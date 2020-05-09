@@ -1,0 +1,9 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "allowJs": true
+    },
+    "include": ["src/**/*", "test/**/*"]
+}
