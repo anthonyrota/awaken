@@ -259,7 +259,8 @@ describe('getLast', () => {
 });
 
 jest.mock('raf', () => {
-    const raf = jest.fn(() => 73);
+    let id = 61;
+    const raf = jest.fn(() => id++);
     (raf as any).cancel = jest.fn();
     return raf;
 });
@@ -272,6 +273,12 @@ describe('requestAnimationFrame', () => {
 
     it('should exist', () => {
         expect(requestAnimationFrame).toBeFunction();
+    });
+
+    it('should not call the callback immediately', () => {
+        const callback = jest.fn();
+        requestAnimationFrame(callback);
+        expect(callback).not.toHaveBeenCalled();
     });
 
     it('should raf the callback', () => {
@@ -316,6 +323,207 @@ describe('queueMicrotask', () => {
     it('should exist', () => {
         expect(queueMicrotask).toBeFunction();
     });
+
+    const _queueMicrotask = global.queueMicrotask;
+    const _Promise = Promise;
+
+    afterEach(() => {
+        global.queueMicrotask = _queueMicrotask;
+        global.Promise = _Promise;
+    });
+
+    it('should not call the callback immediately when queueMicrotask exists', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        global.queueMicrotask = () => {};
+        const callback = jest.fn();
+        queueMicrotask(callback);
+        expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should call queueMicrotask if it exists', () => {
+        global.queueMicrotask = jest.fn();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        queueMicrotask(callback);
+        expect(global.queueMicrotask).toHaveBeenCalledTimes(1);
+        expect(global.queueMicrotask).toHaveBeenCalledWith(
+            expect.any(Function),
+        );
+    });
+
+    it('should call queueMicrotask if it exists with a function that calls the given callback', () => {
+        return new Promise(done => {
+            const callback = jest.fn();
+            queueMicrotask(callback);
+            global.queueMicrotask(() => {
+                expect(callback).toHaveBeenCalledTimes(1);
+                expect(callback).toHaveBeenCalledWith();
+                done();
+            });
+        });
+    });
+
+    it('should not call queueMicrotask if it exists when given a disposed disposable', () => {
+        global.queueMicrotask = jest.fn();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const disposable = new Disposable();
+        disposable.dispose();
+        queueMicrotask(callback, disposable);
+        expect(global.queueMicrotask).not.toHaveBeenCalled();
+    });
+
+    it('should call queueMicrotask if it exists with a function that calls the given callback when given an active disposable', () => {
+        return new Promise(done => {
+            const callback = jest.fn();
+            const disposable = new Disposable();
+            queueMicrotask(callback, disposable);
+            global.queueMicrotask(() => {
+                expect(callback).toHaveBeenCalledTimes(1);
+                expect(callback).toHaveBeenCalledWith();
+                done();
+            });
+        });
+    });
+
+    it('should not call the given callback if queueMicrotask exists when the given disposable is disposed later', () => {
+        return new Promise(done => {
+            const callback = jest.fn();
+            const disposable = new Disposable();
+            global.queueMicrotask(() => disposable.dispose());
+            queueMicrotask(callback, disposable);
+            global.queueMicrotask(() => {
+                expect(callback).not.toHaveBeenCalled();
+                done();
+            });
+        });
+    });
+
+    it("should schedule the callback to the microtask queue when native queueMicrotask doesn't exist and Promise exists", () => {
+        delete global.queueMicrotask;
+        return new Promise(done => {
+            const callback = jest.fn();
+            _queueMicrotask(() => {
+                expect(callback).not.toHaveBeenCalled();
+            });
+            queueMicrotask(callback);
+            _queueMicrotask(() => {
+                expect(callback).toHaveBeenCalledTimes(1);
+                expect(callback).toHaveBeenCalledWith();
+                done();
+            });
+        });
+    });
+
+    it("should not schedule the callback if native queueMicrotask doesn't exist and Promise exists when given a disposed disposable", () => {
+        delete global.queueMicrotask;
+        return new Promise(done => {
+            const callback = jest.fn();
+            const disposable = new Disposable();
+            disposable.dispose();
+            queueMicrotask(callback, disposable);
+            _queueMicrotask(() => {
+                expect(callback).not.toHaveBeenCalled();
+                done();
+            });
+        });
+    });
+
+    it("should schedule the callback to the microtask queue when native queueMicrotask doesn't exist and Promise exists when given an active disposable", () => {
+        delete global.queueMicrotask;
+        return new Promise(done => {
+            const callback = jest.fn();
+            _queueMicrotask(() => {
+                expect(callback).not.toHaveBeenCalled();
+            });
+            const disposable = new Disposable();
+            queueMicrotask(callback, disposable);
+            _queueMicrotask(() => {
+                expect(callback).toHaveBeenCalledTimes(1);
+                expect(callback).toHaveBeenCalledWith();
+                done();
+            });
+        });
+    });
+
+    it("should not call the given callback if native queueMicrotask doesn't exist and Promise exists when the given disposable is disposed later", () => {
+        delete global.queueMicrotask;
+        return new Promise(done => {
+            const callback = jest.fn();
+            const disposable = new Disposable();
+            _queueMicrotask(() => disposable.dispose());
+            queueMicrotask(callback, disposable);
+            _queueMicrotask(() => {
+                expect(callback).not.toHaveBeenCalled();
+                done();
+            });
+        });
+    });
+
+    it("should schedule the callback to setTimeout when native queueMicrotask/Promise doesn't exist", () => {
+        delete global.queueMicrotask;
+        delete global.Promise;
+        return new _Promise(done => {
+            const callback = jest.fn();
+            global.setTimeout(() => {
+                expect(callback).not.toHaveBeenCalled();
+            }, 0);
+            queueMicrotask(callback);
+            global.setTimeout(() => {
+                expect(callback).toHaveBeenCalledTimes(1);
+                expect(callback).toHaveBeenCalledWith();
+                done();
+            }, 0);
+        });
+    });
+
+    it("should not schedule the callback if native queueMicrotask/Promise doesn't exist when given a disposed disposable", () => {
+        delete global.queueMicrotask;
+        delete global.Promise;
+        return new _Promise(done => {
+            const callback = jest.fn();
+            const disposable = new Disposable();
+            disposable.dispose();
+            queueMicrotask(callback, disposable);
+            global.setTimeout(() => {
+                expect(callback).not.toHaveBeenCalled();
+                done();
+            }, 0);
+        });
+    });
+
+    it("should schedule the callback when native queueMicrotask/Promise doesn't exist when given an active disposable", () => {
+        delete global.queueMicrotask;
+        delete global.Promise;
+        return new _Promise(done => {
+            const callback = jest.fn();
+            global.setTimeout(() => {
+                expect(callback).not.toHaveBeenCalled();
+            }, 0);
+            const disposable = new Disposable();
+            queueMicrotask(callback, disposable);
+            global.setTimeout(() => {
+                expect(callback).toHaveBeenCalledTimes(1);
+                expect(callback).toHaveBeenCalledWith();
+                done();
+            }, 0);
+        });
+    });
+
+    it("should not call the given callback if native queueMicrotask/Promise doesn't exist when the given disposable is disposed later", () => {
+        delete global.queueMicrotask;
+        delete global.Promise;
+        return new _Promise(done => {
+            const callback = jest.fn();
+            const disposable = new Disposable();
+            global.setTimeout(() => disposable.dispose(), 0);
+            queueMicrotask(callback, disposable);
+            global.setTimeout(() => {
+                expect(callback).not.toHaveBeenCalled();
+                done();
+            }, 0);
+        });
+    });
 });
 
 describe('setTimeout', () => {
@@ -327,6 +535,12 @@ describe('setTimeout', () => {
         expect(setTimeout).toBeFunction();
     });
 
+    it('should not call the callback immediately', () => {
+        const callback = jest.fn();
+        setTimeout(callback);
+        expect(callback).not.toHaveBeenCalled();
+    });
+
     it('should call native setTimeout with the callback and delay', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
@@ -336,7 +550,23 @@ describe('setTimeout', () => {
         expect(global.setTimeout).toHaveBeenCalledWith(callback, delay);
     });
 
-    it('should not call native setTimeout with the callback and delay when given a disposed disposable', () => {
+    it('should call native setTimeout with any additional arguments given', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const extraArgs = [2, { foo: 'bar' }, () => {}, Symbol()] as const;
+        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+        const callback = (..._args: typeof extraArgs) => {};
+        const delay = 49;
+        setTimeout(callback, delay, new Disposable(), ...extraArgs);
+        expect(global.setTimeout).toHaveBeenCalledTimes(1);
+        expect(global.setTimeout).toHaveBeenCalledWith(
+            callback,
+            delay,
+            ...extraArgs,
+        );
+    });
+
+    it('should not call native setTimeout when given a disposed disposable', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
         const delay = 13;
@@ -378,6 +608,12 @@ describe('setInterval', () => {
         expect(setInterval).toBeFunction();
     });
 
+    it('should not call the callback immediately', () => {
+        const callback = jest.fn();
+        setInterval(callback);
+        expect(callback).not.toHaveBeenCalled();
+    });
+
     it('should call native setInterval with the callback and delay', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
@@ -387,7 +623,32 @@ describe('setInterval', () => {
         expect(global.setInterval).toHaveBeenCalledWith(callback, delay);
     });
 
-    it('should not call native setInterval with the callback and delay when given a disposed disposable', () => {
+    it('should call native setInterval with any additional arguments given', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const extraArgs = [2, { foo: 'bar' }, () => {}, Symbol()] as const;
+        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+        const callback = (..._args: typeof extraArgs) => {};
+        const delay = 32;
+        setInterval(callback, delay, new Disposable(), ...extraArgs);
+        expect(global.setInterval).toHaveBeenCalledTimes(1);
+        expect(global.setInterval).toHaveBeenCalledWith(
+            callback,
+            delay,
+            ...extraArgs,
+        );
+    });
+
+    it('should default delay to zero', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const delay = 0;
+        setInterval(callback, delay);
+        expect(global.setInterval).toHaveBeenCalledTimes(1);
+        expect(global.setInterval).toHaveBeenCalledWith(callback, 0);
+    });
+
+    it('should not call native setInterval when given a disposed disposable', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
         const delay = 13;
@@ -420,7 +681,7 @@ describe('setInterval', () => {
         }
     });
 
-    it('should cancel the scheduled callback when the given disposable is disposed', () => {
+    it('should cancel the interval when the given disposable is disposed', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
         const disposable = new Disposable();
@@ -432,7 +693,7 @@ describe('setInterval', () => {
         expect(global.clearInterval).toHaveBeenCalledWith(id);
     });
 
-    it('shoud cancel the interval when the given disopsable is disposed after a few interval durations', () => {
+    it('should cancel the interval when the given disposable is disposed after a few interval durations', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
         const disposable = new Disposable();
@@ -487,11 +748,15 @@ describe('get$$iterator', () => {
         expect(get$$iterator()).toBe(Symbol.iterator);
     });
 
+    const _Symbol = Symbol;
+
+    afterEach(() => {
+        global.Symbol = _Symbol;
+    });
+
     it('should return "@@iterator" if Symbol does not exist', () => {
-        const _Symbol = Symbol;
         delete global.Symbol;
         expect(get$$iterator()).toBe('@@iterator');
-        global.Symbol = _Symbol;
     });
 });
 
@@ -504,18 +769,20 @@ describe('get$$asyncIterator', () => {
         expect(get$$asyncIterator()).toBe(Symbol.asyncIterator);
     });
 
-    it('should return undefined if Symbol does not exist', () => {
-        const _Symbol = Symbol;
-        delete global.Symbol;
-        expect(get$$asyncIterator()).toBeUndefined();
+    const _Symbol = Symbol;
+
+    afterEach(() => {
         global.Symbol = _Symbol;
     });
 
+    it('should return undefined if Symbol does not exist', () => {
+        delete global.Symbol;
+        expect(get$$asyncIterator()).toBeUndefined();
+    });
+
     it('should return undefined if Symbol.asyncIterator does not exist', () => {
-        const _Symbol = Symbol;
         global.Symbol = {} as any;
         expect(get$$asyncIterator()).toBeUndefined();
-        global.Symbol = _Symbol;
     });
 });
 
@@ -565,14 +832,18 @@ describe('isIterable', () => {
         expect(isIterable(value)).toBeFalse();
     });
 
+    const _Symbol = Symbol;
+
+    afterEach(() => {
+        global.Symbol = _Symbol;
+    });
+
     each(simpleFalseValues.concat(falseValuesWithCompatIteratorKey)).it(
         'should return false if Symbol does not exist when given %s',
         (_, value) => {
-            const _Symbol = Symbol;
             delete global.Symbol;
             // eslint-disable-next-line jest/no-standalone-expect
             expect(isIterable(value)).toBeFalse();
-            global.Symbol = _Symbol;
         },
     );
 
@@ -624,11 +895,9 @@ describe('isIterable', () => {
     each(trueValuesWithCompatIteratorKey).it(
         'should return true if Symbol.iterator does not exist when given %s',
         (_, value) => {
-            const _Symbol = Symbol;
             delete global.Symbol;
             // eslint-disable-next-line jest/no-standalone-expect
             expect(isIterable(value)).toBeTrue();
-            global.Symbol = _Symbol;
         },
     );
 });
@@ -677,16 +946,20 @@ describe('isAsyncIterable', () => {
         [`a function with an async Symbol.asyncIterator method`, function2],
     ];
 
+    const _Symbol = Symbol;
+
+    afterEach(() => {
+        global.Symbol = _Symbol;
+    });
+
     each(
         falseValuesWithAsyncIteratorKey.concat(trueValuesWithAsyncIteratorKey),
     ).it(
         'should return false if Symbol does not exist when given %s',
         (_, value) => {
-            const _Symbol = Symbol;
             delete global.Symbol;
             // eslint-disable-next-line jest/no-standalone-expect
             expect(isAsyncIterable(value)).toBeFalse();
-            global.Symbol = _Symbol;
         },
     );
 
@@ -695,11 +968,9 @@ describe('isAsyncIterable', () => {
     ).it(
         'should return false if Symbol.asyncIterator does not exist when given %s',
         (_, value) => {
-            const _Symbol = Symbol;
             global.Symbol = {} as any;
             // eslint-disable-next-line jest/no-standalone-expect
             expect(isAsyncIterable(value)).toBeFalse();
-            global.Symbol = _Symbol;
         },
     );
 

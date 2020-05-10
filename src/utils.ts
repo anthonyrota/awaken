@@ -531,8 +531,8 @@ export { setTimeoutImplementation as setTimeout };
  * @param args The arguments to pass to `callback`.
  */
 function setIntervalImplementation<T extends any[]>(
-    callback: (...args: any[]) => void,
-    delayMs: number,
+    callback: (...args: T) => void,
+    delayMs = 0,
     subscription?: Disposable,
     ...args: T
 ): void {
