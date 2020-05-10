@@ -537,7 +537,7 @@ describe('setTimeout', () => {
 
     it('should not call the callback immediately', () => {
         const callback = jest.fn();
-        setTimeout(callback);
+        setTimeout(callback, 29);
         expect(callback).not.toHaveBeenCalled();
     });
 
@@ -564,6 +564,14 @@ describe('setTimeout', () => {
             delay,
             ...extraArgs,
         );
+    });
+
+    it('should default delay to zero', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        setTimeout(callback);
+        expect(global.setTimeout).toHaveBeenCalledTimes(1);
+        expect(global.setTimeout).toHaveBeenCalledWith(callback, 0);
     });
 
     it('should not call native setTimeout when given a disposed disposable', () => {
@@ -610,7 +618,7 @@ describe('setInterval', () => {
 
     it('should not call the callback immediately', () => {
         const callback = jest.fn();
-        setInterval(callback);
+        setInterval(callback, 43);
         expect(callback).not.toHaveBeenCalled();
     });
 
@@ -642,8 +650,7 @@ describe('setInterval', () => {
     it('should default delay to zero', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
-        const delay = 0;
-        setInterval(callback, delay);
+        setInterval(callback);
         expect(global.setInterval).toHaveBeenCalledTimes(1);
         expect(global.setInterval).toHaveBeenCalledWith(callback, 0);
     });
