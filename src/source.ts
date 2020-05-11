@@ -86,5 +86,5 @@ export function subscribe<T>(
     sink: Sink<T>,
     subscription: Disposable,
 ): (source: Source<T>) => void {
-    return source => source(sink, subscription);
+    return (source) => source(sink, subscription);
 }

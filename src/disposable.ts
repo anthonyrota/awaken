@@ -3,20 +3,15 @@ import { removeOnce, toArray } from './utils';
 /**
  * Represents a function which when called disposes a resource.
  */
-export interface DisposeFunction {
+export interface Teardown {
     (): void;
 }
 
 /**
- * General representation of a resource/release function.
- */
-export type DisposableLike = Disposable | DisposeFunction;
-
-/**
- * Disposes the given value.
+ * Disposes the given value. If it is a teardown then it will call the teardown.
  * @param value The value to dispose.
  */
-export function dispose(value: DisposableLike): void {
+export function dispose(value: Disposable | Teardown): void {
     if (isDisposable(value)) {
         value.dispose();
     } else {
@@ -33,29 +28,29 @@ export function isDisposable(value: unknown): value is Disposable {
 }
 
 /**
+ * Constructs a `Disposable` from a single `Teardown` value.
+ * @param child The Teardown to be initially linked.
+ * @returns The created `Disposable` instance.
+ */
+export function fromTeardown(fn: Teardown): Disposable {
+    return new Disposable([fn]);
+}
+
+/**
  * Represents a resource which can be disposed of using the `dispose` method.
- * Child `DisposableLikes` can be linked/unlinked to a Disposable instance
- * through the `add` and `remove` methods, and when the instance is disposed of,
- * all of it's children will also be disposed of.
+ * Child `Disposables/Teardowns` can be linked/unlinked to a Disposable
+ * instance through the `add` and `remove` methods, and when the instance is
+ * disposed of, all of it's children will also be disposed of.
  */
 export class Disposable {
-    private __children: DisposableLike[] | null;
+    private __children: (Disposable | Teardown)[] | null;
 
     /**
-     * Constructs a `Disposable` from a single `DisposableLike` value.
-     * @param child The DisposableLike to be initially linked.
-     * @returns The created `Disposable` instance.
+     * @param children A list/iterable of `Disposables/Teardowns` to be
+     * initially linked to this instance. Note: if the value given is an array,
+     * the array will be mutated inside this instance.
      */
-    public static fromDisposable(child: DisposableLike): Disposable {
-        return new Disposable([child]);
-    }
-
-    /**
-     * @param children A list/iterable of DisposableLikes to be initially linked
-     * to this instance. Note: if the value given is an array, the array will be
-     * mutated inside this instance.
-     */
-    constructor(children: Iterable<DisposableLike> = []) {
+    constructor(children: Iterable<Disposable | Teardown> = []) {
         this.__children = toArray(children);
     }
 
@@ -69,16 +64,15 @@ export class Disposable {
     }
 
     /**
-     * Links the given `DisposableLike` to be called when this instance is
-     * disposed. If this Disposable is already disposed, then the given
-     * DisposableLike will be disposed immediately.
+     * Links the given value to be disposed when this instance is disposed. If
+     * this Disposable is already disposed, then the given value will be
+     * disposed immediately.
      *
-     * In order to unlink the DisposableLike from this instance, simply call
-     * this instance's `remove` method with the given DisposableLike as the
-     * argument.
-     * @param child The DisposableLike to link.
+     * In order to unlink the value from this instance, simply call this
+     * instance's `remove` method with the given value as the argument.
+     * @param child The Disposable/Teardown to link.
      */
-    public add(child: DisposableLike): void {
+    public add(child: Disposable | Teardown): void {
         if (!this.__children) {
             dispose(child);
             return;
@@ -92,11 +86,11 @@ export class Disposable {
     }
 
     /**
-     * Unlinks the given DisposableLike from this instance, preventing it from
-     * being called when this instance is disposed.
-     * @param child The child DisposableLike to unlink.
+     * Unlinks the given value from this instance, preventing it from being
+     * disposed when this instance is disposed.
+     * @param child The child value to unlink.
      */
-    public remove(child: DisposableLike): void {
+    public remove(child: Disposable | Teardown): void {
         if (!this.__children) {
             return;
         }
@@ -105,7 +99,8 @@ export class Disposable {
     }
 
     /**
-     * Disposes this instance, as well as all the linked child DisposableLikes.
+     * Disposes this instance, as well as all the linked child
+     * `Disposables/Teardowns`.
      */
     public dispose(): void {
         const children = this.__children;
@@ -118,7 +113,7 @@ export class Disposable {
 
         this.__children = null;
 
-        children.forEach(child => {
+        children.forEach((child) => {
             try {
                 dispose(child);
             } catch (error) {
@@ -132,35 +127,33 @@ export class Disposable {
     }
 }
 
+export interface DisposalError extends Error {
+    readonly errors: any[];
+}
+
+export interface DisposalErrorConstructor {
+    new (errors: any[]): DisposalError;
+    readonly prototype: DisposalError;
+}
+
 /**
  * Thrown when at least one error is caught during a resource's disposal.
+ * @param errors The errors thrown during disposal. Note that all
+ *     `DisposalError`s will be merged with the rest of the errors given.
  */
-export class DisposalError extends Error {
-    public name: string;
+export const DisposalError = (function (this: Error, errors: any[]) {
+    Error.call(this);
 
-    /**
-     * The list of errors which have been caught. Note that any caught
-     * DisposalError will have it's errors merged with the rest of the errors.
-     */
-    public errors: any[];
+    const flattenedErrors = flattenDisposalErrors(errors);
+    const printedErrors = flattenedErrors
+        .map((error, index) => `\n  [#${index + 1}] ${error}`)
+        .join('');
 
-    /**
-     * @param errors The list of errors which have been caught.
-     */
-    constructor(errors: unknown[]) {
-        const flattenedErrors = flattenDisposalErrors(errors);
-        const printedErrors = flattenedErrors
-            .map((error, index) => `\n  [#${index + 1}] ${error}`)
-            .join('');
+    this.message = `Failed to dispose a resource. ${flattenedErrors.length} errors were caught.${printedErrors}`;
 
-        super(
-            `Failed to dispose a resource. ${flattenedErrors.length} errors were caught.${printedErrors}`,
-        );
-
-        this.name = 'DisposalError';
-        this.errors = flattenedErrors;
-    }
-}
+    this.name = 'DisposalError';
+    (this as any).errors = flattenedErrors;
+} as Function) as DisposalErrorConstructor;
 
 /**
  * Flattens the list of errors given, merging all `DisposalError`s with the rest
@@ -171,11 +164,13 @@ export class DisposalError extends Error {
 function flattenDisposalErrors(errors: any[]): any[] {
     const flattened: any[] = [];
 
-    errors.forEach(error =>
-        error instanceof DisposalError
-            ? Array.prototype.push.apply(flattened, error.errors)
-            : flattened.push(error),
-    );
+    errors.forEach((error) => {
+        if (error instanceof DisposalError) {
+            Array.prototype.push.apply(flattened, error.errors);
+        } else {
+            flattened.push(error);
+        }
+    });
 
     return flattened;
 }

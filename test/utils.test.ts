@@ -15,10 +15,9 @@ import {
     isAsyncIterable,
     isPromiseLike,
 } from '../src/utils';
-import { Disposable } from './../src/disposable';
+import { Disposable } from '../src/disposable';
 import cloneDeep = require('lodash.clonedeep');
 import each from 'jest-each';
-import 'jest-extended';
 
 const composableFunction1 = (x: string): string => x + '+f1';
 const composableFunction2 = (x: string): string => x + '+f2';
@@ -169,7 +168,7 @@ describe('removeOnce', () => {
         [[A, B, A, A, A, B]],
         [{ length: 1, 0: A }],
         [{ length: 29, 4: A, 17: B, 23: A }],
-    ]).it(`should do nothing when removing "${x}" from %s`, input => {
+    ]).it(`should do nothing when removing "${x}" from %s`, (input) => {
         const copy = cloneDeep(input);
         removeOnce(copy, x);
         // eslint-disable-next-line jest/no-standalone-expect
@@ -352,7 +351,7 @@ describe('queueMicrotask', () => {
     });
 
     it('should call queueMicrotask if it exists with a function that calls the given callback', () => {
-        return new Promise(done => {
+        return new Promise((done) => {
             const callback = jest.fn();
             queueMicrotask(callback);
             global.queueMicrotask(() => {
@@ -374,7 +373,7 @@ describe('queueMicrotask', () => {
     });
 
     it('should call queueMicrotask if it exists with a function that calls the given callback when given an active disposable', () => {
-        return new Promise(done => {
+        return new Promise((done) => {
             const callback = jest.fn();
             const disposable = new Disposable();
             queueMicrotask(callback, disposable);
@@ -387,7 +386,7 @@ describe('queueMicrotask', () => {
     });
 
     it('should not call the given callback if queueMicrotask exists when the given disposable is disposed later', () => {
-        return new Promise(done => {
+        return new Promise((done) => {
             const callback = jest.fn();
             const disposable = new Disposable();
             global.queueMicrotask(() => disposable.dispose());
@@ -401,7 +400,7 @@ describe('queueMicrotask', () => {
 
     it("should schedule the callback to the microtask queue when native queueMicrotask doesn't exist and Promise exists", () => {
         delete global.queueMicrotask;
-        return new Promise(done => {
+        return new Promise((done) => {
             const callback = jest.fn();
             _queueMicrotask(() => {
                 expect(callback).not.toHaveBeenCalled();
@@ -417,7 +416,7 @@ describe('queueMicrotask', () => {
 
     it("should not schedule the callback if native queueMicrotask doesn't exist and Promise exists when given a disposed disposable", () => {
         delete global.queueMicrotask;
-        return new Promise(done => {
+        return new Promise((done) => {
             const callback = jest.fn();
             const disposable = new Disposable();
             disposable.dispose();
@@ -431,7 +430,7 @@ describe('queueMicrotask', () => {
 
     it("should schedule the callback to the microtask queue when native queueMicrotask doesn't exist and Promise exists when given an active disposable", () => {
         delete global.queueMicrotask;
-        return new Promise(done => {
+        return new Promise((done) => {
             const callback = jest.fn();
             _queueMicrotask(() => {
                 expect(callback).not.toHaveBeenCalled();
@@ -448,7 +447,7 @@ describe('queueMicrotask', () => {
 
     it("should not call the given callback if native queueMicrotask doesn't exist and Promise exists when the given disposable is disposed later", () => {
         delete global.queueMicrotask;
-        return new Promise(done => {
+        return new Promise((done) => {
             const callback = jest.fn();
             const disposable = new Disposable();
             _queueMicrotask(() => disposable.dispose());
@@ -463,7 +462,7 @@ describe('queueMicrotask', () => {
     it("should schedule the callback to setTimeout when native queueMicrotask/Promise doesn't exist", () => {
         delete global.queueMicrotask;
         delete global.Promise;
-        return new _Promise(done => {
+        return new _Promise((done) => {
             const callback = jest.fn();
             global.setTimeout(() => {
                 expect(callback).not.toHaveBeenCalled();
@@ -480,7 +479,7 @@ describe('queueMicrotask', () => {
     it("should not schedule the callback if native queueMicrotask/Promise doesn't exist when given a disposed disposable", () => {
         delete global.queueMicrotask;
         delete global.Promise;
-        return new _Promise(done => {
+        return new _Promise((done) => {
             const callback = jest.fn();
             const disposable = new Disposable();
             disposable.dispose();
@@ -495,7 +494,7 @@ describe('queueMicrotask', () => {
     it("should schedule the callback when native queueMicrotask/Promise doesn't exist when given an active disposable", () => {
         delete global.queueMicrotask;
         delete global.Promise;
-        return new _Promise(done => {
+        return new _Promise((done) => {
             const callback = jest.fn();
             global.setTimeout(() => {
                 expect(callback).not.toHaveBeenCalled();
@@ -513,7 +512,7 @@ describe('queueMicrotask', () => {
     it("should not call the given callback if native queueMicrotask/Promise doesn't exist when the given disposable is disposed later", () => {
         delete global.queueMicrotask;
         delete global.Promise;
-        return new _Promise(done => {
+        return new _Promise((done) => {
             const callback = jest.fn();
             const disposable = new Disposable();
             global.setTimeout(() => disposable.dispose(), 0);
@@ -732,9 +731,7 @@ describe('asyncReportError', () => {
     it('should call setTimeout with a delay of zero', () => {
         asyncReportError(new Error('foo'));
         expect(global.setTimeout).toHaveBeenCalledTimes(1);
-        expect(global.setTimeout).toHaveBeenLastCalledWith(
-            expect.any(Function),
-        );
+        expect(global.setTimeout).toHaveBeenCalledWith(expect.any(Function));
     });
 
     it('should call setTimeout with a callback that throws the given error', () => {
@@ -799,7 +796,7 @@ const simpleFalseValues: any[] = [
     ['a number', 17],
     ['a boolean', true],
     ['a symbol', Symbol('foo')],
-    // eslint-disable-next-line
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     ['a function', () => {}],
 ];
 
@@ -857,18 +854,18 @@ describe('isIterable', () => {
     function getTrueValuesWithIteratorKey(key: any, keyDesc: string): any[] {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const function1: any = () => {};
-        // eslint-disable-next-line
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         function1[key] = () => {};
 
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const function2: any = () => {};
-        // eslint-disable-next-line
-        function2[key] = async function() {};
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        function2[key] = async function () {};
 
         return [
-            // eslint-disable-next-line
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             [`an object with a ${keyDesc} method`, { foo: 'bar', [key]() {} }],
-            // eslint-disable-next-line
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             [`an object with an async ${keyDesc} method`, { async [key]() {} }],
             [`a function with a ${keyDesc} method`, function1],
             [`a function with an async ${keyDesc} method`, function2],
@@ -935,19 +932,19 @@ describe('isAsyncIterable', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const function1: any = () => {};
-    // eslint-disable-next-line
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     function1[Symbol.asyncIterator] = () => {};
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const function2: any = () => {};
-    // eslint-disable-next-line
-    function2[Symbol.asyncIterator] = async function() {};
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    function2[Symbol.asyncIterator] = async function () {};
 
     // prettier-ignore
     const trueValuesWithAsyncIteratorKey = [
-        // eslint-disable-next-line
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         [`an object with a Symbol.asyncIterator method`, { foo: 'bar', [Symbol.asyncIterator]() {} }],
-        // eslint-disable-next-line
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         [`an object with an async Symbol.asyncIterator method`, { async [Symbol.asyncIterator]() {} }],
         [`a function with a Symbol.asyncIterator method`, function1],
         [`a function with an async Symbol.asyncIterator method`, function2],
@@ -1013,18 +1010,18 @@ describe('isPromiseLike', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const promise1: any = () => {};
-    // eslint-disable-next-line
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     promise1.then = () => {};
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const promise2: any = () => {};
-    // eslint-disable-next-line
-    promise2.then = async function() {};
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    promise2.then = async function () {};
 
     const trueValues = [
-        // eslint-disable-next-line
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         [`an object with a "then" method`, { foo: 'bar', then() {} }],
-        // eslint-disable-next-line
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         [`an object with an async a "then" method`, { async then() {} }],
         [`a function with a "then" method`, promise1],
         [`a function with an async a "then" method`, promise2],

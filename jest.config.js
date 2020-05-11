@@ -12,9 +12,7 @@ module.exports = {
         'ts-jest': {
             tsConfig: 'tsconfig.test.json',
         },
-        NODE_ENV: 'test',
     },
-    transformIgnorePatterns: ['node_modules/(?!lodash-es)'],
     setupFilesAfterEnv: ['jest-extended'],
     coverageDirectory: 'coverage',
     collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}', '!src/**/*.d.ts'],

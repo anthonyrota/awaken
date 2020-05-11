@@ -5,9 +5,9 @@ export interface Operator<T, U> {
 }
 
 export function map<T, U>(transform: (x: T) => U): Operator<T, U> {
-    return source =>
+    return (source) =>
         Source((sink, sub) => {
-            source(event => {
+            source((event) => {
                 switch (event.type) {
                     case EventType.Push: {
                         let transformed: U;
@@ -36,9 +36,9 @@ export function takeWhile<T>(
 export function takeWhile<T>(
     shouldContinue: (value: T) => boolean,
 ): Operator<T, T> {
-    return source =>
+    return (source) =>
         Source((sink, sub) => {
-            source(event => {
+            source((event) => {
                 if (event.type === EventType.Push) {
                     let keepGoing: boolean;
                     try {

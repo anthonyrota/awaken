@@ -20,7 +20,8 @@
         "strictNullChecks": true,
         "downlevelIteration": true,
         "baseUrl": ".",
-        "lib": ["esnext", "dom"]
+        "lib": ["esnext", "dom"],
+        "types": ["jest-extended"]
     },
     "include": ["src/**/*", "test/**/*"]
 }
