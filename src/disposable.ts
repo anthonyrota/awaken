@@ -9,7 +9,6 @@ export interface Teardown {
 
 /**
  * Disposes the given value. If it is a teardown then it will call the teardown.
- * @param value The value to dispose.
  */
 export function dispose(value: Disposable | Teardown): void {
     if (isDisposable(value)) {
@@ -21,7 +20,6 @@ export function dispose(value: Disposable | Teardown): void {
 
 /**
  * Tests to see if the value is a `Disposable`.
- * @param value The value to check.
  */
 export function isDisposable(value: unknown): value is Disposable {
     return value instanceof Disposable;
@@ -29,8 +27,6 @@ export function isDisposable(value: unknown): value is Disposable {
 
 /**
  * Constructs a `Disposable` from a single `Teardown` value.
- * @param child The Teardown to be initially linked.
- * @returns The created `Disposable` instance.
  */
 export function fromTeardown(fn: Teardown): Disposable {
     return new Disposable([fn]);
@@ -138,8 +134,6 @@ export interface DisposalErrorConstructor {
 
 /**
  * Thrown when at least one error is caught during a resource's disposal.
- * @param errors The errors thrown during disposal. Note that all
- *     `DisposalError`s will be merged with the rest of the errors given.
  */
 export const DisposalError = (function (this: Error, errors: any[]) {
     Error.call(this);
@@ -155,12 +149,6 @@ export const DisposalError = (function (this: Error, errors: any[]) {
     (this as any).errors = flattenedErrors;
 } as Function) as DisposalErrorConstructor;
 
-/**
- * Flattens the list of errors given, merging all `DisposalError`s with the rest
- * of the errors given.
- * @param errors The list of errors to flatten.
- * @returns The flattened list of errors.
- */
 function flattenDisposalErrors(errors: any[]): any[] {
     const flattened: any[] = [];
 
