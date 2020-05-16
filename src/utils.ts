@@ -7,10 +7,10 @@ function _call(x: any, f: any): any {
     return f(x);
 }
 
-/* eslint-disable max-len */
 export function pipe<T>(x: T): T;
 export function pipe<T, R>(x: T, f1: (x: T) => R): R;
 export function pipe<T, A, R>(x: T, f1: (x: T) => A, f2: (x: A) => R): R;
+/* eslint-disable max-len */
 // prettier-ignore
 export function pipe<T, A, B, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => R): R;
 // prettier-ignore
@@ -32,10 +32,10 @@ export function pipe(x: any, ...funcs: Array<(x: any) => any>): any {
     return funcs.reduce<any>(_call, x);
 }
 
-/* eslint-disable max-len */
 export function flow(): <T>(x: T) => T;
 export function flow<T, R>(f1: (x: T) => R): (x: T) => R;
 export function flow<T, A, R>(f1: (x: T) => A, f2: (x: A) => R): (x: T) => R;
+/* eslint-disable max-len */
 // prettier-ignore
 export function flow<T, A, B, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => R): (x: T) => R;
 // prettier-ignore
