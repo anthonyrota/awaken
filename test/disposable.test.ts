@@ -429,7 +429,7 @@ describe('DisposalError', () => {
             /* eslint-disable jest/no-try-expect */
             expect(error).toBeInstanceOf(DisposalError);
             expect(error.message).toMatchInlineSnapshot(`
-                "Failed to dispose a resource. 1 errors were caught.
+                "Failed to dispose a resource. 1 error was caught.
                   [#1] Error: foo"
             `);
             expect((error as DisposalError).errors).toHaveLength(1);

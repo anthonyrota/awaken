@@ -139,11 +139,15 @@ export const DisposalError = (function (this: Error, errors: any[]) {
     Error.call(this);
 
     const flattenedErrors = flattenDisposalErrors(errors);
+    const errorCount = flattenedErrors.length;
+
     const printedErrors = flattenedErrors
         .map((error, index) => `\n  [#${index + 1}] ${error}`)
         .join('');
 
-    this.message = `Failed to dispose a resource. ${flattenedErrors.length} errors were caught.${printedErrors}`;
+    this.message = `Failed to dispose a resource. ${errorCount} ${
+        flattenedErrors.length === 1 ? 'error was' : 'errors were'
+    } caught.${printedErrors}`;
 
     this.name = 'DisposalError';
     (this as any).errors = flattenedErrors;
