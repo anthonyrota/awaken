@@ -6,10 +6,33 @@ import {
     ScheduleInterval,
     ScheduleQueue,
 } from '../src/schedule';
+import { Disposable } from '../src/disposable';
 
 describe('scheduleSync', () => {
     it('should exist', () => {
         expect(scheduleSync).toBeFunction();
+    });
+
+    it('should call the callback once with no arguments', () => {
+        const callback = jest.fn();
+        scheduleSync(callback);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback).toHaveBeenCalledWith();
+    });
+
+    it('should call the callback once with no arguments when given an active disposable', () => {
+        const callback = jest.fn();
+        scheduleSync(callback, new Disposable());
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback).toHaveBeenCalledWith();
+    });
+
+    it('should do nothing when given a disposed disposable', () => {
+        const callback = jest.fn();
+        const disposed = new Disposable();
+        disposed.dispose();
+        scheduleSync(callback, disposed);
+        expect(callback).toHaveBeenCalledTimes(0);
     });
 });
 
