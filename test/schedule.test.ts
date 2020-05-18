@@ -1,10 +1,15 @@
 import {
     scheduleSync,
+    ScheduleSyncQueued,
+    scheduleSyncQueued,
+    ScheduleQueued,
     scheduleAnimationFrame,
+    ScheduleAnimationFrameQueued,
+    scheduleAnimationFrameQueued,
     scheduleMicrotask,
     ScheduleTimeout,
+    ScheduleTimeoutQueued,
     ScheduleInterval,
-    ScheduleQueue,
 } from '../src/schedule';
 import { Disposable } from '../src/disposable';
 
@@ -36,9 +41,39 @@ describe('scheduleSync', () => {
     });
 });
 
+describe('ScheduleSyncQueued', () => {
+    it('should exist', () => {
+        expect(ScheduleSyncQueued).toBeFunction();
+    });
+});
+
+describe('scheduleSyncQueued', () => {
+    it('should exist', () => {
+        expect(scheduleSyncQueued).toBeFunction();
+    });
+});
+
+describe('ScheduleQueued', () => {
+    it('should exist', () => {
+        expect(ScheduleQueued).toBeFunction();
+    });
+});
+
 describe('scheduleAnimationFrame', () => {
     it('should exist', () => {
         expect(scheduleAnimationFrame).toBeFunction();
+    });
+});
+
+describe('ScheduleAnimationFrameQueued', () => {
+    it('should exist', () => {
+        expect(ScheduleAnimationFrameQueued).toBeFunction();
+    });
+});
+
+describe('scheduleAnimationFrameQueued', () => {
+    it('should exist', () => {
+        expect(scheduleAnimationFrameQueued).toBeFunction();
     });
 });
 
@@ -54,14 +89,14 @@ describe('ScheduleTimeout', () => {
     });
 });
 
-describe('ScheduleInterval', () => {
+describe('ScheduleTimeoutQueued', () => {
     it('should exist', () => {
-        expect(ScheduleInterval).toBeFunction();
+        expect(ScheduleTimeoutQueued).toBeFunction();
     });
 });
 
-describe('ScheduleQueue', () => {
+describe('ScheduleInterval', () => {
     it('should exist', () => {
-        expect(ScheduleQueue).toBeFunction();
+        expect(ScheduleInterval).toBeFunction();
     });
 });
