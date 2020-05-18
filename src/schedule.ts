@@ -80,7 +80,7 @@ export function ScheduleQueued<T extends any[] = []>(
     }[] = [];
     let scheduledSubscription: Disposable | undefined;
 
-    function reschedule() {
+    function handleCallbacksChange() {
         if (callbacks.length > 0 && !scheduledSubscription) {
             scheduledSubscription = new Disposable();
             schedule(handle, scheduledSubscription);
@@ -110,7 +110,7 @@ export function ScheduleQueued<T extends any[] = []>(
             error = error_;
         }
 
-        reschedule();
+        handleCallbacksChange();
 
         if (hasError) {
             throw error;
@@ -131,13 +131,10 @@ export function ScheduleQueued<T extends any[] = []>(
             }
 
             removeOnce(callbacks, callbackInfo);
-
-            if (callbacks.length === 0) {
-                scheduledSubscription?.dispose();
-            }
+            handleCallbacksChange();
         });
 
-        reschedule();
+        handleCallbacksChange();
     };
 }
 
