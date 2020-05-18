@@ -252,6 +252,33 @@ describe('Disposable', () => {
         expect(teardowns[0]).toHaveBeenCalledBefore(teardowns[1]);
     });
 
+    it('should not dispose itself recursively', () => {
+        const teardown1 = jest.fn(() => finalDisposable1.dispose());
+        const disposableTeardown1 = jest.fn(() => finalDisposable1.dispose());
+        const disposable1 = new Disposable([disposableTeardown1]);
+        const finalDisposable1 = new Disposable([teardown1, disposable1]);
+        finalDisposable1.dispose();
+        expect(teardown1).toHaveBeenCalledTimes(1);
+        expect(teardown1).toHaveBeenCalledWith();
+        expect(disposableTeardown1).toHaveBeenCalledTimes(1);
+        expect(disposableTeardown1).toHaveBeenCalledWith();
+        expect(disposable1.active).toBe(false);
+        expect(finalDisposable1.active).toBe(false);
+        const teardown2 = jest.fn(() => finalDisposable2.dispose());
+        const disposableTeardown2 = jest.fn(() => finalDisposable2.dispose());
+        const disposable2 = new Disposable([disposableTeardown2]);
+        const finalDisposable2 = new Disposable();
+        finalDisposable2.add(teardown2);
+        finalDisposable2.add(disposable2);
+        finalDisposable2.dispose();
+        expect(teardown2).toHaveBeenCalledTimes(1);
+        expect(teardown2).toHaveBeenCalledWith();
+        expect(disposableTeardown2).toHaveBeenCalledTimes(1);
+        expect(disposableTeardown2).toHaveBeenCalledWith();
+        expect(disposable2.active).toBe(false);
+        expect(finalDisposable2.active).toBe(false);
+    });
+
     it('should dispose the given child when calling `add()` if currently disposed', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const disposable = new Disposable([() => {}]);
@@ -356,7 +383,7 @@ describe('Disposable', () => {
         const teardown2 = jest.fn();
         const disposableTeardown1 = jest.fn();
         const disposable1 = new Disposable([disposableTeardown1]);
-        const throws = jest.fn().mockImplementation(_throw('foo'));
+        const throws = jest.fn(_throw('foo'));
         const disposable = new Disposable([
             teardown1,
             throws,
@@ -382,9 +409,9 @@ describe('Disposable', () => {
         const teardown2 = jest.fn();
         const disposableTeardown1 = jest.fn();
         const disposable1 = new Disposable([disposableTeardown1]);
-        const throws1 = jest.fn().mockImplementation(_throw('foo'));
-        const throws2 = jest.fn().mockImplementation(_throw('bar'));
-        const throws3 = jest.fn().mockImplementation(_throw('baz'));
+        const throws1 = jest.fn(_throw('foo'));
+        const throws2 = jest.fn(_throw('bar'));
+        const throws3 = jest.fn(_throw('baz'));
         const disposable = new Disposable([
             teardown1,
             throws1,
