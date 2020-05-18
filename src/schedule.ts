@@ -84,12 +84,15 @@ export function ScheduleQueued<T extends any[] = []>(
         if (callbacks.length > 0 && !scheduledSubscription) {
             scheduledSubscription = new Disposable();
             schedule(handle, scheduledSubscription);
+            return;
+        }
+
+        if (callbacks.length === 0 && scheduledSubscription) {
+            scheduledSubscription.dispose();
         }
     }
 
     function handle() {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        scheduledSubscription!.dispose();
         scheduledSubscription = undefined;
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -166,12 +169,13 @@ export function ScheduleInterval(delay: number): ScheduleFunction {
     let scheduledSubscription: Disposable | undefined;
 
     return ScheduleQueued((callback: () => void, subscription: Disposable) => {
-        scheduledSubscription = subscription;
-
         if (scheduledSubscription && scheduledSubscription.active) {
             return;
         }
 
-        setInterval(callback, delay, subscription);
+        scheduledSubscription = new Disposable();
+        subscription.add(scheduledSubscription);
+
+        setInterval(callback, delay, scheduledSubscription);
     });
 }
