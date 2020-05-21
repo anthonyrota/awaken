@@ -11,6 +11,143 @@ export interface ScheduleFunction<T extends any[] = []> {
     (callback: (...args: T) => void, subscription?: Disposable): void;
 }
 
+interface ScheduleQueuedCallback<T extends any[]> {
+    callback: (...args: T) => void;
+    hasBeenRemovedFromQueue: boolean;
+}
+
+export function ScheduleQueued<T extends any[] = []>(
+    schedule: (
+        callNext: (...args: T) => void,
+        subscription: Disposable,
+    ) => void,
+): ScheduleFunction<T> {
+    let callbacks: ScheduleQueuedCallback<T>[] = [];
+    let scheduledSubscription: Disposable | undefined;
+    let isInCallback = false;
+
+    return (callback, subscription) => {
+        if (subscription && !subscription.active) {
+            return;
+        }
+
+        const callbackInfo = { callback, hasBeenRemovedFromQueue: false };
+        callbacks.push(callbackInfo);
+
+        if (subscription) {
+            const _callbacks = callbacks;
+
+            subscription.add(() => {
+                // If the callbacks array has changed then the queue has already
+                // been flushed, ensuring this callback will not be called in
+                // the future.
+                if (
+                    _callbacks !== callbacks ||
+                    callbackInfo.hasBeenRemovedFromQueue
+                ) {
+                    return;
+                }
+
+                callbackInfo.hasBeenRemovedFromQueue = true;
+                removeOnce(callbacks, callbackInfo);
+
+                // If we are in a callback, then there is no need to handle
+                // unsubscription logic here as it will be handled after the
+                // callback is called. This also avoids unnecessary
+                // unsubscription in the case where the callback flushes all
+                // future callbacks, then queues a new callback.
+                if (isInCallback) {
+                    return;
+                }
+
+                if (callbacks.length === 0) {
+                    // eslint-disable-next-line max-len
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    scheduledSubscription!.dispose();
+                }
+            });
+        }
+
+        // Exiting here ensures that in the case where the last callback is
+        // removed from the queue and executed, scheduling another callback will
+        // mean that the subscription logic will not be handled inside the
+        // execution of the current callback but instead after the current
+        // callback has been executed, ensuring that duplicate subscriptions are
+        // avoided.
+        if (isInCallback) {
+            return;
+        }
+
+        if (callbacks.length === 0) {
+            scheduledSubscription = new Disposable();
+            const _scheduledSubscription = scheduledSubscription;
+
+            schedule((...args: T): void => {
+                // If the scheduledSubscription given upon subscription has been
+                // disposed then this scheduled instance should have stopped
+                // emitting.
+                if (!_scheduledSubscription.active) {
+                    return;
+                }
+
+                // Similarly, the only scheduledSubscription that can ever be
+                // active is the current scheduledSubscription.
+
+                // The only time the callbacks queue will be empty is if the
+                // callbacks have already been flushed, which in this case means
+                // the scheduledSubscription has already been disposed.
+                // Therefore, the callbacks queue is guaranteed to not be empty.
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const callbackInfo = callbacks.shift()!;
+                callbackInfo.hasBeenRemovedFromQueue = true;
+
+                try {
+                    const { callback } = callbackInfo;
+                    isInCallback = true;
+                    callback(...args);
+                    isInCallback = false;
+                } catch (error) {
+                    callbacks = [];
+                    // eslint-disable-next-line max-len
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    scheduledSubscription!.dispose();
+                    throw error;
+                }
+
+                if (callbacks.length === 0) {
+                    // eslint-disable-next-line max-len
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    scheduledSubscription!.dispose();
+                }
+            }, scheduledSubscription);
+        }
+    };
+}
+
+export function ScheduleQueuedDiscrete<T extends any[] = []>(
+    schedule: (
+        callback: (...args: T) => void,
+        subscription: Disposable,
+    ) => void,
+): ScheduleFunction<T> {
+    return ScheduleQueued((callNext, subscription) => {
+        function loop(...args: T): void {
+            callNext(...args);
+
+            // We don't know if the user provided function actually checks if
+            // the subscription given to the schedule function is active or not.
+            // Therefore, only pass active subscriptions to the schedule
+            // function.
+            if (subscription.active) {
+                schedule(loop, subscription);
+            }
+        }
+
+        schedule(loop, subscription);
+    });
+}
+
 export const scheduleSync: ScheduleFunction = (callback, subscription) => {
     if (subscription && !subscription.active) {
         return;
@@ -19,8 +156,13 @@ export const scheduleSync: ScheduleFunction = (callback, subscription) => {
     callback();
 };
 
+interface ScheduleSyncQueuedCallback {
+    callback: () => void;
+    shouldCall: boolean;
+}
+
 export function ScheduleSyncQueued(): ScheduleFunction {
-    let callbacks: { callback: () => void; shouldCall: boolean }[] = [];
+    let callbacks: ScheduleSyncQueuedCallback[] = [];
     let isProcessingQueue = false;
 
     return (callback, subscription) => {
@@ -66,91 +208,22 @@ export function ScheduleSyncQueued(): ScheduleFunction {
     };
 }
 
-export const scheduleSyncQueued = ScheduleSyncQueued();
-
-export function ScheduleQueued<T extends any[] = []>(
-    schedule: (
-        callback: (...args: T) => void,
-        subscription: Disposable,
-    ) => void,
-): ScheduleFunction<T> {
-    const callbacks: {
-        callback: () => void;
-        hasBeenCalled: boolean;
-    }[] = [];
-    let scheduledSubscription: Disposable | undefined;
-
-    function handleCallbacksChange() {
-        if (callbacks.length > 0 && !scheduledSubscription) {
-            scheduledSubscription = new Disposable();
-            schedule(handle, scheduledSubscription);
-            return;
-        }
-
-        if (callbacks.length === 0 && scheduledSubscription) {
-            scheduledSubscription.dispose();
-        }
-    }
-
-    function handle() {
-        scheduledSubscription = undefined;
-
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const callbackInfo = callbacks.shift()!;
-        callbackInfo.hasBeenCalled = true;
-
-        let hasError = false;
-        let error: any;
-
-        try {
-            const { callback } = callbackInfo;
-            callback();
-        } catch (error_) {
-            hasError = true;
-            error = error_;
-        }
-
-        handleCallbacksChange();
-
-        if (hasError) {
-            throw error;
-        }
-    }
-
-    return (callback, subscription) => {
-        if (subscription && !subscription.active) {
-            return;
-        }
-
-        const callbackInfo = { callback, hasBeenCalled: false };
-        callbacks.push(callbackInfo);
-
-        subscription?.add(() => {
-            if (callbackInfo.hasBeenCalled) {
-                return;
-            }
-
-            removeOnce(callbacks, callbackInfo);
-            handleCallbacksChange();
-        });
-
-        handleCallbacksChange();
-    };
-}
-
-export const scheduleAnimationFrame: ScheduleFunction<Parameters<
-    FrameRequestCallback
->> = requestAnimationFrame;
-
-export function ScheduleAnimationFrameQueued(): ScheduleFunction<
+export type ScheduleAnimationFrameFunction = ScheduleFunction<
     Parameters<FrameRequestCallback>
-> {
-    return ScheduleQueued(scheduleAnimationFrame);
-}
+>;
 
-export const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+// eslint-disable-next-line max-len
+export const scheduleAnimationFrame: ScheduleAnimationFrameFunction = requestAnimationFrame;
+
+export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
+    return ScheduleQueuedDiscrete(scheduleAnimationFrame);
+}
 
 export const scheduleMicrotask: ScheduleFunction = queueMicrotask;
+
+export function ScheduleMicrotaskQueued(): ScheduleFunction {
+    return ScheduleQueuedDiscrete(queueMicrotask);
+}
 
 export function ScheduleTimeout(delay: number): ScheduleFunction {
     return (callback, subscription) => {
@@ -159,20 +232,11 @@ export function ScheduleTimeout(delay: number): ScheduleFunction {
 }
 
 export function ScheduleTimeoutQueued(delay: number): ScheduleFunction {
-    return ScheduleQueued(ScheduleTimeout(delay));
+    return ScheduleQueuedDiscrete(ScheduleTimeout(delay));
 }
 
 export function ScheduleInterval(delay: number): ScheduleFunction {
-    let scheduledSubscription: Disposable | undefined;
-
-    return ScheduleQueued((callback: () => void, subscription: Disposable) => {
-        if (scheduledSubscription && scheduledSubscription.active) {
-            return;
-        }
-
-        scheduledSubscription = new Disposable();
-        subscription.add(scheduledSubscription);
-
-        setInterval(callback, delay, scheduledSubscription);
+    return ScheduleQueued((callNext, subscription) => {
+        setInterval(callNext, delay, subscription);
     });
 }
