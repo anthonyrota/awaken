@@ -25,6 +25,7 @@ export function ScheduleQueued<T extends any[] = []>(
     let callbacks: ScheduleQueuedCallback<T>[] = [];
     let scheduledSubscription: Disposable | undefined;
     let isInCallback = false;
+    const nestedCallNextArgs: T[] = [];
 
     return (callback, subscription) => {
         if (subscription && !subscription.active) {
@@ -51,9 +52,9 @@ export function ScheduleQueued<T extends any[] = []>(
                 callbackInfo.hasBeenRemovedFromQueue = true;
                 removeOnce(callbacks, callbackInfo);
 
-                // If we are in a callback, then there is no need to handle
-                // unsubscription logic here as it will be handled after the
-                // callback is called. This also avoids unnecessary
+                // If we are executing a callback, then there is no need to
+                // handle unsubscription logic here as it will be handled after
+                // the callback is called. This also avoids unnecessary
                 // unsubscription in the case where the callback flushes all
                 // future callbacks, then queues a new callback.
                 if (isInCallback) {
@@ -90,8 +91,19 @@ export function ScheduleQueued<T extends any[] = []>(
                     return;
                 }
 
-                // Similarly, the only scheduledSubscription that can ever be
-                // active is the current scheduledSubscription.
+                // Similarly, as the only scheduledSubscription that can ever be
+                // active is the current scheduledSubscription, this ensures
+                // that we are currently in the context of the latest
+                // scheduledSubscription.
+
+                // If a the given callNext function (this callback) is being
+                // called inside the execution of a provided callback, then mark
+                // as such and exit to ensure that synchronous recursive
+                // schedule calls are properly queued.
+                if (isInCallback) {
+                    nestedCallNextArgs.push(args);
+                    return;
+                }
 
                 // The only time the callbacks queue will be empty is if the
                 // callbacks have already been flushed, which in this case means
@@ -103,12 +115,31 @@ export function ScheduleQueued<T extends any[] = []>(
                 callbackInfo.hasBeenRemovedFromQueue = true;
 
                 try {
-                    const { callback } = callbackInfo;
+                    let { callback } = callbackInfo;
                     isInCallback = true;
                     callback(...args);
+
+                    let callNextArgs = nestedCallNextArgs.shift();
+
+                    while (callNextArgs) {
+                        const callbackInfo = callbacks.shift();
+
+                        if (!callbackInfo) {
+                            nestedCallNextArgs.length = 0;
+                            break;
+                        }
+
+                        callbackInfo.hasBeenRemovedFromQueue = true;
+                        callback = callbackInfo.callback;
+                        callback(...callNextArgs);
+                        callNextArgs = nestedCallNextArgs.shift();
+                    }
+
                     isInCallback = false;
                 } catch (error) {
                     callbacks = [];
+                    isInCallback = false;
+                    nestedCallNextArgs.length = 0;
                     // eslint-disable-next-line max-len
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     scheduledSubscription!.dispose();
