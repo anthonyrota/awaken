@@ -253,7 +253,7 @@ export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
 export const scheduleMicrotask: ScheduleFunction = queueMicrotask;
 
 export function ScheduleMicrotaskQueued(): ScheduleFunction {
-    return ScheduleQueuedDiscrete(queueMicrotask);
+    return ScheduleQueuedDiscrete(scheduleMicrotask);
 }
 
 export function ScheduleTimeout(delay: number): ScheduleFunction {
