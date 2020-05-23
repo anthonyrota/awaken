@@ -475,7 +475,7 @@ describe('setInterval', () => {
         for (let i = 0; i < 5; i++) {
             jest.runOnlyPendingTimers();
             expect(global.setInterval).toHaveBeenCalledTimes(1);
-            expect(global.clearInterval).toHaveBeenCalledTimes(0);
+            expect(global.clearInterval).not.toHaveBeenCalled();
         }
     });
 
