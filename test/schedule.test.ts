@@ -47,7 +47,7 @@ describe('scheduleSync', () => {
         const disposed = new Disposable();
         disposed.dispose();
         scheduleSync(callback, disposed);
-        expect(callback).toHaveBeenCalledTimes(0);
+        expect(callback).not.toHaveBeenCalled();
     });
 });
 
