@@ -31,7 +31,7 @@ export function ScheduleQueued<T extends any[] = []>(
             return;
         }
 
-        const callbackInfo = { callback, hasBeenRemovedFromQueue: false };
+        const callbackInfo: ScheduleQueuedCallback<T> = { callback, hasBeenRemovedFromQueue: false };
         callbacks.push(callbackInfo);
 
         if (subscription) {
