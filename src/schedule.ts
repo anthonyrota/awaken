@@ -256,18 +256,18 @@ export function ScheduleMicrotaskQueued(): ScheduleFunction {
     return ScheduleQueuedDiscrete(scheduleMicrotask);
 }
 
-export function ScheduleTimeout(delay: number): ScheduleFunction {
+export function ScheduleTimeout(delayMs: number): ScheduleFunction {
     return (callback, subscription) => {
-        setTimeout(callback, delay, subscription);
+        setTimeout(callback, delayMs, subscription);
     };
 }
 
-export function ScheduleTimeoutQueued(delay: number): ScheduleFunction {
-    return ScheduleQueuedDiscrete(ScheduleTimeout(delay));
+export function ScheduleTimeoutQueued(delayMs: number): ScheduleFunction {
+    return ScheduleQueuedDiscrete(ScheduleTimeout(delayMs));
 }
 
-export function ScheduleInterval(delay: number): ScheduleFunction {
+export function ScheduleInterval(delayMs: number): ScheduleFunction {
     return ScheduleQueued((callNext, subscription) => {
-        setInterval(callNext, delay, subscription);
+        setInterval(callNext, delayMs, subscription);
     });
 }
