@@ -504,17 +504,17 @@ describe('DisposalError', () => {
             `);
             expect((error as DisposalError).errors).toHaveLength(6);
             // prettier-ignore
-            expect((error as DisposalError).errors[0]).toHaveProperty('message', 'error1')
+            expect((error as DisposalError).errors[0]).toHaveProperty('message', 'error1');
             // prettier-ignore
-            expect((error as DisposalError).errors[1]).toHaveProperty('message', 'error2')
+            expect((error as DisposalError).errors[1]).toHaveProperty('message', 'error2');
             // prettier-ignore
-            expect((error as DisposalError).errors[2]).toHaveProperty('message', 'error3')
+            expect((error as DisposalError).errors[2]).toHaveProperty('message', 'error3');
             // prettier-ignore
-            expect((error as DisposalError).errors[3]).toHaveProperty('message', 'error4')
+            expect((error as DisposalError).errors[3]).toHaveProperty('message', 'error4');
             // prettier-ignore
-            expect((error as DisposalError).errors[4]).toHaveProperty('message', 'error5')
+            expect((error as DisposalError).errors[4]).toHaveProperty('message', 'error5');
             // prettier-ignore
-            expect((error as DisposalError).errors[5]).toHaveProperty('message', 'error6')
+            expect((error as DisposalError).errors[5]).toHaveProperty('message', 'error6');
             /* eslint-enable jest/no-try-expect */
         }
     });
