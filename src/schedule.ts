@@ -81,7 +81,7 @@ export function ScheduleQueued<T extends any[] = []>(
             return;
         }
 
-        if (callbacks.length === 0) {
+        if (callbacks.length === 1) {
             scheduledSubscription = new Disposable();
             const _scheduledSubscription = scheduledSubscription;
 
