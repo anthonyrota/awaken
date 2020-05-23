@@ -31,7 +31,10 @@ export function ScheduleQueued<T extends any[] = []>(
             return;
         }
 
-        const callbackInfo: ScheduleQueuedCallback<T> = { callback, hasBeenRemovedFromQueue: false };
+        const callbackInfo: ScheduleQueuedCallback<T> = {
+            callback,
+            hasBeenRemovedFromQueue: false,
+        };
         callbacks.push(callbackInfo);
 
         if (subscription) {
@@ -201,37 +204,42 @@ export function ScheduleSyncQueued(): ScheduleFunction {
         }
 
         if (isProcessingQueue) {
-            const task = { callback, shouldCall: true };
-            callbacks.push(task);
+            const callbackInfo: ScheduleSyncQueuedCallback = {
+                callback,
+                shouldCall: true,
+            };
+            callbacks.push(callbackInfo);
             subscription?.add(() => {
-                task.shouldCall = false;
+                callbackInfo.shouldCall = false;
             });
             return;
         }
 
         isProcessingQueue = true;
 
-        try {
-            callback();
-        } catch (error) {
-            isProcessingQueue = false;
-            callbacks = [];
-            throw error;
-        }
+        let cb = callback;
+        let shouldCall = true;
 
-        let callbackInfo = callbacks.shift();
-
-        while (callbackInfo) {
-            if (callbackInfo.shouldCall) {
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            if (shouldCall) {
                 try {
-                    const { callback } = callbackInfo;
-                    callback();
+                    cb();
                 } catch (error) {
                     isProcessingQueue = false;
+                    callbacks = [];
                     throw error;
                 }
             }
-            callbackInfo = callbacks.shift();
+
+            const callbackInfo = callbacks.shift();
+
+            if (!callbackInfo) {
+                break;
+            }
+
+            cb = callbackInfo.callback;
+            shouldCall = callbackInfo.shouldCall;
         }
 
         isProcessingQueue = false;
