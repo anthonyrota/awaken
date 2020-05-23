@@ -1,7 +1,6 @@
 import { Disposable } from './disposable';
 import {
     requestAnimationFrame,
-    queueMicrotask,
     setTimeout,
     setInterval,
     removeOnce,
@@ -248,12 +247,6 @@ export const scheduleAnimationFrame: ScheduleAnimationFrameFunction = requestAni
 
 export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
     return ScheduleQueuedDiscrete(scheduleAnimationFrame);
-}
-
-export const scheduleMicrotask: ScheduleFunction = queueMicrotask;
-
-export function ScheduleMicrotaskQueued(): ScheduleFunction {
-    return ScheduleQueuedDiscrete(scheduleMicrotask);
 }
 
 export function ScheduleTimeout(delayMs: number): ScheduleFunction {

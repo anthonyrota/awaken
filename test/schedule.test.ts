@@ -5,8 +5,6 @@ import {
     ScheduleSyncQueued,
     scheduleAnimationFrame,
     ScheduleAnimationFrameQueued,
-    scheduleMicrotask,
-    ScheduleMicrotaskQueued,
     ScheduleTimeout,
     ScheduleTimeoutQueued,
     ScheduleInterval,
@@ -68,18 +66,6 @@ describe('scheduleAnimationFrame', () => {
 describe('ScheduleAnimationFrameQueued', () => {
     it('should exist', () => {
         expect(ScheduleAnimationFrameQueued).toBeFunction();
-    });
-});
-
-describe('scheduleMicrotask', () => {
-    it('should exist', () => {
-        expect(scheduleMicrotask).toBeFunction();
-    });
-});
-
-describe('ScheduleMicrotaskQueued', () => {
-    it('should exist', () => {
-        expect(ScheduleMicrotaskQueued).toBeFunction();
     });
 });
 

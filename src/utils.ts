@@ -107,46 +107,6 @@ export function requestAnimationFrame(
 }
 
 /**
- * Disposable-based alternative to built-in `queueMicrotask`.
- */
-function queueMicrotaskImplementation(
-    callback: () => void,
-    subscription?: Disposable,
-) {
-    if (subscription && !subscription.active) {
-        return;
-    }
-
-    if (typeof queueMicrotask !== 'undefined' && isFunction(queueMicrotask)) {
-        queueMicrotask(() => {
-            if (subscription && !subscription.active) {
-                return;
-            }
-
-            callback();
-        });
-        return;
-    }
-
-    if (typeof Promise !== 'undefined') {
-        Promise.resolve()
-            .then(() => {
-                if (subscription && !subscription.active) {
-                    return;
-                }
-
-                callback();
-            })
-            .then(null, asyncReportError);
-        return;
-    }
-
-    setTimeoutImplementation(callback, 0, subscription);
-}
-
-export { queueMicrotaskImplementation as queueMicrotask };
-
-/**
  * Disposable-based alternative to built-in `setTimeout`.
  */
 function setTimeoutImplementation<T extends any[]>(
