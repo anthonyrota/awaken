@@ -32,35 +32,35 @@ const composableFunction9: CF = (x) => x + '+f9';
 const composableFunction10: CF = (x) => x + '+f10';
 const composableFunction11: CF = (x) => x + '+f11';
 
-const composableCase1 = [''] as const;
-const composableCase2 = ['+f1', composableFunction1] as const;
+const composableCase0 = [''] as const;
+const composableCase1 = ['+f1', composableFunction1] as const;
 // prettier-ignore
-const composableCase3 = ['+f1+f2', composableFunction1, composableFunction2] as const;
+const composableCase2 = ['+f1+f2', composableFunction1, composableFunction2] as const;
 // prettier-ignore
-const composableCase4 = ['+f1+f2+f3', composableFunction1, composableFunction2, composableFunction3] as const;
+const composableCase3 = ['+f1+f2+f3', composableFunction1, composableFunction2, composableFunction3] as const;
 // prettier-ignore
-const composableCase5 = ['+f1+f2+f3+f4', composableFunction1, composableFunction2, composableFunction3, composableFunction4] as const;
+const composableCase4 = ['+f1+f2+f3+f4', composableFunction1, composableFunction2, composableFunction3, composableFunction4] as const;
 // prettier-ignore
-const composableCase6 = ['+f1+f2+f3+f4+f5', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5] as const;
+const composableCase5 = ['+f1+f2+f3+f4+f5', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5] as const;
 // prettier-ignore
-const composableCase7 = ['+f1+f2+f3+f4+f5+f6', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6] as const;
+const composableCase6 = ['+f1+f2+f3+f4+f5+f6', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6] as const;
 // prettier-ignore
-const composableCase8 = ['+f1+f2+f3+f4+f5+f6+f7', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7] as const;
+const composableCase7 = ['+f1+f2+f3+f4+f5+f6+f7', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7] as const;
 // prettier-ignore
-const composableCase9 = ['+f1+f2+f3+f4+f5+f6+f7+f8', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8] as const;
+const composableCase8 = ['+f1+f2+f3+f4+f5+f6+f7+f8', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8] as const;
 // prettier-ignore
-const composableCase10 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9] as const;
+const composableCase9 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9] as const;
 // prettier-ignore
-const composableCase11 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10] as const;
+const composableCase10 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10] as const;
 // prettier-ignore
-const composableCase12 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10+f11', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10, composableFunction11] as const;
+const composableCase11 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10+f11', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10, composableFunction11] as const;
 
 // prettier-ignore
 // eslint-disable-next-line max-len
-type ComposableCases = [typeof composableCase1, typeof composableCase2, typeof composableCase3, typeof composableCase4, typeof composableCase5, typeof composableCase6, typeof composableCase7, typeof composableCase8, typeof composableCase9, typeof composableCase10, typeof composableCase11, typeof composableCase12];
+type ComposableCases = [typeof composableCase0, typeof composableCase1, typeof composableCase2, typeof composableCase3, typeof composableCase4, typeof composableCase5, typeof composableCase6, typeof composableCase7, typeof composableCase8, typeof composableCase9, typeof composableCase10, typeof composableCase11];
 // prettier-ignore
 // eslint-disable-next-line max-len
-const composableCases: ComposableCases = [composableCase1, composableCase2, composableCase3, composableCase4, composableCase5, composableCase6, composableCase7, composableCase8, composableCase9, composableCase10, composableCase11, composableCase12];
+const composableCases: ComposableCases = [composableCase0, composableCase1, composableCase2, composableCase3, composableCase4, composableCase5, composableCase6, composableCase7, composableCase8, composableCase9, composableCase10, composableCase11];
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
