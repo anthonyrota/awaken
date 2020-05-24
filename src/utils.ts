@@ -1,5 +1,4 @@
 import { Disposable } from './disposable';
-import isArray = require('lodash.isarray');
 import isFunction = require('lodash.isfunction');
 import raf = require('raf');
 
@@ -65,7 +64,7 @@ export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T {
  * Converts the given value into an array.
  */
 export function toArray<T>(items: Iterable<T> | ArrayLike<T> | T[]): T[] {
-    if (isArray(items)) {
+    if (Array.isArray(items)) {
         return items;
     }
 
