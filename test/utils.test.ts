@@ -391,7 +391,8 @@ describe('setTimeout', () => {
         const disposable = new Disposable();
         const delay = 0;
         setTimeout(callback, delay, disposable);
-        const id = (global.setTimeout as jest.Mock).mock.results[0].value;
+        const id = ((global.setTimeout as any) as jest.Mock).mock.results[0]
+            .value;
         disposable.dispose();
         expect(global.clearTimeout).toHaveBeenCalledTimes(1);
         expect(global.clearTimeout).toHaveBeenCalledWith(id);
@@ -529,9 +530,9 @@ describe('asyncReportError', () => {
     it('should call setTimeout with a callback that throws the given error', () => {
         const error = new TypeError('Foo.');
         asyncReportError(error);
-        expect((global.setTimeout as jest.Mock).mock.calls[0][0]).toThrow(
-            error,
-        );
+        expect(
+            ((global.setTimeout as any) as jest.Mock).mock.calls[0][0],
+        ).toThrow(error);
     });
 });
 
