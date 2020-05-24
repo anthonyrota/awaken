@@ -6,15 +6,18 @@ import {
     removeOnce,
 } from './utils';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface ScheduleFunction<T extends any[] = []> {
     (callback: (...args: T) => void, subscription?: Disposable): void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ScheduleQueuedCallback<T extends any[]> {
     callback: (...args: T) => void;
     hasBeenRemovedFromQueue: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ScheduleQueued<T extends any[] = []>(
     schedule: (
         callNext: (...args: T) => void,
@@ -158,6 +161,7 @@ export function ScheduleQueued<T extends any[] = []>(
     };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ScheduleQueuedDiscrete<T extends any[] = []>(
     schedule: (
         callback: (...args: T) => void,

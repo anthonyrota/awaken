@@ -3,7 +3,7 @@ import isArray = require('lodash.isarray');
 import isFunction = require('lodash.isfunction');
 import raf = require('raf');
 
-function _call(x: any, f: any): any {
+function _call<T>(x: T, f: (x: T) => T): T {
     return f(x);
 }
 
@@ -26,10 +26,12 @@ export function pipe<T, A, B, C, D, E, F, G, R>(x: T, f1: (x: T) => A, f2: (x: A
 // prettier-ignore
 export function pipe<T, A, B, C, D, E, F, G, H, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R): R;
 // prettier-ignore
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pipe<T, A, B, C, D, E, F, G, H, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R, ...funcs: Array<(x: any) => any>): R;
 /* eslint-enable max-len */
-export function pipe(x: any, ...funcs: Array<(x: any) => any>): any {
-    return funcs.reduce<any>(_call, x);
+export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T;
+export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T {
+    return fns.reduce(_call, x);
 }
 
 export function flow(): <T>(x: T) => T;
@@ -51,16 +53,18 @@ export function flow<T, A, B, C, D, E, F, G, R>(f1: (x: T) => A, f2: (x: A) => B
 // prettier-ignore
 export function flow<T, A, B, C, D, E, F, G, H, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R): (x: T) => R;
 // prettier-ignore
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function flow<T, A, B, C, D, E, F, G, H, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R, ...funcs: Array<(x: any) => any>): (x: T) => R;
 /* eslint-enable max-len */
-export function flow(...funcs: Array<(x: any) => any>): (x: any) => any {
-    return (x: any): any => funcs.reduce(_call, x);
+export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T;
+export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T {
+    return (x: T): T => fns.reduce(_call, x);
 }
 
 /**
  * Converts the given value into an array.
  */
-export function toArray<T>(items: Iterable<T> | ArrayLike<T>): T[] {
+export function toArray<T>(items: Iterable<T> | ArrayLike<T> | T[]): T[] {
     if (isArray(items)) {
         return items;
     }
@@ -69,7 +73,7 @@ export function toArray<T>(items: Iterable<T> | ArrayLike<T>): T[] {
         return [...items];
     }
 
-    return Array.prototype.slice.call(items);
+    return Array.prototype.slice.call<ArrayLike<T>, [], T[]>(items);
 }
 
 /**
@@ -109,6 +113,7 @@ export function requestAnimationFrame(
 /**
  * Disposable-based alternative to built-in `setTimeout`.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setTimeoutImplementation<T extends any[]>(
     callback: (...args: T) => void,
     delayMs = 0,
@@ -131,6 +136,7 @@ export { setTimeoutImplementation as setTimeout };
 /**
  * Disposable-based alternative to built-in `setInterval`.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setIntervalImplementation<T extends any[]>(
     callback: (...args: T) => void,
     delayMs = 0,
@@ -190,25 +196,33 @@ export function get$$asyncIterator(): symbol | void {
 /**
  * Checks whether the given value is iterable.
  */
-export function isIterable(value: any): value is Iterable<unknown> {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function isIterable(value: unknown): value is Iterable<unknown> {
     return (
         value !== undefined &&
         value != null &&
-        isFunction(value[get$$iterator()])
+        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        isFunction((value as any)[get$$iterator()])
     );
 }
 
 /**
  * Checks whether the given value is an AsyncIterable.
  */
-export function isAsyncIterable(value: any): value is AsyncIterable<unknown> {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function isAsyncIterable(
+    value: unknown,
+): value is AsyncIterable<unknown> {
     const $$asyncIterator = get$$asyncIterator();
 
     return (
         !!$$asyncIterator &&
         value !== undefined &&
         value != null &&
-        isFunction(value[$$asyncIterator])
+        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        isFunction((value as any)[$$asyncIterator])
     );
 }
 
@@ -216,6 +230,8 @@ export function isAsyncIterable(value: any): value is AsyncIterable<unknown> {
  * Checks whether the given value is PromiseLike, meaning it has a `then`
  * function defined.
  */
-export function isPromiseLike(value: any): value is PromiseLike<unknown> {
-    return !!value && isFunction(value.then);
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    return !!value && isFunction((value as PromiseLike<unknown>).then);
 }

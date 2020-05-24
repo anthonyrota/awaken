@@ -105,7 +105,7 @@ export class Disposable {
             return;
         }
 
-        const errors: any[] = [];
+        const errors: unknown[] = [];
 
         this.__children = null;
 
@@ -123,25 +123,34 @@ export class Disposable {
     }
 }
 
-export interface DisposalError extends Error {
-    readonly errors: any[];
+interface _DisposalError extends Error {
+    errors: unknown[];
+}
+
+export interface DisposalError extends _DisposalError {
+    readonly errors: unknown[];
 }
 
 export interface DisposalErrorConstructor {
-    new (errors: any[]): DisposalError;
+    new (errors: unknown[]): DisposalError;
     readonly prototype: DisposalError;
 }
 
 /**
  * Thrown when at least one error is caught during a resource's disposal.
  */
-export const DisposalError = (function (this: Error, errors: any[]) {
+export const DisposalError = (function (
+    this: _DisposalError,
+    errors: unknown[],
+) {
     Error.call(this);
 
     const flattenedErrors = flattenDisposalErrors(errors);
     const errorCount = flattenedErrors.length;
 
     const printedErrors = flattenedErrors
+        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         .map((error, index) => `\n  [#${index + 1}] ${error}`)
         .join('');
 
@@ -150,11 +159,11 @@ export const DisposalError = (function (this: Error, errors: any[]) {
     } caught.${printedErrors}`;
 
     this.name = 'DisposalError';
-    (this as any).errors = flattenedErrors;
-} as Function) as DisposalErrorConstructor;
+    this.errors = flattenedErrors;
+} as unknown) as DisposalErrorConstructor;
 
-function flattenDisposalErrors(errors: any[]): any[] {
-    const flattened: any[] = [];
+function flattenDisposalErrors(errors: unknown[]): unknown[] {
+    const flattened: unknown[] = [];
 
     errors.forEach((error) => {
         if (error instanceof DisposalError) {

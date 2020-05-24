@@ -107,7 +107,6 @@ describe('ScheduleSyncQueued', () => {
         });
         const icof1 = getShiftIcoToStartFromOne();
         const scheduleSyncQueued = ScheduleSyncQueued();
-        /* eslint-disable @typescript-eslint/camelcase */
         const main1_3 = jest.fn();
         const main1_1 = jest.fn(() => {
             scheduleSyncQueued(main1_3);
@@ -140,7 +139,6 @@ describe('ScheduleSyncQueued', () => {
         });
         scheduleSyncQueued(main1);
         scheduleSyncQueued(main2);
-        /* eslint-enable @typescript-eslint/camelcase */
         // start execution: main1
         // (1) main1();   (queue): [main_1, main1_2]
         // (2) main1_1(); (queue): [main1_2, main1_3]

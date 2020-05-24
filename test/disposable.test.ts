@@ -256,7 +256,10 @@ describe('Disposable', () => {
         const teardown1 = jest.fn(() => finalDisposable1.dispose());
         const disposableTeardown1 = jest.fn(() => finalDisposable1.dispose());
         const disposable1 = new Disposable([disposableTeardown1]);
-        const finalDisposable1 = new Disposable([teardown1, disposable1]);
+        const finalDisposable1: Disposable = new Disposable([
+            teardown1,
+            disposable1,
+        ]);
         finalDisposable1.dispose();
         expect(teardown1).toHaveBeenCalledTimes(1);
         expect(teardown1).toHaveBeenCalledWith();
@@ -455,7 +458,7 @@ describe('DisposalError', () => {
         } catch (error) {
             /* eslint-disable jest/no-try-expect */
             expect(error).toBeInstanceOf(DisposalError);
-            expect(error.message).toMatchInlineSnapshot(`
+            expect((error as DisposalError).message).toMatchInlineSnapshot(`
                 "Failed to dispose a resource. 1 error was caught.
                   [#1] Error: foo"
             `);
@@ -493,7 +496,7 @@ describe('DisposalError', () => {
         } catch (error) {
             /* eslint-disable jest/no-try-expect */
             expect(error).toBeInstanceOf(DisposalError);
-            expect(error.message).toMatchInlineSnapshot(`
+            expect((error as DisposalError).message).toMatchInlineSnapshot(`
                 "Failed to dispose a resource. 6 errors were caught.
                   [#1] Error: error1
                   [#2] Error: error2

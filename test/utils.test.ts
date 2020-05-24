@@ -15,48 +15,82 @@ import {
     isPromiseLike,
 } from '../src/utils';
 import { Disposable } from '../src/disposable';
+import { Tail } from './../src/types';
 import cloneDeep = require('lodash.clonedeep');
 import each from 'jest-each';
 
-const composableFunction1 = (x: string): string => x + '+f1';
-const composableFunction2 = (x: string): string => x + '+f2';
-const composableFunction3 = (x: string): string => x + '+f3';
-const composableFunction4 = (x: string): string => x + '+f4';
-const composableFunction5 = (x: string): string => x + '+f5';
-const composableFunction6 = (x: string): string => x + '+f6';
-const composableFunction7 = (x: string): string => x + '+f7';
-const composableFunction8 = (x: string): string => x + '+f8';
-const composableFunction9 = (x: string): string => x + '+f9';
-const composableFunction10 = (x: string): string => x + '+f10';
-const composableFunction11 = (x: string): string => x + '+f11';
+type CF = (x: string) => string;
+const composableFunction1: CF = (x) => x + '+f1';
+const composableFunction2: CF = (x) => x + '+f2';
+const composableFunction3: CF = (x) => x + '+f3';
+const composableFunction4: CF = (x) => x + '+f4';
+const composableFunction5: CF = (x) => x + '+f5';
+const composableFunction6: CF = (x) => x + '+f6';
+const composableFunction7: CF = (x) => x + '+f7';
+const composableFunction8: CF = (x) => x + '+f8';
+const composableFunction9: CF = (x) => x + '+f9';
+const composableFunction10: CF = (x) => x + '+f10';
+const composableFunction11: CF = (x) => x + '+f11';
+
+const composableCase1 = [''] as const;
+const composableCase2 = ['+f1', composableFunction1] as const;
+// prettier-ignore
+const composableCase3 = ['+f1+f2', composableFunction1, composableFunction2] as const;
+// prettier-ignore
+const composableCase4 = ['+f1+f2+f3', composableFunction1, composableFunction2, composableFunction3] as const;
+// prettier-ignore
+const composableCase5 = ['+f1+f2+f3+f4', composableFunction1, composableFunction2, composableFunction3, composableFunction4] as const;
+// prettier-ignore
+const composableCase6 = ['+f1+f2+f3+f4+f5', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5] as const;
+// prettier-ignore
+const composableCase7 = ['+f1+f2+f3+f4+f5+f6', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6] as const;
+// prettier-ignore
+const composableCase8 = ['+f1+f2+f3+f4+f5+f6+f7', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7] as const;
+// prettier-ignore
+const composableCase9 = ['+f1+f2+f3+f4+f5+f6+f7+f8', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8] as const;
+// prettier-ignore
+const composableCase10 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9] as const;
+// prettier-ignore
+const composableCase11 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10] as const;
+// prettier-ignore
+const composableCase12 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10+f11', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10, composableFunction11] as const;
 
 // prettier-ignore
-const cases: [string, ...((x: string) => string)[]][] = [
-    [''],
-    ['+f1', composableFunction1],
-    ['+f1+f2', composableFunction1, composableFunction2],
-    ['+f1+f2+f3', composableFunction1, composableFunction2, composableFunction3],
-    ['+f1+f2+f3+f4', composableFunction1, composableFunction2, composableFunction3, composableFunction4],
-    ['+f1+f2+f3+f4+f5', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5],
-    ['+f1+f2+f3+f4+f5+f6', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6],
-    ['+f1+f2+f3+f4+f5+f6+f7', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7],
-    ['+f1+f2+f3+f4+f5+f6+f7+f8', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8],
-    ['+f1+f2+f3+f4+f5+f6+f7+f8+f9', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9],
-    ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10],
-    ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10+f11', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10, composableFunction11],
-];
+// eslint-disable-next-line max-len
+type ComposableCases = [typeof composableCase1, typeof composableCase2, typeof composableCase3, typeof composableCase4, typeof composableCase5, typeof composableCase6, typeof composableCase7, typeof composableCase8, typeof composableCase9, typeof composableCase10, typeof composableCase11, typeof composableCase12];
+// prettier-ignore
+// eslint-disable-next-line max-len
+const composableCases: ComposableCases = [composableCase1, composableCase2, composableCase3, composableCase4, composableCase5, composableCase6, composableCase7, composableCase8, composableCase9, composableCase10, composableCase11, composableCase12];
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+type _MapGetTail<T> = { [P in keyof T]: Tail<T[P]> };
+// For some reason, inlining the following operation breaks it (the returned
+// type is the mapping of all of the tuple's properties instead of the tuple
+// itself) so this is necessary.
+type ComposableCaseFunctions = _MapGetTail<ComposableCases>[number];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type _DistributeCaseTestFn<T> = T extends any[]
+    ? (expected: string, ...fns: T) => void
+    : never;
+type ComposableCaseTestFn = _DistributeCaseTestFn<ComposableCaseFunctions>;
 
 describe('pipe', () => {
     it('should exist', () => {
         expect(pipe).toBeFunction();
     });
 
-    each(cases).it('should apply %# function(s) ltr', (expected, ...fns) => {
-        // eslint-disable-next-line jest/no-standalone-expect
-        expect((pipe as any)('XXX', ...fns)).toBe('XXX' + expected);
-        // eslint-disable-next-line jest/no-standalone-expect
-        expect((pipe as any)('YYY', ...fns)).toBe('YYY' + expected);
-    });
+    // Inlining the test function without it's type being a union of the
+    // individual test cases causes a type error for some reason.
+    const testPipe: ComposableCaseTestFn = (
+        expected: string,
+        ...fns: ComposableCaseFunctions
+    ): void => {
+        expect(pipe('XXX', ...fns)).toBe('XXX' + expected);
+        expect(pipe('YYY', ...fns)).toBe('YYY' + expected);
+    };
+
+    each(composableCases).it('should apply %# function(s) ltr', testPipe);
 });
 
 describe('flow', () => {
@@ -64,15 +98,18 @@ describe('flow', () => {
         expect(flow).toBeFunction();
     });
 
-    each(cases).it('should ltr compose %# function(s)', (expected, ...fns) => {
-        const composed = (flow as any)(...fns);
-        // eslint-disable-next-line jest/no-standalone-expect
-        expect(composed).toBeFunction();
-        // eslint-disable-next-line jest/no-standalone-expect
+    // Inlining the test function without it's type being a union of the
+    // individual test cases causes a type error for some reason.
+    const testFlow: ComposableCaseTestFn = (
+        expected: string,
+        ...fns: ComposableCaseFunctions
+    ): void => {
+        const composed = flow(...fns);
         expect(composed('XXX')).toBe('XXX' + expected);
-        // eslint-disable-next-line jest/no-standalone-expect
         expect(composed('YYY')).toBe('YYY' + expected);
-    });
+    };
+
+    each(composableCases).it('should ltr compose %# function(s)', testFlow);
 });
 
 describe('toArray', () => {
@@ -98,7 +135,7 @@ describe('toArray', () => {
 
     it('should convert an iterable into an array', () => {
         const object = [{ bar: 'baz' }];
-        function* iter(): Generator<any> {
+        function* iter(): Generator<unknown> {
             yield 1;
             yield 'foo';
             yield [{ bar: 'baz' }];
@@ -167,12 +204,15 @@ describe('removeOnce', () => {
         [[A, B, A, A, A, B]],
         [{ length: 1, 0: A }],
         [{ length: 29, 4: A, 17: B, 23: A }],
-    ]).it(`should do nothing when removing "${x}" from %s`, (input) => {
-        const copy = cloneDeep(input);
-        removeOnce(copy, x);
-        // eslint-disable-next-line jest/no-standalone-expect
-        expect(copy).toEqual(input);
-    });
+    ]).it(
+        `should do nothing when removing "${x}" from %s`,
+        (input: unknown[]) => {
+            const copy = cloneDeep(input);
+            removeOnce(copy, x);
+            // eslint-disable-next-line jest/no-standalone-expect
+            expect(copy).toEqual(input);
+        },
+    );
 
     // prettier-ignore
     each([
@@ -256,15 +296,23 @@ describe('getLast', () => {
     });
 });
 
-jest.mock('raf', () => {
-    let id = 61;
-    const raf = jest.fn(() => id++);
-    (raf as any).cancel = jest.fn();
-    return raf;
-});
+interface RafMock extends jest.Mock {
+    cancel: jest.Mock;
+}
+
+jest.mock(
+    'raf',
+    (): RafMock => {
+        let id = 61;
+        return Object.assign(
+            jest.fn(() => id++),
+            { cancel: jest.fn() },
+        );
+    },
+);
 
 import raf = require('raf');
-const rafMock = (raf as any) as jest.Mock & { cancel: jest.Mock };
+const rafMock = (raf as unknown) as RafMock;
 
 describe('requestAnimationFrame', () => {
     afterEach(jest.resetAllMocks);
@@ -310,7 +358,8 @@ describe('requestAnimationFrame', () => {
         const callback = () => {};
         const disposable = new Disposable();
         requestAnimationFrame(callback, disposable);
-        const id = rafMock.mock.results[0].value;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const id: number = rafMock.mock.results[0].value;
         disposable.dispose();
         expect(rafMock.cancel).toHaveBeenCalledTimes(1);
         expect(rafMock.cancel).toHaveBeenCalledWith(id);
@@ -391,8 +440,9 @@ describe('setTimeout', () => {
         const disposable = new Disposable();
         const delay = 0;
         setTimeout(callback, delay, disposable);
-        const id = ((global.setTimeout as any) as jest.Mock).mock.results[0]
-            .value;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const id: number = ((global.setTimeout as unknown) as jest.Mock).mock
+            .results[0].value;
         disposable.dispose();
         expect(global.clearTimeout).toHaveBeenCalledTimes(1);
         expect(global.clearTimeout).toHaveBeenCalledWith(id);
@@ -486,7 +536,9 @@ describe('setInterval', () => {
         const disposable = new Disposable();
         const delay = 2983;
         setInterval(callback, delay, disposable);
-        const id = (global.setInterval as jest.Mock).mock.results[0].value;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const id: number = (global.setInterval as jest.Mock).mock.results[0]
+            .value;
         disposable.dispose();
         expect(global.clearInterval).toHaveBeenCalledTimes(1);
         expect(global.clearInterval).toHaveBeenCalledWith(id);
@@ -498,7 +550,9 @@ describe('setInterval', () => {
         const disposable = new Disposable();
         const delay = 91;
         setInterval(callback, delay, disposable);
-        const id = (global.setInterval as jest.Mock).mock.results[0].value;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const id: number = (global.setInterval as jest.Mock).mock.results[0]
+            .value;
         for (let i = 0; i < 5; i++) {
             jest.runOnlyPendingTimers();
         }
@@ -531,7 +585,9 @@ describe('asyncReportError', () => {
         const error = new TypeError('Foo.');
         asyncReportError(error);
         expect(
-            ((global.setTimeout as any) as jest.Mock).mock.calls[0][0],
+            // eslint-disable-next-line max-len
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            ((global.setTimeout as unknown) as jest.Mock).mock.calls[0][0],
         ).toThrow(error);
     });
 });
@@ -578,12 +634,12 @@ describe('get$$asyncIterator', () => {
     });
 
     it('should return undefined if Symbol.asyncIterator does not exist', () => {
-        global.Symbol = {} as any;
+        global.Symbol = {} as typeof global.Symbol;
         expect(get$$asyncIterator()).toBeUndefined();
     });
 });
 
-const simpleFalseValues: any[] = [
+const simpleFalseValues: [string, unknown][] = [
     ['undefined', undefined],
     ['null', null],
     ['a number', 17],
@@ -598,10 +654,14 @@ describe('isIterable', () => {
         expect(isIterable).toBeFunction();
     });
 
-    function getFalseValuesWithIteratorKey(key: any, keyDesc: any): any[] {
+    function getFalseValuesWithIteratorKey(
+        key: string | symbol,
+        keyDesc: string,
+    ): [string, unknown][] {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const falseIteratorKeyFunction: any = () => {};
-        falseIteratorKeyFunction[key] = 'foo';
+        const falseIteratorKeyFunction = Object.assign(() => {}, {
+            [key]: 'foo',
+        });
 
         // prettier-ignore
         return [
@@ -619,12 +679,11 @@ describe('isIterable', () => {
         '(compat) "@@iterator"',
     );
 
-    each(
-        simpleFalseValues.concat(
-            falseValuesWithNativeIteratorKey,
-            falseValuesWithCompatIteratorKey,
-        ),
-    ).it('should return false when given %s', (_, value) => {
+    each([
+        ...simpleFalseValues,
+        ...falseValuesWithNativeIteratorKey,
+        ...falseValuesWithCompatIteratorKey,
+    ]).it('should return false when given %s', (_, value) => {
         // eslint-disable-next-line jest/no-standalone-expect
         expect(isIterable(value)).toBeFalse();
     });
@@ -635,7 +694,7 @@ describe('isIterable', () => {
         global.Symbol = _Symbol;
     });
 
-    each(simpleFalseValues.concat(falseValuesWithCompatIteratorKey)).it(
+    each([...simpleFalseValues, ...falseValuesWithCompatIteratorKey]).it(
         'should return false if Symbol does not exist when given %s',
         (_, value) => {
             delete global.Symbol;
@@ -644,16 +703,21 @@ describe('isIterable', () => {
         },
     );
 
-    function getTrueValuesWithIteratorKey(key: any, keyDesc: string): any[] {
+    function getTrueValuesWithIteratorKey(
+        key: string | symbol,
+        keyDesc: string,
+    ): [string, unknown][] {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const function1: any = () => {};
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        function1[key] = () => {};
+        const function1 = Object.assign(() => {}, {
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            [key]() {},
+        });
 
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const function2: any = () => {};
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        function2[key] = async function () {};
+        const function2 = Object.assign(() => {}, {
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            async [key]() {},
+        });
 
         return [
             // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -665,9 +729,10 @@ describe('isIterable', () => {
         ];
     }
 
-    const trueValuesWithNativeIteratorKey = [['a string', 'foo']].concat(
-        getTrueValuesWithIteratorKey(Symbol.iterator, 'Symbol.iterator'),
-    );
+    const trueValuesWithNativeIteratorKey = [
+        ['a string', 'foo'],
+        ...getTrueValuesWithIteratorKey(Symbol.iterator, 'Symbol.iterator'),
+    ];
     const trueValuesWithCompatIteratorKey = getTrueValuesWithIteratorKey(
         '@@iterator',
         '(compat) "@@iterator"',
@@ -705,15 +770,17 @@ describe('isAsyncIterable', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const falseAsyncIteratorFunction: any = () => {};
-    falseAsyncIteratorFunction[Symbol.iterator] = 'foo';
+    const falseAsyncIteratorFunction = Object.assign(() => {}, {
+        [Symbol.asyncIterator]: 'foo',
+    });
 
     // prettier-ignore
-    const falseValuesWithAsyncIteratorKey = simpleFalseValues.concat([
+    const falseValuesWithAsyncIteratorKey = [
+        ...simpleFalseValues,
         ['a string', 'foo'],
         ['an object with a non-method Symbol.asyncIterator key', { foo: 'bar', [Symbol.asyncIterator]: 'baz' }],
         ['a function with a non-method Symbol.asyncIterator key', falseAsyncIteratorFunction],
-    ]);
+    ];
 
     each(falseValuesWithAsyncIteratorKey).it(
         'should return false when given %s',
@@ -724,14 +791,16 @@ describe('isAsyncIterable', () => {
     );
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const function1: any = () => {};
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    function1[Symbol.asyncIterator] = () => {};
+    const function1 = Object.assign(() => {}, {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        [Symbol.asyncIterator]() {},
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const function2: any = () => {};
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    function2[Symbol.asyncIterator] = async function () {};
+    const function2 = Object.assign(() => {}, {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        async [Symbol.asyncIterator]() {},
+    });
 
     // prettier-ignore
     const trueValuesWithAsyncIteratorKey = [
@@ -749,9 +818,10 @@ describe('isAsyncIterable', () => {
         global.Symbol = _Symbol;
     });
 
-    each(
-        falseValuesWithAsyncIteratorKey.concat(trueValuesWithAsyncIteratorKey),
-    ).it(
+    each([
+        ...falseValuesWithAsyncIteratorKey,
+        ...trueValuesWithAsyncIteratorKey,
+    ]).it(
         'should return false if Symbol does not exist when given %s',
         (_, value) => {
             delete global.Symbol;
@@ -760,12 +830,13 @@ describe('isAsyncIterable', () => {
         },
     );
 
-    each(
-        falseValuesWithAsyncIteratorKey.concat(trueValuesWithAsyncIteratorKey),
-    ).it(
+    each([
+        ...falseValuesWithAsyncIteratorKey,
+        ...trueValuesWithAsyncIteratorKey,
+    ]).it(
         'should return false if Symbol.asyncIterator does not exist when given %s',
         (_, value) => {
-            global.Symbol = {} as any;
+            global.Symbol = {} as typeof global.Symbol;
             // eslint-disable-next-line jest/no-standalone-expect
             expect(isAsyncIterable(value)).toBeFalse();
         },
@@ -786,14 +857,16 @@ describe('isPromiseLike', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const falsePromiseFunction: any = () => {};
-    falsePromiseFunction.then = 'foo';
+    const falsePromiseFunction = Object.assign(() => {}, {
+        then: 'foo',
+    });
 
-    const falseValues = simpleFalseValues.concat([
+    const falseValues = [
+        ...simpleFalseValues,
         ['a string', 'foo'],
         ['an object with a non-method "then" key', { foo: 'bar', then: 'baz' }],
         ['a function with a non-method "then" key', falsePromiseFunction],
-    ]);
+    ];
 
     // eslint-disable-next-line jest/no-standalone-expect
     each(falseValues).it('should return false when given %s', (_, value) => {
@@ -802,14 +875,16 @@ describe('isPromiseLike', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const promise1: any = () => {};
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    promise1.then = () => {};
+    const promise1 = Object.assign(() => {}, {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        then() {},
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const promise2: any = () => {};
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    promise2.then = async function () {};
+    const promise2 = Object.assign(() => {}, {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        async then() {},
+    });
 
     const trueValues = [
         // eslint-disable-next-line @typescript-eslint/no-empty-function
