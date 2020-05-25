@@ -5,6 +5,7 @@ import {
     Disposable,
     DisposalError,
 } from '../src/disposable';
+import { throw_ } from './testUtils';
 import each from 'jest-each';
 
 describe('dispose', () => {
@@ -75,10 +76,6 @@ describe('fromTeardown', () => {
         expect(teardown).toHaveBeenCalledWith();
     });
 });
-
-const _throw = (message: string) => () => {
-    throw new Error(message);
-};
 
 describe('Disposable', () => {
     it('should exist', () => {
@@ -387,7 +384,7 @@ describe('Disposable', () => {
         const teardown2 = jest.fn();
         const disposableTeardown1 = jest.fn();
         const disposable1 = new Disposable([disposableTeardown1]);
-        const throws = jest.fn(_throw('foo'));
+        const throws = jest.fn(throw_('foo'));
         const disposable = new Disposable([
             teardown1,
             throws,
@@ -413,9 +410,9 @@ describe('Disposable', () => {
         const teardown2 = jest.fn();
         const disposableTeardown1 = jest.fn();
         const disposable1 = new Disposable([disposableTeardown1]);
-        const throws1 = jest.fn(_throw('foo'));
-        const throws2 = jest.fn(_throw('bar'));
-        const throws3 = jest.fn(_throw('baz'));
+        const throws1 = jest.fn(throw_('foo'));
+        const throws2 = jest.fn(throw_('bar'));
+        const throws3 = jest.fn(throw_('baz'));
         const disposable = new Disposable([
             teardown1,
             throws1,
@@ -452,7 +449,7 @@ describe('DisposalError', () => {
     it('should throw a DisposalError when disposing a disposable if one of the children throws', () => {
         expect.hasAssertions();
 
-        const disposable = new Disposable([_throw('foo')]);
+        const disposable = new Disposable([throw_('foo')]);
 
         try {
             disposable.dispose();
@@ -476,19 +473,19 @@ describe('DisposalError', () => {
         expect.hasAssertions();
 
         const disposable = new Disposable([
-            _throw('error1'),
+            throw_('error1'),
             () => {
-                new Disposable([_throw('error2')]).dispose();
+                new Disposable([throw_('error2')]).dispose();
             },
-            new Disposable([_throw('error3')]),
+            new Disposable([throw_('error3')]),
             new Disposable([
                 new Disposable([
-                    _throw('error4'),
+                    throw_('error4'),
                     () => {
-                        new Disposable([_throw('error5')]).dispose();
+                        new Disposable([throw_('error5')]).dispose();
                     },
                 ]),
-                new Disposable([new Disposable([_throw('error6')])]),
+                new Disposable([new Disposable([throw_('error6')])]),
             ]),
         ]);
 
