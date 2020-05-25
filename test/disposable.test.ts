@@ -241,15 +241,16 @@ describe('Disposable', () => {
     });
 
     it('should do nothing if adding itself', () => {
-        const teardowns = [jest.fn(), jest.fn()];
-        const disposable = new Disposable([...teardowns]);
+        const teardown1 = jest.fn();
+        const teardown2 = jest.fn();
+        const disposable = new Disposable([teardown1, teardown2]);
         disposable.add(disposable);
         disposable.dispose();
-        teardowns.forEach((teardown) => {
-            expect(teardown).toHaveBeenCalledTimes(1);
-            expect(teardown).toHaveBeenCalledWith();
-        });
-        expect(teardowns[0]).toHaveBeenCalledBefore(teardowns[1]);
+        expect(teardown1).toHaveBeenCalledTimes(1);
+        expect(teardown1).toHaveBeenCalledWith();
+        expect(teardown2).toHaveBeenCalledTimes(1);
+        expect(teardown2).toHaveBeenCalledWith();
+        expect(teardown1).toHaveBeenCalledBefore(teardown2);
     });
 
     it('should not dispose itself recursively', () => {
