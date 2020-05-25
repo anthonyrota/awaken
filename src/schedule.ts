@@ -193,61 +193,17 @@ export const scheduleSync: ScheduleFunction = (callback, subscription) => {
     callback();
 };
 
-interface ScheduleSyncQueuedCallback {
-    callback: () => void;
-    shouldCall: boolean;
+function ScheduleSyncQueuedInner(
+    callNext: () => void,
+    subscription: Disposable,
+): void {
+    while (subscription.active) {
+        callNext();
+    }
 }
 
 export function ScheduleSyncQueued(): ScheduleFunction {
-    let callbacks: ScheduleSyncQueuedCallback[] = [];
-    let isProcessingQueue = false;
-
-    return (callback, subscription) => {
-        if (subscription && !subscription.active) {
-            return;
-        }
-
-        if (isProcessingQueue) {
-            const callbackInfo: ScheduleSyncQueuedCallback = {
-                callback,
-                shouldCall: true,
-            };
-            callbacks.push(callbackInfo);
-            subscription?.add(() => {
-                callbackInfo.shouldCall = false;
-            });
-            return;
-        }
-
-        isProcessingQueue = true;
-
-        let cb = callback;
-        let shouldCall = true;
-
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            if (shouldCall) {
-                try {
-                    cb();
-                } catch (error) {
-                    isProcessingQueue = false;
-                    callbacks = [];
-                    throw error;
-                }
-            }
-
-            const callbackInfo = callbacks.shift();
-
-            if (!callbackInfo) {
-                break;
-            }
-
-            cb = callbackInfo.callback;
-            shouldCall = callbackInfo.shouldCall;
-        }
-
-        isProcessingQueue = false;
-    };
+    return ScheduleQueued(ScheduleSyncQueuedInner);
 }
 
 export type ScheduleAnimationFrameFunction = ScheduleFunction<
