@@ -197,9 +197,9 @@ function ScheduleSyncQueuedInner(
     callNext: () => void,
     subscription: Disposable,
 ): void {
-    while (subscription.active) {
+    do {
         callNext();
-    }
+    } while (subscription.active);
 }
 
 export function ScheduleSyncQueued(): ScheduleFunction {
