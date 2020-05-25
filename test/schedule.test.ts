@@ -10,6 +10,7 @@ import {
     ScheduleInterval,
 } from '../src/schedule';
 import { Disposable } from '../src/disposable';
+import { throw_ } from './testUtils';
 
 describe('ScheduleQueued', () => {
     it('should exist', () => {
@@ -56,10 +57,6 @@ describe('ScheduleSyncQueued', () => {
         expect(ScheduleSyncQueued).toBeFunction();
     });
 
-    it('should return a different schedule function each time', () => {
-        expect(ScheduleSyncQueued()).not.toBe(ScheduleSyncQueued());
-    });
-
     it('should synchronously call a single callback once with no arguments', () => {
         const scheduleSyncQueued = ScheduleSyncQueued();
         const callback = jest.fn();
@@ -97,6 +94,22 @@ describe('ScheduleSyncQueued', () => {
         expect(outside).toHaveBeenCalledWith();
         expect(inside).toHaveBeenCalledTimes(1);
         expect(inside).toHaveBeenCalledWith();
+    });
+
+    it('should return a different instance each time', () => {
+        expect(ScheduleSyncQueued()).not.toBe(ScheduleSyncQueued());
+    });
+
+    it('should use different queues for different instances', () => {
+        const scheduleSyncQueued1 = ScheduleSyncQueued();
+        const scheduleSyncQueued2 = ScheduleSyncQueued();
+        const nested = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleSyncQueued2(nested);
+            expect(nested).toHaveBeenCalledTimes(1);
+        });
+        scheduleSyncQueued1(callback);
+        expect(callback).toHaveBeenCalledTimes(1);
     });
 
     it('should call multiple recursively given callbacks only after the previous ones have been executed', () => {
@@ -183,6 +196,196 @@ describe('ScheduleSyncQueued', () => {
         // prettier-ignore
         expect(icof1(main2_1_4)).toEqual([13, 19, 25, 31, 37, 43, 49, 55, 60, 64]);
         /* eslint-enable max-len */
+    });
+
+    it('should cancel a single nested callback', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const disposable = new Disposable();
+        const nested = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleSyncQueued(nested, disposable);
+            disposable.dispose();
+        });
+        scheduleSyncQueued(callback);
+        expect(nested).not.toHaveBeenCalled();
+        expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should only cancel the callback whose subscription has been disposed', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const disposable = new Disposable();
+        const nested1 = jest.fn();
+        const nested2 = jest.fn();
+        const nested3 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleSyncQueued(nested1);
+            scheduleSyncQueued(nested2, disposable);
+            scheduleSyncQueued(nested3);
+            disposable.dispose();
+            expect(nested1).not.toHaveBeenCalled();
+            expect(nested3).not.toHaveBeenCalled();
+        });
+        scheduleSyncQueued(callback);
+        expect(nested2).not.toHaveBeenCalled();
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledWith();
+        expect(nested3).toHaveBeenCalledTimes(1);
+        expect(nested3).toHaveBeenCalledWith();
+    });
+
+    it('should not schedule a nested callback when given a disposed disposable', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const disposable = new Disposable();
+        disposable.dispose();
+        const nested = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleSyncQueued(nested, disposable);
+        });
+        scheduleSyncQueued(callback);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing when cancelling a callback after it has been called', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const disposable = new Disposable();
+        const nested = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleSyncQueued(nested, disposable);
+        });
+        scheduleSyncQueued(callback, disposable);
+        disposable.dispose();
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cancel multiple callbacks', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const disposable = new Disposable();
+        const nested1_1 = jest.fn();
+        const nested1_2 = jest.fn();
+        const nested1 = jest.fn(() => {
+            scheduleSyncQueued(nested1_1, disposable);
+            scheduleSyncQueued(nested1_2);
+            disposable.dispose();
+            expect(nested1_2).not.toHaveBeenCalled();
+            expect(nested4).not.toHaveBeenCalled();
+        });
+        const nested2 = jest.fn();
+        const nested3 = jest.fn();
+        const nested4 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleSyncQueued(nested1);
+            scheduleSyncQueued(nested2, disposable);
+            scheduleSyncQueued(nested3, disposable);
+            scheduleSyncQueued(nested4);
+        });
+        scheduleSyncQueued(callback);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1_1).not.toHaveBeenCalled();
+        expect(nested1_2).toHaveBeenCalledTimes(1);
+        expect(nested1_2).toHaveBeenCalledWith();
+        expect(nested2).not.toHaveBeenCalled();
+        expect(nested3).not.toHaveBeenCalled();
+        expect(nested4).toHaveBeenCalledTimes(1);
+        expect(nested4).toHaveBeenCalledWith();
+    });
+
+    it('should throw the error thrown by the main callback scheduled', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const throws = jest.fn(throw_('foo'));
+        expect(() => scheduleSyncQueued(throws)).toThrow('foo');
+        expect(throws).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw the error thrown by a nested callback', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const throws = jest.fn(throw_('foo'));
+        const callback = jest.fn(() => {
+            scheduleSyncQueued(throws);
+        });
+        expect(() => scheduleSyncQueued(callback)).toThrow('foo');
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(throws).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cancel queued callbacks when the main callback scheduled throws', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const nested1 = jest.fn();
+        const nested2 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleSyncQueued(nested1);
+            scheduleSyncQueued(nested2);
+            throw_('foo')();
+        });
+        expect(() => scheduleSyncQueued(callback)).toThrow('foo');
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).not.toHaveBeenCalled();
+        expect(nested2).not.toHaveBeenCalled();
+    });
+
+    it('should cancel queued callbacks when a nested callback throws', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const nested1_1 = jest.fn();
+        const nested1 = jest.fn(() => {
+            scheduleSyncQueued(nested1_1);
+            throw_('foo')();
+        });
+        const nested2 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleSyncQueued(nested1);
+            scheduleSyncQueued(nested2);
+        });
+        expect(() => scheduleSyncQueued(callback)).toThrow('foo');
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1_1).not.toHaveBeenCalled();
+        expect(nested2).not.toHaveBeenCalled();
+    });
+
+    it('should be able to schedule more main callbacks after the previous one errored', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const throws1 = jest.fn(throw_('foo'));
+        const throws2 = jest.fn(throw_('bar'));
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        expect(() => scheduleSyncQueued(throws1)).toThrow('foo');
+        expect(() => scheduleSyncQueued(throws2)).toThrow('bar');
+        scheduleSyncQueued(callback1);
+        scheduleSyncQueued(callback2);
+        expect(throws1).toHaveBeenCalledTimes(1);
+        expect(throws2).toHaveBeenCalledTimes(1);
+        expect(throws2).toHaveBeenCalledWith();
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback1).toHaveBeenCalledWith();
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledWith();
+    });
+
+    it('should be able to schedule more nested main callbacks after the previous one errored', () => {
+        const scheduleSyncQueued = ScheduleSyncQueued();
+        const throws = jest.fn(throw_('foo'));
+        const nested1_1 = jest.fn();
+        const nested1 = jest.fn(() => {
+            scheduleSyncQueued(nested1_1);
+            expect(nested1_1).not.toHaveBeenCalled();
+            expect(nested2).not.toHaveBeenCalled();
+        });
+        const nested2 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleSyncQueued(nested1);
+            scheduleSyncQueued(nested2);
+            expect(nested1).not.toHaveBeenCalled();
+            expect(nested2).not.toHaveBeenCalled();
+        });
+        expect(() => scheduleSyncQueued(throws)).toThrow('foo');
+        scheduleSyncQueued(callback);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1_1).toHaveBeenCalledTimes(1);
+        expect(nested2).toHaveBeenCalledTimes(1);
     });
 });
 
