@@ -154,8 +154,8 @@ export const DisposalError = (function (
         .map((error, index) => `\n  [#${index + 1}] ${error}`)
         .join('');
 
-    this.message = `Failed to dispose a resource. ${errorCount} ${
-        flattenedErrors.length === 1 ? 'error was' : 'errors were'
+    this.message = `Failed to dispose a resource. ${errorCount} error${
+        flattenedErrors.length === 1 ? ' was' : 's were'
     } caught.${printedErrors}`;
 
     this.name = 'DisposalError';
