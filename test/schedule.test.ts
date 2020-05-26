@@ -468,8 +468,88 @@ describe('ScheduleAnimationFrameQueued', () => {
 });
 
 describe('ScheduleTimeout', () => {
+    beforeAll(jest.useFakeTimers);
+    afterAll(jest.useRealTimers);
+    afterEach(jest.resetAllMocks);
+
     it('should exist', () => {
         expect(ScheduleTimeout).toBeFunction();
+    });
+
+    it('should not call the callback immediately when the delay is not zero', () => {
+        const callback = jest.fn();
+        const scheduleTimeout = ScheduleTimeout(19);
+        scheduleTimeout(callback);
+        expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should not call the callback immediately when the delay is zero', () => {
+        const callback = jest.fn();
+        const scheduleTimeout = ScheduleTimeout(0);
+        scheduleTimeout(callback);
+        expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should call native setTimeout with the callback and delay', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const delay = 33;
+        const scheduleTimeout = ScheduleTimeout(delay);
+        scheduleTimeout(callback);
+        expect(setTimeout).toHaveBeenCalledTimes(1);
+        expect(setTimeout).toHaveBeenCalledWith(callback, delay);
+    });
+
+    it('should call native setTimeout with the callback and delay when given an active disposable', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const delay = 0;
+        const disposable = new Disposable();
+        const scheduleTimeout = ScheduleTimeout(delay);
+        scheduleTimeout(callback, disposable);
+        expect(setTimeout).toHaveBeenCalledTimes(1);
+        expect(setTimeout).toHaveBeenCalledWith(callback, delay);
+    });
+
+    it('should not call native setTimeout when given a disposed disposable', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const disposable = new Disposable();
+        disposable.dispose();
+        const scheduleTimeout = ScheduleTimeout(13);
+        scheduleTimeout(callback, disposable);
+        expect(setTimeout).not.toHaveBeenCalled();
+    });
+
+    it('should support multiple schedules', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback1 = () => {};
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback2 = () => {};
+        const delay = 4391;
+        const scheduleTimeout = ScheduleTimeout(delay);
+        scheduleTimeout(callback1);
+        expect(setTimeout).toHaveBeenCalledTimes(1);
+        scheduleTimeout(callback2);
+        expect(setTimeout).toHaveBeenCalledTimes(2);
+        expect(setTimeout).toHaveBeenNthCalledWith(2, callback2, delay);
+        scheduleTimeout(callback1);
+        expect(setTimeout).toHaveBeenCalledTimes(3);
+        expect(setTimeout).toHaveBeenNthCalledWith(3, callback1, delay);
+    });
+
+    it('should cancel the scheduled callback when the given disposable is disposed', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const disposable = new Disposable();
+        const scheduleTimeout = ScheduleTimeout(0);
+        scheduleTimeout(callback, disposable);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const id: number = ((setTimeout as unknown) as jest.Mock).mock
+            .results[0].value;
+        disposable.dispose();
+        expect(clearTimeout).toHaveBeenCalledTimes(1);
+        expect(clearTimeout).toHaveBeenCalledWith(id);
     });
 });
 
