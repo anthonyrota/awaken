@@ -106,7 +106,9 @@ export function requestAnimationFrame(
 
     const animationId = raf(callback);
 
-    subscription?.add(() => raf.cancel(animationId));
+    subscription?.add(() => {
+        raf.cancel(animationId);
+    });
 }
 
 /**
