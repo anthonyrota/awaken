@@ -15,7 +15,7 @@ import {
     isPromiseLike,
 } from '../src/utils';
 import { Disposable } from '../src/disposable';
-import { Tail } from './../src/types';
+import { Tail } from '../src/types';
 import { RafMock } from './mockTypes/raf';
 import cloneDeep = require('lodash.clonedeep');
 import each from 'jest-each';
