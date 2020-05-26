@@ -11,6 +11,11 @@ import {
 } from '../src/schedule';
 import { Disposable } from '../src/disposable';
 import { throw_ } from './testUtils';
+import { RafMock } from './mockTypes/raf';
+
+import raf = require('raf');
+jest.mock('raf');
+const rafMock = (raf as unknown) as RafMock;
 
 describe('ScheduleQueued', () => {
     it('should exist', () => {
@@ -390,8 +395,69 @@ describe('ScheduleSyncQueued', () => {
 });
 
 describe('scheduleAnimationFrame', () => {
+    afterEach(jest.resetAllMocks);
+
     it('should exist', () => {
         expect(scheduleAnimationFrame).toBeFunction();
+    });
+
+    it('should not call the callback immediately', () => {
+        const callback = jest.fn();
+        scheduleAnimationFrame(callback);
+        expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should raf the callback', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        scheduleAnimationFrame(callback);
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        expect(rafMock).toHaveBeenCalledWith(callback);
+    });
+
+    it('should raf the callback when given an active disposable', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const disposable = new Disposable();
+        scheduleAnimationFrame(callback, disposable);
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        expect(rafMock).toHaveBeenCalledWith(callback);
+    });
+
+    it('should not raf the callback when given a disposed disposable', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const disposable = new Disposable();
+        disposable.dispose();
+        scheduleAnimationFrame(callback, disposable);
+        expect(rafMock).not.toHaveBeenCalled();
+    });
+
+    it('should support multiple schedules', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback1 = () => {};
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback2 = () => {};
+        scheduleAnimationFrame(callback1);
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        scheduleAnimationFrame(callback2);
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock).toHaveBeenNthCalledWith(2, callback2);
+        scheduleAnimationFrame(callback1);
+        expect(rafMock).toHaveBeenCalledTimes(3);
+        expect(rafMock).toHaveBeenNthCalledWith(3, callback1);
+    });
+
+    it('should be able to cancel the callback', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const disposable = new Disposable();
+        scheduleAnimationFrame(callback, disposable);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const id: number = rafMock.mock.results[0].value;
+        disposable.dispose();
+        expect(rafMock.cancel).toHaveBeenCalledTimes(1);
+        expect(rafMock.cancel).toHaveBeenCalledWith(id);
     });
 });
 

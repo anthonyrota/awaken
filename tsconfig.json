@@ -23,5 +23,5 @@
         "lib": ["esnext", "dom"],
         "types": ["jest-extended"]
     },
-    "include": ["src/**/*", "test/**/*"]
+    "include": ["src/**/*", "test/**/*", "__mocks__/**/*"]
 }

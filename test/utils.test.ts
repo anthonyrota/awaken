@@ -16,8 +16,13 @@ import {
 } from '../src/utils';
 import { Disposable } from '../src/disposable';
 import { Tail } from './../src/types';
+import { RafMock } from './mockTypes/raf';
 import cloneDeep = require('lodash.clonedeep');
 import each from 'jest-each';
+
+import raf = require('raf');
+jest.mock('raf');
+const rafMock = (raf as unknown) as RafMock;
 
 type CF = (x: string) => string;
 const composableFunction1: CF = (x) => x + '+f1';
@@ -295,24 +300,6 @@ describe('getLast', () => {
         ).toBe(object);
     });
 });
-
-interface RafMock extends jest.Mock {
-    cancel: jest.Mock;
-}
-
-jest.mock(
-    'raf',
-    (): RafMock => {
-        let id = 61;
-        return Object.assign(
-            jest.fn(() => id++),
-            { cancel: jest.fn() },
-        );
-    },
-);
-
-import raf = require('raf');
-const rafMock = (raf as unknown) as RafMock;
 
 describe('requestAnimationFrame', () => {
     afterEach(jest.resetAllMocks);
