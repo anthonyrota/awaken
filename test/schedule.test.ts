@@ -470,6 +470,7 @@ describe('ScheduleAnimationFrameQueued', () => {
 describe('ScheduleTimeout', () => {
     beforeEach(jest.useFakeTimers);
     afterEach(jest.useRealTimers);
+    afterEach(jest.clearAllTimers);
 
     it('should exist', () => {
         expect(ScheduleTimeout).toBeFunction();
