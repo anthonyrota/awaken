@@ -560,7 +560,91 @@ describe('ScheduleTimeoutQueued', () => {
 });
 
 describe('ScheduleInterval', () => {
+    beforeEach(jest.useFakeTimers);
+    afterEach(jest.useRealTimers);
+    afterEach(jest.clearAllTimers);
+
     it('should exist', () => {
         expect(ScheduleInterval).toBeFunction();
+    });
+
+    it('should not call the given callback immediately', () => {
+        const scheduleInterval = ScheduleInterval(291);
+        const callback = jest.fn();
+        scheduleInterval(callback);
+        expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should not call the callback immediately when given zero delay', () => {
+        const scheduleInterval = ScheduleInterval(0);
+        const callback = jest.fn();
+        scheduleInterval(callback);
+        expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should not call setTimeout', () => {
+        const scheduleInterval = ScheduleInterval(39);
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        scheduleInterval(() => {});
+        expect(setTimeout).not.toHaveBeenCalled();
+    });
+
+    it('should schedule an interval with the given delay', () => {
+        const delay = 429;
+        const scheduleInterval = ScheduleInterval(delay);
+        expect(setInterval).not.toBeCalled();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        scheduleInterval(() => {});
+        expect(jest.getTimerCount()).toBe(1);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(setInterval).toHaveBeenCalledWith(expect.any(Function), delay);
+    });
+
+    it('should schedule an interval with the given delay when given an active disposable', () => {
+        const delay = 429;
+        const scheduleInterval = ScheduleInterval(delay);
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        scheduleInterval(() => {}, new Disposable());
+        expect(jest.getTimerCount()).toBe(1);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(setInterval).toHaveBeenCalledWith(expect.any(Function), delay);
+    });
+
+    it('should do nothing when given a disposed disposable', () => {
+        const scheduleInterval = ScheduleInterval(19423);
+        const callback = jest.fn();
+        const disposed = new Disposable();
+        disposed.dispose();
+        scheduleInterval(callback, disposed);
+        expect(callback).not.toHaveBeenCalled();
+        expect(setInterval).not.toHaveBeenCalled();
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('should schedule an interval with a function calling the given callback', () => {
+        const callback = jest.fn();
+        const scheduleInterval = ScheduleInterval(19);
+        scheduleInterval(callback);
+        jest.runOnlyPendingTimers();
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback).toHaveBeenCalledWith();
+    });
+
+    it('should cancel the scheduled interval if only one callback is ever scheduled', () => {
+        const callback = jest.fn();
+        const scheduleInterval = ScheduleInterval(19);
+        scheduleInterval(callback);
+        jest.runOnlyPendingTimers();
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('should cancel the main scheduled callback when the given disposable is disposed', () => {
+        const callback = jest.fn();
+        const disposable = new Disposable();
+        const scheduleInterval = ScheduleInterval(299);
+        scheduleInterval(callback, disposable);
+        disposable.dispose();
+        expect(jest.getTimerCount()).toBe(0);
+        expect(callback).not.toHaveBeenCalled();
     });
 });
