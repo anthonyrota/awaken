@@ -354,9 +354,8 @@ describe('requestAnimationFrame', () => {
 });
 
 describe('setTimeout', () => {
-    beforeAll(jest.useFakeTimers);
-    afterAll(jest.useRealTimers);
-    afterEach(jest.resetAllMocks);
+    beforeEach(jest.useFakeTimers);
+    afterEach(jest.useRealTimers);
 
     it('should exist', () => {
         expect(setTimeout).toBeFunction();
@@ -437,9 +436,8 @@ describe('setTimeout', () => {
 });
 
 describe('setInterval', () => {
-    beforeAll(jest.useFakeTimers);
-    afterAll(jest.useRealTimers);
-    afterEach(jest.resetAllMocks);
+    beforeEach(jest.useFakeTimers);
+    afterEach(jest.useRealTimers);
 
     it('should exist', () => {
         expect(setInterval).toBeFunction();
@@ -550,9 +548,8 @@ describe('setInterval', () => {
 });
 
 describe('asyncReportError', () => {
-    beforeAll(jest.useFakeTimers);
-    afterAll(jest.useRealTimers);
-    afterEach(jest.resetAllMocks);
+    beforeEach(jest.useFakeTimers);
+    afterEach(jest.useRealTimers);
 
     it('should exist', () => {
         expect(asyncReportError).toBeFunction();
