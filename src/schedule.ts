@@ -101,7 +101,7 @@ export function ScheduleQueued<T extends any[] = []>(
                 // that we are currently in the context of the latest
                 // scheduledSubscription.
 
-                // If a the given callNext function (this callback) is being
+                // If the given callNext function (this callback) is being
                 // called inside the execution of a provided callback, then mark
                 // as such and exit to ensure that synchronous recursive
                 // schedule calls are properly queued.
