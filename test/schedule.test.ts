@@ -8,6 +8,7 @@ import {
     ScheduleTimeout,
     ScheduleTimeoutQueued,
     ScheduleInterval,
+    ScheduleFunction,
 } from '../src/schedule';
 import { Disposable } from '../src/disposable';
 import { throw_ } from './testUtils';
@@ -568,6 +569,31 @@ describe('ScheduleInterval', () => {
         expect(ScheduleInterval).toBeFunction();
     });
 
+    it('should return a different instance each time', () => {
+        expect(ScheduleInterval(1)).not.toBe(ScheduleInterval(1));
+    });
+
+    it('should use different queues for different instances', () => {
+        const delay = 4;
+        const scheduleInterval1 = ScheduleInterval(delay);
+        const scheduleInterval2 = ScheduleInterval(delay);
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        scheduleInterval1(callback1);
+        scheduleInterval2(callback2);
+        jest.advanceTimersByTime(delay);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(setInterval).toHaveBeenCalledTimes(2);
+        // prettier-ignore
+        // eslint-disable-next-line max-len
+        expect(setInterval).toHaveBeenNthCalledWith(1, expect.any(Function), delay)
+        // prettier-ignore
+        // eslint-disable-next-line max-len
+        expect(setInterval).toHaveBeenNthCalledWith(2, expect.any(Function), delay)
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
     it('should not call the given callback immediately', () => {
         const scheduleInterval = ScheduleInterval(291);
         const callback = jest.fn();
@@ -623,18 +649,20 @@ describe('ScheduleInterval', () => {
 
     it('should schedule an interval with a function calling the given callback', () => {
         const callback = jest.fn();
-        const scheduleInterval = ScheduleInterval(19);
+        const delay = 19;
+        const scheduleInterval = ScheduleInterval(delay);
         scheduleInterval(callback);
-        jest.runOnlyPendingTimers();
+        jest.advanceTimersByTime(delay);
         expect(callback).toHaveBeenCalledTimes(1);
         expect(callback).toHaveBeenCalledWith();
     });
 
     it('should cancel the scheduled interval if only one callback is ever scheduled', () => {
         const callback = jest.fn();
-        const scheduleInterval = ScheduleInterval(19);
+        const delay = 19;
+        const scheduleInterval = ScheduleInterval(delay);
         scheduleInterval(callback);
-        jest.runOnlyPendingTimers();
+        jest.advanceTimersByTime(delay);
         expect(jest.getTimerCount()).toBe(0);
     });
 
@@ -646,5 +674,419 @@ describe('ScheduleInterval', () => {
         disposable.dispose();
         expect(jest.getTimerCount()).toBe(0);
         expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should call two consecutively scheduled callbacks in the same interval', () => {
+        const delay = 1;
+        const scheduleInterval = ScheduleInterval(delay);
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        scheduleInterval(callback1);
+        scheduleInterval(callback2);
+        expect(jest.getTimerCount()).toBe(1);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        jest.advanceTimersByTime(delay);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback1).toHaveBeenCalledWith();
+        expect(callback2).not.toHaveBeenCalled();
+        expect(jest.getTimerCount()).toBe(1);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        jest.advanceTimersByTime(delay);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledWith();
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('should be able to cancel top level callbacks', () => {
+        const delay = 423;
+        const scheduleInterval = ScheduleInterval(delay);
+        const disposable1 = new Disposable();
+        const disposable2 = new Disposable();
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        const callback3 = jest.fn();
+        const callback4 = jest.fn();
+        scheduleInterval(callback1);
+        scheduleInterval(callback2, disposable1);
+        scheduleInterval(callback3);
+        disposable1.dispose();
+        scheduleInterval(callback4, disposable2);
+        disposable2.dispose();
+        expect(jest.getTimerCount()).toBe(1);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        jest.advanceTimersByTime(delay);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback1).toHaveBeenCalledWith();
+        expect(callback2).not.toHaveBeenCalled();
+        expect(callback3).not.toHaveBeenCalled();
+        expect(callback4).not.toHaveBeenCalled();
+        expect(jest.getTimerCount()).toBe(1);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        jest.advanceTimersByTime(delay);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).not.toHaveBeenCalled();
+        expect(callback3).toHaveBeenCalledTimes(1);
+        expect(callback3).toHaveBeenCalledWith();
+        expect(callback4).not.toHaveBeenCalled();
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('should cancel the interval if all top level callbacks are cancelled', () => {
+        const scheduleInterval = ScheduleInterval(0);
+        const disposable = new Disposable();
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        const callback3 = jest.fn();
+        scheduleInterval(callback1, disposable);
+        scheduleInterval(callback2, disposable);
+        scheduleInterval(callback3, disposable);
+        disposable.dispose();
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+        expect(callback1).toHaveBeenCalledTimes(0);
+        expect(callback2).toHaveBeenCalledTimes(0);
+        expect(callback3).toHaveBeenCalledTimes(0);
+    });
+
+    it('should be able to cancel mid interval', () => {
+        const delay = 29304;
+        const scheduleInterval = ScheduleInterval(delay);
+        const disposable = new Disposable();
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        scheduleInterval(callback1);
+        scheduleInterval(callback2, disposable);
+        jest.advanceTimersByTime(delay);
+        disposable.dispose();
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).not.toHaveBeenCalled();
+    });
+
+    it('should schedule nested callbacks to the same interval', () => {
+        const delay = 15;
+        const scheduleInterval = ScheduleInterval(delay);
+        const nested = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleInterval(nested);
+        });
+        scheduleInterval(callback);
+        jest.advanceTimersByTime(delay);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(1);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested).not.toHaveBeenCalled();
+        jest.advanceTimersByTime(delay);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested).toHaveBeenCalledTimes(1);
+        expect(nested).toHaveBeenCalledWith();
+    });
+
+    function testScheduleMultipleNestedCallbacks(
+        scheduleInterval: ScheduleFunction,
+        delay: number,
+    ): void {
+        const prev = (setInterval as jest.Mock).mock.calls.length;
+        const adv = () => {
+            if (delay === 0) {
+                jest.runOnlyPendingTimers();
+            } else {
+                jest.advanceTimersByTime(delay);
+            }
+        };
+        const nested1_1 = jest.fn();
+        const nested1_2_1 = jest.fn();
+        const nested1_2 = jest.fn(() => {
+            scheduleInterval(nested1_2_1);
+        });
+        const nested1 = jest.fn(() => {
+            scheduleInterval(nested1_1);
+            scheduleInterval(nested1_2);
+        });
+        const nested2 = jest.fn();
+        const nested3 = jest.fn();
+        const callback1 = jest.fn(() => {
+            scheduleInterval(nested1);
+            scheduleInterval(nested2);
+            scheduleInterval(nested3);
+        });
+        const callback2 = jest.fn();
+        scheduleInterval(callback1);
+        scheduleInterval(callback2);
+        expect(jest.getTimerCount()).toBe(1);
+        adv();
+        expect(setInterval).toHaveBeenCalledTimes(prev + 1);
+        expect(jest.getTimerCount()).toBe(1);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback1).toHaveBeenCalledWith();
+        expect(callback2).not.toHaveBeenCalled();
+        expect(nested1).not.toHaveBeenCalled();
+        expect(nested2).not.toHaveBeenCalled();
+        expect(nested3).not.toHaveBeenCalled();
+        adv();
+        expect(setInterval).toHaveBeenCalledTimes(prev + 1);
+        expect(jest.getTimerCount()).toBe(1);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledWith();
+        expect(nested1).not.toHaveBeenCalled();
+        expect(nested2).not.toHaveBeenCalled();
+        expect(nested3).not.toHaveBeenCalled();
+        adv();
+        expect(setInterval).toHaveBeenCalledTimes(prev + 1);
+        expect(jest.getTimerCount()).toBe(1);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledWith();
+        for (const c of [nested2, nested3, nested1_1, nested1_2]) {
+            expect(c).not.toHaveBeenCalled();
+        }
+        adv();
+        expect(setInterval).toHaveBeenCalledTimes(prev + 1);
+        expect(jest.getTimerCount()).toBe(1);
+        for (const c of [callback1, callback2, nested1, nested2]) {
+            expect(c).toHaveBeenCalledTimes(1);
+        }
+        expect(nested2).toHaveBeenCalledWith();
+        expect(nested3).not.toHaveBeenCalled();
+        expect(nested1_1).not.toHaveBeenCalled();
+        expect(nested1_2).not.toHaveBeenCalled();
+        adv();
+        expect(setInterval).toHaveBeenCalledTimes(prev + 1);
+        expect(jest.getTimerCount()).toBe(1);
+        for (const c of [callback1, callback2, nested1, nested2, nested3]) {
+            expect(c).toHaveBeenCalledTimes(1);
+        }
+        expect(nested3).toHaveBeenCalledWith();
+        expect(nested1_1).not.toHaveBeenCalled();
+        expect(nested1_2).not.toHaveBeenCalled();
+        adv();
+        expect(setInterval).toHaveBeenCalledTimes(prev + 1);
+        expect(jest.getTimerCount()).toBe(1);
+        for (const c of [
+            callback1,
+            callback2,
+            nested1,
+            nested2,
+            nested3,
+            nested1_1,
+        ]) {
+            expect(c).toHaveBeenCalledTimes(1);
+        }
+        expect(nested1_1).toHaveBeenCalledWith();
+        expect(nested1_2).not.toHaveBeenCalled();
+        adv();
+        expect(setInterval).toHaveBeenCalledTimes(prev + 1);
+        expect(jest.getTimerCount()).toBe(1);
+        // prettier-ignore
+        // eslint-disable-next-line max-len
+        for (const c of [callback1, callback2, nested1, nested2, nested3, nested1_1, nested1_2]) {
+            expect(c).toHaveBeenCalledTimes(1)
+        }
+        expect(nested1_2).toHaveBeenCalledWith();
+        expect(nested1_2_1).not.toHaveBeenCalled();
+        adv();
+        expect(setInterval).toHaveBeenCalledTimes(prev + 1);
+        expect(jest.getTimerCount()).toBe(0);
+        // prettier-ignore
+        // eslint-disable-next-line max-len
+        for (const c of [callback1, callback2, nested1, nested2, nested3, nested1_1, nested1_2, nested1_2_1]) {
+            expect(c).toHaveBeenCalledTimes(1)
+        }
+        expect(nested1_2_1).toHaveBeenCalledWith();
+    }
+
+    // eslint-disable-next-line jest/expect-expect
+    it('should schedule multiple nested callbacks to the same interval', () => {
+        const delay = 43;
+        const scheduleInterval = ScheduleInterval(delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+    });
+
+    // eslint-disable-next-line jest/expect-expect
+    it('should be able to nested schedule multiple times', () => {
+        const delay = 12;
+        const scheduleInterval = ScheduleInterval(delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+    });
+
+    // eslint-disable-next-line jest/expect-expect
+    it('should be able to schedule a new interval if the previous one was cancelled', () => {
+        const delay = 0;
+        const scheduleInterval = ScheduleInterval(delay);
+        const disposable = new Disposable();
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        scheduleInterval(callback1);
+        scheduleInterval(callback2, disposable);
+        jest.runOnlyPendingTimers();
+        disposable.dispose();
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+    });
+
+    it('should not cancel the interval if the queue is flushed then scheduled synchronously', () => {
+        const delay = 19;
+        const scheduleInterval = ScheduleInterval(delay);
+        const disposable = new Disposable();
+        const nested = jest.fn();
+        const callback1 = jest.fn(() => {
+            disposable.dispose();
+            scheduleInterval(nested);
+        });
+        const callback2 = jest.fn();
+        scheduleInterval(callback1);
+        scheduleInterval(callback2, disposable);
+        jest.advanceTimersByTime(delay);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(1);
+        expect(nested).not.toHaveBeenCalled();
+        jest.advanceTimersByTime(delay);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).not.toHaveBeenCalled();
+        expect(nested).toHaveBeenCalledTimes(1);
+        expect(nested).toHaveBeenCalledWith();
+    });
+
+    it('should do nothing when cancelling after a callback has been called', () => {
+        const delay = 19;
+        const scheduleInterval = ScheduleInterval(delay);
+        const disposable = new Disposable();
+        const callback = jest.fn();
+        scheduleInterval(callback, disposable);
+        jest.advanceTimersByTime(delay);
+        disposable.dispose();
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+        expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should only cancel the nested callback whose subscription has been disposed', () => {
+        const delay = 1000;
+        const scheduleInterval = ScheduleInterval(delay);
+        const disposable = new Disposable();
+        const nested1 = jest.fn();
+        const nested2 = jest.fn();
+        const nested3 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleInterval(nested1);
+            scheduleInterval(nested2, disposable);
+            scheduleInterval(nested3);
+            disposable.dispose();
+        });
+        scheduleInterval(callback);
+        jest.advanceTimersByTime(delay * 3);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+        expect(nested2).not.toHaveBeenCalled();
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledWith();
+        expect(nested3).toHaveBeenCalledTimes(1);
+        expect(nested3).toHaveBeenCalledWith();
+    });
+
+    it('should not schedule a nested callback when given a disposed disposable', () => {
+        const delay = 400;
+        const scheduleInterval = ScheduleInterval(delay);
+        const disposable = new Disposable();
+        disposable.dispose();
+        const nested = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleInterval(nested, disposable);
+        });
+        scheduleInterval(callback);
+        jest.advanceTimersByTime(delay);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested).not.toHaveBeenCalled();
+    });
+
+    it('should throw the error thrown by the main callback scheduled and cancel the interval', () => {
+        const delay = 491;
+        const scheduleInterval = ScheduleInterval(delay);
+        const throws = jest.fn(throw_('foo'));
+        scheduleInterval(throws);
+        expect(() => jest.advanceTimersByTime(delay)).toThrow('foo');
+        expect(throws).toHaveBeenCalledTimes(1);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('should throw the error thrown by a nested callback', () => {
+        const scheduleInterval = ScheduleInterval(0);
+        const throws = jest.fn(throw_('foo'));
+        const callback = jest.fn(() => {
+            scheduleInterval(throws);
+        });
+        scheduleInterval(callback);
+        jest.runOnlyPendingTimers();
+        expect(jest.runOnlyPendingTimers).toThrow('foo');
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(throws).toHaveBeenCalledTimes(1);
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('should cancel queued callbacks when the main callback scheduled throws and allow more schedules', () => {
+        const delay = 51;
+        const scheduleInterval = ScheduleInterval(delay);
+        const nested1 = jest.fn();
+        const nested2 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleInterval(nested1);
+            scheduleInterval(nested2);
+            throw_('foo')();
+        });
+        scheduleInterval(callback);
+        expect(() => jest.advanceTimersByTime(delay)).toThrow('foo');
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).not.toHaveBeenCalled();
+        expect(nested2).not.toHaveBeenCalled();
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+    });
+
+    it('should cancel queued callbacks when a nested callback throws and allow more schedules', () => {
+        const delay = 721;
+        const scheduleInterval = ScheduleInterval(delay);
+        const nested1_1 = jest.fn();
+        const nested1 = jest.fn(() => {
+            scheduleInterval(nested1_1);
+            throw_('foo')();
+        });
+        const nested2 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleInterval(nested1);
+            scheduleInterval(nested2);
+        });
+        scheduleInterval(callback);
+        jest.advanceTimersByTime(delay);
+        expect(() => jest.advanceTimersByTime(delay)).toThrow('foo');
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1_1).not.toHaveBeenCalled();
+        expect(nested2).not.toHaveBeenCalled();
+        expect(setInterval).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
+        testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
     });
 });
