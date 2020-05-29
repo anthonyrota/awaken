@@ -868,14 +868,9 @@ describe('ScheduleInterval', () => {
         adv();
         expect(setInterval).toHaveBeenCalledTimes(prev + 1);
         expect(jest.getTimerCount()).toBe(1);
-        for (const c of [
-            callback1,
-            callback2,
-            nested1,
-            nested2,
-            nested3,
-            nested1_1,
-        ]) {
+        // prettier-ignore
+        // eslint-disable-next-line max-len
+        for (const c of [callback1, callback2, nested1, nested2, nested3, nested1_1]) {
             expect(c).toHaveBeenCalledTimes(1);
         }
         expect(nested1_1).toHaveBeenCalledWith();
