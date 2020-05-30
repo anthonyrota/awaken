@@ -15,7 +15,6 @@ import { throw_ } from './testUtils';
 import { RafMock } from './mockTypes/raf';
 
 import raf = require('raf');
-jest.mock('raf');
 const rafMock = (raf as unknown) as RafMock;
 
 describe('ScheduleQueued', () => {
@@ -396,7 +395,8 @@ describe('ScheduleSyncQueued', () => {
 });
 
 describe('scheduleAnimationFrame', () => {
-    afterEach(jest.resetAllMocks);
+    afterEach(jest.clearAllMocks);
+    afterEach(rafMock._resetQueue);
 
     it('should exist', () => {
         expect(scheduleAnimationFrame).toBeFunction();

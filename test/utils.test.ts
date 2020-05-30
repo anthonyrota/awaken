@@ -21,7 +21,6 @@ import cloneDeep = require('lodash.clonedeep');
 import each from 'jest-each';
 
 import raf = require('raf');
-jest.mock('raf');
 const rafMock = (raf as unknown) as RafMock;
 
 type CF = (x: string) => string;
@@ -302,7 +301,8 @@ describe('getLast', () => {
 });
 
 describe('requestAnimationFrame', () => {
-    afterEach(jest.resetAllMocks);
+    afterEach(jest.clearAllMocks);
+    afterEach(rafMock._resetQueue);
 
     it('should exist', () => {
         expect(requestAnimationFrame).toBeFunction();
