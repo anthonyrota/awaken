@@ -55,6 +55,51 @@ describe('scheduleSync', () => {
         scheduleSync(callback, disposed);
         expect(callback).not.toHaveBeenCalled();
     });
+
+    it('should throw the error that a callback throws and allow scheduling of more functions after', () => {
+        const throws = jest.fn(throw_('foo'));
+        expect(() => scheduleSync(throws)).toThrow('foo');
+        expect(throws).toHaveBeenCalledTimes(1);
+        const callback = jest.fn();
+        scheduleSync(callback);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback).toHaveBeenCalledWith();
+    });
+
+    it('should throw the error that a nested callback throws and allow scheduling of more functions after', () => {
+        return new Promise((done) => {
+            const throws = jest.fn(throw_('foo'));
+            const throwsWrapped = jest.fn(() => {
+                scheduleSync(throws);
+                done(new Error('This should not be called.'));
+            });
+            expect(() => scheduleSync(throwsWrapped)).toThrow('foo');
+            expect(throws).toHaveBeenCalledTimes(1);
+            expect(throwsWrapped).toHaveBeenCalledTimes(1);
+            const callback = jest.fn();
+            scheduleSync(callback);
+            expect(callback).toHaveBeenCalledTimes(1);
+            expect(callback).toHaveBeenCalledWith();
+            done();
+        });
+    });
+
+    it('should synchronously call all nested functions', () => {
+        const nested1 = jest.fn();
+        const nested2 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleSync(nested1);
+            expect(nested1).toHaveBeenCalledTimes(1);
+            scheduleSync(nested2);
+            expect(nested2).toHaveBeenCalledTimes(1);
+        });
+        scheduleSync(callback);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledWith();
+        expect(nested2).toHaveBeenCalledTimes(1);
+        expect(nested2).toHaveBeenCalledWith();
+    });
 });
 
 describe('ScheduleSyncQueued', () => {
