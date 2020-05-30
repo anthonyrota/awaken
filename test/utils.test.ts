@@ -15,7 +15,6 @@ import {
     isPromiseLike,
 } from '../src/utils';
 import { Disposable } from '../src/disposable';
-import { Tail } from '../src/types';
 import { RafMock } from './mockTypes/raf';
 import cloneDeep = require('lodash.clonedeep');
 import each from 'jest-each';
@@ -36,65 +35,36 @@ const composableFunction9: CF = (x) => x + '+f9';
 const composableFunction10: CF = (x) => x + '+f10';
 const composableFunction11: CF = (x) => x + '+f11';
 
-const composableCase0 = [''] as const;
-const composableCase1 = ['+f1', composableFunction1] as const;
 // prettier-ignore
-const composableCase2 = ['+f1+f2', composableFunction1, composableFunction2] as const;
-// prettier-ignore
-const composableCase3 = ['+f1+f2+f3', composableFunction1, composableFunction2, composableFunction3] as const;
-// prettier-ignore
-const composableCase4 = ['+f1+f2+f3+f4', composableFunction1, composableFunction2, composableFunction3, composableFunction4] as const;
-// prettier-ignore
-const composableCase5 = ['+f1+f2+f3+f4+f5', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5] as const;
-// prettier-ignore
-const composableCase6 = ['+f1+f2+f3+f4+f5+f6', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6] as const;
-// prettier-ignore
-const composableCase7 = ['+f1+f2+f3+f4+f5+f6+f7', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7] as const;
-// prettier-ignore
-const composableCase8 = ['+f1+f2+f3+f4+f5+f6+f7+f8', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8] as const;
-// prettier-ignore
-const composableCase9 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9] as const;
-// prettier-ignore
-const composableCase10 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10] as const;
-// prettier-ignore
-const composableCase11 = ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10+f11', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10, composableFunction11] as const;
-
-// prettier-ignore
-// eslint-disable-next-line max-len
-type ComposableCases = [typeof composableCase0, typeof composableCase1, typeof composableCase2, typeof composableCase3, typeof composableCase4, typeof composableCase5, typeof composableCase6, typeof composableCase7, typeof composableCase8, typeof composableCase9, typeof composableCase10, typeof composableCase11];
-// prettier-ignore
-// eslint-disable-next-line max-len
-const composableCases: ComposableCases = [composableCase0, composableCase1, composableCase2, composableCase3, composableCase4, composableCase5, composableCase6, composableCase7, composableCase8, composableCase9, composableCase10, composableCase11];
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-type _MapGetTail<T> = { [P in keyof T]: Tail<T[P]> };
-// For some reason, inlining the following operation breaks it (the returned
-// type is the mapping of all of the tuple's properties instead of the tuple
-// itself) so this is necessary.
-type ComposableCaseFunctions = _MapGetTail<ComposableCases>[number];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type _DistributeCaseTestFn<T> = T extends any[]
-    ? (expected: string, ...fns: T) => void
-    : never;
-type ComposableCaseTestFn = _DistributeCaseTestFn<ComposableCaseFunctions>;
+const composableCases: [string, ...CF[]][] = [
+    [''],
+    ['+f1', composableFunction1],
+    ['+f1+f2', composableFunction1, composableFunction2],
+    ['+f1+f2+f3', composableFunction1, composableFunction2, composableFunction3],
+    ['+f1+f2+f3+f4', composableFunction1, composableFunction2, composableFunction3, composableFunction4],
+    ['+f1+f2+f3+f4+f5', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5],
+    ['+f1+f2+f3+f4+f5+f6', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6],
+    ['+f1+f2+f3+f4+f5+f6+f7', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7],
+    ['+f1+f2+f3+f4+f5+f6+f7+f8', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8],
+    ['+f1+f2+f3+f4+f5+f6+f7+f8+f9', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9],
+    ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10],
+    ['+f1+f2+f3+f4+f5+f6+f7+f8+f9+f10+f11', composableFunction1, composableFunction2, composableFunction3, composableFunction4, composableFunction5, composableFunction6, composableFunction7, composableFunction8, composableFunction9, composableFunction10, composableFunction11],
+]
 
 describe('pipe', () => {
     it('should exist', () => {
         expect(pipe).toBeFunction();
     });
 
-    // Inlining the test function without it's type being a union of the
-    // individual test cases causes a type error for some reason.
-    const testPipe: ComposableCaseTestFn = (
-        expected: string,
-        ...fns: ComposableCaseFunctions
-    ): void => {
-        expect(pipe('XXX', ...fns)).toBe('XXX' + expected);
-        expect(pipe('YYY', ...fns)).toBe('YYY' + expected);
-    };
-
-    each(composableCases).it('should apply %# function(s) ltr', testPipe);
+    each(composableCases).it(
+        'should apply %# function(s) ltr',
+        (expected: string, ...fns: CF[]) => {
+            // eslint-disable-next-line jest/no-standalone-expect
+            expect(pipe('XXX', ...fns)).toBe('XXX' + expected);
+            // eslint-disable-next-line jest/no-standalone-expect
+            expect(pipe('YYY', ...fns)).toBe('YYY' + expected);
+        },
+    );
 });
 
 describe('flow', () => {
@@ -102,18 +72,16 @@ describe('flow', () => {
         expect(flow).toBeFunction();
     });
 
-    // Inlining the test function without it's type being a union of the
-    // individual test cases causes a type error for some reason.
-    const testFlow: ComposableCaseTestFn = (
-        expected: string,
-        ...fns: ComposableCaseFunctions
-    ): void => {
-        const composed = flow(...fns);
-        expect(composed('XXX')).toBe('XXX' + expected);
-        expect(composed('YYY')).toBe('YYY' + expected);
-    };
-
-    each(composableCases).it('should ltr compose %# function(s)', testFlow);
+    each(composableCases).it(
+        'should ltr compose %# function(s)',
+        (expected: string, ...fns: CF[]) => {
+            const composed = flow(...fns);
+            // eslint-disable-next-line jest/no-standalone-expect
+            expect(composed('XXX')).toBe('XXX' + expected);
+            // eslint-disable-next-line jest/no-standalone-expect
+            expect(composed('YYY')).toBe('YYY' + expected);
+        },
+    );
 });
 
 describe('toArray', () => {
