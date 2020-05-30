@@ -902,7 +902,7 @@ describe('ScheduleAnimationFrameQueued', () => {
         expect(rafMock._getActiveCount()).toBe(0);
     });
 
-    it('should cancel queued callbacks when the main callback scheduled throws and allow more schedules', () => {
+    it('should cancel queued callbacks when the main callback scheduled throws and allow more schedules after', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
         const nested1 = jest.fn();
         const nested2 = jest.fn();
@@ -923,7 +923,7 @@ describe('ScheduleAnimationFrameQueued', () => {
         testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
     });
 
-    it('should cancel queued callbacks when a nested callback throws and allow more schedules', () => {
+    it('should cancel queued callbacks when a nested callback throws and allow more schedules after', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
         const nested1_1 = jest.fn();
         const nested1 = jest.fn(() => {
@@ -1514,7 +1514,7 @@ describe('ScheduleTimeoutQueued', () => {
         expect(jest.getTimerCount()).toBe(0);
     });
 
-    it('should cancel queued callbacks when the main callback scheduled throws and allow more schedules', () => {
+    it('should cancel queued callbacks when the main callback scheduled throws and allow more schedules after', () => {
         const delay = 51;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
         const nested1 = jest.fn();
@@ -1536,7 +1536,7 @@ describe('ScheduleTimeoutQueued', () => {
         testScheduleMultipleNestedCallbacks(scheduleTimeoutQueued, delay);
     });
 
-    it('should cancel queued callbacks when a nested callback throws and allow more schedules', () => {
+    it('should cancel queued callbacks when a nested callback throws and allow more schedules after', () => {
         const delay = 721;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
         const nested1_1 = jest.fn();
@@ -2040,7 +2040,7 @@ describe('ScheduleInterval', () => {
         expect(jest.getTimerCount()).toBe(0);
     });
 
-    it('should cancel queued callbacks when the main callback scheduled throws and allow more schedules', () => {
+    it('should cancel queued callbacks when the main callback scheduled throws and allow more schedules after', () => {
         const delay = 51;
         const scheduleInterval = ScheduleInterval(delay);
         const nested1 = jest.fn();
@@ -2062,7 +2062,7 @@ describe('ScheduleInterval', () => {
         testScheduleMultipleNestedCallbacks(scheduleInterval, delay);
     });
 
-    it('should cancel queued callbacks when a nested callback throws and allow more schedules', () => {
+    it('should cancel queued callbacks when a nested callback throws and allow more schedules after', () => {
         const delay = 721;
         const scheduleInterval = ScheduleInterval(delay);
         const nested1_1 = jest.fn();
