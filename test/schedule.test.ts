@@ -463,8 +463,490 @@ describe('scheduleAnimationFrame', () => {
 });
 
 describe('ScheduleAnimationFrameQueued', () => {
+    afterEach(jest.clearAllMocks);
+    afterEach(rafMock._resetQueue);
+
     it('should exist', () => {
         expect(ScheduleAnimationFrameQueued).toBeFunction();
+    });
+
+    it('should return a different instance each time', () => {
+        const sAFQ1 = ScheduleAnimationFrameQueued();
+        const sAFQ2 = ScheduleAnimationFrameQueued();
+        expect(sAFQ1).not.toBe(sAFQ2);
+    });
+
+    it('should use different queues for different instances', () => {
+        const scheduleAnimationFrameQueued1 = ScheduleAnimationFrameQueued();
+        const scheduleAnimationFrameQueued2 = ScheduleAnimationFrameQueued();
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        scheduleAnimationFrameQueued1(callback1);
+        scheduleAnimationFrameQueued2(callback2);
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(2);
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call the given callback immediately', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const callback = jest.fn();
+        scheduleAnimationFrameQueued(callback);
+        expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should call rAF', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        expect(rafMock).not.toHaveBeenCalled();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        scheduleAnimationFrameQueued(() => {});
+        expect(rafMock._getActiveCount()).toBe(1);
+        expect(rafMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call rAF when given an active disposable', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        scheduleAnimationFrameQueued(() => {}, new Disposable());
+        expect(rafMock._getActiveCount()).toBe(1);
+        expect(rafMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should do nothing when given a disposed disposable', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const disposed = new Disposable();
+        disposed.dispose();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        scheduleAnimationFrameQueued(() => {}, disposed);
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(rafMock).not.toHaveBeenCalled();
+    });
+
+    it('should call rAF with a function calling the given callback', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const callback = jest.fn();
+        scheduleAnimationFrameQueued(callback);
+        rafMock._flushQueue();
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback).toHaveBeenCalledWith(expect.any(Number));
+    });
+
+    it('should not call another rAF if only one callback is ever scheduled', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const callback = jest.fn();
+        scheduleAnimationFrameQueued(callback);
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        expect(rafMock._getActiveCount()).toBe(0);
+    });
+
+    it('should cancel the main scheduled callback when the given disposable is disposed', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const callback = jest.fn();
+        const disposable = new Disposable();
+        scheduleAnimationFrameQueued(callback, disposable);
+        disposable.dispose();
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should call two consecutively scheduled callbacks in separate rAF calls one after another', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        scheduleAnimationFrameQueued(callback1);
+        scheduleAnimationFrameQueued(callback2);
+        expect(rafMock._getActiveCount()).toBe(1);
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        rafMock._flushQueue();
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback1).toHaveBeenCalledWith(expect.any(Number));
+        expect(callback2).not.toHaveBeenCalled();
+        expect(rafMock._getActiveCount()).toBe(1);
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        // prettier-ignore
+        // eslint-disable-next-line max-len
+        rafMock._flushQueue();
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledWith(expect.any(Number));
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(rafMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should be able to cancel top level callbacks', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const disposable1 = new Disposable();
+        const disposable2 = new Disposable();
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        const callback3 = jest.fn();
+        const callback4 = jest.fn();
+        scheduleAnimationFrameQueued(callback1);
+        scheduleAnimationFrameQueued(callback2, disposable1);
+        scheduleAnimationFrameQueued(callback3);
+        disposable1.dispose();
+        scheduleAnimationFrameQueued(callback4, disposable2);
+        disposable2.dispose();
+        expect(rafMock._getActiveCount()).toBe(1);
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        rafMock._flushQueue();
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback1).toHaveBeenCalledWith(expect.any(Number));
+        expect(callback2).not.toHaveBeenCalled();
+        expect(callback3).not.toHaveBeenCalled();
+        expect(callback4).not.toHaveBeenCalled();
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(1);
+        rafMock._flushQueue();
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).not.toHaveBeenCalled();
+        expect(callback3).toHaveBeenCalledTimes(1);
+        expect(callback3).toHaveBeenCalledWith(expect.any(Number));
+        expect(callback4).not.toHaveBeenCalled();
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(0);
+    });
+
+    it('should cancel the rAF if all top level callbacks are cancelled', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const disposable = new Disposable();
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        const callback3 = jest.fn();
+        scheduleAnimationFrameQueued(callback1, disposable);
+        scheduleAnimationFrameQueued(callback2, disposable);
+        scheduleAnimationFrameQueued(callback3, disposable);
+        disposable.dispose();
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(callback1).toHaveBeenCalledTimes(0);
+        expect(callback2).toHaveBeenCalledTimes(0);
+        expect(callback3).toHaveBeenCalledTimes(0);
+    });
+
+    it('should be able to cancel the rAF after a callback has been called', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const disposable = new Disposable();
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        scheduleAnimationFrameQueued(callback1);
+        scheduleAnimationFrameQueued(callback2, disposable);
+        rafMock._flushQueue();
+        disposable.dispose();
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).not.toHaveBeenCalled();
+    });
+
+    it('should schedule nested callbacks one after another', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const nested = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleAnimationFrameQueued(nested);
+        });
+        scheduleAnimationFrameQueued(callback);
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(1);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested).not.toHaveBeenCalled();
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested).toHaveBeenCalledTimes(1);
+        expect(nested).toHaveBeenCalledWith(expect.any(Number));
+    });
+
+    function testScheduleMultipleNestedCallbacks(
+        scheduleAnimationFrameQueued: ScheduleFunction,
+    ): void {
+        const prev = ((rafMock as unknown) as jest.Mock).mock.calls.length;
+        const nested1_1 = jest.fn();
+        const nested1_2_1 = jest.fn();
+        const nested1_2 = jest.fn(() => {
+            scheduleAnimationFrameQueued(nested1_2_1);
+        });
+        const nested1 = jest.fn(() => {
+            scheduleAnimationFrameQueued(nested1_1);
+            scheduleAnimationFrameQueued(nested1_2);
+        });
+        const nested2 = jest.fn();
+        const nested3 = jest.fn();
+        const callback1 = jest.fn(() => {
+            scheduleAnimationFrameQueued(nested1);
+            scheduleAnimationFrameQueued(nested2);
+            scheduleAnimationFrameQueued(nested3);
+        });
+        const callback2 = jest.fn();
+        scheduleAnimationFrameQueued(callback1);
+        scheduleAnimationFrameQueued(callback2);
+        expect(rafMock).toHaveBeenCalledTimes(prev + 1);
+        expect(rafMock._getActiveCount()).toBe(1);
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(prev + 2);
+        expect(rafMock._getActiveCount()).toBe(1);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback1).toHaveBeenCalledWith(expect.any(Number));
+        expect(callback2).not.toHaveBeenCalled();
+        expect(nested1).not.toHaveBeenCalled();
+        expect(nested2).not.toHaveBeenCalled();
+        expect(nested3).not.toHaveBeenCalled();
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(prev + 3);
+        expect(rafMock._getActiveCount()).toBe(1);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledWith(expect.any(Number));
+        expect(nested1).not.toHaveBeenCalled();
+        expect(nested2).not.toHaveBeenCalled();
+        expect(nested3).not.toHaveBeenCalled();
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(prev + 4);
+        expect(rafMock._getActiveCount()).toBe(1);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledWith(expect.any(Number));
+        for (const c of [nested2, nested3, nested1_1, nested1_2]) {
+            expect(c).not.toHaveBeenCalled();
+        }
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(prev + 5);
+        expect(rafMock._getActiveCount()).toBe(1);
+        for (const c of [callback1, callback2, nested1, nested2]) {
+            expect(c).toHaveBeenCalledTimes(1);
+        }
+        expect(nested2).toHaveBeenCalledWith(expect.any(Number));
+        expect(nested3).not.toHaveBeenCalled();
+        expect(nested1_1).not.toHaveBeenCalled();
+        expect(nested1_2).not.toHaveBeenCalled();
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(prev + 6);
+        expect(rafMock._getActiveCount()).toBe(1);
+        for (const c of [callback1, callback2, nested1, nested2, nested3]) {
+            expect(c).toHaveBeenCalledTimes(1);
+        }
+        expect(nested3).toHaveBeenCalledWith(expect.any(Number));
+        expect(nested1_1).not.toHaveBeenCalled();
+        expect(nested1_2).not.toHaveBeenCalled();
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(prev + 7);
+        expect(rafMock._getActiveCount()).toBe(1);
+        // prettier-ignore
+        // eslint-disable-next-line max-len
+        for (const c of [callback1, callback2, nested1, nested2, nested3, nested1_1]) {
+            expect(c).toHaveBeenCalledTimes(1);
+        }
+        expect(nested1_1).toHaveBeenCalledWith(expect.any(Number));
+        expect(nested1_2).not.toHaveBeenCalled();
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(prev + 8);
+        expect(rafMock._getActiveCount()).toBe(1);
+        // prettier-ignore
+        // eslint-disable-next-line max-len
+        for (const c of [callback1, callback2, nested1, nested2, nested3, nested1_1, nested1_2]) {
+            expect(c).toHaveBeenCalledTimes(1)
+        }
+        expect(nested1_2).toHaveBeenCalledWith(expect.any(Number));
+        expect(nested1_2_1).not.toHaveBeenCalled();
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(prev + 8);
+        expect(rafMock._getActiveCount()).toBe(0);
+        // prettier-ignore
+        // eslint-disable-next-line max-len
+        for (const c of [callback1, callback2, nested1, nested2, nested3, nested1_1, nested1_2, nested1_2_1]) {
+            expect(c).toHaveBeenCalledTimes(1)
+        }
+        expect(nested1_2_1).toHaveBeenCalledWith(expect.any(Number));
+    }
+
+    // eslint-disable-next-line jest/expect-expect
+    it('should schedule multiple nested callbacks in a queue one after another', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+    });
+
+    // eslint-disable-next-line jest/expect-expect
+    it('should be able to nested schedule multiple times', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+    });
+
+    // eslint-disable-next-line jest/expect-expect
+    it('should schedule again even if the previous one was cancelled', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const disposable = new Disposable();
+        const callback1 = jest.fn();
+        const callback2 = jest.fn();
+        scheduleAnimationFrameQueued(callback1);
+        scheduleAnimationFrameQueued(callback2, disposable);
+        rafMock._flushQueue();
+        disposable.dispose();
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+    });
+
+    it('should not call rAF another time if the queue is flushed then scheduled synchronously', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const disposable = new Disposable();
+        const nested = jest.fn();
+        const callback1 = jest.fn(() => {
+            disposable.dispose();
+            scheduleAnimationFrameQueued(nested);
+        });
+        const callback2 = jest.fn();
+        scheduleAnimationFrameQueued(callback1);
+        scheduleAnimationFrameQueued(callback2, disposable);
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(1);
+        expect(nested).not.toHaveBeenCalled();
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(callback1).toHaveBeenCalledTimes(1);
+        expect(callback2).not.toHaveBeenCalled();
+        expect(nested).toHaveBeenCalledTimes(1);
+        expect(nested).toHaveBeenCalledWith(expect.any(Number));
+    });
+
+    it('should do nothing when cancelling after a callback has been called', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const disposable = new Disposable();
+        const callback = jest.fn();
+        scheduleAnimationFrameQueued(callback, disposable);
+        rafMock._flushQueue();
+        disposable.dispose();
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should only cancel the nested callback whose subscription has been disposed', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const disposable = new Disposable();
+        const nested1 = jest.fn();
+        const nested2 = jest.fn();
+        const nested3 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleAnimationFrameQueued(nested1);
+            scheduleAnimationFrameQueued(nested2, disposable);
+            scheduleAnimationFrameQueued(nested3);
+            disposable.dispose();
+        });
+        scheduleAnimationFrameQueued(callback);
+        rafMock._flushQueue();
+        rafMock._flushQueue();
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(3);
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(nested2).not.toHaveBeenCalled();
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledWith(expect.any(Number));
+        expect(nested3).toHaveBeenCalledTimes(1);
+        expect(nested3).toHaveBeenCalledWith(expect.any(Number));
+    });
+
+    it('should not schedule a nested callback when given a disposed disposable', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const disposable = new Disposable();
+        disposable.dispose();
+        const nested = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleAnimationFrameQueued(nested, disposable);
+        });
+        scheduleAnimationFrameQueued(callback);
+        rafMock._flushQueue();
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        expect(rafMock._getActiveCount()).toBe(0);
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested).not.toHaveBeenCalled();
+    });
+
+    it('should throw the error thrown by the main callback scheduled', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const throws = jest.fn(throw_('foo'));
+        scheduleAnimationFrameQueued(throws);
+        expect(rafMock._flushQueue).toThrow('foo');
+        expect(throws).toHaveBeenCalledTimes(1);
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        expect(rafMock._getActiveCount()).toBe(0);
+    });
+
+    it('should throw the error thrown by a nested callback', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const throws = jest.fn(throw_('foo'));
+        const callback = jest.fn(() => {
+            scheduleAnimationFrameQueued(throws);
+        });
+        scheduleAnimationFrameQueued(callback);
+        rafMock._flushQueue();
+        expect(rafMock._flushQueue).toThrow('foo');
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(throws).toHaveBeenCalledTimes(1);
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(0);
+    });
+
+    it('should cancel queued callbacks when the main callback scheduled throws and allow more schedules', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const nested1 = jest.fn();
+        const nested2 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleAnimationFrameQueued(nested1);
+            scheduleAnimationFrameQueued(nested2);
+            throw_('foo')();
+        });
+        scheduleAnimationFrameQueued(callback);
+        expect(() => rafMock._flushQueue()).toThrow('foo');
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).not.toHaveBeenCalled();
+        expect(nested2).not.toHaveBeenCalled();
+        expect(rafMock).toHaveBeenCalledTimes(1);
+        expect(rafMock._getActiveCount()).toBe(0);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+    });
+
+    it('should cancel queued callbacks when a nested callback throws and allow more schedules', () => {
+        const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
+        const nested1_1 = jest.fn();
+        const nested1 = jest.fn(() => {
+            scheduleAnimationFrameQueued(nested1_1);
+            throw_('foo')();
+        });
+        const nested2 = jest.fn();
+        const callback = jest.fn(() => {
+            scheduleAnimationFrameQueued(nested1);
+            scheduleAnimationFrameQueued(nested2);
+        });
+        scheduleAnimationFrameQueued(callback);
+        rafMock._flushQueue();
+        expect(() => rafMock._flushQueue()).toThrow('foo');
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(nested1).toHaveBeenCalledTimes(1);
+        expect(nested1_1).not.toHaveBeenCalled();
+        expect(nested2).not.toHaveBeenCalled();
+        expect(rafMock).toHaveBeenCalledTimes(2);
+        expect(rafMock._getActiveCount()).toBe(0);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
+        testScheduleMultipleNestedCallbacks(scheduleAnimationFrameQueued);
     });
 });
 
