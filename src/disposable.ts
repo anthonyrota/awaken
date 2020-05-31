@@ -9,6 +9,7 @@ export interface Teardown {
 
 /**
  * Disposes the given value. If it is a teardown then it will call the teardown.
+ * @param value The Disposable or Teardown to dispose.
  */
 export function dispose(value: Disposable | Teardown): void {
     if (isDisposable(value)) {
@@ -19,14 +20,18 @@ export function dispose(value: Disposable | Teardown): void {
 }
 
 /**
- * Tests to see if the value is a `Disposable`.
+ * Tests to see if the value is a Disposable.
+ * @param value The value to test.
+ * @returns True if the value is a Disposable, else false.
  */
 export function isDisposable(value: unknown): value is Disposable {
     return value instanceof Disposable;
 }
 
 /**
- * Constructs a `Disposable` from a single `Teardown` value.
+ * Constructs a Disposable from a single Teardown value.
+ * @param fn The Teardown to add as a child to the returned Disposable.
+ * @returns The constructed Disposable, containing the given fn as a child.
  */
 export function fromTeardown(fn: Teardown): Disposable {
     return new Disposable([fn]);
@@ -34,7 +39,7 @@ export function fromTeardown(fn: Teardown): Disposable {
 
 /**
  * Represents a resource which can be disposed of using the `dispose` method.
- * Child `Disposables/Teardowns` can be linked/unlinked to a Disposable
+ * Child `Disposables` / `Teardowns` can be linked/unlinked to a Disposable
  * instance through the `add` and `remove` methods, and when the instance is
  * disposed of, all of it's children will also be disposed of.
  */
@@ -42,7 +47,7 @@ export class Disposable {
     private __children: (Disposable | Teardown)[] | null;
 
     /**
-     * @param children A list/iterable of `Disposables/Teardowns` to be
+     * @param children A list/iterable of `Disposables` / `Teardowns` to be
      *     initially linked to this instance. Note: if the value given is an
      *     array, the array will be mutated inside this instance.
      */
@@ -54,6 +59,7 @@ export class Disposable {
      * A readonly boolean flag representing whether this instance is still
      * active. If the value is false, then the instance has already been
      * disposed.
+     * @returns Whether this instance is still active.
      */
     public get active(): boolean {
         return !!this.__children;
@@ -95,8 +101,8 @@ export class Disposable {
     }
 
     /**
-     * Disposes this instance, as well as all the linked child
-     * `Disposables/Teardowns`.
+     * Disposes this instance, as well as all the linked child `Disposables` /
+     * `Teardowns`.
      */
     public dispose(): void {
         const children = this.__children;
@@ -128,6 +134,9 @@ interface _DisposalError extends Error {
 }
 
 export interface DisposalError extends _DisposalError {
+    /**
+     * The flattened list of errors thrown during disposable.
+     */
     readonly errors: unknown[];
 }
 
