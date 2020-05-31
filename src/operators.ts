@@ -130,7 +130,7 @@ export function reduce<T, R>(
 /**
  * Calls the shouldContinue function for each Push event of the given source.
  * The returned source will emit an End event instead of the received Push event
- * when the give shouldContinue function returns false.
+ * when the give shouldContinue function returns a falsy value.
  * @param shouldContinue A function that accepts a value and an index. The
  *     takeWhile method calls this function one time for each Push event of the
  *     given source.
@@ -139,17 +139,17 @@ export function takeWhile<T, S extends T>(
     shouldContinue: (value: T, index: number) => value is S,
 ): Operator<T, S>;
 export function takeWhile<T>(
-    shouldContinue: (value: T, index: number) => boolean,
+    shouldContinue: (value: T, index: number) => unknown,
 ): Operator<T, T>;
 export function takeWhile<T>(
-    shouldContinue: (value: T, index: number) => boolean,
+    shouldContinue: (value: T, index: number) => unknown,
 ): Operator<T, T> {
     return (source) =>
         Source((sink, sub) => {
             let idx = 0;
             source((event) => {
                 if (event.type === EventType.Push) {
-                    let keepGoing: boolean;
+                    let keepGoing: unknown;
                     try {
                         keepGoing = shouldContinue(event.value, idx++);
                     } catch (error) {
