@@ -62,6 +62,8 @@ export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T {
 
 /**
  * Converts the given value into an array.
+ * @param items The values to convert into an array.
+ * @returns The converted array.
  */
 export function toArray<T>(items: Iterable<T> | ArrayLike<T> | T[]): T[] {
     if (Array.isArray(items)) {
@@ -77,6 +79,8 @@ export function toArray<T>(items: Iterable<T> | ArrayLike<T> | T[]): T[] {
 
 /**
  * Removes the first instance of the value from the array.
+ * @param array The array to remove the value from.
+ * @param item The value to remove from the array.
  */
 export function removeOnce<T>(array: ArrayLike<T>, item: T): void {
     const index = Array.prototype.indexOf.call(array, item);
@@ -88,6 +92,9 @@ export function removeOnce<T>(array: ArrayLike<T>, item: T): void {
 /**
  * Returns the last item from the given array, or `undefined` if the array has
  * no items.
+ * @param array The array to get the last item from.
+ * @returns The last item from the given array, or `undefined` if the array has
+ *     no items.
  */
 export function getLast<T>(array: ArrayLike<T>): T | undefined {
     return array.length > 0 ? array[array.length - 1] : undefined;
@@ -95,6 +102,8 @@ export function getLast<T>(array: ArrayLike<T>): T | undefined {
 
 /**
  * Disposable-based alternative to built-in `requestAnimationFrame`.
+ * @param callback The callback to schedule.
+ * @param subscription If this is disposed then the request will be cancelled.
  */
 export function requestAnimationFrame(
     callback: FrameRequestCallback,
@@ -113,6 +122,10 @@ export function requestAnimationFrame(
 
 /**
  * Disposable-based alternative to built-in `setTimeout`.
+ * @param callback The callback to schedule.
+ * @param delayMs The amount of delay.
+ * @param subscription If this is disposed then the request will be cancelled.
+ * @param args The arguments to send to the callback.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setTimeoutImplementation<T extends any[]>(
@@ -136,6 +149,10 @@ export { setTimeoutImplementation as setTimeout };
 
 /**
  * Disposable-based alternative to built-in `setInterval`.
+ * @param callback The callback to schedule.
+ * @param delayMs The amount of delay.
+ * @param subscription If this is disposed then the request will be cancelled.
+ * @param args The arguments to send to the callback.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setIntervalImplementation<T extends any[]>(
@@ -159,6 +176,7 @@ export { setIntervalImplementation as setInterval };
 
 /**
  * Reports the given error asynchronously.
+ * @param error The error to report.
  */
 export function asyncReportError(error: unknown): void {
     setTimeout(() => {
@@ -168,6 +186,7 @@ export function asyncReportError(error: unknown): void {
 
 /**
  * Returns the most suitable iterator symbol.
+ * @returns Symbol.iterator if it exists, else a string substitute.
  */
 export function get$$iterator(): symbol | '@@iterator' {
     if (
@@ -183,6 +202,7 @@ export function get$$iterator(): symbol | '@@iterator' {
 
 /**
  * Returns `Symbol.asyncIterator` if it is defined.
+ * @returns Symbol.asyncIterator if it exists, else undefined.
  */
 export function get$$asyncIterator(): symbol | void {
     if (
@@ -196,6 +216,7 @@ export function get$$asyncIterator(): symbol | void {
 
 /**
  * Checks whether the given value is iterable.
+ * @returns Whether the given value is an iterable.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isIterable(value: unknown): value is Iterable<unknown> {
@@ -210,6 +231,7 @@ export function isIterable(value: unknown): value is Iterable<unknown> {
 
 /**
  * Checks whether the given value is an AsyncIterable.
+ * @returns Whether the given value is an AsyncIterable.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isAsyncIterable(
@@ -230,6 +252,7 @@ export function isAsyncIterable(
 /**
  * Checks whether the given value is PromiseLike, meaning it has a `then`
  * function defined.
+ * @returns Whether the given value is PromiseLike.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
