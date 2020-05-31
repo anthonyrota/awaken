@@ -123,7 +123,7 @@ export function Source<T>(
 /**
  * Higher order function which takes a sink and a subscription, and returns
  * another function which receives a source that will be subscribed to using the
- * given sink and subscription. This is useful, for example, in {@link pipe}
+ * given sink and subscription. This is useful, for example, at the end of pipe
  * calls.
  * @param sink The sink to be given to the received source.
  * @param subscription The subscription to be given to the received source.
