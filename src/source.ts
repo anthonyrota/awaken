@@ -127,7 +127,7 @@ export function Source<T>(
  * Higher order function which takes a sink and a subscription, and returns
  * another function which receives a source that will be subscribed to using the
  * given sink and subscription. This is useful, for example, at the end of pipe
- * calls.
+ * calls in order to subscribe to the transformed source.
  * @param sink The sink to be given to the received source.
  * @param subscription The subscription to be given to the received source.
  * @returns The higher order function which takes a source to subscribe to.
