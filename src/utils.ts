@@ -6,54 +6,118 @@ function _call<T>(x: T, f: (x: T) => T): T {
     return f(x);
 }
 
+/**
+ * Calls the value accumulatively against all of the functions given
+ * left-to-right. The result of calling a function with the accumulated value
+ * will be given to the next function, and the result of the last function will
+ * be returned. If there are no functions given, the given value will be
+ * returned.
+ * @returns The result of accumulatively calling the given value against all of
+ *     the functions given left-to-right.
+ */
 export function pipe<T>(x: T): T;
-export function pipe<T, R>(x: T, f1: (x: T) => R): R;
-export function pipe<T, A, R>(x: T, f1: (x: T) => A, f2: (x: A) => R): R;
 /* eslint-disable max-len */
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
+export function pipe<T, R>(x: T, f1: (x: T) => R): R;
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
+export function pipe<T, A, R>(x: T, f1: (x: T) => A, f2: (x: A) => R): R;
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
 // prettier-ignore
 export function pipe<T, A, B, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => R): R;
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
 // prettier-ignore
 export function pipe<T, A, B, C, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => R): R;
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
 // prettier-ignore
 export function pipe<T, A, B, C, D, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => R): R;
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
 // prettier-ignore
 export function pipe<T, A, B, C, D, E, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => R): R;
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
 // prettier-ignore
 export function pipe<T, A, B, C, D, E, F, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => R): R;
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
 // prettier-ignore
 export function pipe<T, A, B, C, D, E, F, G, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => R): R;
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
 // prettier-ignore
 export function pipe<T, A, B, C, D, E, F, G, H, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R): R;
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
 // prettier-ignore
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pipe<T, A, B, C, D, E, F, G, H, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R, ...funcs: Array<(x: any) => any>): R;
+/** Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
+ * @returns The result of accumulatively calling the given value against all of the functions given left-to-right. */
 /* eslint-enable max-len */
 export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T;
 export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T {
     return fns.reduce(_call, x);
 }
 
+/**
+ * Combines all of the functions given into a single function. This function
+ * takes a value and will accumulatively call it against all of the given
+ * functions left-to-right. The result of calling a function with the
+ * accumulated value will be given to the next function, and the result of the
+ * last function will be returned. If there are no functions given, then the
+ * combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of
+ *     accumulatively calling the value against all of the functions given
+ *     left-to-right.
+ */
 export function flow(): <T>(x: T) => T;
-export function flow<T, R>(f1: (x: T) => R): (x: T) => R;
-export function flow<T, A, R>(f1: (x: T) => A, f2: (x: A) => R): (x: T) => R;
 /* eslint-disable max-len */
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
+export function flow<T, R>(f1: (x: T) => R): (x: T) => R;
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
+export function flow<T, A, R>(f1: (x: T) => A, f2: (x: A) => R): (x: T) => R;
 // prettier-ignore
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
 export function flow<T, A, B, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => R): (x: T) => R;
 // prettier-ignore
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
 export function flow<T, A, B, C, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => R): (x: T) => R;
 // prettier-ignore
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
 export function flow<T, A, B, C, D, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => R): (x: T) => R;
 // prettier-ignore
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
 export function flow<T, A, B, C, D, E, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => R): (x: T) => R;
 // prettier-ignore
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
 export function flow<T, A, B, C, D, E, F, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => R): (x: T) => R;
 // prettier-ignore
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
 export function flow<T, A, B, C, D, E, F, G, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => R): (x: T) => R;
 // prettier-ignore
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
 export function flow<T, A, B, C, D, E, F, G, H, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R): (x: T) => R;
 // prettier-ignore
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function flow<T, A, B, C, D, E, F, G, H, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R, ...funcs: Array<(x: any) => any>): (x: T) => R;
+/** Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
+ * @returns A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right. */
 /* eslint-enable max-len */
 export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T;
 export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T {
