@@ -3,7 +3,7 @@ import { Source, Push, End } from './source';
 /**
  * Creates a Source from the given array/array-like. The values of the array
  * will be synchronously emitted by the created source upon each susbcription.
- * @param array The array/array-like to take the values from.
+ * @param array The array/array-like to iterate over.
  * @returns The created source.
  */
 export function fromArray<T>(array: ArrayLike<T>): Source<T> {
