@@ -35,6 +35,7 @@ export type Event<T> = Push<T> | Throw | End;
 /**
  * Creates a Push event.
  * @param value The value to send.
+ * @returns The created Push event.
  */
 export function Push<T>(value: T): Push<T> {
     return { type: EventType.Push, value };
@@ -43,6 +44,7 @@ export function Push<T>(value: T): Push<T> {
 /**
  * Creates a Throw event.
  * @param error The error to be thrown.
+ * @returns The created Throw event.
  */
 export function Throw(error: unknown): Throw {
     return { type: EventType.Throw, error };
@@ -79,6 +81,7 @@ export interface Source<T> {
  *     events and does not have to be called with a sourceSubscription. When the
  *     given subscription is disposed, the safeSink will ignore all events of
  *     the events it receives.
+ * @returns The created source.
  */
 export function Source<T>(
     base: (
@@ -127,6 +130,7 @@ export function Source<T>(
  * calls.
  * @param sink The sink to be given to the received source.
  * @param subscription The subscription to be given to the received source.
+ * @returns The higher order function which takes a source to subscribe to.
  */
 export function subscribe<T>(
     sink: Sink<T>,
