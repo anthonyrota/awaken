@@ -43,8 +43,8 @@ export class Disposable {
 
     /**
      * @param children A list/iterable of `Disposables/Teardowns` to be
-     * initially linked to this instance. Note: if the value given is an array,
-     * the array will be mutated inside this instance.
+     *     initially linked to this instance. Note: if the value given is an
+     *     array, the array will be mutated inside this instance.
      */
     constructor(children: Iterable<Disposable | Teardown> = []) {
         this.__children = toArray(children);
