@@ -130,7 +130,7 @@ export function reduce<T, R>(
 /**
  * Calls the shouldContinue function for each Push event of the given source.
  * The returned source will emit an End event instead of the received Push event
- * when the give shouldContinue function returns a falsy value.
+ * when the given shouldContinue function returns a falsy value.
  * @param shouldContinue A function that accepts a value and an index. The
  *     takeWhile method calls this function one time for each Push event of the
  *     given source.
