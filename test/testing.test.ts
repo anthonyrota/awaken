@@ -71,6 +71,6 @@ describe('Unsubscribe', () => {
     });
 
     it('should have type property equal to UnsubscribeType', () => {
-        expect(Unsubscribe).toEqual({ type: Unsubscribe });
+        expect(Unsubscribe).toEqual({ type: UnsubscribeType });
     });
 });
