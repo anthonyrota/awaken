@@ -68,7 +68,6 @@ export interface Sink<T> {
  * when the given subscription is disposed.
  */
 export interface Source<T> {
-    readonly '': unique symbol;
     (sink: Sink<T>, subscription?: Disposable): void;
 }
 
@@ -120,7 +119,7 @@ export function Source<T>(
         }
     }
 
-    return safeSource as Source<T>;
+    return safeSource;
 }
 
 /**
