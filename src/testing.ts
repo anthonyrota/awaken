@@ -1,44 +1,231 @@
-import { Event, EventType } from './source';
+import { EventType, Event, Push, Throw, End, Source } from './source';
+import { Subject } from './subject';
+import { Disposable } from './disposable';
 
-export type DelayType = 3;
-export type Delay = { type: DelayType; ms: number };
-export const DelayType: DelayType = 3;
-export function Delay(ms = 1): Delay {
-    return { type: DelayType, ms };
+interface TestScheduleFunction {
+    (
+        callback: () => void,
+        delayFrames: number,
+        subscription?: Disposable,
+    ): void;
 }
 
-export type SubscribeType = 4;
-export type Subscribe = { type: SubscribeType };
-export const SubscribeType: SubscribeType = 4;
-export const Subscribe: Subscribe = { type: SubscribeType };
-
-export type UnsubscribeType = 5;
-export type Unsubscribe = { type: UnsubscribeType };
-export const UnsubscribeType: UnsubscribeType = 5;
-export const Unsubscribe: Unsubscribe = { type: UnsubscribeType };
-
-export type TestSourceEventType = EventType | DelayType;
-export type TestSourceEvent<T> = Event<T> | Delay;
-
-export type TestSubscriptionEventType = DelayType | SubscribeType |UnsubscribeType;
-export type TestSubscriptionEvent =
-    | Delay
-    | Subscribe
-    | Unsubscribe;
-
-export type
-interface TestSource {
-    subscriptions: TestSubscriptions
+export interface TestSchedule extends TestScheduleFunction {
+    readonly currentFrame: number;
+    readonly flush: () => void;
 }
 
-export function SharedTestSource<T>(...events: Test_SourceEvent<T>): 
+interface TestScheduleAction {
+    readonly callback: () => void;
+    readonly executionFrame: number;
+    shouldCall: boolean;
+}
 
-export function assertSourceEvents<T>(
-    source: Source<T>,
-    events: Test_SourceEvent<T>,
-): void {}
+export function TestSchedule(): TestSchedule {
+    let actions: TestScheduleAction[] = [];
+    let currentFrame = 0;
 
-export function assertSourceSubscriptions(
+    function flush(): void {
+        let action = actions.shift();
+        while (action) {
+            currentFrame = action.executionFrame;
+            const { callback, shouldCall } = action;
+            if (shouldCall) {
+                try {
+                    callback();
+                } catch (error) {
+                    actions = [];
+                    currentFrame = 0;
+                    throw error;
+                }
+            }
+            action = actions.shift();
+        }
+    }
+
+    const testSchedule: TestScheduleFunction = (
+        callback,
+        delayFrames,
+        subscription,
+    ) => {
+        const executionFrame = currentFrame + delayFrames;
+        const index = getActionInsertIndex(actions, executionFrame);
+        const action: TestScheduleAction = {
+            callback,
+            executionFrame,
+            shouldCall: true,
+        };
+
+        actions.splice(index, 0, action);
+        subscription?.add(() => {
+            action.shouldCall = false;
+        });
+    };
+
+    Object.defineProperty(testSchedule, 'currentFrame', {
+        enumerable: true,
+        get: (): number => currentFrame,
+    });
+
+    Object.defineProperty(testSchedule, 'flush', {
+        value: flush,
+    });
+
+    return testSchedule as TestSchedule;
+}
+
+function getActionInsertIndex(
+    actions: TestScheduleAction[],
+    frame: number,
+): number {
+    const len = actions.length;
+    let low = 0;
+    let high: number = len - 1;
+
+    while (low <= high) {
+        let mid: number = ((low + high) / 2) | 0;
+
+        if (actions[mid].executionFrame < frame) {
+            low = mid + 1;
+        } else if (actions[mid].executionFrame > frame) {
+            high = mid - 1;
+        } else {
+            while (mid + 1 < len && actions[mid + 1].executionFrame === frame) {
+                mid++;
+            }
+            return mid + 1;
+        }
+    }
+
+    if (high < 0) {
+        return 0; // frame < first frame
+    } else if (low > len - 1) {
+        return len; // frame >= last frame
+    } else {
+        return low < high ? low + 1 : high + 1;
+    }
+}
+
+export interface TestSubscriptionInfo {
+    subscriptionStartFrame: number;
+    subscriptionEndFrame: number;
+}
+
+function createTestSubscriptionInfo(
+    testSchedule: TestSchedule,
+    subscription: Disposable,
+): TestSubscriptionInfo {
+    const info = {
+        subscriptionStartFrame: testSchedule.currentFrame,
+        subscriptionEndFrame: Infinity,
+    };
+
+    subscription.add(() => {
+        info.subscriptionEndFrame = testSchedule.currentFrame;
+    });
+
+    return info;
+}
+
+export type TestSourceSubscriptions = ReadonlyArray<
+    Readonly<TestSubscriptionInfo>
+>;
+
+interface HasFrame {
+    readonly frame: number;
+}
+
+export type TestSourceEvent<T> = Event<T> & HasFrame;
+
+export function P<T>(value: T, frame: number): Push<T> & HasFrame {
+    return { type: EventType.Push, value, frame };
+}
+
+export function T(error: unknown, frame: number): Throw & HasFrame {
+    return { type: EventType.Throw, error, frame };
+}
+
+export function E(frame: number): End & HasFrame {
+    return { type: EventType.End, frame };
+}
+
+export interface TestSource<T> extends Source<T> {
+    readonly subscriptions: TestSourceSubscriptions;
+}
+
+export function TestSource<T>(
+    events: TestSourceEvent<T>[],
+    testSchedule: TestSchedule,
+): TestSource<T> {
+    const subscriptions: TestSubscriptionInfo[] = [];
+
+    const base = Source<T>((sink, sub) => {
+        subscriptions.push(createTestSubscriptionInfo(testSchedule, sub));
+        events.forEach((event) => {
+            testSchedule(() => sink(event), event.frame, sub);
+        });
+    });
+
+    Object.defineProperty(base, 'subscriptions', {
+        enumerable: true,
+        get: (): TestSourceSubscriptions => subscriptions,
+    });
+
+    return base as TestSource<T>;
+}
+
+export interface SharedTestSource<T> extends TestSource<T> {
+    readonly init: () => void;
+}
+
+export function SharedTestSource<T>(
+    events: TestSourceEvent<T>[],
+    testSchedule: TestSchedule,
+): SharedTestSource<T> {
+    const subscriptions: TestSubscriptionInfo[] = [];
+    const subject = Subject<T>();
+
+    const base = Source<T>((sink, sub) => {
+        subscriptions.push(createTestSubscriptionInfo(testSchedule, sub));
+        subject(sink, sub);
+    });
+
+    Object.defineProperty(base, 'subscriptions', {
+        enumerable: true,
+        get: (): TestSourceSubscriptions => subscriptions,
+    });
+
+    Object.defineProperty(base, 'init', {
+        value: (): void => {
+            events.forEach((event) => {
+                testSchedule(() => subject(event), event.frame);
+            });
+        },
+    });
+
+    return base as SharedTestSource<T>;
+}
+
+export function scheduleSourceExecution<T>(
+    testSchedule: TestSchedule,
     source: Source<T>,
-    events: Test_SubscriptionEvent,
-): void {}
+    subscriptionInfo: TestSubscriptionInfo = {
+        subscriptionStartFrame: 0,
+        subscriptionEndFrame: Infinity,
+    },
+): { events: Event<T>[] } {
+    const subscription = new Disposable();
+    const events: Event<T>[] = [];
+
+    testSchedule(() => {
+        source((event) => {
+            events.push(event);
+        }, subscription);
+    }, subscriptionInfo.subscriptionStartFrame);
+
+    testSchedule(() => {
+        subscription.dispose();
+    }, subscriptionInfo.subscriptionEndFrame);
+
+    return { events };
+}
