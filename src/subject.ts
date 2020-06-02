@@ -1,6 +1,6 @@
 import { Disposable } from './disposable';
 import { removeOnce, asyncReportError } from './utils';
-import { Event, EventType, Throw, End, Source, Sink } from './source';
+import { EventType, Event, Throw, End, Source, Sink } from './source';
 import isFunction = require('lodash.isfunction');
 
 export interface Subject<T> extends Source<T> {
@@ -91,7 +91,7 @@ export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
     return base;
 }
 
-export function Subject<T>(subscription: Disposable): Subject<T> {
+export function Subject<T>(subscription?: Disposable): Subject<T> {
     const base: Subject<T> = SubjectBase<T>(subscription);
     let finalEvent: Throw | End | null | undefined;
 
