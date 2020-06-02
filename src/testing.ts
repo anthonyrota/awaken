@@ -84,10 +84,11 @@ function getActionInsertIndex(
 
     while (low <= high) {
         let mid: number = ((low + high) / 2) | 0;
+        const { executionFrame } = actions[mid];
 
-        if (actions[mid].executionFrame < frame) {
+        if (executionFrame < frame) {
             low = mid + 1;
-        } else if (actions[mid].executionFrame > frame) {
+        } else if (executionFrame > frame) {
             high = mid - 1;
         } else {
             while (mid + 1 < len && actions[mid + 1].executionFrame === frame) {
