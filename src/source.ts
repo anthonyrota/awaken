@@ -108,6 +108,7 @@ export function Source<T>(
             try {
                 sink(event, subscription);
             } catch (error) {
+                downstreamSubscription.dispose();
                 asyncReportError(error);
             }
         }
