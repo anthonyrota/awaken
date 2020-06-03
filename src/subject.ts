@@ -21,7 +21,7 @@ interface EventQueueItem<T> {
 export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
     let sinks: SinkInfo<T>[] | null = [];
     let distributingEvent = false;
-    let eventsQueue: EventQueueItem<T>[] = [];
+    const eventsQueue: EventQueueItem<T>[] = [];
 
     function base(event: Event<T>): void;
     function base(sink: Sink<T>, subscription?: Disposable): void;
@@ -72,13 +72,14 @@ export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
 
             distributingEvent = true;
             while (queueItem) {
-                const { event, sinks } = queueItem;
-                sinks.forEach(({ sink, subscription }) => {
+                const { event, sinks: queueItemSinks } = queueItem;
+                queueItemSinks.forEach(({ sink, subscription }) => {
                     try {
                         sink(event, subscription);
                     } catch (error) {
                         distributingEvent = false;
-                        eventsQueue = [];
+                        sinks = null;
+                        eventsQueue.length = 0;
                         throw error;
                     }
                 });
