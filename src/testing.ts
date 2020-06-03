@@ -132,21 +132,21 @@ export type TestSourceSubscriptions = ReadonlyArray<
     Readonly<TestSubscriptionInfo>
 >;
 
-interface HasFrame {
+interface WithFrameProperty {
     readonly frame: number;
 }
 
-export type TestSourceEvent<T> = Event<T> & HasFrame;
+export type TestSourceEvent<T> = Event<T> & WithFrameProperty;
 
-export function P<T>(value: T, frame: number): Push<T> & HasFrame {
+export function P<T>(value: T, frame: number): Push<T> & WithFrameProperty {
     return { type: EventType.Push, value, frame };
 }
 
-export function T(error: unknown, frame: number): Throw & HasFrame {
+export function T(error: unknown, frame: number): Throw & WithFrameProperty {
     return { type: EventType.Throw, error, frame };
 }
 
-export function E(frame: number): End & HasFrame {
+export function E(frame: number): End & WithFrameProperty {
     return { type: EventType.End, frame };
 }
 
