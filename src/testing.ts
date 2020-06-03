@@ -112,14 +112,21 @@ export interface TestSubscriptionInfo {
     subscriptionEndFrame: number;
 }
 
+export function TestSubscriptionInfo(
+    subscriptionStartFrame: number,
+    subscriptionEndFrame: number,
+): TestSubscriptionInfo {
+    return { subscriptionStartFrame, subscriptionEndFrame };
+}
+
 function createTestSubscriptionInfo(
     testSchedule: TestSchedule,
     subscription?: Disposable,
 ): TestSubscriptionInfo {
-    const info: TestSubscriptionInfo = {
-        subscriptionStartFrame: testSchedule.currentFrame,
-        subscriptionEndFrame: Infinity,
-    };
+    const info: TestSubscriptionInfo = TestSubscriptionInfo(
+        testSchedule.currentFrame,
+        Infinity,
+    );
 
     subscription?.add(() => {
         info.subscriptionEndFrame = testSchedule.currentFrame;
