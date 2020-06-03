@@ -119,7 +119,7 @@ export function TestSubscriptionInfo(
     return { subscriptionStartFrame, subscriptionEndFrame };
 }
 
-function createTestSubscriptionInfo(
+function watchTestSourceSubscription(
     testSchedule: TestSchedule,
     subscription?: Disposable,
 ): TestSubscriptionInfo {
@@ -168,7 +168,7 @@ export function TestSource<T>(
     const subscriptions: TestSubscriptionInfo[] = [];
 
     const base = Source<T>((sink, sub) => {
-        subscriptions.push(createTestSubscriptionInfo(testSchedule, sub));
+        subscriptions.push(watchTestSourceSubscription(testSchedule, sub));
         events.forEach((event) => {
             testSchedule(() => sink(event), event.frame, sub);
         });
@@ -194,7 +194,7 @@ export function SharedTestSource<T>(
     const subject = Subject<T>();
 
     const base = Source<T>((sink, sub) => {
-        subscriptions.push(createTestSubscriptionInfo(testSchedule, sub));
+        subscriptions.push(watchTestSourceSubscription(testSchedule, sub));
         subject(sink, sub);
     });
 
@@ -217,7 +217,7 @@ export function SharedTestSource<T>(
 export function watchSourceEvents<T>(
     source: Source<T>,
     testSchedule: TestSchedule,
-    subscriptionInfo: TestSubscriptionInfo = createTestSubscriptionInfo(
+    subscriptionInfo: TestSubscriptionInfo = watchTestSourceSubscription(
         testSchedule,
     ),
 ): TestSourceEvent<T>[] {
