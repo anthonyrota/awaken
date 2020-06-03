@@ -114,14 +114,14 @@ export interface TestSubscriptionInfo {
 
 function createTestSubscriptionInfo(
     testSchedule: TestSchedule,
-    subscription: Disposable,
+    subscription?: Disposable,
 ): TestSubscriptionInfo {
     const info: TestSubscriptionInfo = {
         subscriptionStartFrame: testSchedule.currentFrame,
         subscriptionEndFrame: Infinity,
     };
 
-    subscription.add(() => {
+    subscription?.add(() => {
         info.subscriptionEndFrame = testSchedule.currentFrame;
     });
 
@@ -210,10 +210,9 @@ export function SharedTestSource<T>(
 export function watchSourceEvents<T>(
     source: Source<T>,
     testSchedule: TestSchedule,
-    subscriptionInfo: TestSubscriptionInfo = {
-        subscriptionStartFrame: 0,
-        subscriptionEndFrame: Infinity,
-    },
+    subscriptionInfo: TestSubscriptionInfo = createTestSubscriptionInfo(
+        testSchedule,
+    ),
 ): Event<T>[] {
     const subscription = new Disposable();
     const events: Event<T>[] = [];
