@@ -22,7 +22,7 @@ interface TestScheduleAction {
 }
 
 export function TestSchedule(): TestSchedule {
-    let actions: TestScheduleAction[] = [];
+    const actions: TestScheduleAction[] = [];
     let currentFrame = 0;
 
     function flush(): void {
@@ -34,7 +34,7 @@ export function TestSchedule(): TestSchedule {
                 try {
                     callback();
                 } catch (error) {
-                    actions = [];
+                    actions.length = 0;
                     currentFrame = 0;
                     throw error;
                 }
