@@ -48,6 +48,7 @@ export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
 
             sinkSubscription?.add(() => {
                 if (sinks && !sinkInfo.didRemove) {
+                    sinkInfo.didRemove = true;
                     removeOnce(sinks, sinkInfo);
                 }
             });
