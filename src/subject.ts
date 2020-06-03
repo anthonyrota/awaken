@@ -103,7 +103,7 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
         eventOrSink: Event<T> | Sink<T>,
         maybeSubscription?: Disposable,
     ): void {
-        if (finalEvent == null) {
+        if (finalEvent === null) {
             return;
         }
 
