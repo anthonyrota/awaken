@@ -116,7 +116,7 @@ function createTestSubscriptionInfo(
     testSchedule: TestSchedule,
     subscription: Disposable,
 ): TestSubscriptionInfo {
-    const info = {
+    const info: TestSubscriptionInfo = {
         subscriptionStartFrame: testSchedule.currentFrame,
         subscriptionEndFrame: Infinity,
     };
