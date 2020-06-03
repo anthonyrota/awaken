@@ -207,14 +207,14 @@ export function SharedTestSource<T>(
     return base as SharedTestSource<T>;
 }
 
-export function scheduleSourceExecution<T>(
-    testSchedule: TestSchedule,
+export function watchSourceEvents<T>(
     source: Source<T>,
+    testSchedule: TestSchedule,
     subscriptionInfo: TestSubscriptionInfo = {
         subscriptionStartFrame: 0,
         subscriptionEndFrame: Infinity,
     },
-): { events: Event<T>[] } {
+): Event<T>[] {
     const subscription = new Disposable();
     const events: Event<T>[] = [];
 
@@ -228,5 +228,5 @@ export function scheduleSourceExecution<T>(
         subscription.dispose();
     }, subscriptionInfo.subscriptionEndFrame);
 
-    return { events };
+    return events;
 }
