@@ -213,13 +213,13 @@ export function watchSourceEvents<T>(
     subscriptionInfo: TestSubscriptionInfo = createTestSubscriptionInfo(
         testSchedule,
     ),
-): Event<T>[] {
+): TestSourceEvent<T>[] {
     const subscription = new Disposable();
-    const events: Event<T>[] = [];
+    const events: TestSourceEvent<T>[] = [];
 
     testSchedule(() => {
         source((event) => {
-            events.push(event);
+            events.push({ ...event, frame: testSchedule.currentFrame });
         }, subscription);
     }, subscriptionInfo.subscriptionStartFrame);
 
