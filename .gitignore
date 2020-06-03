@@ -12,5 +12,7 @@ node_modules/
 # Generated
 coverage
 build/
+
 # .vscode
 !.vscode/tasks.js
+!.vscode/launch.json
