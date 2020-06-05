@@ -89,7 +89,7 @@ export function Source<T>(
     ) => void,
 ): Source<T> {
     function safeSource(sink: Sink<T>, subscription?: Disposable): void {
-        if (subscription && !subscription.active) {
+        if (subscription?.active === false) {
             return;
         }
 

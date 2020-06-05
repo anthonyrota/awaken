@@ -173,7 +173,7 @@ export function requestAnimationFrame(
     callback: FrameRequestCallback,
     subscription?: Disposable,
 ): void {
-    if (subscription && !subscription.active) {
+    if (subscription?.active === false) {
         return;
     }
 
@@ -198,7 +198,7 @@ function setTimeoutImplementation<T extends any[]>(
     subscription?: Disposable,
     ...args: T
 ): void {
-    if (subscription && !subscription.active) {
+    if (subscription?.active === false) {
         return;
     }
 
@@ -225,7 +225,7 @@ function setIntervalImplementation<T extends any[]>(
     subscription?: Disposable,
     ...args: T
 ): void {
-    if (subscription && !subscription.active) {
+    if (subscription?.active === false) {
         return;
     }
 

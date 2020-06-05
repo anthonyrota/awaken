@@ -30,7 +30,7 @@ export function ScheduleQueued<T extends any[] = []>(
     const nestedCallNextArgs: T[] = [];
 
     return (callback, subscription) => {
-        if (subscription && !subscription.active) {
+        if (subscription?.active === false) {
             return;
         }
 
@@ -186,7 +186,7 @@ export function ScheduleQueuedDiscrete<T extends any[] = []>(
 }
 
 export const scheduleSync: ScheduleFunction = (callback, subscription) => {
-    if (subscription && !subscription.active) {
+    if (subscription?.active === false) {
         return;
     }
 

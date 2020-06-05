@@ -29,12 +29,12 @@ export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
         eventOrSink: Event<T> | Sink<T>,
         maybeSubscription?: Disposable,
     ): void {
-        if (!sinks || (subscription && !subscription.active)) {
+        if (!sinks || subscription?.active === false) {
             return;
         }
 
         if (isFunction(eventOrSink)) {
-            if (maybeSubscription && !maybeSubscription.active) {
+            if (maybeSubscription?.active === false) {
                 return;
             }
 
@@ -110,7 +110,7 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
 
         if (isFunction(eventOrSink)) {
             if (finalEvent) {
-                if (!(maybeSubscription && !maybeSubscription.active)) {
+                if (maybeSubscription?.active !== false) {
                     eventOrSink(finalEvent, DISPOSED);
                 }
             } else {
