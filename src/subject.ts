@@ -74,7 +74,9 @@ export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
 }
 
 export function Subject<T>(subscription?: Disposable): Subject<T> {
-    const base: Subject<T> = SubjectBase<T>(subscription);
+    const baseSubscription = new Disposable();
+    subscription?.add(baseSubscription);
+    const base: Subject<T> = SubjectBase<T>(baseSubscription);
     let finalEvent: Throw | End | null | undefined;
 
     function subject(event: Event<T>): void;
@@ -90,7 +92,13 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
         if (isFunction(eventOrSink)) {
             if (finalEvent) {
                 if (maybeSubscription?.active !== false) {
-                    eventOrSink(finalEvent, DISPOSED);
+                    try {
+                        eventOrSink(finalEvent, DISPOSED);
+                    } catch (error) {
+                        baseSubscription.dispose();
+                        finalEvent = null;
+                        asyncReportError(error);
+                    }
                 }
             } else {
                 base(eventOrSink, maybeSubscription);
