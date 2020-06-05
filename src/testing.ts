@@ -25,6 +25,7 @@ interface TestScheduleAction {
 export function TestSchedule(): TestSchedule {
     const actions: TestScheduleAction[] = [];
     let currentFrame = 0;
+    let isFlushing = false;
 
     const testSchedule: TestScheduleFunction = (
         callback,
@@ -55,10 +56,16 @@ export function TestSchedule(): TestSchedule {
     });
 
     function flush(): void {
+        if (isFlushing) {
+            return;
+        }
+
+        isFlushing = true;
         let action = actions.shift();
         while (action) {
             currentFrame = action.executionFrame;
             const { callback, shouldCall } = action;
+
             if (shouldCall) {
                 try {
                     callback();
@@ -67,8 +74,10 @@ export function TestSchedule(): TestSchedule {
                     throw error;
                 }
             }
+
             action = actions.shift();
         }
+        isFlushing = false;
     }
 
     Object.defineProperty(testSchedule, 'flush', {
@@ -78,6 +87,8 @@ export function TestSchedule(): TestSchedule {
     function reset(): void {
         actions.length = 0;
         currentFrame = 0;
+        // If reset mid-execution
+        isFlushing = false;
     }
 
     Object.defineProperty(testSchedule, 'reset', {
