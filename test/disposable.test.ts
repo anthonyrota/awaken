@@ -4,6 +4,7 @@ import {
     fromTeardown,
     Disposable,
     DisposalError,
+    DISPOSED,
 } from '../src/disposable';
 import { throw_ } from './testUtils';
 import each from 'jest-each';
@@ -518,5 +519,19 @@ describe('DisposalError', () => {
             expect((error as DisposalError).errors[5]).toHaveProperty('message', 'error6');
             /* eslint-enable jest/no-try-expect */
         }
+    });
+});
+
+describe('DISPOSED', () => {
+    it('should exist', () => {
+        expect(DISPOSED).toBeInstanceOf(Disposable);
+    });
+
+    it('should be disposed', () => {
+        expect(DISPOSED.active).toBe(false);
+        const fn = jest.fn();
+        DISPOSED.add(fn);
+        expect(fn).toHaveBeenCalledTimes(1);
+        expect(fn).toHaveBeenCalledWith();
     });
 });

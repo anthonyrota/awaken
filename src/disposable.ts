@@ -184,3 +184,6 @@ function flattenDisposalErrors(errors: unknown[]): unknown[] {
 
     return flattened;
 }
+
+export const DISPOSED = new Disposable();
+DISPOSED.dispose();
