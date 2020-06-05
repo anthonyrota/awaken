@@ -39,7 +39,7 @@ describe('Throw', () => {
 });
 
 describe('End', () => {
-    it('should be a object', () => {
+    it('should be an object', () => {
         expect(End).toBeObject();
     });
 
