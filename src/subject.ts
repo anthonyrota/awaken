@@ -16,6 +16,10 @@ interface SinkInfo<T> {
 export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
     let sinks: SinkInfo<T>[] | null = [];
 
+    subscription?.add(() => {
+        sinks = null;
+    });
+
     function base(event: Event<T>): void;
     function base(sink: Sink<T>, subscription?: Disposable): void;
     function base(
@@ -54,14 +58,15 @@ export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
                 sinks = null;
             }
 
-            copy.forEach(({ sink, subscription }) => {
+            for (let i = 0; sinks && i < copy.length; i++) {
                 try {
+                    const { sink, subscription } = copy[i];
                     sink(eventOrSink, subscription);
                 } catch (error) {
                     sinks = null;
                     throw error;
                 }
-            });
+            }
         }
     }
 
