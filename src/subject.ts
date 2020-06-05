@@ -13,15 +13,8 @@ interface SinkInfo<T> {
     didRemove: boolean;
 }
 
-interface EventQueueItem<T> {
-    event: Event<T>;
-    sinks: SinkInfo<T>[];
-}
-
 export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
     let sinks: SinkInfo<T>[] | null = [];
-    let distributingEvent = false;
-    const eventsQueue: EventQueueItem<T>[] = [];
 
     function base(event: Event<T>): void;
     function base(sink: Sink<T>, subscription?: Disposable): void;
@@ -47,14 +40,13 @@ export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
                 didRemove: false,
             };
 
+            sinks.push(sinkInfo);
             sinkSubscription?.add(() => {
                 if (sinks && !sinkInfo.didRemove) {
                     sinkInfo.didRemove = true;
                     removeOnce(sinks, sinkInfo);
                 }
             });
-
-            sinks.push(sinkInfo);
         } else if (sinks.length > 0) {
             const copy = sinks.slice();
 
@@ -62,32 +54,14 @@ export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
                 sinks = null;
             }
 
-            let queueItem: EventQueueItem<T> | undefined = {
-                event: eventOrSink,
-                sinks: copy,
-            };
-
-            if (distributingEvent) {
-                eventsQueue.push(queueItem);
-                return;
-            }
-
-            distributingEvent = true;
-            while (queueItem) {
-                const { event, sinks: queueItemSinks } = queueItem;
-                queueItemSinks.forEach(({ sink, subscription }) => {
-                    try {
-                        sink(event, subscription);
-                    } catch (error) {
-                        distributingEvent = false;
-                        sinks = null;
-                        eventsQueue.length = 0;
-                        throw error;
-                    }
-                });
-                queueItem = eventsQueue.shift();
-            }
-            distributingEvent = false;
+            copy.forEach(({ sink, subscription }) => {
+                try {
+                    sink(eventOrSink, subscription);
+                } catch (error) {
+                    sinks = null;
+                    throw error;
+                }
+            });
         }
     }
 
