@@ -18,19 +18,19 @@ import raf = require('raf');
 const rafMock = (raf as unknown) as RafMock;
 
 describe('ScheduleQueued', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(ScheduleQueued).toBeFunction();
     });
 });
 
 describe('ScheduleQueuedDiscrete', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(ScheduleQueuedDiscrete).toBeFunction();
     });
 });
 
 describe('scheduleSync', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(scheduleSync).toBeFunction();
     });
 
@@ -103,7 +103,7 @@ describe('scheduleSync', () => {
 });
 
 describe('ScheduleSyncQueued', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(ScheduleSyncQueued).toBeFunction();
     });
 
@@ -443,7 +443,7 @@ describe('scheduleAnimationFrame', () => {
     afterEach(jest.clearAllMocks);
     afterEach(rafMock._resetQueue);
 
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(scheduleAnimationFrame).toBeFunction();
     });
 
@@ -511,7 +511,7 @@ describe('ScheduleAnimationFrameQueued', () => {
     afterEach(jest.clearAllMocks);
     afterEach(rafMock._resetQueue);
 
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(ScheduleAnimationFrameQueued).toBeFunction();
     });
 
@@ -1000,7 +1000,7 @@ describe('ScheduleTimeout', () => {
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(ScheduleTimeout).toBeFunction();
     });
 
@@ -1086,7 +1086,7 @@ describe('ScheduleTimeoutQueued', () => {
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(ScheduleTimeoutQueued).toBeFunction();
     });
 
@@ -1614,7 +1614,7 @@ describe('ScheduleInterval', () => {
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(ScheduleInterval).toBeFunction();
     });
 

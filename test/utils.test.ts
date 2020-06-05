@@ -52,7 +52,7 @@ const composableCases: [string, ...CF[]][] = [
 ]
 
 describe('pipe', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(pipe).toBeFunction();
     });
 
@@ -68,7 +68,7 @@ describe('pipe', () => {
 });
 
 describe('flow', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(flow).toBeFunction();
     });
 
@@ -85,7 +85,7 @@ describe('flow', () => {
 });
 
 describe('toArray', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(toArray).toBeFunction();
     });
 
@@ -149,7 +149,7 @@ describe('toArray', () => {
 });
 
 describe('removeOnce', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(removeOnce).toBeFunction();
     });
 
@@ -221,7 +221,7 @@ describe('removeOnce', () => {
 });
 
 describe('getLast', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(getLast).toBeFunction();
     });
 
@@ -272,7 +272,7 @@ describe('requestAnimationFrame', () => {
     afterEach(jest.clearAllMocks);
     afterEach(rafMock._resetQueue);
 
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(requestAnimationFrame).toBeFunction();
     });
 
@@ -326,7 +326,7 @@ describe('setTimeout', () => {
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(setTimeout).toBeFunction();
     });
 
@@ -409,7 +409,7 @@ describe('setInterval', () => {
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(setInterval).toBeFunction();
     });
 
@@ -522,7 +522,7 @@ describe('asyncReportError', () => {
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(asyncReportError).toBeFunction();
     });
 
@@ -548,7 +548,7 @@ describe('asyncReportError', () => {
 });
 
 describe('get$$iterator', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(get$$iterator).toBeFunction();
     });
 
@@ -569,7 +569,7 @@ describe('get$$iterator', () => {
 });
 
 describe('get$$asyncIterator', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(get$$asyncIterator).toBeFunction();
     });
 
@@ -605,7 +605,7 @@ const simpleFalseValues: [string, unknown][] = [
 ];
 
 describe('isIterable', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(isIterable).toBeFunction();
     });
 
@@ -720,7 +720,7 @@ describe('isIterable', () => {
 });
 
 describe('isAsyncIterable', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(isAsyncIterable).toBeFunction();
     });
 
@@ -807,7 +807,7 @@ describe('isAsyncIterable', () => {
 });
 
 describe('isPromiseLike', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(isPromiseLike).toBeFunction();
     });
 

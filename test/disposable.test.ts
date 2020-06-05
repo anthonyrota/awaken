@@ -10,7 +10,7 @@ import { throw_ } from './testUtils';
 import each from 'jest-each';
 
 describe('dispose', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(dispose).toBeFunction();
     });
 
@@ -29,7 +29,7 @@ describe('dispose', () => {
 });
 
 describe('isDisposable', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(isDisposable).toBeFunction();
     });
 
@@ -64,7 +64,7 @@ describe('isDisposable', () => {
 });
 
 describe('fromTeardown', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(fromTeardown).toBeFunction();
     });
 
@@ -79,7 +79,7 @@ describe('fromTeardown', () => {
 });
 
 describe('Disposable', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(Disposable).toBeFunction();
     });
 
@@ -443,7 +443,7 @@ describe('Disposable', () => {
 });
 
 describe('DisposalError', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(DisposalError).toBeFunction();
     });
 
@@ -523,7 +523,7 @@ describe('DisposalError', () => {
 });
 
 describe('DISPOSED', () => {
-    it('should exist', () => {
+    it('should be a Disposable', () => {
         expect(DISPOSED).toBeInstanceOf(Disposable);
     });
 

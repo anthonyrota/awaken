@@ -15,7 +15,7 @@ describe('EventType', () => {
 });
 
 describe('Push', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(Push).toBeFunction();
     });
 
@@ -27,7 +27,7 @@ describe('Push', () => {
 });
 
 describe('Throw', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(Throw).toBeFunction();
     });
 
@@ -39,7 +39,7 @@ describe('Throw', () => {
 });
 
 describe('End', () => {
-    it('should exist', () => {
+    it('should be a object', () => {
         expect(End).toBeObject();
     });
 
@@ -49,7 +49,7 @@ describe('End', () => {
 });
 
 describe('Source', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(Source).toBeFunction();
     });
 
@@ -61,7 +61,7 @@ describe('Source', () => {
 });
 
 describe('subscribe', () => {
-    it('should exist', () => {
+    it('should be a function', () => {
         expect(subscribe).toBeFunction();
     });
 });
