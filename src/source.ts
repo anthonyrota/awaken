@@ -88,13 +88,13 @@ export function Source<T>(
         subscription: Disposable,
     ) => void,
 ): Source<T> {
-    function safeSource(sink: Sink<T>, subscription = new Disposable()): void {
-        if (!subscription.active) {
+    function safeSource(sink: Sink<T>, subscription?: Disposable): void {
+        if (subscription && !subscription.active) {
             return;
         }
 
         const downstreamSubscription = new Disposable();
-        subscription.add(downstreamSubscription);
+        subscription?.add(downstreamSubscription);
 
         function safeSink(event: Event<T>): void {
             if (!downstreamSubscription.active) {
@@ -106,7 +106,7 @@ export function Source<T>(
             }
 
             try {
-                sink(event, subscription);
+                sink(event, downstreamSubscription);
             } catch (error) {
                 downstreamSubscription.dispose();
                 asyncReportError(error);
