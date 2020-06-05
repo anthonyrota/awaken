@@ -31,6 +31,10 @@ export function TestSchedule(): TestSchedule {
         delayFrames,
         subscription,
     ) => {
+        if (subscription?.active === false) {
+            return;
+        }
+
         const executionFrame = currentFrame + delayFrames;
         const index = getActionInsertIndex(actions, executionFrame);
         const action: TestScheduleAction = {
