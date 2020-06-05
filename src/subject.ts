@@ -104,6 +104,10 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
                 base(eventOrSink, maybeSubscription);
             }
         } else {
+            if (finalEvent) {
+                return;
+            }
+
             if (eventOrSink.type !== EventType.Push) {
                 finalEvent = eventOrSink;
             }
