@@ -1,4 +1,4 @@
-import { Disposable } from './disposable';
+import { Disposable, DISPOSED } from './disposable';
 import { removeOnce, asyncReportError } from './utils';
 import { EventType, Event, Throw, End, Source, Sink } from './source';
 import isFunction = require('lodash.isfunction');
@@ -34,11 +34,12 @@ export function SubjectBase<T>(subscription?: Disposable): Subject<T> {
         }
 
         if (isFunction(eventOrSink)) {
-            const sinkSubscription = maybeSubscription || new Disposable();
-
-            if (!sinkSubscription.active) {
+            if (maybeSubscription && !maybeSubscription.active) {
                 return;
             }
+
+            const sinkSubscription = new Disposable();
+            maybeSubscription?.add(sinkSubscription);
 
             const sinkInfo: SinkInfo<T> = {
                 sink: eventOrSink,
@@ -110,10 +111,7 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
         if (isFunction(eventOrSink)) {
             if (finalEvent) {
                 if (!(maybeSubscription && !maybeSubscription.active)) {
-                    eventOrSink(
-                        finalEvent,
-                        maybeSubscription || new Disposable(),
-                    );
+                    eventOrSink(finalEvent, DISPOSED);
                 }
             } else {
                 base(eventOrSink, maybeSubscription);
