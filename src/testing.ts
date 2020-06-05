@@ -192,7 +192,7 @@ export function TestSource<T>(
 }
 
 export interface SharedTestSource<T> extends TestSource<T> {
-    readonly schedule: () => void;
+    readonly schedule: (subscription?: Disposable) => void;
 }
 
 export function SharedTestSource<T>(
@@ -213,9 +213,9 @@ export function SharedTestSource<T>(
     });
 
     Object.defineProperty(base, 'schedule', {
-        value: (): void => {
+        value: (subscription?: Disposable): void => {
             events.forEach((event) => {
-                testSchedule(() => subject(event), event.frame);
+                testSchedule(() => subject(event), event.frame, subscription);
             });
         },
     });
