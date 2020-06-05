@@ -13,6 +13,7 @@ interface TestScheduleFunction {
 export interface TestSchedule extends TestScheduleFunction {
     readonly currentFrame: number;
     readonly flush: () => void;
+    readonly reset: () => void;
 }
 
 interface TestScheduleAction {
@@ -24,24 +25,6 @@ interface TestScheduleAction {
 export function TestSchedule(): TestSchedule {
     const actions: TestScheduleAction[] = [];
     let currentFrame = 0;
-
-    function flush(): void {
-        let action = actions.shift();
-        while (action) {
-            currentFrame = action.executionFrame;
-            const { callback, shouldCall } = action;
-            if (shouldCall) {
-                try {
-                    callback();
-                } catch (error) {
-                    actions.length = 0;
-                    currentFrame = 0;
-                    throw error;
-                }
-            }
-            action = actions.shift();
-        }
-    }
 
     const testSchedule: TestScheduleFunction = (
         callback,
@@ -67,8 +50,34 @@ export function TestSchedule(): TestSchedule {
         get: (): number => currentFrame,
     });
 
+    function flush(): void {
+        let action = actions.shift();
+        while (action) {
+            currentFrame = action.executionFrame;
+            const { callback, shouldCall } = action;
+            if (shouldCall) {
+                try {
+                    callback();
+                } catch (error) {
+                    reset();
+                    throw error;
+                }
+            }
+            action = actions.shift();
+        }
+    }
+
     Object.defineProperty(testSchedule, 'flush', {
         value: flush,
+    });
+
+    function reset(): void {
+        actions.length = 0;
+        currentFrame = 0;
+    }
+
+    Object.defineProperty(testSchedule, 'reset', {
+        value: reset,
     });
 
     return testSchedule as TestSchedule;
