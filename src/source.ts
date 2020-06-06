@@ -76,10 +76,9 @@ export interface Source<T> {
  * sink and optionally a subscription. The source will emit values to the given
  * sink, and will stop when the given subscription is disposed.
  * @param base This will be called with a "safeSink" and a subscription when the
- *     source is subscribed to. The safeSink is a sink which can be receive
- *     events and does not have to be called with a sourceSubscription. When the
- *     given subscription is disposed, the safeSink will ignore all events of
- *     the events it receives.
+ *     source is subscribed to. The safeSink is a sink which takes an event and
+ *     does not have to be called with a sourceSubscription. When the given
+ *     subscription is disposed, the safeSink will stop taking events.
  * @returns The created source.
  */
 export function Source<T>(
