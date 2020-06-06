@@ -142,7 +142,7 @@ export interface DisposalError extends _DisposalError {
 
 export interface DisposalErrorConstructor {
     new (errors: unknown[]): DisposalError;
-    readonly prototype: DisposalError;
+    prototype: DisposalError;
 }
 
 /**
@@ -169,7 +169,11 @@ export const DisposalError = (function (
 
     this.name = 'DisposalError';
     this.errors = flattenedErrors;
+    this.stack = new Error().stack;
 } as unknown) as DisposalErrorConstructor;
+
+DisposalError.prototype = Object.create(Error.prototype) as DisposalError;
+DisposalError.prototype.constructor = DisposalError;
 
 function flattenDisposalErrors(errors: unknown[]): unknown[] {
     const flattened: unknown[] = [];

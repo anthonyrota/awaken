@@ -447,6 +447,11 @@ describe('DisposalError', () => {
         expect(DisposalError).toBeFunction();
     });
 
+    it('should have a constructor equal to itself', () => {
+        expect(DisposalError.prototype.constructor).toBe(DisposalError);
+        expect(new DisposalError([]).constructor).toBe(DisposalError);
+    });
+
     it('should throw a DisposalError when disposing a disposable if one of the children throws', () => {
         expect.hasAssertions();
 
