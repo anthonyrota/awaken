@@ -118,6 +118,7 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
                         if (event.type === EventType.Push) {
                             sinkInfos.splice(i--, 1);
                         }
+                        continue;
                     }
 
                     try {
