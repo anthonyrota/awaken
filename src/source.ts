@@ -54,12 +54,10 @@ export const End: End = { type: EventType.End };
 
 /**
  * A Sink is what a Source subscribes to. All events emitted by the source will
- * be received by the sink that is given to the source. A Sink has two
- * parameters: the event which has been received and the subscription used to
- * subscribe to the source.
+ * be passed to the sink that has been given to the source.
  */
 export interface Sink<T> {
-    (event: Event<T>, sourceSubscription: Disposable): void;
+    (event: Event<T>): void;
 }
 
 /**
@@ -75,11 +73,10 @@ export interface Source<T> {
  * Creates a Source. A Source is a function which can be subscribed to with a
  * sink and optionally a subscription. The source will emit values to the given
  * sink, and will stop when the given subscription is disposed.
- * @param base This will be called with a "safeSink" and a subscription when the
- *     source is subscribed to. The safeSink is a modified version of a sink
- *     which takes an event and does not have to be called with a
- *     sourceSubscription. When the given subscription is disposed, the safeSink
- *     will stop taking events.
+ * @param base This will be called with a safe version of a Sink and a
+ *     subscription when the source is subscribed to. The safeSink is a sink
+ *     which additionally handles errors and unsubscription logic. When the
+ *     given subscription is disposed, the safeSink will stop accepting events.
  * @returns The created source.
  */
 export function Source<T>(
@@ -115,7 +112,7 @@ export function Source<T>(
             }
 
             try {
-                sink(event, downstreamSubscription);
+                sink(event);
             } catch (error) {
                 downstreamSubscription.dispose();
                 asyncReportError(error);

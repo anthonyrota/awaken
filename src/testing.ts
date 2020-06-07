@@ -1,5 +1,5 @@
 import { EventType, Event, Push, Throw, End, Source } from './source';
-import { Subject } from './subject';
+import { Subject as DefaultSubject } from './subject';
 import { Disposable } from './disposable';
 
 interface TestScheduleFunction {
@@ -213,6 +213,7 @@ export interface SharedTestSource<T> extends TestSource<T> {
 export function SharedTestSource<T>(
     events: TestSourceEvent<T>[],
     testSchedule: TestSchedule,
+    Subject = DefaultSubject,
 ): SharedTestSource<T> {
     const subscriptions: TestSubscriptionInfo[] = [];
     const subject = Subject<T>();
