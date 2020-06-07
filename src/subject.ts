@@ -101,52 +101,48 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
                     const sinkInfo = sinkInfos[i];
                     const { sink, maybeSubscription, didRemove } = sinkInfo;
 
-                    if (didRemove) {
-                        // The sink was unsubscribed but was not removed because
-                        // an event is currently being distributed. Only remove
-                        // it if the current event is a Push event as if the
-                        // current event is a Throw or End event then there is
-                        // no point in removing it now as it will be removed at
-                        // the end of the loop.
+                    if (
+                        didRemove ||
+                        // This check is necessary in case a dispose method
+                        // queued to the given maybeSubscription before the
+                        // callback which removes the sink above calls this
+                        // subject with a new event, meaning this sink has not
+                        // been removed from the list of sinks yet.
+                        maybeSubscription?.active === false
+                    ) {
+                        sinkInfo.didRemove = true;
+                        // Only remove if the current event is a Push event as
+                        // if the current event is a Throw or End event then
+                        // there is no point in removing it now as it will be
+                        // removed at the end of the loop.
                         if (event.type === EventType.Push) {
                             sinkInfos.splice(i--, 1);
                         }
-                        continue;
                     }
 
-                    // This check is necessary in case a dispose method queued
-                    // to the given maybeSubscription before the callback which
-                    // removes the sink above calls this subject with a new
-                    // event, meaning this sink has not been removed from the
-                    // list of sinks yet.
-                    if (maybeSubscription?.active !== false) {
-                        try {
-                            sink(event);
-                        } catch (error) {
-                            asyncReportError(error);
-                            sinkInfo.didRemove = true;
-                        }
+                    try {
+                        sink(event);
+                    } catch (error) {
+                        asyncReportError(error);
+                        sinkInfo.didRemove = true;
+                    }
 
-                        // It is possible that during the execution of the sink
-                        // it was removed. This will also execute if the sink
-                        // errored above.
-                        if (
-                            sinkInfo.didRemove &&
-                            event.type === EventType.Push &&
-                            // The subscription could have been disposed in
-                            // the execution of the sink.
-                            (subscription?.active as boolean | undefined) !==
-                                false
-                        ) {
-                            sinkInfos.splice(i--, 1);
-                        }
+                    // The subscription could have been disposed in the
+                    // execution of the sink.
+                    if (
+                        (subscription?.active as boolean | undefined) === false
+                    ) {
+                        return;
+                    }
+
+                    // It is possible that during the execution of the sink it
+                    // was removed. This will also execute if the sink errored
+                    // above.
+                    if (sinkInfo.didRemove && event.type === EventType.Push) {
+                        sinkInfos.splice(i--, 1);
                     }
                 }
 
-                // We do not need to explicitly check and break if the main
-                // subscription has been disposed as if this is the case then
-                // the eventsQueue will have been flushed and the following will
-                // be undefined.
                 event = eventsQueue.shift();
             }
             distributingEvent = false;
