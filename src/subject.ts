@@ -161,7 +161,9 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
 }
 
 /** @todo align with queueing behaviour */
-export function KeepFinalEvent<T>(subscription?: Disposable): Subject<T> {
+export function KeepFinalEventSubject<T>(
+    subscription?: Disposable,
+): Subject<T> {
     const base = Subject<T>(subscription);
     let finalEvent: Throw | End | undefined;
 
@@ -193,7 +195,7 @@ export function KeepFinalEvent<T>(subscription?: Disposable): Subject<T> {
 }
 
 /** @todo align with queuing behaviour */
-export function LastValue<T>(subscription?: Disposable): Subject<T> {
+export function LastValueSubject<T>(subscription?: Disposable): Subject<T> {
     const base = Subject<T>();
     let lastPushEvent: Push<T> | undefined;
     let finalEvent: Throw | End | undefined;
