@@ -285,7 +285,6 @@ export function get$$asyncIterator(): symbol | void {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isIterable(value: unknown): value is Iterable<unknown> {
     return (
-        value !== undefined &&
         value != null &&
         // eslint-disable-next-line max-len
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
@@ -305,7 +304,6 @@ export function isAsyncIterable(
 
     return (
         !!$$asyncIterator &&
-        value !== undefined &&
         value != null &&
         // eslint-disable-next-line max-len
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
