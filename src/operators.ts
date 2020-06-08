@@ -18,7 +18,7 @@ export function map<T, U>(
         Source((sink) => {
             let idx = 0;
             source(
-                Sink<T>((event) => {
+                Sink((event) => {
                     switch (event.type) {
                         case EventType.Push: {
                             let transformed: U;
