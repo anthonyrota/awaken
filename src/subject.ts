@@ -1,6 +1,6 @@
 import { Disposable, implDisposable } from './disposable';
 import { removeOnce, asyncReportError } from './utils';
-import { EventType, Event, Throw, End, Source, Sink } from './source';
+import { EventType, Event, Push, Throw, End, Source, Sink } from './source';
 import isFunction = require('lodash.isfunction');
 
 export interface Subject<T> extends Source<T>, Sink<T> {}
@@ -188,6 +188,46 @@ export function KeepFinalEvent<T>(subscription?: Disposable): Subject<T> {
             }
 
             base(eventOrSink);
+        }
+    }, base);
+}
+
+/** @todo align with queuing behaviour */
+export function LastValue<T>(subscription?: Disposable): Subject<T> {
+    const base = Subject<T>();
+    let lastPushEvent: Push<T> | undefined;
+    let finalEvent: Throw | End | undefined;
+
+    return implDisposable((eventOrSink: Event<T> | Sink<T>) => {
+        if (subscription?.active === false) {
+            // If this is called from a dispose method queued before base.
+            base.dispose();
+            return;
+        }
+
+        if (isFunction(eventOrSink)) {
+            if (finalEvent) {
+                if (finalEvent.type === EventType.End && lastPushEvent) {
+                    eventOrSink(lastPushEvent);
+                }
+                eventOrSink(finalEvent);
+            } else {
+                base(eventOrSink);
+            }
+        } else {
+            if (!base.active) {
+                return;
+            }
+
+            if (eventOrSink.type === EventType.Push) {
+                lastPushEvent = eventOrSink;
+            } else {
+                finalEvent = eventOrSink;
+                if (finalEvent.type === EventType.End && lastPushEvent) {
+                    base(lastPushEvent);
+                }
+                base(finalEvent);
+            }
         }
     }, base);
 }
