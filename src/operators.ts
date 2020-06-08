@@ -1,4 +1,4 @@
-import { Source, EventType, Push, Throw, End } from './source';
+import { Source, Sink, EventType, Push, Throw, End } from './source';
 
 export interface Operator<T, U> {
     (source: Source<T>): Source<U>;
@@ -15,25 +15,27 @@ export function map<T, U>(
     transform: (value: T, index: number) => U,
 ): Operator<T, U> {
     return (source) =>
-        Source((sink, sub) => {
+        Source((sink) => {
             let idx = 0;
-            source((event) => {
-                switch (event.type) {
-                    case EventType.Push: {
-                        let transformed: U;
-                        try {
-                            transformed = transform(event.value, idx++);
-                        } catch (error) {
-                            sink(Throw(error));
-                            return;
+            source(
+                Sink<T>((event) => {
+                    switch (event.type) {
+                        case EventType.Push: {
+                            let transformed: U;
+                            try {
+                                transformed = transform(event.value, idx++);
+                            } catch (error) {
+                                sink(Throw(error));
+                                return;
+                            }
+                            sink(Push(transformed));
+                            break;
                         }
-                        sink(Push(transformed));
-                        break;
+                        default:
+                            sink(event);
                     }
-                    default:
-                        sink(event);
-                }
-            }, sub);
+                }, sink),
+            );
         });
 }
 
@@ -56,23 +58,25 @@ export function filter<T>(
     predicate: (value: T, index: number) => unknown,
 ): Operator<T, T> {
     return (source) =>
-        Source((sink, sub) => {
+        Source((sink) => {
             let idx = 0;
-            source((event) => {
-                if (event.type === EventType.Push) {
-                    let passThrough: unknown;
-                    try {
-                        passThrough = predicate(event.value, idx++);
-                    } catch (error) {
-                        sink(error);
-                        return;
+            source(
+                Sink((event) => {
+                    if (event.type === EventType.Push) {
+                        let passThrough: unknown;
+                        try {
+                            passThrough = predicate(event.value, idx++);
+                        } catch (error) {
+                            sink(error);
+                            return;
+                        }
+                        if (!passThrough) {
+                            return;
+                        }
                     }
-                    if (!passThrough) {
-                        return;
-                    }
-                }
-                sink(event);
-            }, sub);
+                    sink(event);
+                }, sink),
+            );
         });
 }
 
@@ -98,32 +102,34 @@ export function reduce<T, R>(
     initialValue: R,
 ): Operator<T, R> {
     return (source) =>
-        Source((sink, sub) => {
+        Source((sink) => {
             let previousAccumulatedResult = initialValue;
             let currentValue: T;
             let currentIndex = 0;
 
-            source((event) => {
-                switch (event.type) {
-                    case EventType.Push: {
-                        currentValue = event.value;
-                        try {
-                            previousAccumulatedResult = transform(
-                                previousAccumulatedResult,
-                                currentValue,
-                                currentIndex++,
-                            );
-                        } catch (error) {
-                            sink(error);
+            source(
+                Sink((event) => {
+                    switch (event.type) {
+                        case EventType.Push: {
+                            currentValue = event.value;
+                            try {
+                                previousAccumulatedResult = transform(
+                                    previousAccumulatedResult,
+                                    currentValue,
+                                    currentIndex++,
+                                );
+                            } catch (error) {
+                                sink(error);
+                            }
+                            return;
                         }
-                        return;
+                        case EventType.End: {
+                            sink(Push(previousAccumulatedResult));
+                        }
                     }
-                    case EventType.End: {
-                        sink(Push(previousAccumulatedResult));
-                    }
-                }
-                sink(event);
-            }, sub);
+                    sink(event);
+                }, sink),
+            );
         });
 }
 
@@ -145,23 +151,25 @@ export function takeWhile<T>(
     shouldContinue: (value: T, index: number) => unknown,
 ): Operator<T, T> {
     return (source) =>
-        Source((sink, sub) => {
+        Source((sink) => {
             let idx = 0;
-            source((event) => {
-                if (event.type === EventType.Push) {
-                    let keepGoing: unknown;
-                    try {
-                        keepGoing = shouldContinue(event.value, idx++);
-                    } catch (error) {
-                        sink(Throw(error));
-                        return;
+            source(
+                Sink((event) => {
+                    if (event.type === EventType.Push) {
+                        let keepGoing: unknown;
+                        try {
+                            keepGoing = shouldContinue(event.value, idx++);
+                        } catch (error) {
+                            sink(Throw(error));
+                            return;
+                        }
+                        if (!keepGoing) {
+                            sink(End);
+                            return;
+                        }
                     }
-                    if (!keepGoing) {
-                        sink(End);
-                        return;
-                    }
-                }
-                sink(event);
-            }, sub);
+                    sink(event);
+                }, sink),
+            );
         });
 }

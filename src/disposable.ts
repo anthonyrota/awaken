@@ -19,13 +19,22 @@ export function dispose(value: Disposable | Teardown): void {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const $$disposable: unique symbol =
+    typeof Symbol !== 'undefined'
+        ? Symbol('IsDisposable_Property_Indicator')
+        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ('@@__IsDisposable_Property_Indicator__@@' as any);
+
 /**
  * Tests to see if the value is a Disposable.
  * @param value The value to test.
  * @returns True if the value is a Disposable, else false.
  */
 export function isDisposable(value: unknown): value is Disposable {
-    return value instanceof Disposable;
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    return value != null && (value as any)[$$disposable] === 'Disposable';
 }
 
 /**
@@ -34,7 +43,7 @@ export function isDisposable(value: unknown): value is Disposable {
  * @returns The constructed Disposable, containing the given fn as a child.
  */
 export function fromTeardown(fn: Teardown): Disposable {
-    return new Disposable([fn]);
+    return new _Disposable([fn]);
 }
 
 /**
@@ -43,8 +52,23 @@ export function fromTeardown(fn: Teardown): Disposable {
  * instance through the `add` and `remove` methods, and when the instance is
  * disposed of, all of it's children will also be disposed of.
  */
-export class Disposable {
+export interface Disposable {
+    readonly [$$disposable]: 'Disposable';
+    readonly active: boolean;
+    add(child: Disposable | Teardown): void;
+    remove(child: Disposable | Teardown): void;
+    dispose(): void;
+}
+
+export function Disposable(
+    children: Iterable<Disposable | Teardown> = [],
+): Disposable {
+    return new _Disposable(children);
+}
+
+class _Disposable implements Disposable {
     private __children: (Disposable | Teardown)[] | null;
+    public [$$disposable]: 'Disposable';
 
     /**
      * @param children A list/iterable of `Disposables` / `Teardowns` to be
@@ -129,6 +153,10 @@ export class Disposable {
     }
 }
 
+Object.defineProperty(_Disposable.prototype, $$disposable, {
+    value: 'Disposable',
+});
+
 interface _DisposalError extends Error {
     errors: unknown[];
 }
@@ -189,5 +217,32 @@ function flattenDisposalErrors(errors: unknown[]): unknown[] {
     return flattened;
 }
 
-export const DISPOSED = new Disposable();
+export const DISPOSED = new _Disposable();
 DISPOSED.dispose();
+
+// Used in implementing Sinks.
+export function implDisposable<T>(
+    value: T,
+    disposable: Disposable,
+): T & Disposable {
+    /* eslint-disable @typescript-eslint/no-non-null-assertion */
+    Object.defineProperties(value, {
+        [$$disposable]: { value: 'Disposable' },
+        active: {
+            get: () => disposable.active,
+        },
+        add: {
+            value: (child: Disposable | Teardown): void =>
+                disposable.add(child),
+        },
+        remove: {
+            value: (child: Disposable | Teardown): void =>
+                disposable.remove(child),
+        },
+        dispose: {
+            value: (): void => disposable.dispose(),
+        },
+    });
+    /* eslint-enable @typescript-eslint/no-non-null-assertion */
+    return value as T & Disposable;
+}

@@ -1,4 +1,4 @@
-import { EventType, Event, Push, Throw, End, Source } from './source';
+import { EventType, Event, Push, Throw, End, Source, Sink } from './source';
 import { Subject as DefaultSubject } from './subject';
 import { Disposable } from './disposable';
 
@@ -87,7 +87,7 @@ export function TestSchedule(): TestSchedule {
     function reset(): void {
         actions.length = 0;
         currentFrame = 0;
-        // If reset mid-execution
+        // If reset mid-execution.
         isFlushing = false;
     }
 
@@ -143,7 +143,7 @@ export function TestSubscriptionInfo(
     return { subscriptionStartFrame, subscriptionEndFrame };
 }
 
-function watchTestSourceSubscription(
+function watchSubscriptionInfo(
     testSchedule: TestSchedule,
     subscription?: Disposable,
 ): TestSubscriptionInfo {
@@ -191,10 +191,10 @@ export function TestSource<T>(
 ): TestSource<T> {
     const subscriptions: TestSubscriptionInfo[] = [];
 
-    const base = Source<T>((sink, sub) => {
-        subscriptions.push(watchTestSourceSubscription(testSchedule, sub));
+    const base = Source<T>((sink) => {
+        subscriptions.push(watchSubscriptionInfo(testSchedule, sink));
         events.forEach((event) => {
-            testSchedule(() => sink(event), event.frame, sub);
+            testSchedule(() => sink(event), event.frame, sink);
         });
     });
 
@@ -218,9 +218,9 @@ export function SharedTestSource<T>(
     const subscriptions: TestSubscriptionInfo[] = [];
     const subject = Subject<T>();
 
-    const base = Source<T>((sink, sub) => {
-        subscriptions.push(watchTestSourceSubscription(testSchedule, sub));
-        subject(sink, sub);
+    const base = Source<T>((sink) => {
+        subscriptions.push(watchSubscriptionInfo(testSchedule, sink));
+        subject(sink);
     });
 
     Object.defineProperty(base, 'subscriptions', {
@@ -242,17 +242,19 @@ export function SharedTestSource<T>(
 export function watchSourceEvents<T>(
     source: Source<T>,
     testSchedule: TestSchedule,
-    subscriptionInfo: TestSubscriptionInfo = watchTestSourceSubscription(
+    subscriptionInfo: TestSubscriptionInfo = watchSubscriptionInfo(
         testSchedule,
     ),
 ): TestSourceEvent<T>[] {
-    const subscription = new Disposable();
+    const subscription = Disposable();
     const events: TestSourceEvent<T>[] = [];
 
     testSchedule(() => {
-        source((event) => {
-            events.push({ ...event, frame: testSchedule.currentFrame });
-        }, subscription);
+        source(
+            Sink((event) => {
+                events.push({ ...event, frame: testSchedule.currentFrame });
+            }, subscription),
+        );
     }, subscriptionInfo.subscriptionStartFrame);
 
     testSchedule(() => {

@@ -7,8 +7,8 @@ import { Source, Push, End } from './source';
  * @returns The created source.
  */
 export function fromArray<T>(array: ArrayLike<T>): Source<T> {
-    return Source((sink, sub) => {
-        for (let i = 0; i < array.length && sub.active; i++) {
+    return Source((sink) => {
+        for (let i = 0; i < array.length && sink.active; i++) {
             sink(Push(array[i]));
         }
         sink(End);

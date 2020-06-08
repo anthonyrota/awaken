@@ -15,7 +15,7 @@ describe('dispose', () => {
     });
 
     it('should dispose a Disposable', () => {
-        const disposable = new Disposable();
+        const disposable = Disposable();
         dispose(disposable);
         expect(disposable).toHaveProperty('active', false);
     });
@@ -53,13 +53,13 @@ describe('isDisposable', () => {
     });
 
     it('should return true for a disposed disposable', () => {
-        const disposable = new Disposable();
+        const disposable = Disposable();
         disposable.dispose();
         expect(isDisposable(disposable)).toBeTrue();
     });
 
     it('should return true for an active disposable', () => {
-        expect(isDisposable(new Disposable())).toBeTrue();
+        expect(isDisposable(Disposable())).toBeTrue();
     });
 });
 
@@ -85,14 +85,14 @@ describe('Disposable', () => {
 
     it('should have a .active field describing whether the disposable is disposed or not', () => {
         [
-            new Disposable(),
+            Disposable(),
             // eslint-disable-next-line @typescript-eslint/no-empty-function
-            new Disposable([() => {}, new Disposable([])]),
+            Disposable([() => {}, Disposable([])]),
             // eslint-disable-next-line @typescript-eslint/no-empty-function
-            new Disposable([() => {}, () => {}][Symbol.iterator]()),
+            Disposable([() => {}, () => {}][Symbol.iterator]()),
         ].forEach((disposable) => {
             expect(disposable).toHaveProperty('active', true);
-            const child = new Disposable();
+            const child = Disposable();
             disposable.add(child);
             expect(disposable).toHaveProperty('active', true);
             disposable.remove(child);
@@ -104,7 +104,7 @@ describe('Disposable', () => {
 
     it('should attach a single teardown function', () => {
         const teardown = jest.fn();
-        const disposable = new Disposable([teardown]);
+        const disposable = Disposable([teardown]);
         expect(teardown).not.toHaveBeenCalled();
         disposable.dispose();
         expect(teardown).toHaveBeenCalledTimes(1);
@@ -116,10 +116,10 @@ describe('Disposable', () => {
         const teardown2 = jest.fn();
         const disposableTeardown1 = jest.fn();
         const disposableTeardown2 = jest.fn();
-        const disposable1 = new Disposable([disposableTeardown1]);
-        const disposable2 = new Disposable([disposableTeardown2]);
-        const disposable3 = new Disposable();
-        const disposable = new Disposable([
+        const disposable1 = Disposable([disposableTeardown1]);
+        const disposable2 = Disposable([disposableTeardown2]);
+        const disposable3 = Disposable();
+        const disposable = Disposable([
             teardown1,
             disposable1,
             disposable2,
@@ -155,7 +155,7 @@ describe('Disposable', () => {
                 yield teardown2;
             },
         };
-        const disposable = new Disposable(iter);
+        const disposable = Disposable(iter);
         disposable.dispose();
         expect(teardown1).toHaveBeenCalledTimes(1);
         expect(teardown1).toHaveBeenCalledWith();
@@ -165,7 +165,7 @@ describe('Disposable', () => {
     });
 
     it('should be able to add a single child with the `add()` method', () => {
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const teardown = jest.fn();
         disposable.add(teardown);
         disposable.dispose();
@@ -175,7 +175,7 @@ describe('Disposable', () => {
 
     it('should be able to remove a single child with the `remove()` method', () => {
         const teardown = jest.fn();
-        const disposable = new Disposable([teardown]);
+        const disposable = Disposable([teardown]);
         disposable.remove(teardown);
         disposable.dispose();
         expect(teardown).not.toHaveBeenCalled();
@@ -185,8 +185,8 @@ describe('Disposable', () => {
         const teardown1 = jest.fn();
         const teardown2 = jest.fn();
         const disposableTeardown = jest.fn();
-        const disposable1 = new Disposable([disposableTeardown]);
-        const disposable = new Disposable([teardown1]);
+        const disposable1 = Disposable([disposableTeardown]);
+        const disposable = Disposable([teardown1]);
         disposable.add(teardown2);
         disposable.add(disposable1);
         expect(teardown1).not.toHaveBeenCalled();
@@ -206,8 +206,8 @@ describe('Disposable', () => {
     it('should be able to remove multiple children with multiple `remove()` calls', () => {
         const teardown1 = jest.fn();
         const teardown2 = jest.fn();
-        const disposable1 = new Disposable();
-        const disposable = new Disposable([teardown1, disposable1]);
+        const disposable1 = Disposable();
+        const disposable = Disposable([teardown1, disposable1]);
         disposable.add(teardown2);
         disposable.remove(teardown1);
         disposable.remove(teardown2);
@@ -225,8 +225,8 @@ describe('Disposable', () => {
         const teardown2 = () => {};
         const teardown3 = jest.fn();
         const disposableTeardown = jest.fn();
-        const disposable1 = new Disposable([disposableTeardown]);
-        const disposable = new Disposable([
+        const disposable1 = Disposable([disposableTeardown]);
+        const disposable = Disposable([
             teardown1,
             disposable1,
             teardown2,
@@ -241,7 +241,7 @@ describe('Disposable', () => {
     it('should do nothing if adding itself', () => {
         const teardown1 = jest.fn();
         const teardown2 = jest.fn();
-        const disposable = new Disposable([teardown1, teardown2]);
+        const disposable = Disposable([teardown1, teardown2]);
         disposable.add(disposable);
         disposable.dispose();
         expect(teardown1).toHaveBeenCalledTimes(1);
@@ -254,8 +254,8 @@ describe('Disposable', () => {
     it('should not dispose itself recursively', () => {
         const teardown1 = jest.fn(() => finalDisposable1.dispose());
         const disposableTeardown1 = jest.fn(() => finalDisposable1.dispose());
-        const disposable1 = new Disposable([disposableTeardown1]);
-        const finalDisposable1: Disposable = new Disposable([
+        const disposable1 = Disposable([disposableTeardown1]);
+        const finalDisposable1: Disposable = Disposable([
             teardown1,
             disposable1,
         ]);
@@ -268,8 +268,8 @@ describe('Disposable', () => {
         expect(finalDisposable1.active).toBe(false);
         const teardown2 = jest.fn(() => finalDisposable2.dispose());
         const disposableTeardown2 = jest.fn(() => finalDisposable2.dispose());
-        const disposable2 = new Disposable([disposableTeardown2]);
-        const finalDisposable2 = new Disposable();
+        const disposable2 = Disposable([disposableTeardown2]);
+        const finalDisposable2 = Disposable();
         finalDisposable2.add(teardown2);
         finalDisposable2.add(disposable2);
         finalDisposable2.dispose();
@@ -283,14 +283,14 @@ describe('Disposable', () => {
 
     it('should dispose the given child when calling `add()` if currently disposed', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const disposable = new Disposable([() => {}]);
+        const disposable = Disposable([() => {}]);
         disposable.dispose();
         const teardown = jest.fn();
         disposable.add(teardown);
         expect(teardown).toHaveBeenCalledTimes(1);
         expect(teardown).toHaveBeenCalledWith();
         const disposableTeardown = jest.fn();
-        const disposable1 = new Disposable([disposableTeardown]);
+        const disposable1 = Disposable([disposableTeardown]);
         disposable.add(disposable1);
         expect(disposable1).toHaveProperty('active', false);
         expect(disposableTeardown).toHaveBeenCalledTimes(1);
@@ -299,7 +299,7 @@ describe('Disposable', () => {
 
     it('should do nothing when calling `remove()` if currently disposed', () => {
         const teardown = jest.fn();
-        const disposable = new Disposable([teardown]);
+        const disposable = Disposable([teardown]);
         disposable.dispose();
         disposable.remove(teardown);
         expect(teardown).toHaveBeenCalledTimes(1);
@@ -307,7 +307,7 @@ describe('Disposable', () => {
 
     it('should be able to add the same teardown function multiple times', () => {
         const teardown = jest.fn();
-        const disposable = new Disposable([teardown]);
+        const disposable = Disposable([teardown]);
         disposable.add(teardown);
         disposable.add(teardown);
         disposable.add(teardown);
@@ -323,7 +323,7 @@ describe('Disposable', () => {
         const teardown1 = jest.fn();
         const teardown2 = jest.fn();
         const teardown3 = jest.fn();
-        const disposable = new Disposable([
+        const disposable = Disposable([
             teardown1,
             teardown2,
             teardown3,
@@ -351,9 +351,9 @@ describe('Disposable', () => {
     it('should do nothing when disposed multiple times', () => {
         const teardown = jest.fn();
         const disposableTeardown = jest.fn();
-        const disposable = new Disposable([
+        const disposable = Disposable([
             teardown,
-            new Disposable([disposableTeardown]),
+            Disposable([disposableTeardown]),
         ]);
         disposable.dispose();
         disposable.dispose();
@@ -364,7 +364,7 @@ describe('Disposable', () => {
 
     it('should directly mutate the given list when adding/removing', () => {
         const list = [];
-        const disposable = new Disposable(list);
+        const disposable = Disposable(list);
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const fns = [() => {}, () => {}, () => {}, () => {}];
         disposable.add(fns[0]);
@@ -384,9 +384,9 @@ describe('Disposable', () => {
         const teardown1 = jest.fn();
         const teardown2 = jest.fn();
         const disposableTeardown1 = jest.fn();
-        const disposable1 = new Disposable([disposableTeardown1]);
+        const disposable1 = Disposable([disposableTeardown1]);
         const throws = jest.fn(throw_('foo'));
-        const disposable = new Disposable([
+        const disposable = Disposable([
             teardown1,
             throws,
             disposable1,
@@ -410,15 +410,15 @@ describe('Disposable', () => {
         const teardown1 = jest.fn();
         const teardown2 = jest.fn();
         const disposableTeardown1 = jest.fn();
-        const disposable1 = new Disposable([disposableTeardown1]);
+        const disposable1 = Disposable([disposableTeardown1]);
         const throws1 = jest.fn(throw_('foo'));
         const throws2 = jest.fn(throw_('bar'));
         const throws3 = jest.fn(throw_('baz'));
-        const disposable = new Disposable([
+        const disposable = Disposable([
             teardown1,
             throws1,
             disposable1,
-            new Disposable([throws2, new Disposable([throws3])]),
+            Disposable([throws2, Disposable([throws3])]),
             teardown2,
         ]);
         expect(() => disposable.dispose()).toThrow();
@@ -455,7 +455,7 @@ describe('DisposalError', () => {
     it('should throw a DisposalError when disposing a disposable if one of the children throws', () => {
         expect.hasAssertions();
 
-        const disposable = new Disposable([throw_('foo')]);
+        const disposable = Disposable([throw_('foo')]);
 
         try {
             disposable.dispose();
@@ -478,20 +478,20 @@ describe('DisposalError', () => {
     it('should flatten all DisposalErrors thrown when a disposable is disposed', () => {
         expect.hasAssertions();
 
-        const disposable = new Disposable([
+        const disposable = Disposable([
             throw_('error1'),
             () => {
-                new Disposable([throw_('error2')]).dispose();
+                Disposable([throw_('error2')]).dispose();
             },
-            new Disposable([throw_('error3')]),
-            new Disposable([
-                new Disposable([
+            Disposable([throw_('error3')]),
+            Disposable([
+                Disposable([
                     throw_('error4'),
                     () => {
-                        new Disposable([throw_('error5')]).dispose();
+                        Disposable([throw_('error5')]).dispose();
                     },
                 ]),
-                new Disposable([new Disposable([throw_('error6')])]),
+                Disposable([Disposable([throw_('error6')])]),
             ]),
         ]);
 
@@ -529,7 +529,7 @@ describe('DisposalError', () => {
 
 describe('DISPOSED', () => {
     it('should be a Disposable', () => {
-        expect(DISPOSED).toBeInstanceOf(Disposable);
+        expect(isDisposable(DISPOSED)).toBe(true);
     });
 
     it('should be disposed', () => {

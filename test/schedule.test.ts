@@ -43,14 +43,14 @@ describe('scheduleSync', () => {
 
     it('should call the callback once with no arguments when given an active disposable', () => {
         const callback = jest.fn();
-        scheduleSync(callback, new Disposable());
+        scheduleSync(callback, Disposable());
         expect(callback).toHaveBeenCalledTimes(1);
         expect(callback).toHaveBeenCalledWith();
     });
 
     it('should do nothing when given a disposed disposable', () => {
         const callback = jest.fn();
-        const disposed = new Disposable();
+        const disposed = Disposable();
         disposed.dispose();
         scheduleSync(callback, disposed);
         expect(callback).not.toHaveBeenCalled();
@@ -118,7 +118,7 @@ describe('ScheduleSyncQueued', () => {
     it('should synchronously call a single callback once with no arguments when given an active disposable', () => {
         const scheduleSyncQueued = ScheduleSyncQueued();
         const callback = jest.fn();
-        scheduleSyncQueued(callback, new Disposable());
+        scheduleSyncQueued(callback, Disposable());
         expect(callback).toHaveBeenCalledTimes(1);
         expect(callback).toHaveBeenCalledWith();
     });
@@ -126,7 +126,7 @@ describe('ScheduleSyncQueued', () => {
     it('should do nothing when given a disposed disposable', () => {
         const scheduleSyncQueued = ScheduleSyncQueued();
         const callback = jest.fn();
-        const disposed = new Disposable();
+        const disposed = Disposable();
         disposed.dispose();
         scheduleSyncQueued(callback, disposed);
         expect(callback).not.toHaveBeenCalled();
@@ -250,7 +250,7 @@ describe('ScheduleSyncQueued', () => {
 
     it('should cancel a single nested callback', () => {
         const scheduleSyncQueued = ScheduleSyncQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const nested = jest.fn();
         const callback = jest.fn(() => {
             scheduleSyncQueued(nested, disposable);
@@ -263,7 +263,7 @@ describe('ScheduleSyncQueued', () => {
 
     it('should only cancel the callback whose subscription has been disposed', () => {
         const scheduleSyncQueued = ScheduleSyncQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const nested1 = jest.fn();
         const nested2 = jest.fn();
         const nested3 = jest.fn();
@@ -286,7 +286,7 @@ describe('ScheduleSyncQueued', () => {
 
     it('should not schedule a nested callback when given a disposed disposable', () => {
         const scheduleSyncQueued = ScheduleSyncQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         disposable.dispose();
         const nested = jest.fn();
         const callback = jest.fn(() => {
@@ -299,7 +299,7 @@ describe('ScheduleSyncQueued', () => {
 
     it('should do nothing when cancelling a callback after it has been called', () => {
         const scheduleSyncQueued = ScheduleSyncQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const nested = jest.fn();
         const callback = jest.fn(() => {
             scheduleSyncQueued(nested, disposable);
@@ -312,7 +312,7 @@ describe('ScheduleSyncQueued', () => {
 
     it('should cancel multiple callbacks', () => {
         const scheduleSyncQueued = ScheduleSyncQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const nested1_1 = jest.fn();
         const nested1_2 = jest.fn();
         const nested1 = jest.fn(() => {
@@ -464,7 +464,7 @@ describe('scheduleAnimationFrame', () => {
     it('should raf the callback when given an active disposable', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
-        const disposable = new Disposable();
+        const disposable = Disposable();
         scheduleAnimationFrame(callback, disposable);
         expect(rafMock).toHaveBeenCalledTimes(1);
         expect(rafMock).toHaveBeenCalledWith(callback);
@@ -473,7 +473,7 @@ describe('scheduleAnimationFrame', () => {
     it('should not raf the callback when given a disposed disposable', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
-        const disposable = new Disposable();
+        const disposable = Disposable();
         disposable.dispose();
         scheduleAnimationFrame(callback, disposable);
         expect(rafMock).not.toHaveBeenCalled();
@@ -497,7 +497,7 @@ describe('scheduleAnimationFrame', () => {
     it('should be able to cancel the callback', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
-        const disposable = new Disposable();
+        const disposable = Disposable();
         scheduleAnimationFrame(callback, disposable);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const id: number = rafMock.mock.results[0].value;
@@ -556,14 +556,14 @@ describe('ScheduleAnimationFrameQueued', () => {
     it('should call rAF when given an active disposable', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleAnimationFrameQueued(() => {}, new Disposable());
+        scheduleAnimationFrameQueued(() => {}, Disposable());
         expect(rafMock._getActiveCount()).toBe(1);
         expect(rafMock).toHaveBeenCalledTimes(1);
     });
 
     it('should do nothing when given a disposed disposable', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
-        const disposed = new Disposable();
+        const disposed = Disposable();
         disposed.dispose();
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         scheduleAnimationFrameQueued(() => {}, disposed);
@@ -592,7 +592,7 @@ describe('ScheduleAnimationFrameQueued', () => {
     it('should cancel the main scheduled callback when the given disposable is disposed', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
         const callback = jest.fn();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         scheduleAnimationFrameQueued(callback, disposable);
         disposable.dispose();
         expect(rafMock).toHaveBeenCalledTimes(1);
@@ -626,8 +626,8 @@ describe('ScheduleAnimationFrameQueued', () => {
 
     it('should be able to cancel top level callbacks', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
-        const disposable1 = new Disposable();
-        const disposable2 = new Disposable();
+        const disposable1 = Disposable();
+        const disposable2 = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         const callback3 = jest.fn();
@@ -660,7 +660,7 @@ describe('ScheduleAnimationFrameQueued', () => {
 
     it('should cancel the rAF if all top level callbacks are cancelled', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         const callback3 = jest.fn();
@@ -677,7 +677,7 @@ describe('ScheduleAnimationFrameQueued', () => {
 
     it('should be able to cancel the rAF after a callback has been called', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         scheduleAnimationFrameQueued(callback1);
@@ -832,7 +832,7 @@ describe('ScheduleAnimationFrameQueued', () => {
     // eslint-disable-next-line jest/expect-expect
     it('should schedule again even if the previous one was cancelled', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         scheduleAnimationFrameQueued(callback1);
@@ -846,7 +846,7 @@ describe('ScheduleAnimationFrameQueued', () => {
 
     it('should not call rAF another time if the queue is flushed then scheduled synchronously', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const nested = jest.fn();
         const callback1 = jest.fn(() => {
             disposable.dispose();
@@ -870,7 +870,7 @@ describe('ScheduleAnimationFrameQueued', () => {
 
     it('should do nothing when cancelling after a callback has been called', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback = jest.fn();
         scheduleAnimationFrameQueued(callback, disposable);
         rafMock._flushQueue();
@@ -882,7 +882,7 @@ describe('ScheduleAnimationFrameQueued', () => {
 
     it('should only cancel the nested callback whose subscription has been disposed', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const nested1 = jest.fn();
         const nested2 = jest.fn();
         const nested3 = jest.fn();
@@ -908,7 +908,7 @@ describe('ScheduleAnimationFrameQueued', () => {
 
     it('should not schedule a nested callback when given a disposed disposable', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         disposable.dispose();
         const nested = jest.fn();
         const callback = jest.fn(() => {
@@ -1032,7 +1032,7 @@ describe('ScheduleTimeout', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
         const delay = 0;
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const scheduleTimeout = ScheduleTimeout(delay);
         scheduleTimeout(callback, disposable);
         expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -1042,7 +1042,7 @@ describe('ScheduleTimeout', () => {
     it('should not call native setTimeout when given a disposed disposable', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
-        const disposable = new Disposable();
+        const disposable = Disposable();
         disposable.dispose();
         const scheduleTimeout = ScheduleTimeout(13);
         scheduleTimeout(callback, disposable);
@@ -1069,7 +1069,7 @@ describe('ScheduleTimeout', () => {
     it('should cancel the scheduled callback when the given disposable is disposed', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const scheduleTimeout = ScheduleTimeout(0);
         scheduleTimeout(callback, disposable);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -1144,7 +1144,7 @@ describe('ScheduleTimeoutQueued', () => {
         const delay = 0;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleTimeoutQueued(() => {}, new Disposable());
+        scheduleTimeoutQueued(() => {}, Disposable());
         expect(jest.getTimerCount()).toBe(1);
         expect(setTimeout).toHaveBeenCalledTimes(1);
         expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), delay);
@@ -1152,7 +1152,7 @@ describe('ScheduleTimeoutQueued', () => {
 
     it('should do nothing when given a disposed disposable', () => {
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(5);
-        const disposed = new Disposable();
+        const disposed = Disposable();
         disposed.dispose();
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         scheduleTimeoutQueued(() => {}, disposed);
@@ -1183,7 +1183,7 @@ describe('ScheduleTimeoutQueued', () => {
     it('should cancel the main scheduled callback when the given disposable is disposed', () => {
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(51);
         const callback = jest.fn();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         scheduleTimeoutQueued(callback, disposable);
         disposable.dispose();
         expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -1221,8 +1221,8 @@ describe('ScheduleTimeoutQueued', () => {
     it('should be able to cancel top level callbacks', () => {
         const delay = 491;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
-        const disposable1 = new Disposable();
-        const disposable2 = new Disposable();
+        const disposable1 = Disposable();
+        const disposable2 = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         const callback3 = jest.fn();
@@ -1255,7 +1255,7 @@ describe('ScheduleTimeoutQueued', () => {
 
     it('should cancel the setTimeout if all top level callbacks are cancelled', () => {
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(0);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         const callback3 = jest.fn();
@@ -1273,7 +1273,7 @@ describe('ScheduleTimeoutQueued', () => {
     it('should be able to cancel the setTimeout after a callback has been called', () => {
         const delay = 981032;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         scheduleTimeoutQueued(callback1);
@@ -1441,7 +1441,7 @@ describe('ScheduleTimeoutQueued', () => {
     it('should schedule again even if the previous one was cancelled', () => {
         const delay = 0;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         scheduleTimeoutQueued(callback1);
@@ -1456,7 +1456,7 @@ describe('ScheduleTimeoutQueued', () => {
     it('should not schedule an additional setTimeout if the queue is flushed then scheduled synchronously', () => {
         const delay = 19;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const nested = jest.fn();
         const callback1 = jest.fn(() => {
             disposable.dispose();
@@ -1481,7 +1481,7 @@ describe('ScheduleTimeoutQueued', () => {
     it('should do nothing when cancelling after a callback has been called', () => {
         const delay = 19;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback = jest.fn();
         scheduleTimeoutQueued(callback, disposable);
         jest.advanceTimersByTime(delay);
@@ -1494,7 +1494,7 @@ describe('ScheduleTimeoutQueued', () => {
     it('should only cancel the nested callback whose subscription has been disposed', () => {
         const delay = 1000;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const nested1 = jest.fn();
         const nested2 = jest.fn();
         const nested3 = jest.fn();
@@ -1519,7 +1519,7 @@ describe('ScheduleTimeoutQueued', () => {
     it('should not schedule a nested callback when given a disposed disposable', () => {
         const delay = 400;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         disposable.dispose();
         const nested = jest.fn();
         const callback = jest.fn(() => {
@@ -1679,7 +1679,7 @@ describe('ScheduleInterval', () => {
         const delay = 429;
         const scheduleInterval = ScheduleInterval(delay);
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleInterval(() => {}, new Disposable());
+        scheduleInterval(() => {}, Disposable());
         expect(jest.getTimerCount()).toBe(1);
         expect(setInterval).toHaveBeenCalledTimes(1);
         expect(setInterval).toHaveBeenCalledWith(expect.any(Function), delay);
@@ -1688,7 +1688,7 @@ describe('ScheduleInterval', () => {
     it('should do nothing when given a disposed disposable', () => {
         const scheduleInterval = ScheduleInterval(19423);
         const callback = jest.fn();
-        const disposed = new Disposable();
+        const disposed = Disposable();
         disposed.dispose();
         scheduleInterval(callback, disposed);
         expect(callback).not.toHaveBeenCalled();
@@ -1717,7 +1717,7 @@ describe('ScheduleInterval', () => {
 
     it('should cancel the main scheduled callback when the given disposable is disposed', () => {
         const callback = jest.fn();
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const scheduleInterval = ScheduleInterval(299);
         scheduleInterval(callback, disposable);
         disposable.dispose();
@@ -1750,8 +1750,8 @@ describe('ScheduleInterval', () => {
     it('should be able to cancel top level callbacks', () => {
         const delay = 423;
         const scheduleInterval = ScheduleInterval(delay);
-        const disposable1 = new Disposable();
-        const disposable2 = new Disposable();
+        const disposable1 = Disposable();
+        const disposable2 = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         const callback3 = jest.fn();
@@ -1783,7 +1783,7 @@ describe('ScheduleInterval', () => {
 
     it('should cancel the interval if all top level callbacks are cancelled', () => {
         const scheduleInterval = ScheduleInterval(0);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         const callback3 = jest.fn();
@@ -1801,7 +1801,7 @@ describe('ScheduleInterval', () => {
     it('should be able to cancel mid interval', () => {
         const delay = 29304;
         const scheduleInterval = ScheduleInterval(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         scheduleInterval(callback1);
@@ -1967,7 +1967,7 @@ describe('ScheduleInterval', () => {
     it('should be able to schedule a new interval if the previous one was cancelled', () => {
         const delay = 0;
         const scheduleInterval = ScheduleInterval(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback1 = jest.fn();
         const callback2 = jest.fn();
         scheduleInterval(callback1);
@@ -1982,7 +1982,7 @@ describe('ScheduleInterval', () => {
     it('should not cancel the interval if the queue is flushed then scheduled synchronously', () => {
         const delay = 19;
         const scheduleInterval = ScheduleInterval(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const nested = jest.fn();
         const callback1 = jest.fn(() => {
             disposable.dispose();
@@ -2007,7 +2007,7 @@ describe('ScheduleInterval', () => {
     it('should do nothing when cancelling after a callback has been called', () => {
         const delay = 19;
         const scheduleInterval = ScheduleInterval(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const callback = jest.fn();
         scheduleInterval(callback, disposable);
         jest.advanceTimersByTime(delay);
@@ -2020,7 +2020,7 @@ describe('ScheduleInterval', () => {
     it('should only cancel the nested callback whose subscription has been disposed', () => {
         const delay = 1000;
         const scheduleInterval = ScheduleInterval(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         const nested1 = jest.fn();
         const nested2 = jest.fn();
         const nested3 = jest.fn();
@@ -2045,7 +2045,7 @@ describe('ScheduleInterval', () => {
     it('should not schedule a nested callback when given a disposed disposable', () => {
         const delay = 400;
         const scheduleInterval = ScheduleInterval(delay);
-        const disposable = new Disposable();
+        const disposable = Disposable();
         disposable.dispose();
         const nested = jest.fn();
         const callback = jest.fn(() => {

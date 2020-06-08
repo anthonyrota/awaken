@@ -1,4 +1,4 @@
-import { Disposable } from './disposable';
+import { Disposable, implDisposable } from './disposable';
 import { asyncReportError } from './utils';
 
 export const enum EventType {
@@ -56,8 +56,43 @@ export const End: End = { type: EventType.End };
  * A Sink is what a Source subscribes to. All events emitted by the source will
  * be passed to the sink that has been given to the source.
  */
-export interface Sink<T> {
+export interface Sink<T> extends Disposable {
     (event: Event<T>): void;
+}
+
+/**
+ * Creates a Sink. A Sink is what a Source subscribes to. All events emitted by
+ * the source will be passed to the sink that has been given to the source.
+ * @param onEvent The callback for when an event is received.
+ * @param subscription When this is disposed this sink will stop taking values,
+ *     and any source which this sink has subscribed to will stop emitting
+ *     values to this sink.
+ */
+export function Sink<T>(
+    onEvent: (event: Event<T>) => void,
+    subscription?: Disposable,
+): Sink<T> {
+    const disposable = Disposable();
+    subscription?.add(disposable);
+    return implDisposable((event: Event<T>): void => {
+        if (!disposable.active) {
+            return;
+        }
+        // Called in dispose method queued to subscripton before disposable.
+        if (subscription?.active === false) {
+            disposable.dispose();
+            return;
+        }
+        if (event.type !== EventType.Push) {
+            disposable.dispose();
+        }
+        try {
+            onEvent(event);
+        } catch (error) {
+            asyncReportError(error);
+            disposable.dispose();
+        }
+    }, disposable);
 }
 
 /**
@@ -66,7 +101,7 @@ export interface Sink<T> {
  * when the given subscription is disposed.
  */
 export interface Source<T> {
-    (sink: Sink<T>, subscription?: Disposable): void;
+    (sink: Sink<T>): void;
 }
 
 /**
@@ -79,57 +114,21 @@ export interface Source<T> {
  *     given subscription is disposed, the safeSink will stop accepting events.
  * @returns The created source.
  */
-export function Source<T>(
-    base: (
-        safeSink: (event: Event<T>) => void,
-        subscription: Disposable,
-    ) => void,
-): Source<T> {
-    function safeSource(sink: Sink<T>, subscription?: Disposable): void {
-        if (subscription?.active === false) {
-            return;
-        }
-
-        const downstreamSubscription = new Disposable();
-        subscription?.add(downstreamSubscription);
-
-        function safeSink(event: Event<T>): void {
-            // This check is necessary in case a dispose method is queued to
-            // subscription before downstreamSubscription and calls this
-            // function, meaning downstreamSubscription is active but the given
-            // subscription is not active.
-            if (subscription?.active === false) {
-                downstreamSubscription.dispose();
-                return;
-            }
-
-            if (!downstreamSubscription.active) {
-                return;
-            }
-
-            if (event.type !== EventType.Push) {
-                downstreamSubscription.dispose();
-            }
-
-            try {
-                sink(event);
-            } catch (error) {
-                downstreamSubscription.dispose();
-                asyncReportError(error);
-            }
-        }
-
+export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
+    function safeSource(sink: Sink<T>): void {
         try {
-            base(safeSink, downstreamSubscription);
+            base(sink);
         } catch (error) {
-            safeSink(Throw(error));
+            /** @todo act like promise? */
+            asyncReportError(error);
+            sink(error);
         }
     }
 
     return safeSource;
 }
 
-/**
+/*\*
  * Higher order function which takes a sink and a subscription, and returns
  * another function which receives a source that will be subscribed to using the
  * given sink and subscription. This is useful, for example, at the end of pipe
@@ -139,8 +138,10 @@ export function Source<T>(
  * @returns The higher order function which takes a source to subscribe to.
  */
 export function subscribe<T>(
-    sink: Sink<T>,
-    subscription: Disposable,
+    onEvent: (event: Event<T>) => void,
+    subscription?: Disposable,
 ): (source: Source<T>) => void {
-    return (source) => source(sink, subscription);
+    return (source) => {
+        source(Sink(onEvent, subscription));
+    };
 }
