@@ -93,11 +93,9 @@ class _DisposableImplementation implements _IDisposableImplementation {
             return;
         }
 
-        if (!this.__isParentDisposed) {
-            // Walk the tree of all children and mark that one of their parents
-            // has been disposed.
-            this.__markParentDisposed();
-        }
+        // Walk the tree of all children and mark that one of their parents
+        // has been disposed.
+        this.__markParentDisposed();
 
         const errors: unknown[] = [];
 
