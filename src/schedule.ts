@@ -43,35 +43,37 @@ export function ScheduleQueued<T extends any[] = []>(
         if (subscription) {
             const _callbacks = callbacks;
 
-            subscription.add(() => {
-                // If the callbacks array has changed then the queue has already
-                // been flushed, ensuring this callback will not be called in
-                // the future.
-                if (
-                    _callbacks !== callbacks ||
-                    callbackInfo.hasBeenRemovedFromQueue
-                ) {
-                    return;
-                }
+            subscription.add(
+                Disposable(() => {
+                    // If the callbacks array has changed then the queue has
+                    // already been flushed, ensuring this callback will not be
+                    // called in the future.
+                    if (
+                        _callbacks !== callbacks ||
+                        callbackInfo.hasBeenRemovedFromQueue
+                    ) {
+                        return;
+                    }
 
-                callbackInfo.hasBeenRemovedFromQueue = true;
-                removeOnce(callbacks, callbackInfo);
+                    callbackInfo.hasBeenRemovedFromQueue = true;
+                    removeOnce(callbacks, callbackInfo);
 
-                // If we are executing a callback, then there is no need to
-                // handle unsubscription logic here as it will be handled after
-                // the callback is called. This also avoids unnecessary
-                // unsubscription in the case where the callback flushes all
-                // future callbacks, then queues a new callback.
-                if (isInCallback) {
-                    return;
-                }
+                    // If we are executing a callback, then there is no need to
+                    // handle unsubscription logic here as it will be handled
+                    // after the callback is called. This also avoids
+                    // unnecessary unsubscription in the case where the callback
+                    // flushes all future callbacks, then queues a new callback.
+                    if (isInCallback) {
+                        return;
+                    }
 
-                if (callbacks.length === 0) {
-                    // eslint-disable-next-line max-len
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    scheduledSubscription!.dispose();
-                }
-            });
+                    if (callbacks.length === 0) {
+                        // eslint-disable-next-line max-len
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        scheduledSubscription!.dispose();
+                    }
+                }),
+            );
         }
 
         // Exiting here ensures that in the case where the last callback is

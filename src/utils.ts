@@ -179,9 +179,11 @@ export function requestAnimationFrame(
 
     const animationId = raf(callback);
 
-    subscription?.add(() => {
-        raf.cancel(animationId);
-    });
+    subscription?.add(
+        Disposable(() => {
+            raf.cancel(animationId);
+        }),
+    );
 }
 
 /**
@@ -204,9 +206,11 @@ function setTimeoutImplementation<T extends any[]>(
 
     const id = setTimeout(callback, delayMs, ...args);
 
-    subscription?.add(() => {
-        clearTimeout(id);
-    });
+    subscription?.add(
+        Disposable(() => {
+            clearTimeout(id);
+        }),
+    );
 }
 
 export { setTimeoutImplementation as setTimeout };
@@ -231,9 +235,11 @@ function setIntervalImplementation<T extends any[]>(
 
     const id = setInterval(callback, delayMs, ...args);
 
-    subscription?.add(() => {
-        clearInterval(id);
-    });
+    subscription?.add(
+        Disposable(() => {
+            clearInterval(id);
+        }),
+    );
 }
 
 export { setIntervalImplementation as setInterval };

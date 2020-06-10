@@ -1,23 +1,4 @@
-import { removeOnce, toArray } from './utils';
-
-/**
- * Represents a function which when called disposes a resource.
- */
-export interface Teardown {
-    (): void;
-}
-
-/**
- * Disposes the given value. If it is a teardown then it will call the teardown.
- * @param value The Disposable or Teardown to dispose.
- */
-export function dispose(value: Disposable | Teardown): void {
-    if (isDisposable(value)) {
-        value.dispose();
-    } else {
-        value();
-    }
-}
+import { removeOnce } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const $$disposable: unique symbol =
@@ -26,108 +7,85 @@ const $$disposable: unique symbol =
         : // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ('@@__IsDisposable_Property_Indicator__@@' as any);
 
-/**
- * Tests to see if the value is a Disposable.
- * @param value The value to test.
- * @returns True if the value is a Disposable, else false.
- */
-export function isDisposable(value: unknown): value is Disposable {
-    // eslint-disable-next-line max-len
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    return value != null && (value as any)[$$disposable] === 'Disposable';
-}
+const $$disposable_IdentifyingValue = 'Disposable';
 
-/**
- * Constructs a Disposable from a single Teardown value.
- * @param fn The Teardown to add as a child to the returned Disposable.
- * @returns The constructed Disposable, containing the given fn as a child.
- */
-export function fromTeardown(fn: Teardown): Disposable {
-    return new _Disposable([fn]);
-}
-
-/**
- * Represents a resource which can be disposed of using the `dispose` method.
- * Child `Disposables` / `Teardowns` can be linked/unlinked to a Disposable
- * instance through the `add` and `remove` methods, and when the instance is
- * disposed of, all of it's children will also be disposed of.
- */
 export interface Disposable {
-    readonly [$$disposable]: 'Disposable';
+    readonly [$$disposable]: typeof $$disposable_IdentifyingValue;
     readonly active: boolean;
-    add(child: Disposable | Teardown): void;
-    remove(child: Disposable | Teardown): void;
+    add(child: Disposable): void;
+    remove(child: Disposable): void;
     dispose(): void;
 }
 
-export function Disposable(
-    children: Iterable<Disposable | Teardown> = [],
-): Disposable {
-    return new _Disposable(children);
+interface _IDisposableImplementation extends Disposable {
+    __markParentDisposed(): void;
 }
 
-class _Disposable implements Disposable {
-    private __children: (Disposable | Teardown)[] | null;
-    public [$$disposable]: 'Disposable';
+class _DisposableImplementation implements _IDisposableImplementation {
+    private __children: _IDisposableImplementation[] | null = [];
+    private __isParentDisposed = false;
+    public [$$disposable]: typeof $$disposable_IdentifyingValue;
 
-    /**
-     * @param children A list/iterable of `Disposables` / `Teardowns` to be
-     *     initially linked to this instance. Note: if the value given is an
-     *     array, the array will be mutated inside this instance.
-     */
-    constructor(children: Iterable<Disposable | Teardown> = []) {
-        this.__children = toArray(children);
-    }
+    constructor(private __onDispose?: () => void) {}
 
-    /**
-     * A readonly boolean flag representing whether this instance is still
-     * active. If the value is false, then the instance has already been
-     * disposed.
-     * @returns Whether this instance is still active.
-     */
     public get active(): boolean {
-        return !!this.__children;
+        if (!this.__children) {
+            return false;
+        }
+        // If a disposable is determined to not be active, it should be ensured
+        // that it's dispose method was called.
+        if (this.__isParentDisposed) {
+            this.dispose();
+            return false;
+        }
+        return true;
     }
 
-    /**
-     * Links the given value to be disposed when this instance is disposed. If
-     * this Disposable is already disposed, then the given value will be
-     * disposed immediately.
-     *
-     * In order to unlink the value from this instance, simply call this
-     * instance's `remove` method with the given value as the argument.
-     * @param child The Disposable/Teardown to link.
-     */
-    public add(child: Disposable | Teardown): void {
+    public add(child: _IDisposableImplementation): void {
         if (!this.__children) {
-            dispose(child);
+            child.dispose();
             return;
         }
 
-        if (child === this || (isDisposable(child) && !child.active)) {
+        if (child === this) {
+            return;
+        }
+
+        if (this.__isParentDisposed) {
+            this.__children.push(child);
+            // Already marked children as disposed -> have to manually here.
+            child.__markParentDisposed();
+            this.dispose();
+            return;
+        }
+
+        if (
+            // If the child is marked for disposal this will dispose it now.
+            !child.active
+        ) {
             return;
         }
 
         this.__children.push(child);
     }
 
-    /**
-     * Unlinks the given value from this instance, preventing it from being
-     * disposed when this instance is disposed.
-     * @param child The child value to unlink.
-     */
-    public remove(child: Disposable | Teardown): void {
-        if (!this.__children) {
+    public remove(child: _IDisposableImplementation): void {
+        if (!this.active) {
             return;
         }
 
-        removeOnce(this.__children, child);
+        if (
+            // If the child is marked for disposal this will dispose it now.
+            !child.active
+        ) {
+            return;
+        }
+
+        // Neither we nor the child are/waiting to be disposed.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        removeOnce(this.__children!, child);
     }
 
-    /**
-     * Disposes this instance, as well as all the linked child `Disposables` /
-     * `Teardowns`.
-     */
     public dispose(): void {
         const children = this.__children;
 
@@ -135,26 +93,53 @@ class _Disposable implements Disposable {
             return;
         }
 
+        if (!this.__isParentDisposed) {
+            // Walk the tree of all children and mark that one of their parents
+            // has been disposed.
+            this.__markParentDisposed();
+        }
+
         const errors: unknown[] = [];
 
         this.__children = null;
 
-        children.forEach((child) => {
+        const onDispose = this.__onDispose;
+
+        if (onDispose) {
             try {
-                dispose(child);
+                onDispose();
             } catch (error) {
                 errors.push(error);
             }
-        });
+        }
+
+        for (let i = 0; i < children.length; i++) {
+            try {
+                children[i].dispose();
+            } catch (error) {
+                errors.push(error);
+            }
+        }
 
         if (errors.length > 0) {
             throw new DisposalError(errors);
         }
     }
+
+    public __markParentDisposed(): void {
+        const children = this.__children;
+        if (!children || this.__isParentDisposed) {
+            return;
+        }
+        this.__isParentDisposed = true;
+        for (let i = 0; i < children.length; i++) {
+            children[i].__markParentDisposed();
+        }
+    }
 }
 
-Object.defineProperty(_Disposable.prototype, $$disposable, {
-    value: 'Disposable',
+Object.defineProperty(_DisposableImplementation.prototype, $$disposable, {
+    value: $$disposable_IdentifyingValue,
 });
 
 interface _DisposalError extends Error {
@@ -217,32 +202,86 @@ function flattenDisposalErrors(errors: unknown[]): unknown[] {
     return flattened;
 }
 
-export const DISPOSED = new _Disposable();
+export function Disposable(onDispose?: () => void): Disposable {
+    return new _DisposableImplementation(onDispose);
+}
+
+export function isDisposable(value: unknown): value is Disposable {
+    return (
+        value != null &&
+        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        (value as any)[$$disposable] === $$disposable_IdentifyingValue
+    );
+}
+
+export const DISPOSED: Disposable = new _DisposableImplementation();
 DISPOSED.dispose();
+
+// eslint-disable-next-line max-len
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/unbound-method
+const _DisposableImplementation_activeGetter = Object.getOwnPropertyDescriptor(
+    _DisposableImplementation.prototype,
+    'active',
+)!.get!;
+
+const {
+    add: _DisposableImplementation_add,
+    remove: _DisposableImplementation_remove,
+    dispose: _DisposableImplementation_dispose,
+    __markParentDisposed: _DisposableImplementation___markParentDisposed,
+} = _DisposableImplementation.prototype;
 
 // Used in implementing Sinks.
 export function implDisposable<T>(
     value: T,
     disposable: Disposable,
 ): T & Disposable {
-    /* eslint-disable @typescript-eslint/no-non-null-assertion */
-    Object.defineProperties(value, {
-        [$$disposable]: { value: 'Disposable' },
-        active: {
-            get: () => disposable.active,
-        },
-        add: {
-            value: (child: Disposable | Teardown): void =>
-                disposable.add(child),
-        },
-        remove: {
-            value: (child: Disposable | Teardown): void =>
-                disposable.remove(child),
-        },
-        dispose: {
-            value: (): void => disposable.dispose(),
-        },
-    });
-    /* eslint-enable @typescript-eslint/no-non-null-assertion */
+    if (disposable instanceof _DisposableImplementation) {
+        Object.defineProperties(value, {
+            [$$disposable]: { value: $$disposable_IdentifyingValue },
+            active: {
+                get: _DisposableImplementation_activeGetter.bind(disposable),
+            },
+            add: {
+                value: _DisposableImplementation_add.bind(disposable),
+            },
+            remove: {
+                value: _DisposableImplementation_remove.bind(disposable),
+            },
+            dispose: {
+                value: _DisposableImplementation_dispose.bind(disposable),
+            },
+            __markParentDisposed: {
+                value: _DisposableImplementation___markParentDisposed.bind(
+                    disposable,
+                ),
+            },
+        });
+    } else {
+        Object.defineProperties(value, {
+            [$$disposable]: { value: $$disposable_IdentifyingValue },
+            active: {
+                get: () => disposable.active,
+            },
+            add: {
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                value: disposable.add,
+            },
+            remove: {
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                value: disposable.remove,
+            },
+            dispose: {
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                value: disposable.dispose,
+            },
+            __markParentDisposed: {
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                value: (disposable as _IDisposableImplementation)
+                    .__markParentDisposed,
+            },
+        });
+    }
     return value as T & Disposable;
 }

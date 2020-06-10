@@ -15,8 +15,7 @@ interface SubjectBasePrivateActiveState<T> {
     eventsQueue: Event<T>[];
 }
 
-export function Subject<T>(subscription?: Disposable): Subject<T> {
-    const disposable = Disposable();
+export function Subject<T>(): Subject<T> {
     let distributingEvent = false;
     let state: SubjectBasePrivateActiveState<T> | null = {
         sinkInfos: [],
@@ -33,25 +32,14 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
         }
     }
 
-    disposable.add(() => {
+    const disposable = Disposable(() => {
         if (state && !distributingEvent) {
-            // If we are not currently distributing an event and we are not
-            // allowing future events to be distributed then we should nullify
-            // the state.
             nullifyState();
         }
     });
 
-    subscription?.add(nullifyState);
-
     return implDisposable((eventOrSink: Event<T> | Sink<T>): void => {
         if (!state) {
-            return;
-        }
-
-        // Called in dispose method queued to subscription before nullifyState.
-        if (subscription?.active === false) {
-            nullifyState();
             return;
         }
 
@@ -69,16 +57,19 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
 
             sinkInfos.push(sinkInfo);
 
-            eventOrSink?.add(() => {
-                if (state && !sinkInfo.didRemove) {
-                    sinkInfo.didRemove = true;
-                    // Only remove the sink if not currently distributing an
-                    // event as removing it here will mess up the loop below.
-                    if (!distributingEvent) {
-                        removeOnce(sinkInfos, sinkInfo);
+            eventOrSink?.add(
+                Disposable(() => {
+                    if (state && !sinkInfo.didRemove) {
+                        sinkInfo.didRemove = true;
+                        // Only remove the sink if not currently distributing an
+                        // event as removing it here will mess up the loop
+                        // below.
+                        if (!distributingEvent) {
+                            removeOnce(sinkInfos, sinkInfo);
+                        }
                     }
-                }
-            });
+                }),
+            );
         } else if (sinkInfos.length > 0) {
             if (!disposable.active) {
                 return;
@@ -161,19 +152,11 @@ export function Subject<T>(subscription?: Disposable): Subject<T> {
 }
 
 /** @todo align with queueing behaviour */
-export function KeepFinalEventSubject<T>(
-    subscription?: Disposable,
-): Subject<T> {
-    const base = Subject<T>(subscription);
+export function KeepFinalEventSubject<T>(): Subject<T> {
+    const base = Subject<T>();
     let finalEvent: Throw | End | undefined;
 
     return implDisposable((eventOrSink: Event<T> | Sink<T>): void => {
-        if (subscription?.active === false) {
-            // If this is called from a dispose method queued before base.
-            base.dispose();
-            return;
-        }
-
         if (isFunction(eventOrSink)) {
             if (finalEvent) {
                 eventOrSink(finalEvent);
@@ -195,18 +178,12 @@ export function KeepFinalEventSubject<T>(
 }
 
 /** @todo align with queuing behaviour */
-export function LastValueSubject<T>(subscription?: Disposable): Subject<T> {
+export function LastValueSubject<T>(): Subject<T> {
     const base = Subject<T>();
     let lastPushEvent: Push<T> | undefined;
     let finalEvent: Throw | End | undefined;
 
     return implDisposable((eventOrSink: Event<T> | Sink<T>) => {
-        if (subscription?.active === false) {
-            // If this is called from a dispose method queued before base.
-            base.dispose();
-            return;
-        }
-
         if (isFunction(eventOrSink)) {
             if (finalEvent) {
                 if (finalEvent.type === EventType.End && lastPushEvent) {

@@ -45,9 +45,11 @@ export function TestSchedule(): TestSchedule {
         };
 
         actions.splice(index, 0, action);
-        subscription?.add(() => {
-            action.shouldCall = false;
-        });
+        subscription?.add(
+            Disposable(() => {
+                action.shouldCall = false;
+            }),
+        );
     };
 
     Object.defineProperty(testSchedule, 'currentFrame', {
@@ -152,9 +154,11 @@ function watchSubscriptionInfo(
         Infinity,
     );
 
-    subscription?.add(() => {
-        info.subscriptionEndFrame = testSchedule.currentFrame;
-    });
+    subscription?.add(
+        Disposable(() => {
+            info.subscriptionEndFrame = testSchedule.currentFrame;
+        }),
+    );
 
     return info;
 }

@@ -78,11 +78,6 @@ export function Sink<T>(
         if (!disposable.active) {
             return;
         }
-        // Called in dispose method queued to subscripton before disposable.
-        if (subscription?.active === false) {
-            disposable.dispose();
-            return;
-        }
         if (event.type !== EventType.Push) {
             disposable.dispose();
         }
