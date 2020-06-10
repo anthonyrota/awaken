@@ -259,26 +259,16 @@ export function implDisposable<T>(
     } else {
         Object.defineProperties(value, {
             [$$disposable]: { value: $$disposable_IdentifyingValue },
-            active: {
-                get: () => disposable.active,
-            },
-            add: {
-                // eslint-disable-next-line @typescript-eslint/unbound-method
-                value: disposable.add,
-            },
-            remove: {
-                // eslint-disable-next-line @typescript-eslint/unbound-method
-                value: disposable.remove,
-            },
-            dispose: {
-                // eslint-disable-next-line @typescript-eslint/unbound-method
-                value: disposable.dispose,
-            },
-            __markParentDisposed: {
-                // eslint-disable-next-line @typescript-eslint/unbound-method
-                value: (disposable as _IDisposableImplementation)
-                    .__markParentDisposed,
-            },
+            /* eslint-disable @typescript-eslint/no-non-null-assertion */
+            active: Object.getOwnPropertyDescriptor(disposable, 'active')!,
+            add: Object.getOwnPropertyDescriptor(disposable, 'add')!,
+            remove: Object.getOwnPropertyDescriptor(disposable, 'remove')!,
+            dispose: Object.getOwnPropertyDescriptor(disposable, 'dispose')!,
+            __markParentDisposed: Object.getOwnPropertyDescriptor(
+                disposable,
+                '__markParentDisposed',
+            )!,
+            /* eslint-enable @typescript-eslint/no-non-null-assertion */
         });
     }
     return value as T & Disposable;
