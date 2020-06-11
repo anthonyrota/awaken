@@ -81,7 +81,7 @@ class _DisposableImplementation implements _IDisposableImplementation {
             return;
         }
 
-        // Neither we nor the child are/waiting to be disposed.
+        // Neither we nor the child are being/waiting to be disposed.
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         removeOnce(this.__children!, child);
     }
