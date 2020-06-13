@@ -1,11 +1,8 @@
 import { removeOnce } from './utils';
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const $$disposable: unique symbol =
-    typeof Symbol !== 'undefined'
-        ? Symbol('IsDisposable_Property_Indicator')
-        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ('@@__IsDisposable_Property_Indicator__@@' as any);
+// eslint-disable-next-line max-len
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+const $$disposable: unique symbol = '@@__IsDisposable_Property_Indicator__@@' as any;
 
 const $$disposable_IdentifyingValue = 'Disposable';
 
