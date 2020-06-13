@@ -69,7 +69,7 @@ export function filter<T>(
                     try {
                         passThrough = predicate(event.value, idx++);
                     } catch (error) {
-                        sink(error);
+                        sink(Throw(error));
                         return;
                     }
                     if (!passThrough) {
