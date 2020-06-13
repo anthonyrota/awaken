@@ -254,11 +254,11 @@ export function watchSourceEvents<T>(
     const events: TestSourceEvent<T>[] = [];
 
     testSchedule(() => {
-        source(
-            Sink((event) => {
-                events.push({ ...event, frame: testSchedule.currentFrame });
-            }, subscription),
-        );
+        const sink = Sink<T>((event) => {
+            events.push({ ...event, frame: testSchedule.currentFrame });
+        });
+        subscription.add(sink);
+        source(sink);
     }, subscriptionInfo.subscriptionStartFrame);
 
     testSchedule(() => {

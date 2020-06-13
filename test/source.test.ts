@@ -1,4 +1,13 @@
-import { EventType, Push, Throw, End, Source, subscribe } from '../src/source';
+import {
+    EventType,
+    Push,
+    Throw,
+    End,
+    Source,
+    Sink,
+    subscribe,
+} from '../src/source';
+import { Disposable } from './../src/disposable';
 
 describe('EventType', () => {
     it('should have a Push property equal to zero', () => {
@@ -57,6 +66,29 @@ describe('Source', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const source = Source(() => {});
         expect(source).toBeFunction();
+    });
+});
+
+describe('Sink', () => {
+    it('should be a function', () => {
+        expect(Sink).toBeFunction();
+    });
+
+    it('should not take values from a previous subscriber of parent disposable', () => {
+        const received: unknown[] = [];
+        const parent = Disposable();
+        const sink = Sink((event) => {
+            received.push(event);
+            parent.dispose();
+        });
+        parent.add(
+            Disposable(() => {
+                sink(Push(1));
+            }),
+        );
+        parent.add(sink);
+        sink(Push(0));
+        expect(received).toEqual([Push(0)]);
     });
 });
 

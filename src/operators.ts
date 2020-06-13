@@ -17,25 +17,27 @@ export function map<T, U>(
     return (source) =>
         Source((sink) => {
             let idx = 0;
-            source(
-                Sink((event) => {
-                    switch (event.type) {
-                        case EventType.Push: {
-                            let transformed: U;
-                            try {
-                                transformed = transform(event.value, idx++);
-                            } catch (error) {
-                                sink(Throw(error));
-                                return;
-                            }
-                            sink(Push(transformed));
-                            break;
+
+            const sourceSink = Sink<T>((event) => {
+                switch (event.type) {
+                    case EventType.Push: {
+                        let transformed: U;
+                        try {
+                            transformed = transform(event.value, idx++);
+                        } catch (error) {
+                            sink(Throw(error));
+                            return;
                         }
-                        default:
-                            sink(event);
+                        sink(Push(transformed));
+                        break;
                     }
-                }, sink),
-            );
+                    default:
+                        sink(event);
+                }
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
         });
 }
 
@@ -60,23 +62,25 @@ export function filter<T>(
     return (source) =>
         Source((sink) => {
             let idx = 0;
-            source(
-                Sink((event) => {
-                    if (event.type === EventType.Push) {
-                        let passThrough: unknown;
-                        try {
-                            passThrough = predicate(event.value, idx++);
-                        } catch (error) {
-                            sink(error);
-                            return;
-                        }
-                        if (!passThrough) {
-                            return;
-                        }
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push) {
+                    let passThrough: unknown;
+                    try {
+                        passThrough = predicate(event.value, idx++);
+                    } catch (error) {
+                        sink(error);
+                        return;
                     }
-                    sink(event);
-                }, sink),
-            );
+                    if (!passThrough) {
+                        return;
+                    }
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
         });
 }
 
@@ -107,29 +111,30 @@ export function reduce<T, R>(
             let currentValue: T;
             let currentIndex = 0;
 
-            source(
-                Sink((event) => {
-                    switch (event.type) {
-                        case EventType.Push: {
-                            currentValue = event.value;
-                            try {
-                                previousAccumulatedResult = transform(
-                                    previousAccumulatedResult,
-                                    currentValue,
-                                    currentIndex++,
-                                );
-                            } catch (error) {
-                                sink(error);
-                            }
-                            return;
+            const sourceSink = Sink<T>((event) => {
+                switch (event.type) {
+                    case EventType.Push: {
+                        currentValue = event.value;
+                        try {
+                            previousAccumulatedResult = transform(
+                                previousAccumulatedResult,
+                                currentValue,
+                                currentIndex++,
+                            );
+                        } catch (error) {
+                            sink(error);
                         }
-                        case EventType.End: {
-                            sink(Push(previousAccumulatedResult));
-                        }
+                        return;
                     }
-                    sink(event);
-                }, sink),
-            );
+                    case EventType.End: {
+                        sink(Push(previousAccumulatedResult));
+                    }
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
         });
 }
 
@@ -153,23 +158,25 @@ export function takeWhile<T>(
     return (source) =>
         Source((sink) => {
             let idx = 0;
-            source(
-                Sink((event) => {
-                    if (event.type === EventType.Push) {
-                        let keepGoing: unknown;
-                        try {
-                            keepGoing = shouldContinue(event.value, idx++);
-                        } catch (error) {
-                            sink(Throw(error));
-                            return;
-                        }
-                        if (!keepGoing) {
-                            sink(End);
-                            return;
-                        }
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push) {
+                    let keepGoing: unknown;
+                    try {
+                        keepGoing = shouldContinue(event.value, idx++);
+                    } catch (error) {
+                        sink(Throw(error));
+                        return;
                     }
-                    sink(event);
-                }, sink),
-            );
+                    if (!keepGoing) {
+                        sink(End);
+                        return;
+                    }
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
         });
 }
