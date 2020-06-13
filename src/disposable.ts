@@ -3,7 +3,6 @@ import { removeOnce } from './utils';
 // eslint-disable-next-line max-len
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
 const $$disposable: unique symbol = '@@__IsDisposable_Property_Indicator__@@' as any;
-
 const $$disposable_IdentifyingValue = 'Disposable';
 
 export interface Disposable {
