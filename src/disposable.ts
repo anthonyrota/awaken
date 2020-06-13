@@ -227,7 +227,15 @@ const {
     __markParentDisposed: _DisposableImplementation___markParentDisposed,
 } = _DisposableImplementation.prototype;
 
-// Used in implementing Sinks.
+/**
+ * Implements the Disposable Interface onto the given value by proxying the
+ * disposable methods & properties from the given value to the given disposable.
+ * @param value The value to implement the Disposable Interface on.
+ * @param disposable The disposable to proxy to.
+ * @returns The given value which has been mutated. In strict javascript this is
+ *     unnecessary but here it is useful as the returned value will have the
+ *     type of the given value & Disposable.
+ */
 export function implDisposable<T>(
     value: T,
     disposable: Disposable,
