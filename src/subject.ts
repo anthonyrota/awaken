@@ -28,7 +28,6 @@ export function Subject<T>(): Subject<T> {
             sinkInfos.length = 0;
             eventsQueue.length = 0;
             state = null;
-            disposable.dispose();
         }
     }
 
