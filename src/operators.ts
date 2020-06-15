@@ -206,6 +206,8 @@ export function takeWhile<T>(
  * Ignores all received Push events. When the source emits an End event, the
  * last received Push event will be emitted along with the End event.
  * @param source The source to transform.
+ * @returns Transformed Source which ignores all Push events except for the last
+ *     one.
  */
 export function takeLast<T>(source: Source<T>): Source<T> {
     return Source((sink) => {
