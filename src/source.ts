@@ -118,8 +118,9 @@ export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
                 // the sink itself is not disposed yet, meaning while checking
                 // if it is active, it disposes itself.
                 active = sink.active;
-            } catch (error) {
-                active = false;
+            } catch (innerError) {
+                asyncReportError(error);
+                throw innerError;
             }
             if (active) {
                 sink(error);
