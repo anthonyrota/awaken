@@ -1,4 +1,5 @@
-import { Source, Sink, EventType, Push, Throw, End } from './source';
+import { Source, Sink, EventType, Event, Push, Throw, End } from './source';
+import { flow } from './utils';
 
 export interface Operator<T, U> {
     (source: Source<T>): Source<U>;
@@ -88,9 +89,59 @@ export function filter<T>(
  * Calls the specified transform function for all the values pushed by the given
  * source. The return value of the transform function is the accumulated result,
  * and is provided as an argument in the next call to the transform function.
+ * The accumulated will be emitted after each Push event.
+ * @param transform A function that transforms the previousAccumulatedResult
+ *     (last value returned by this function), the currentValue of the emitted
+ *     Push event and the currentIndex, and returns an accumulated result.
+ * @param initialValue This is used as the initial value to start the
+ *     accumulation. The first call to the transform function provides this
+ *     as the previousAccumulatedResult.
+ */
+export function scan<T, R>(
+    transform: (
+        previousAccumulatedResult: R,
+        currentValue: T,
+        currentIndex: number,
+    ) => R,
+    initialValue: R,
+): Operator<T, R> {
+    return (source) =>
+        Source((sink) => {
+            let previousAccumulatedResult = initialValue;
+            let currentIndex = 0;
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push) {
+                    try {
+                        previousAccumulatedResult = transform(
+                            previousAccumulatedResult,
+                            event.value,
+                            currentIndex++,
+                        );
+                    } catch (error) {
+                        sink(error);
+                        return;
+                    }
+
+                    sink(Push(previousAccumulatedResult));
+                    return;
+                }
+
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+/**
+ * Calls the specified transform function for all the values pushed by the given
+ * source. The return value of the transform function is the accumulated result,
+ * and is provided as an argument in the next call to the transform function.
  * The accumulated result will be emitted as a Push event once the given source
  * ends.
- * @param transform A function that transforms the previosAccumulatedResult
+ * @param transform A function that transforms the previousAccumulatedResult
  *     (last value returned by this function), the currentValue of the emitted
  *     Push event and the currentIndex, and returns an accumulated result.
  * @param initialValue This is used as the initial value to start the
@@ -105,37 +156,7 @@ export function reduce<T, R>(
     ) => R,
     initialValue: R,
 ): Operator<T, R> {
-    return (source) =>
-        Source((sink) => {
-            let previousAccumulatedResult = initialValue;
-            let currentValue: T;
-            let currentIndex = 0;
-
-            const sourceSink = Sink<T>((event) => {
-                switch (event.type) {
-                    case EventType.Push: {
-                        currentValue = event.value;
-                        try {
-                            previousAccumulatedResult = transform(
-                                previousAccumulatedResult,
-                                currentValue,
-                                currentIndex++,
-                            );
-                        } catch (error) {
-                            sink(error);
-                        }
-                        return;
-                    }
-                    case EventType.End: {
-                        sink(Push(previousAccumulatedResult));
-                    }
-                }
-                sink(event);
-            });
-
-            sink.add(sourceSink);
-            source(sourceSink);
-        });
+    return flow(scan(transform, initialValue), takeLast);
 }
 
 /**
@@ -179,4 +200,31 @@ export function takeWhile<T>(
             sink.add(sourceSink);
             source(sourceSink);
         });
+}
+
+/**
+ * Ignores all received Push events. When the source emits an End event, the
+ * last received Push event will be emitted along with the End event.
+ * @param source The source to transform.
+ */
+export function takeLast<T>(source: Source<T>): Source<T> {
+    return Source((sink) => {
+        let lastEvent: Event<T> | undefined;
+
+        const sourceSink = Sink<T>((event) => {
+            if (event.type === EventType.Push) {
+                lastEvent = event;
+                return;
+            }
+
+            if (event.type === EventType.End && lastEvent) {
+                sink(lastEvent);
+            }
+
+            sink(event);
+        });
+
+        sink.add(sourceSink);
+        source(sourceSink);
+    });
 }
