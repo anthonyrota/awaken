@@ -71,21 +71,17 @@ export interface Sink<T> extends Disposable {
 export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
     const disposable = Disposable();
     return implDisposable((event: Event<T>): void => {
+        if (!disposable.active) {
+            return;
+        }
+
+        if (event.type !== EventType.Push) {
+            disposable.dispose();
+        }
+
         try {
-            // This can throw.
-            if (!disposable.active) {
-                return;
-            }
-
-            if (event.type !== EventType.Push) {
-                // This can also throw.
-                disposable.dispose();
-            }
-
-            // This can definitely throw.
             onEvent(event);
         } catch (error) {
-            // Errors should always be thrown asynchronously.
             asyncReportError(error);
             disposable.dispose();
         }
