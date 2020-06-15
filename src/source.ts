@@ -112,9 +112,20 @@ export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
         try {
             base(sink);
         } catch (error) {
-            /** @todo act like promise? */
-            asyncReportError(error);
-            sink(error);
+            let active: boolean;
+            try {
+                // This can throw if one of the sink's parents is disposed but
+                // the sink itself is not disposed yet, meaning while checking
+                // if it is active, it disposes itself.
+                active = sink.active;
+            } catch (error) {
+                active = false;
+            }
+            if (active) {
+                sink(error);
+            } else {
+                asyncReportError(error);
+            }
         }
     }
 
