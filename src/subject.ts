@@ -171,6 +171,7 @@ export function Subject<T>(): Subject<T> {
                     const sinkToAdd = sinksToAdd[i];
                     sinkToAdd.notAdded = false;
                 }
+                sinksToAdd.length = 0;
 
                 event = eventsQueue.shift();
             }
