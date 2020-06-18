@@ -1,5 +1,5 @@
 import { Disposable, implDisposable } from './disposable';
-import { removeOnce, asyncReportError } from './utils';
+import { removeOnce, asyncReportError } from './util';
 import { EventType, Event, Push, Throw, End, Source, Sink } from './source';
 import {
     setPrototypeOf,

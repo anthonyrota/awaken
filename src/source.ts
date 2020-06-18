@@ -1,5 +1,5 @@
 import { Disposable, implDisposable } from './disposable';
-import { asyncReportError } from './utils';
+import { asyncReportError } from './util';
 
 export const enum EventType {
     Push = 0,

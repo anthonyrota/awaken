@@ -1,5 +1,5 @@
 import { Source, Sink, EventType, Event, Push, Throw, End } from './source';
-import { flow } from './utils';
+import { flow } from './util';
 
 export interface Operator<T, U> {
     (source: Source<T>): Source<U>;

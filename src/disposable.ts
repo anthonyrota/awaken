@@ -1,4 +1,4 @@
-import { removeOnce } from './utils';
+import { removeOnce } from './util';
 import {
     setPrototypeOf,
     NativeErrorWrapped,

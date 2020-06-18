@@ -13,7 +13,7 @@ import {
     isIterable,
     isAsyncIterable,
     isPromiseLike,
-} from '../src/utils';
+} from '../src/util';
 import { Disposable } from '../src/disposable';
 import { RafMock } from './mockTypes/raf';
 import cloneDeep = require('lodash.clonedeep');

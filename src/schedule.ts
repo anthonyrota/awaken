@@ -4,7 +4,7 @@ import {
     setTimeout,
     setInterval,
     removeOnce,
-} from './utils';
+} from './util';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface ScheduleFunction<T extends any[] = []> {
