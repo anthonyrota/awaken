@@ -198,7 +198,7 @@ setPrototypeOf(_DisposalError, NativeErrorWrapped);
 // eslint-disable-next-line max-len
 export const DisposalError: DisposalErrorConstructor = (_DisposalError as unknown) as DisposalErrorConstructor;
 
-export function flattenDisposalErrors(errors: unknown[]): unknown[] {
+function flattenDisposalErrors(errors: unknown[]): unknown[] {
     const flattened: unknown[] = [];
 
     errors.forEach((error) => {
