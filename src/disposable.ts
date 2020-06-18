@@ -1,4 +1,10 @@
 import { removeOnce } from './utils';
+import {
+    setPrototypeOf,
+    NativeErrorWrapped,
+    createSuper,
+    joinErrors,
+} from './errorBase';
 
 // eslint-disable-next-line max-len
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
@@ -153,143 +159,46 @@ export interface DisposalErrorConstructor
     prototype: DisposalError;
 }
 
-function shouldUseReflect(): boolean {
-    return typeof Reflect !== 'undefined' && !!Reflect.construct;
-}
-
-function setPrototypeOf(object: unknown, proto: unknown): void {
-    if (Object.setPrototypeOf) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Object.setPrototypeOf(object, proto as any);
-    } else {
-        // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (object as any).__proto__ = proto;
-    }
-}
-
-interface NativeErrorWrapped extends Omit<ErrorConstructor, 'prototype'> {
-    prototype: NativeErrorWrapped;
-}
-
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const NativeErrorWrapped: NativeErrorWrapped = (function NativeErrorWrapped() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { constructor } = Object.getPrototypeOf(this);
-    if (shouldUseReflect()) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return Reflect.construct(Error, [], constructor);
-    } else {
-        const instance = new Error();
-        if (constructor) {
-            // eslint-disable-next-line max-len
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            setPrototypeOf(instance, constructor.prototype);
-        }
-        return instance;
-    }
-} as unknown) as NativeErrorWrapped;
+const DisposalErrorSuper = createSuper(_DisposalError);
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-NativeErrorWrapped.prototype = Object.create(Error.prototype, {
-    constructor: {
-        value: NativeErrorWrapped,
-        writable: true,
-        configurable: true,
-    },
-});
-
-setPrototypeOf(NativeErrorWrapped, Error);
-
-function DisposalErrorSuper(instance: DisposalError): _DisposalError {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const Super = Object.getPrototypeOf(DisposalError);
-    let constructedValue: unknown;
-
-    if (shouldUseReflect()) {
-        // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        const newTarget = Object.getPrototypeOf(instance).constructor;
-        // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, prefer-rest-params
-        constructedValue = Reflect.construct(Super, arguments, newTarget);
-    } else {
-        // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, prefer-rest-params
-        constructedValue = Super.apply(instance, arguments);
-    }
-
-    if (
-        typeof constructedValue === 'object' ||
-        typeof constructedValue === 'function'
-    ) {
-        return constructedValue as DisposalError;
-    } else {
-        return instance;
-    }
-}
-
-/**
- * Thrown when at least one error is caught during a resource's disposal.
- */
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-export const DisposalError: DisposalErrorConstructor = (function DisposalError(
-    this: DisposalError,
-    errors: unknown[],
-) {
-    const instance = DisposalErrorSuper(this);
+function _DisposalError(this: _DisposalError, errors: unknown[]) {
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    const instance: _DisposalError = DisposalErrorSuper.apply(this);
 
     const flattenedErrors = flattenDisposalErrors(errors);
-    const errorCount = flattenedErrors.length;
 
-    const lastPrefixLength = `  [#${errorCount}] `.length;
-    const multilineErrorPrefix = '\n' + Array(lastPrefixLength + 1).join(' ');
-
-    const printedErrors = flattenedErrors
-        // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        .map((error, index) => {
-            const prefix_ = `  [#${index}] `;
-            const prefix =
-                '\n' +
-                Array(lastPrefixLength - prefix_.length + 1).join(' ') +
-                prefix_;
-
-            const displayedError = `${
-                // eslint-disable-next-line max-len
-                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                error instanceof Error && error.stack ? error.stack : error
-            }`;
-
-            return (
-                prefix +
-                displayedError.split(/\r\n|\r|\n/).join(multilineErrorPrefix)
-            );
-        })
-        .join('');
-
-    instance.message = `Failed to dispose a resource. ${errorCount} error${
+    instance.message = `Failed to dispose a resource. ${
+        flattenedErrors.length
+    } error${
         flattenedErrors.length === 1 ? ' was' : 's were'
-    } caught.${printedErrors}`;
+    } caught.${joinErrors(flattenedErrors)}`;
 
     instance.name = 'DisposalError';
     instance.errors = flattenedErrors;
 
     return instance;
-} as unknown) as DisposalErrorConstructor;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-DisposalError.prototype = Object.create(NativeErrorWrapped.prototype, {
+_DisposalError.prototype = Object.create(NativeErrorWrapped.prototype, {
     constructor: {
-        value: DisposalError,
+        value: _DisposalError,
         writable: true,
         configurable: true,
     },
 });
 
-setPrototypeOf(DisposalError, NativeErrorWrapped);
+setPrototypeOf(_DisposalError, NativeErrorWrapped);
 
-function flattenDisposalErrors(errors: unknown[]): unknown[] {
+/**
+ * Thrown when at least one error is caught during a resource's disposal.
+ */
+// eslint-disable-next-line max-len
+export const DisposalError: DisposalErrorConstructor = (_DisposalError as unknown) as DisposalErrorConstructor;
+
+export function flattenDisposalErrors(errors: unknown[]): unknown[] {
     const flattened: unknown[] = [];
 
     errors.forEach((error) => {
