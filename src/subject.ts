@@ -104,16 +104,7 @@ export function Subject<T>(): Subject<T> {
             );
         } else if (sinkInfos.length > 0) {
             if (eventOrSink.type !== EventType.Push) {
-                try {
-                    disposable.dispose();
-                } catch (error) {
-                    // An error will be thrown synchronously, stopping the
-                    // distribution of all current and future queued events.
-                    // Therefore nullify state even if currently distributing an
-                    // event.
-                    nullifyState();
-                    throw error;
-                }
+                disposable.dispose();
             }
 
             if (distributingEvent) {
