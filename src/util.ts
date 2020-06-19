@@ -327,3 +327,9 @@ export function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     return !!value && isFunction((value as PromiseLike<unknown>).then);
 }
+
+export function forEach<T>(array: T[], callback: (value: T) => void): void {
+    for (let i = 0; i < array.length; i++) {
+        callback(array[i]);
+    }
+}

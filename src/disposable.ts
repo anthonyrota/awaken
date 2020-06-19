@@ -1,4 +1,4 @@
-import { removeOnce } from './util';
+import { removeOnce, forEach } from './util';
 import {
     setPrototypeOf,
     NativeErrorWrapped,
@@ -201,7 +201,7 @@ export const DisposalError: DisposalErrorConstructor = (_DisposalError as unknow
 function flattenDisposalErrors(errors: unknown[]): unknown[] {
     const flattened: unknown[] = [];
 
-    errors.forEach((error) => {
+    forEach(errors, (error) => {
         if (error instanceof DisposalError) {
             Array.prototype.push.apply(flattened, error.errors);
         } else {
