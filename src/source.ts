@@ -1,5 +1,11 @@
+import {
+    ScheduleFunction,
+    scheduleAnimationFrame,
+    ScheduleInterval,
+} from './schedule';
 import { Disposable, implDisposable } from './disposable';
 import { asyncReportError } from './util';
+import { pluck, map, concat, merge, mergeConcurrent, flat } from './operator';
 
 export const enum EventType {
     Push = 0,
@@ -147,6 +153,15 @@ export function subscribe<T>(sink: Sink<T>): (source: Source<T>) => void {
     };
 }
 
+export function pushArrayItemsToSink<T>(
+    array: ArrayLike<T>,
+    sink: Sink<T>,
+): void {
+    for (let i = 0; sink.active && i < array.length; i++) {
+        sink(Push(array[i]));
+    }
+}
+
 /**
  * Creates a Source from the given array/array-like. The values of the array
  * will be synchronously emitted by the created source upon each susbcription.
@@ -155,13 +170,295 @@ export function subscribe<T>(sink: Sink<T>): (source: Source<T>) => void {
  */
 export function fromArray<T>(array: ArrayLike<T>): Source<T> {
     return Source((sink) => {
-        for (let i = 0; i < array.length && sink.active; i++) {
-            sink(Push(array[i]));
+        pushArrayItemsToSink(array, sink);
+        sink(End);
+    });
+}
+
+export function fromArrayScheduled<T>(
+    array: ArrayLike<T>,
+    schedule: ScheduleFunction,
+): Source<T> {
+    return Source((sink) => {
+        if (array.length === 0) {
+            sink(End);
+            return;
+        }
+
+        let idx = 0;
+
+        function pushNext(): void {
+            sink(Push(array[idx++]));
+
+            if (idx === array.length) {
+                sink(End);
+            } else {
+                // We don't know if the user provided function actually checks
+                // if the sink is active or not, even though it should.
+                if (sink.active) {
+                    schedule(pushNext, sink);
+                }
+            }
+        }
+
+        schedule(pushNext, sink);
+    });
+}
+
+export function of<T>(...items: T[]): Source<T> {
+    return fromArray(items);
+}
+
+export function ofScheduled<T>(
+    schedule: ScheduleFunction,
+    ...items: T[]
+): Source<T> {
+    return fromArrayScheduled(items, schedule);
+}
+
+export function ofEvent(event: Throw | End): Source<never>;
+export function ofEvent<T>(event: Event<T>): Source<T>;
+export function ofEvent<T>(event: Event<T>): Source<T> {
+    return Source((sink) => {
+        sink(event);
+        sink(End);
+    });
+}
+
+export function ofError(error: unknown): Source<never> {
+    return ofEvent(Throw(error));
+}
+
+export const empty = ofEvent(End);
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export const never = Source(() => {});
+
+export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
+    return Source((sink) => {
+        try {
+            for (const item of iterable) {
+                sink(Push(item));
+                if (!sink.active) {
+                    break;
+                }
+            }
+        } catch (error) {
+            sink(Throw(error));
         }
         sink(End);
     });
 }
 
-export const empty = Source<never>((sink) => {
+async function distributeAsyncIterable<T>(
+    iterable: AsyncIterable<T>,
+    sink: Sink<T>,
+): Promise<void> {
+    try {
+        for await (const item of iterable) {
+            sink(Push(item));
+            if (!sink.active) {
+                break;
+            }
+        }
+    } catch (error) {
+        sink(Throw(error));
+        return;
+    }
     sink(End);
-});
+}
+
+export function fromAsyncIterable<T>(iterable: AsyncIterable<T>): Source<T> {
+    return Source((sink) => {
+        void distributeAsyncIterable(iterable, sink);
+    });
+}
+
+export function fromPromise<T>(promise: Promise<T>): Source<T> {
+    return Source((sink) => {
+        promise
+            .then(
+                (value) => {
+                    sink(Push(value));
+                    sink(End);
+                },
+                (error) => {
+                    sink(Throw(error));
+                },
+            )
+            .then(null, asyncReportError);
+    });
+}
+
+export function fromScheduleFunction<T extends unknown[]>(
+    schedule: ScheduleFunction<T>,
+): Source<T> {
+    return Source((sink) => {
+        function callback(...args: T): void {
+            sink(Push(args));
+
+            // We don't know if the user provided function actually checks if
+            // the sink is active or not, even though it should.
+            if (sink.active) {
+                schedule(callback, sink);
+            }
+        }
+
+        schedule(callback, sink);
+    });
+}
+
+const replaceWithValueIndex = map((_: unknown, idx) => idx);
+
+export function interval(delayMs: number): Source<number> {
+    return replaceWithValueIndex(
+        fromScheduleFunction(ScheduleInterval(delayMs)),
+    );
+}
+
+export const animationFrames: Source<number> = pluck<[number], 0>(0)(
+    fromScheduleFunction(scheduleAnimationFrame),
+);
+
+export function lazy<T>(createSource: () => Source<T>): Source<T> {
+    return Source((sink) => {
+        let source: Source<T>;
+        try {
+            source = createSource();
+        } catch (error) {
+            sink(Throw(error));
+            return;
+        }
+        source(sink);
+    });
+}
+
+export function range(count: number, start = 0): Source<number> {
+    return Source((sink) => {
+        for (let i = 0; sink.active && i < count; i++) {
+            sink(Push(start + i));
+        }
+        sink(End);
+    });
+}
+
+export function flatSources<T>(...sources: Source<T>[]): Source<T> {
+    return flat(fromArray(sources));
+}
+
+export function mergeSourcesConcurrent<T>(
+    max: number,
+    ...sources: Source<T>[]
+): Source<T> {
+    return mergeConcurrent(max)(fromArray(sources));
+}
+
+export function mergeSources<T>(...sources: Source<T>[]): Source<T> {
+    return merge(fromArray(sources));
+}
+
+export function concatSources<T>(...sources: Source<T>[]): Source<T> {
+    return concat(fromArray(sources));
+}
+
+// eslint-disable-next-line max-len
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+const noValue: unique symbol = {} as any;
+
+export function combineSources<T extends unknown[]>(
+    ...sources: { [K in keyof T]: Source<T[K]> }
+): Source<T> {
+    return sources.length === 0
+        ? empty
+        : Source((sink) => {
+              const values: unknown[] = [];
+              let responded = 0;
+
+              for (let i = 0; sink.active && i < sources.length; i++) {
+                  const sourceSink = Sink<unknown>((event) => {
+                      if (event.type === EventType.Push) {
+                          if (values[i] === noValue) {
+                              responded++;
+                          }
+                          values[i] = event.value;
+                          if (responded === sources.length) {
+                              sink(Push(values.slice() as T));
+                          }
+                          return;
+                      }
+                      sink(event);
+                  });
+
+                  sink.add(sourceSink);
+                  sources[i](sourceSink);
+              }
+          });
+}
+
+export function raceSources<T>(...sources: Source<T>[]): Source<T> {
+    return sources.length === 0
+        ? empty
+        : Source((sink) => {
+              const sourceSinks = Disposable();
+              sink.add(sourceSinks);
+              let hasSourceWonRace = false;
+
+              for (let i = 0; sink.active && i < sources.length; i++) {
+                  const sourceSink = Sink<T>((event) => {
+                      if (!hasSourceWonRace && event.type === EventType.Push) {
+                          hasSourceWonRace = true;
+                          sourceSinks.remove(sourceSink);
+                          sink.add(sourceSink);
+                          sourceSinks.dispose();
+                      }
+                      sink(event);
+                  });
+
+                  sourceSinks.add(sourceSink);
+                  sources[i](sourceSink);
+              }
+          });
+}
+
+export function zipSources<T extends unknown[]>(
+    ...sources: { [K in keyof T]: Source<T[K]> }
+): Source<T> {
+    return sources.length === 0
+        ? empty
+        : Source((sink) => {
+              const sourcesValues: unknown[][] = [];
+              let hasValueCount = 0;
+
+              for (let i = 0; sink.active && i < sources.length; i++) {
+                  const values = [];
+                  sourcesValues[i] = values;
+
+                  const sourceSink = Sink<unknown>((event) => {
+                      if (event.type === EventType.Push) {
+                          if (!values.length) {
+                              hasValueCount++;
+                          }
+
+                          if (hasValueCount === sources.length) {
+                              const valuesToPush: unknown[] = [];
+                              for (let i = 0; i < sourcesValues.length; i++) {
+                                  // eslint-disable-next-line max-len
+                                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                                  valuesToPush.push(sourcesValues[i].shift()!);
+                                  if (!sourcesValues[i].length) {
+                                      hasValueCount--;
+                                  }
+                              }
+                              sink(Push(valuesToPush as T));
+                          }
+
+                          return;
+                      }
+                      sink(event);
+                  });
+
+                  sink.add(sourceSink);
+                  sources[i](sourceSink);
+              }
+          });
+}

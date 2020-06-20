@@ -7,6 +7,14 @@ import {
     Throw,
     End,
     empty,
+    pushArrayItemsToSink,
+    flatSources,
+    mergeSources,
+    mergeSourcesConcurrent,
+    concatSources,
+    combineSources,
+    raceSources,
+    zipSources,
 } from './source';
 import { flow, forEach } from './util';
 
@@ -49,6 +57,10 @@ export function map<T, U>(
             sink.add(sourceSink);
             source(sourceSink);
         });
+}
+
+export function mapTo<T>(value: T): Operator<unknown, T> {
+    return map(() => value);
 }
 
 /**
@@ -168,7 +180,28 @@ export function reduce<T, R>(
     return flow(scan(transform, initialValue), last);
 }
 
-export function flatConcurrent(
+export function flat<T>(source: Source<Source<T>>): Source<T> {
+    return Source((sink) => {
+        let hasReceivedSource = false;
+
+        const sourceSink = Sink<Source<T>>((event) => {
+            if (event.type === EventType.Push) {
+                hasReceivedSource = true;
+                event.value(sink);
+                return;
+            }
+            if (event.type === EventType.End && !hasReceivedSource) {
+                sink(End);
+            }
+            sink(event);
+        });
+
+        sink.add(sourceSink);
+        source(sourceSink);
+    });
+}
+
+export function mergeConcurrent(
     max: number,
 ): <T>(source: Source<Source<T>>) => Source<T> {
     return <T>(source: Source<Source<T>>) =>
@@ -189,6 +222,7 @@ export function flatConcurrent(
                         return;
                     }
                 }
+                sink(event);
             }
 
             function subscribeNext(innerSource: Source<T>): void {
@@ -222,8 +256,8 @@ export function flatConcurrent(
         });
 }
 
-export const flat = flatConcurrent(Infinity);
-export const concat = flatConcurrent(1);
+export const merge = mergeConcurrent(Infinity);
+export const concat = mergeConcurrent(1);
 
 function _createSwitchOperator(
     overrideCurrent: boolean,
@@ -272,17 +306,76 @@ function _createSwitchOperator(
 export const switchEach = _createSwitchOperator(true);
 export const concatDrop = _createSwitchOperator(false);
 
-export function flatMapConcurrent<T, U>(
+export function startWith<T>(
+    ...values: T[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) =>
+        Source<T | U>((sink) => {
+            pushArrayItemsToSink(values, sink);
+            source(sink);
+        });
+}
+
+export function endWith<T>(
+    ...values: T[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) =>
+        Source<T | U>((sink) => {
+            const sourceSink = Sink<U>((event) => {
+                if (event.type === EventType.End) {
+                    pushArrayItemsToSink(values, sink);
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export function flatWith<T>(
+    ...sources: Source<T>[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) => flatSources<T | U>(source, ...sources);
+}
+
+export function mergeWithConcurrent<T>(
     max: number,
-    transform: (value: T, index: number) => Source<U>,
-): Operator<T, U> {
-    return flow(map(transform), flatConcurrent(max));
+    ...sources: Source<T>[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) =>
+        mergeSourcesConcurrent<T | U>(max, source, ...sources);
+}
+
+export function mergeWith<T>(
+    ...sources: Source<T>[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) => mergeSources<T | U>(source, ...sources);
+}
+
+export function concatWith<T>(
+    ...sources: Source<T>[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) => concatSources<T | U>(source, ...sources);
 }
 
 export function flatMap<T, U>(
     transform: (value: T, index: number) => Source<U>,
 ): Operator<T, U> {
     return flow(map(transform), flat);
+}
+
+export function mergeMapConcurrent<T, U>(
+    max: number,
+    transform: (value: T, index: number) => Source<U>,
+): Operator<T, U> {
+    return flow(map(transform), mergeConcurrent(max));
+}
+
+export function mergeMap<T, U>(
+    transform: (value: T, index: number) => Source<U>,
+): Operator<T, U> {
+    return flow(map(transform), merge);
 }
 
 export function concatMap<T, U>(
@@ -323,16 +416,23 @@ export function spyEvent<T>(
         });
 }
 
-export function spyPush<T>(onPush: (event: Push<T>) => void): Operator<T, T> {
-    return spyEvent((event) => {
-        if (event.type === EventType.Push) {
-            onPush(event);
-        }
-    });
+export function spyPush<T>(
+    onPush: (pushEvent: Push<T>, index: number) => void,
+): Operator<T, T> {
+    return (source) =>
+        Source((sink) => {
+            let idx = 0;
+
+            spyEvent<T>((event) => {
+                if (event.type === EventType.Push) {
+                    onPush(event, idx++);
+                }
+            })(source)(sink);
+        });
 }
 
 export function spyThrow(
-    onThrow: (event: Throw) => void,
+    onThrow: (throwEvent: Throw) => void,
 ): <T>(source: Source<T>) => Source<T> {
     return spyEvent((event) => {
         if (event.type === EventType.Throw) {
@@ -342,7 +442,7 @@ export function spyThrow(
 }
 
 export function spyEnd(
-    onEnd: (event: End) => void,
+    onEnd: (endEvent: End) => void,
 ): <T>(source: Source<T>) => Source<T> {
     return spyEvent((event) => {
         if (event.type === EventType.End) {
@@ -583,4 +683,35 @@ export function skipUntil(
             stopSource(stopSink);
             source(sourceSink);
         });
+}
+
+export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
+    return map((value) => value[key]);
+}
+
+export type Unshift<T extends unknown[], U> = ((
+    h: U,
+    ...t: T
+) => void) extends (...t: infer R) => void
+    ? R
+    : never;
+
+export function combineWith<T extends unknown[]>(
+    ...sources: { [K in keyof T]: Source<T[K]> }
+): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    return <U>(source: Source<U>) =>
+        combineSources(source, ...sources) as Source<Unshift<T, U>>;
+}
+
+export function raceWith<T>(
+    ...sources: Source<T>[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) => raceSources<T | U>(source, ...sources);
+}
+
+export function zipWith<T extends unknown[]>(
+    ...sources: { [K in keyof T]: Source<T[K]> }
+): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    return <U>(source: Source<U>) =>
+        zipSources(source, ...sources) as Source<Unshift<T, U>>;
 }
