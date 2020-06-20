@@ -1,5 +1,5 @@
 import { Source, Sink, EventType, Event, Push, Throw, End } from './source';
-import { flow } from './util';
+import { flow, forEach } from './util';
 
 export interface Operator<T, U> {
     (source: Source<T>): Source<U>;
@@ -119,7 +119,7 @@ export function scan<T, R>(
                             currentIndex++,
                         );
                     } catch (error) {
-                        sink(error);
+                        sink(Throw(error));
                         return;
                     }
 
@@ -156,8 +156,217 @@ export function reduce<T, R>(
     ) => R,
     initialValue: R,
 ): Operator<T, R> {
-    return flow(scan(transform, initialValue), takeLast);
+    return flow(scan(transform, initialValue), last);
 }
+
+export function flatConcurrent(
+    max: number,
+): <T>(source: Source<Source<T>>) => Source<T> {
+    return <T>(source: Source<Source<T>>) =>
+        Source<T>((sink) => {
+            const queue: Source<T>[] = [];
+            let completed = false;
+            let active = 0;
+
+            function onInnerEvent(event: Event<T>): void {
+                if (event.type === EventType.End) {
+                    active--;
+                    const nextSource = queue.shift();
+                    if (nextSource) {
+                        subscribeNext(nextSource);
+                        return;
+                    }
+                    if (active !== 0 || !completed) {
+                        return;
+                    }
+                }
+            }
+
+            function subscribeNext(innerSource: Source<T>): void {
+                const innerSink = Sink(onInnerEvent);
+                sink.add(innerSink);
+                innerSource(innerSink);
+            }
+
+            const sourceSink = Sink<Source<T>>((event) => {
+                if (event.type === EventType.Push) {
+                    if (active < max) {
+                        subscribeNext(event.value);
+                    } else {
+                        queue.push(event.value);
+                    }
+                    return;
+                }
+
+                if (event.type === EventType.End) {
+                    completed = true;
+                    if (queue.length !== 0 || active !== 0) {
+                        return;
+                    }
+                }
+
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export const flat = flatConcurrent(Infinity);
+export const concat = flatConcurrent(1);
+
+function _createSwitchOperator(
+    overrideCurrent: boolean,
+): <T>(source: Source<Source<T>>) => Source<T> {
+    return <T>(source: Source<Source<T>>) =>
+        Source<T>((sink) => {
+            let completed = false;
+            let innerSink: Sink<T> | undefined;
+
+            function onInnerEvent(event: Event<T>): void {
+                if (event.type === EventType.End && !completed) {
+                    return;
+                }
+                sink(event);
+            }
+
+            const sourceSink = Sink<Source<T>>((event) => {
+                if (event.type === EventType.Push) {
+                    if (overrideCurrent) {
+                        innerSink?.dispose();
+                    } else if (innerSink?.active) {
+                        return;
+                    }
+
+                    innerSink = Sink(onInnerEvent);
+                    sink.add(innerSink);
+                    event.value(innerSink);
+                    return;
+                }
+
+                if (event.type === EventType.End) {
+                    completed = true;
+                    if (innerSink?.active) {
+                        return;
+                    }
+                }
+
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export const switchEach = _createSwitchOperator(true);
+export const concatDrop = _createSwitchOperator(false);
+
+export function flatMapConcurrent<T, U>(
+    max: number,
+    transform: (value: T, index: number) => Source<U>,
+): Operator<T, U> {
+    return flow(map(transform), flatConcurrent(max));
+}
+
+export function flatMap<T, U>(
+    transform: (value: T, index: number) => Source<U>,
+): Operator<T, U> {
+    return flow(map(transform), flat);
+}
+
+export function concatMap<T, U>(
+    transform: (value: T, index: number) => Source<U>,
+): Operator<T, U> {
+    return flow(map(transform), concat);
+}
+
+export function switchMap<T, U>(
+    transform: (value: T, index: number) => Source<U>,
+): Operator<T, U> {
+    return flow(map(transform), switchEach);
+}
+
+export function concatDropMap<T, U>(
+    transform: (value: T, index: number) => Source<U>,
+): Operator<T, U> {
+    return flow(map(transform), concatDrop);
+}
+
+export function spyEvent<T>(
+    onEvent: (event: Event<T>) => void,
+): Operator<T, T> {
+    return (source) =>
+        Source((sink) => {
+            const sourceSink = Sink<T>((event) => {
+                try {
+                    onEvent(event);
+                } catch (error) {
+                    sink(Throw(error));
+                    return;
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export function spyPush<T>(onPush: (event: Push<T>) => void): Operator<T, T> {
+    return spyEvent((event) => {
+        if (event.type === EventType.Push) {
+            onPush(event);
+        }
+    });
+}
+
+export function spyThrow(
+    onThrow: (event: Throw) => void,
+): <T>(source: Source<T>) => Source<T> {
+    return spyEvent((event) => {
+        if (event.type === EventType.Throw) {
+            onThrow(event);
+        }
+    });
+}
+
+export function spyEnd(
+    onEnd: (event: End) => void,
+): <T>(source: Source<T>) => Source<T> {
+    return spyEvent((event) => {
+        if (event.type === EventType.End) {
+            onEnd(event);
+        }
+    });
+}
+
+export function take(amount: number): <T>(source: Source<T>) => Source<T> {
+    return <T>(source: Source<T>) =>
+        Source<T>((sink) => {
+            let count = 0;
+
+            const sourceSink = Sink<T>((event) => {
+                // If called during last event, exit.
+                if (count === amount) {
+                    return;
+                }
+                if (event.type === EventType.Push) {
+                    count++;
+                }
+                sink(event);
+                if (count === amount) {
+                    sink(End);
+                }
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export const first = take(1);
 
 /**
  * Calls the shouldContinue function for each Push event of the given source.
@@ -204,29 +413,160 @@ export function takeWhile<T>(
 
 /**
  * Ignores all received Push events. When the source emits an End event, the
- * last received Push event will be emitted along with the End event.
- * @param source The source to transform.
- * @returns Transformed Source which ignores all Push events except for the last
- *     one.
+ * last N=amount received Push event will be emitted along with the End event.
+ * @param amount The amount of events to keep and distribute at the end.
  */
-export function takeLast<T>(source: Source<T>): Source<T> {
-    return Source((sink) => {
-        let lastEvent: Event<T> | undefined;
+export function takeLast(amount: number): <T>(source: Source<T>) => Source<T> {
+    return <T>(source: Source<T>) =>
+        Source<T>((sink) => {
+            let pushEvents: Push<T>[] | null = [];
 
-        const sourceSink = Sink<T>((event) => {
-            if (event.type === EventType.Push) {
-                lastEvent = event;
-                return;
-            }
+            const sourceSink = Sink<T>((event) => {
+                if (!pushEvents) {
+                    return;
+                }
 
-            if (event.type === EventType.End && lastEvent) {
-                sink(lastEvent);
-            }
+                if (event.type === EventType.Push) {
+                    if (pushEvents.length >= amount) {
+                        pushEvents.shift();
+                    }
+                    pushEvents.push(event);
+                    return;
+                }
 
-            sink(event);
+                if (event.type === EventType.End) {
+                    const pushEvents_ = pushEvents;
+                    pushEvents = null;
+                    forEach(pushEvents_, sink);
+                }
+
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
         });
+}
 
-        sink.add(sourceSink);
-        source(sourceSink);
-    });
+export const last = takeLast(1);
+
+export function takeUntil(
+    stopSource: Source<unknown>,
+): <T>(source: Source<T>) => Source<T> {
+    return <T>(source: Source<T>) =>
+        Source<T>((sink) => {
+            const stopSink = Sink<unknown>((event) => {
+                sink(event.type === EventType.Throw ? event : End);
+            });
+
+            sink.add(stopSink);
+            stopSource(stopSink);
+            source(sink);
+        });
+}
+
+export function skip(amount: number): <T>(source: Source<T>) => Source<T> {
+    return <T>(source: Source<T>) =>
+        Source<T>((sink) => {
+            let count = 0;
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push && ++count <= amount) {
+                    return;
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export function skipWhile<T>(
+    shouldContinueSkipping: (value: T, index: number) => unknown,
+): Operator<T, T> {
+    return (source) =>
+        Source((sink) => {
+            let skipping = true;
+            let idx = 0;
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push && skipping) {
+                    try {
+                        skipping = !!shouldContinueSkipping(event.value, idx++);
+                    } catch (error) {
+                        sink(Throw(error));
+                        return;
+                    }
+
+                    if (skipping) {
+                        return;
+                    }
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export function skipLast(amount: number): <T>(source: Source<T>) => Source<T> {
+    return <T>(source: Source<T>) =>
+        Source<T>((sink) => {
+            const pushEvents: Push<T>[] = [];
+            let count = 0;
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push) {
+                    let idx = count++;
+
+                    if (idx < amount) {
+                        pushEvents[idx] = event;
+                    } else {
+                        idx %= amount;
+                        const previous = pushEvents[idx];
+                        pushEvents[idx] = event;
+                        sink(previous);
+                    }
+
+                    return;
+                }
+
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export function skipUntil(
+    stopSource: Source<unknown>,
+): <T>(source: Source<T>) => Source<T> {
+    return <T>(source: Source<T>) =>
+        Source<T>((sink) => {
+            let skip = true;
+
+            const stopSink = Sink<unknown>((event) => {
+                if (event.type === EventType.Throw) {
+                    sink(event);
+                } else {
+                    skip = false;
+                    stopSink.dispose();
+                }
+            });
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push && skip) {
+                    return;
+                }
+                sink(event);
+            });
+
+            sink.add(stopSink);
+            sink.add(sourceSink);
+            stopSource(stopSink);
+            source(sourceSink);
+        });
 }
