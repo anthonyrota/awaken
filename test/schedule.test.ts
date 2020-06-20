@@ -996,7 +996,9 @@ describe('ScheduleAnimationFrameQueued', () => {
 });
 
 describe('ScheduleTimeout', () => {
-    beforeEach(jest.useFakeTimers);
+    beforeEach(() => {
+        jest.useFakeTimers('legacy');
+    });
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
@@ -1082,7 +1084,9 @@ describe('ScheduleTimeout', () => {
 });
 
 describe('ScheduleTimeoutQueued', () => {
-    beforeEach(jest.useFakeTimers);
+    beforeEach(() => {
+        jest.useFakeTimers('legacy');
+    });
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
@@ -1610,7 +1614,9 @@ describe('ScheduleTimeoutQueued', () => {
 });
 
 describe('ScheduleInterval', () => {
-    beforeEach(jest.useFakeTimers);
+    beforeEach(() => {
+        jest.useFakeTimers('legacy');
+    });
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 

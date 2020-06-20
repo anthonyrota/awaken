@@ -203,7 +203,9 @@ describe('requestAnimationFrame', () => {
 });
 
 describe('setTimeout', () => {
-    beforeEach(jest.useFakeTimers);
+    beforeEach(() => {
+        jest.useFakeTimers('legacy');
+    });
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
@@ -286,7 +288,9 @@ describe('setTimeout', () => {
 });
 
 describe('setInterval', () => {
-    beforeEach(jest.useFakeTimers);
+    beforeEach(() => {
+        jest.useFakeTimers('legacy');
+    });
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
@@ -399,7 +403,9 @@ describe('setInterval', () => {
 });
 
 describe('asyncReportError', () => {
-    beforeEach(jest.useFakeTimers);
+    beforeEach(() => {
+        jest.useFakeTimers('legacy');
+    });
     afterEach(jest.useRealTimers);
     afterEach(jest.clearAllTimers);
 
