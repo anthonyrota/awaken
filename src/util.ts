@@ -1,5 +1,4 @@
 import { Disposable } from './disposable';
-import isFunction = require('lodash.isfunction');
 import raf = require('raf');
 
 function _call<T>(x: T, f: (x: T) => T): T {
@@ -125,23 +124,6 @@ export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T {
 }
 
 /**
- * Converts the given value into an array.
- * @param items The values to convert into an array.
- * @returns The converted array.
- */
-export function toArray<T>(items: Iterable<T> | ArrayLike<T> | T[]): T[] {
-    if (Array.isArray(items)) {
-        return items;
-    }
-
-    if (isIterable(items)) {
-        return [...items];
-    }
-
-    return Array.prototype.slice.call<ArrayLike<T>, [], T[]>(items);
-}
-
-/**
  * Removes the first instance of the value from the array.
  * @param array The array to remove the value from.
  * @param item The value to remove from the array.
@@ -151,17 +133,6 @@ export function removeOnce<T>(array: ArrayLike<T>, item: T): void {
     if (index !== -1) {
         Array.prototype.splice.call(array, index, 1);
     }
-}
-
-/**
- * Returns the last item from the given array, or `undefined` if the array has
- * no items.
- * @param array The array to get the last item from.
- * @returns The last item from the given array, or `undefined` if the array has
- *     no items.
- */
-export function getLast<T>(array: ArrayLike<T>): T | undefined {
-    return array.length > 0 ? array[array.length - 1] : undefined;
 }
 
 /**
@@ -252,80 +223,6 @@ export function asyncReportError(error: unknown): void {
     setTimeout(() => {
         throw error;
     });
-}
-
-/**
- * Returns the most suitable iterator symbol.
- * @returns Symbol.iterator if it exists, else a string substitute.
- */
-export function get$$iterator(): symbol | '@@iterator' {
-    if (
-        typeof Symbol !== 'undefined' &&
-        isFunction(Symbol) &&
-        Symbol.iterator
-    ) {
-        return Symbol.iterator;
-    }
-
-    return '@@iterator';
-}
-
-/**
- * Returns `Symbol.asyncIterator` if it is defined.
- * @returns Symbol.asyncIterator if it exists, else undefined.
- */
-export function get$$asyncIterator(): symbol | void {
-    if (
-        typeof Symbol !== 'undefined' &&
-        isFunction(Symbol) &&
-        Symbol.asyncIterator
-    ) {
-        return Symbol.asyncIterator;
-    }
-}
-
-/**
- * Checks whether the given value is iterable.
- * @returns Whether the given value is an iterable.
- */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function isIterable(value: unknown): value is Iterable<unknown> {
-    return (
-        value != null &&
-        // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        isFunction((value as any)[get$$iterator()])
-    );
-}
-
-/**
- * Checks whether the given value is an AsyncIterable.
- * @returns Whether the given value is an AsyncIterable.
- */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function isAsyncIterable(
-    value: unknown,
-): value is AsyncIterable<unknown> {
-    const $$asyncIterator = get$$asyncIterator();
-
-    return (
-        !!$$asyncIterator &&
-        value != null &&
-        // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        isFunction((value as any)[$$asyncIterator])
-    );
-}
-
-/**
- * Checks whether the given value is PromiseLike, meaning it has a `then`
- * function defined.
- * @returns Whether the given value is PromiseLike.
- */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    return !!value && isFunction((value as PromiseLike<unknown>).then);
 }
 
 export function forEach<T>(array: T[], callback: (value: T) => void): void {
