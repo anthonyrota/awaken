@@ -1,4 +1,13 @@
-import { Source, Sink, EventType, Event, Push, Throw, End } from './source';
+import {
+    Source,
+    Sink,
+    EventType,
+    Event,
+    Push,
+    Throw,
+    End,
+    empty,
+} from './source';
 import { flow, forEach } from './util';
 
 export interface Operator<T, U> {
@@ -342,21 +351,26 @@ export function spyEnd(
     });
 }
 
+const toEmpty = () => empty;
+
 export function take(amount: number): <T>(source: Source<T>) => Source<T> {
+    if (amount < 1) {
+        return toEmpty;
+    }
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
             let count = 0;
 
             const sourceSink = Sink<T>((event) => {
                 // If called during last event, exit.
-                if (count === amount) {
+                if (count >= amount) {
                     return;
                 }
                 if (event.type === EventType.Push) {
                     count++;
                 }
                 sink(event);
-                if (count === amount) {
+                if (count >= amount) {
                     sink(End);
                 }
             });

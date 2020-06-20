@@ -161,3 +161,7 @@ export function fromArray<T>(array: ArrayLike<T>): Source<T> {
         sink(End);
     });
 }
+
+export const empty = Source<never>((sink) => {
+    sink(End);
+});
