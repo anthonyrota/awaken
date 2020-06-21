@@ -221,7 +221,7 @@ export function ofEvent<T>(event: Event<T>): Source<T> {
     });
 }
 
-export function ofError(error: unknown): Source<never> {
+export function throwError(error: unknown): Source<never> {
     return ofEvent(Throw(error));
 }
 
