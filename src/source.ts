@@ -503,6 +503,10 @@ export function map<T, U>(
         });
 }
 
+/**
+ * Replaces the value of each received Push event with the given value.
+ * @param value The value to push.
+ */
 export function mapTo<T>(value: T): Operator<unknown, T> {
     return map(() => value);
 }
