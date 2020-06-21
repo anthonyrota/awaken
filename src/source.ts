@@ -152,10 +152,7 @@ export function subscribe<T>(sink: Sink<T>): (source: Source<T>) => void {
     };
 }
 
-export function pushArrayItemsToSink<T>(
-    array: ArrayLike<T>,
-    sink: Sink<T>,
-): void {
+function pushArrayItemsToSink<T>(array: ArrayLike<T>, sink: Sink<T>): void {
     for (let i = 0; sink.active && i < array.length; i++) {
         sink(Push(array[i]));
     }
