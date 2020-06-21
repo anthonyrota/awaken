@@ -689,7 +689,7 @@ export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
     return map((value) => value[key]);
 }
 
-export type Unshift<T extends unknown[], U> = ((
+type Unshift<T extends unknown[], U> = ((
     h: U,
     ...t: T
 ) => void) extends (...t: infer R) => void
