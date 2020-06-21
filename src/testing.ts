@@ -1,6 +1,6 @@
+import { Disposable } from './disposable';
 import { EventType, Event, Push, Throw, End, Source, Sink } from './source';
 import { Subject as DefaultSubject } from './subject';
-import { Disposable } from './disposable';
 
 interface TestScheduleFunction {
     (

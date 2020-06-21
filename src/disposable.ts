@@ -1,10 +1,5 @@
+import { createCustomError, joinErrors } from './errorBase';
 import { removeOnce, forEach } from './util';
-import {
-    setPrototypeOf,
-    NativeErrorWrapped,
-    createSuper,
-    joinErrors,
-} from './errorBase';
 
 // eslint-disable-next-line max-len
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
@@ -153,50 +148,28 @@ export interface DisposalError extends _DisposalError {
     readonly errors: unknown[];
 }
 
-export interface DisposalErrorConstructor
-    extends Omit<ErrorConstructor, 'prototype'> {
+export interface DisposalErrorConstructor {
     new (errors: unknown[]): DisposalError;
     prototype: DisposalError;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const DisposalErrorSuper = createSuper(_DisposalError);
-
-function _DisposalError(this: _DisposalError, errors: unknown[]) {
-    // eslint-disable-next-line max-len
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    const instance: _DisposalError = DisposalErrorSuper.apply(this);
-
-    const flattenedErrors = flattenDisposalErrors(errors);
-
-    instance.message = `Failed to dispose a resource. ${
-        flattenedErrors.length
-    } error${
-        flattenedErrors.length === 1 ? ' was' : 's were'
-    } caught.${joinErrors(flattenedErrors)}`;
-
-    instance.name = 'DisposalError';
-    instance.errors = flattenedErrors;
-
-    return instance;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-_DisposalError.prototype = Object.create(NativeErrorWrapped.prototype, {
-    constructor: {
-        value: _DisposalError,
-        writable: true,
-        configurable: true,
-    },
-});
-
-setPrototypeOf(_DisposalError, NativeErrorWrapped);
-
 /**
- * Thrown when at least one error is caught during a resource's disposal.
+ * Thrown when at least one error is caught during the disposal of a disposable.
  */
-// eslint-disable-next-line max-len
-export const DisposalError: DisposalErrorConstructor = (_DisposalError as unknown) as DisposalErrorConstructor;
+export const DisposalError: DisposalErrorConstructor = createCustomError(
+    (self: _DisposalError, errors: unknown[]) => {
+        const flattenedErrors = flattenDisposalErrors(errors);
+
+        self.message = `Failed to dispose a resource. ${
+            flattenedErrors.length
+        } error${
+            flattenedErrors.length === 1 ? ' was' : 's were'
+        } caught.${joinErrors(flattenedErrors)}`;
+
+        self.name = 'DisposalError';
+        self.errors = flattenedErrors;
+    },
+);
 
 function flattenDisposalErrors(errors: unknown[]): unknown[] {
     const flattened: unknown[] = [];

@@ -1,84 +1,48 @@
-function shouldUseReflect(): boolean {
-    return typeof Reflect !== 'undefined' && !!Reflect.construct;
-}
-
-export function setPrototypeOf(object: unknown, proto: unknown): void {
-    if (Object.setPrototypeOf) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Object.setPrototypeOf(object, proto as any);
-    } else {
-        // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (object as any).__proto__ = proto;
-    }
-}
-
-export interface NativeErrorWrapped
-    extends Omit<ErrorConstructor, 'prototype'> {
-    prototype: NativeErrorWrapped;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-export const NativeErrorWrapped: NativeErrorWrapped = (function () {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { constructor } = Object.getPrototypeOf(this);
-    if (shouldUseReflect()) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return Reflect.construct(Error, [], constructor);
-    } else {
-        const instance = new Error();
-        if (constructor) {
+export function createCustomError<T extends unknown[]>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    initiate: (self: any, ...args: T) => void,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+): {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    new (...args: T): any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    prototype: any;
+} {
+    function CustomError(...args: T) {
+        if (typeof Reflect !== 'undefined' && Reflect.construct) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const self = Reflect.construct(Error, [], new.target);
+            initiate(self, ...args);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return self;
+        } else {
+            initiate(this, ...args);
             // eslint-disable-next-line max-len
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            setPrototypeOf(instance, constructor.prototype);
-        }
-        return instance;
-    }
-} as unknown) as NativeErrorWrapped;
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-NativeErrorWrapped.prototype = Object.create(Error.prototype, {
-    constructor: {
-        value: NativeErrorWrapped,
-        writable: true,
-        configurable: true,
-    },
-});
-
-setPrototypeOf(NativeErrorWrapped, Error);
-
-export function createSuper(
-    Derived: unknown,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any {
-    return function (this: unknown): unknown {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const Super = Object.getPrototypeOf(Derived);
-        let constructedValue: unknown;
-
-        if (shouldUseReflect()) {
+            const _error = new Error(this.message);
             // eslint-disable-next-line max-len
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-            const newTarget = Object.getPrototypeOf(this).constructor;
-            // eslint-disable-next-line max-len
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, prefer-rest-params
-            constructedValue = Reflect.construct(Super, arguments, newTarget);
-        } else {
-            // eslint-disable-next-line max-len
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, prefer-rest-params
-            constructedValue = Super.apply(this, arguments);
+            _error.name = this.name;
+            if (_error.stack) {
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                this.stack = _error.stack;
+            }
         }
+    }
 
-        if (
-            constructedValue &&
-            (typeof constructedValue === 'object' ||
-                typeof constructedValue === 'function')
-        ) {
-            return constructedValue;
-        } else {
-            return this;
-        }
-    };
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    CustomError.prototype = Object.create(Error.prototype, {
+        constructor: {
+            value: CustomError,
+            writable: true,
+            configurable: true,
+        },
+    });
+
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
+    return CustomError as any;
 }
 
 export function joinErrors(errors: unknown[]): string {

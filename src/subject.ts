@@ -1,12 +1,7 @@
-import { Disposable, implDisposable } from './disposable';
-import { removeOnce, asyncReportError } from './util';
+import { Disposable, implDisposable, DisposalError } from './disposable';
+import { createCustomError, joinErrors } from './errorBase';
 import { EventType, Event, Push, Throw, End, Source, Sink } from './source';
-import {
-    setPrototypeOf,
-    NativeErrorWrapped,
-    createSuper,
-    joinErrors,
-} from './errorBase';
+import { removeOnce, asyncReportError } from './util';
 import isFunction = require('lodash.isfunction');
 
 export interface Subject<T> extends Source<T>, Sink<T> {}
@@ -114,7 +109,7 @@ export function Subject<T>(): Subject<T> {
 
             let event: Event<T> | undefined = eventOrSink;
 
-            const errors: unknown[] = [];
+            const errors: DisposalError[] = [];
 
             distributingEvent = true;
             while (event) {
@@ -185,70 +180,39 @@ export function Subject<T>(): Subject<T> {
 }
 
 interface _SubjectDistributionSinkDisposalError extends Error {
-    errors: unknown[];
+    errors: DisposalError[];
 }
 
 export interface SubjectDistributionSinkDisposalError
     extends _SubjectDistributionSinkDisposalError {
     /**
-     * The flattened list of errors thrown during disposable.
+     * The list of errors caught.
      */
-    readonly errors: unknown[];
+    readonly errors: DisposalError[];
 }
 
-export interface SubjectDistributionSinkDisposalErrorConstructor
-    extends Omit<ErrorConstructor, 'prototype'> {
-    new (errors: unknown[]): SubjectDistributionSinkDisposalError;
+export interface SubjectDistributionSinkDisposalErrorConstructor {
+    new (errors: DisposalError[]): SubjectDistributionSinkDisposalError;
     prototype: SubjectDistributionSinkDisposalError;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const SubjectDistributionSinkDisposalErrorSuper = createSuper(
-    _SubjectDistributionSinkDisposalError,
-);
-
-function _SubjectDistributionSinkDisposalError(
-    this: _SubjectDistributionSinkDisposalError,
-    errors: unknown[],
-) {
-    // eslint-disable-next-line max-len
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, max-len
-    const instance: _SubjectDistributionSinkDisposalError = SubjectDistributionSinkDisposalErrorSuper.apply(
-        this,
-    );
-
-    instance.message = `${errors.length} error${
-        errors.length === 1 ? ' was' : 's were'
-    } caught while distributing an event through a subject.${joinErrors(
-        errors,
-    )}`;
-
-    instance.name = 'SubjectDistributionSinkDisposalError';
-    instance.errors = errors;
-
-    return instance;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-_SubjectDistributionSinkDisposalError.prototype = Object.create(
-    NativeErrorWrapped.prototype,
-    {
-        constructor: {
-            value: _SubjectDistributionSinkDisposalError,
-            writable: true,
-            configurable: true,
-        },
-    },
-);
-
-setPrototypeOf(_SubjectDistributionSinkDisposalError, NativeErrorWrapped);
-
 /**
- * Thrown when at least one error is caught during a the distribution of an
- * by a subject.
+ * Thrown when at least least one error is caught during the checking of whether
+ * a subscribed sink is active or not.
  */
 // eslint-disable-next-line max-len
-export const SubjectDistributionSinkDisposalError: SubjectDistributionSinkDisposalErrorConstructor = (_SubjectDistributionSinkDisposalError as unknown) as SubjectDistributionSinkDisposalErrorConstructor;
+export const SubjectDistributionSinkDisposalError: SubjectDistributionSinkDisposalErrorConstructor = createCustomError(
+    (self: _SubjectDistributionSinkDisposalError, errors: DisposalError[]) => {
+        self.message = `${errors.length} error${
+            errors.length === 1 ? ' was' : 's were'
+        } caught while distributing an event through a subject.${joinErrors(
+            errors,
+        )}`;
+
+        self.name = 'SubjectDistributionSinkDisposalError';
+        self.errors = errors;
+    },
+);
 
 /** @todo align with queueing behaviour */
 export function KeepFinalEventSubject<T>(): Subject<T> {

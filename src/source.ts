@@ -1,11 +1,11 @@
+import { Disposable, implDisposable } from './disposable';
+import { pluck, map, concat, merge, mergeConcurrent, flat } from './operator';
 import {
     ScheduleFunction,
     scheduleAnimationFrame,
     ScheduleInterval,
 } from './schedule';
-import { Disposable, implDisposable } from './disposable';
 import { asyncReportError } from './util';
-import { pluck, map, concat, merge, mergeConcurrent, flat } from './operator';
 
 export const enum EventType {
     Push = 0,
