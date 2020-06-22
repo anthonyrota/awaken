@@ -208,13 +208,6 @@ const _DisposableImplementation_activeGetter = Object.getOwnPropertyDescriptor(
     'active',
 )!.get!;
 
-const {
-    add: _DisposableImplementation_add,
-    remove: _DisposableImplementation_remove,
-    dispose: _DisposableImplementation_dispose,
-    __markParentDisposed: _DisposableImplementation___markParentDisposed,
-} = _DisposableImplementation.prototype;
-
 /**
  * Implements the Disposable Interface onto the given value by proxying the
  * disposable methods & properties from the given value to the given disposable.
@@ -235,18 +228,16 @@ export function implDisposable<T>(
                 get: _DisposableImplementation_activeGetter.bind(disposable),
             },
             add: {
-                value: _DisposableImplementation_add.bind(disposable),
+                value: disposable.add.bind(disposable),
             },
             remove: {
-                value: _DisposableImplementation_remove.bind(disposable),
+                value: disposable.remove.bind(disposable),
             },
             dispose: {
-                value: _DisposableImplementation_dispose.bind(disposable),
+                value: disposable.dispose.bind(disposable),
             },
             __markParentDisposed: {
-                value: _DisposableImplementation___markParentDisposed.bind(
-                    disposable,
-                ),
+                value: disposable.__markParentDisposed.bind(disposable),
             },
         });
     } else {
