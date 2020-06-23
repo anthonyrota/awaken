@@ -1005,6 +1005,10 @@ export function takeWhile<T>(
  * @param amount The amount of events to keep and distribute at the end.
  */
 export function takeLast(amount: number): <T>(source: Source<T>) => Source<T> {
+    const amount_ = Math.floor(amount);
+    if (amount_ < 1) {
+        return toEmpty;
+    }
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
             let pushEvents: Push<T>[] | null = [];
@@ -1015,7 +1019,7 @@ export function takeLast(amount: number): <T>(source: Source<T>) => Source<T> {
                 }
 
                 if (event.type === EventType.Push) {
-                    if (pushEvents.length >= amount) {
+                    if (pushEvents.length >= amount_) {
                         pushEvents.shift();
                     }
                     pushEvents.push(event);
