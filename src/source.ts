@@ -232,15 +232,30 @@ export const never = Source(() => {});
 
 export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
     return Source((sink) => {
+        let sinkDisposalError: { e: unknown } | undefined;
         try {
             for (const item of iterable) {
-                sink(Push(item));
-                if (!sink.active) {
+                try {
+                    sink(Push(item));
+                    if (!sink.active) {
+                        break;
+                    }
+                } catch (error) {
+                    // eslint-disable-next-line max-len
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    sinkDisposalError = { e: error };
                     break;
                 }
             }
-        } catch (error) {
-            sink(Throw(error));
+        } catch (iterableError) {
+            if (sinkDisposalError) {
+                asyncReportError(iterableError);
+            } else {
+                sink(Throw(iterableError));
+            }
+        }
+        if (sinkDisposalError) {
+            throw sinkDisposalError.e;
         }
         sink(End);
     });
@@ -250,16 +265,30 @@ async function distributeAsyncIterable<T>(
     iterable: AsyncIterable<T>,
     sink: Sink<T>,
 ): Promise<void> {
+    let sinkDisposalError: { e: unknown } | undefined;
     try {
         for await (const item of iterable) {
-            sink(Push(item));
-            if (!sink.active) {
+            try {
+                sink(Push(item));
+                if (!sink.active) {
+                    break;
+                }
+            } catch (error) {
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                sinkDisposalError = { e: error };
                 break;
             }
         }
-    } catch (error) {
-        sink(Throw(error));
-        return;
+    } catch (iterableError) {
+        if (sinkDisposalError) {
+            asyncReportError(iterableError);
+        } else {
+            sink(Throw(iterableError));
+        }
+    }
+    if (sinkDisposalError) {
+        throw sinkDisposalError.e;
     }
     sink(End);
 }
