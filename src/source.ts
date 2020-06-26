@@ -3,6 +3,7 @@ import {
     ScheduleFunction,
     scheduleAnimationFrame,
     ScheduleInterval,
+    ScheduleTimeout,
 } from './schedule';
 import { asyncReportError, flow, forEach } from './util';
 
@@ -221,11 +222,42 @@ export function ofEvent<T>(event: Event<T>): Source<T> {
     });
 }
 
+export function ofEventScheduled<T>(
+    event: Throw | End,
+    schedule: ScheduleFunction,
+): Source<never>;
+export function ofEventScheduled<T>(
+    event: Event<T>,
+    schedule: ScheduleFunction,
+): Source<T>;
+export function ofEventScheduled<T>(
+    event: Event<T>,
+    schedule: ScheduleFunction,
+): Source<T> {
+    return Source((sink) => {
+        schedule(() => {
+            sink(event);
+            sink(End);
+        }, sink);
+    });
+}
+
 export function throwError(error: unknown): Source<never> {
     return ofEvent(Throw(error));
 }
 
+export function throwErrorScheduled(
+    error: unknown,
+    schedule: ScheduleFunction,
+): Source<never> {
+    return ofEventScheduled(Throw(error), schedule);
+}
+
 export const empty = ofEvent(End);
+
+export function emptyScheduled(schedule: ScheduleFunction): Source<never> {
+    return ofEventScheduled(End, schedule);
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const never = Source(() => {});
@@ -451,14 +483,20 @@ export function zipSources<T extends unknown[]>(
     return sources.length === 0
         ? empty
         : Source((sink) => {
-              const sourcesValues: unknown[][] = [];
+              const sourcesValues: { ended: boolean; values: unknown[] }[] = [];
               let hasValueCount = 0;
+              let hasCompletedSourceWithNoValues = false;
 
               for (let i = 0; sink.active && i < sources.length; i++) {
                   const values = [];
-                  sourcesValues[i] = values;
+                  const info = { ended: false, values };
+                  sourcesValues[i] = info;
 
                   const sourceSink = Sink<unknown>((event) => {
+                      if (hasCompletedSourceWithNoValues) {
+                          return;
+                      }
+
                       if (event.type === EventType.Push) {
                           if (!values.length) {
                               hasValueCount++;
@@ -467,18 +505,33 @@ export function zipSources<T extends unknown[]>(
                           if (hasValueCount === sources.length) {
                               const valuesToPush: unknown[] = [];
                               for (let i = 0; i < sourcesValues.length; i++) {
+                                  const { values, ended } = sourcesValues[i];
                                   // eslint-disable-next-line max-len
                                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                                  valuesToPush.push(sourcesValues[i].shift()!);
-                                  if (!sourcesValues[i].length) {
+                                  valuesToPush.push(values.shift()!);
+                                  if (!values.length) {
+                                      if (ended) {
+                                          hasCompletedSourceWithNoValues = true;
+                                      }
                                       hasValueCount--;
                                   }
                               }
+
                               sink(Push(valuesToPush as T));
+
+                              if (hasCompletedSourceWithNoValues) {
+                                  sink(End);
+                              }
                           }
 
                           return;
                       }
+
+                      if (event.type === EventType.End && values.length !== 0) {
+                          info.ended = true;
+                          return;
+                      }
+
                       sink(event);
                   });
 
@@ -490,6 +543,10 @@ export function zipSources<T extends unknown[]>(
 
 export interface Operator<T, U> {
     (source: Source<T>): Source<U>;
+}
+
+export interface IdentityOperator {
+    <T>(source: Source<T>): Source<T>;
 }
 
 /**
@@ -507,21 +564,18 @@ export function map<T, U>(
             let idx = 0;
 
             const sourceSink = Sink<T>((event) => {
-                switch (event.type) {
-                    case EventType.Push: {
-                        let transformed: U;
-                        try {
-                            transformed = transform(event.value, idx++);
-                        } catch (error) {
-                            sink(Throw(error));
-                            return;
-                        }
-                        sink(Push(transformed));
-                        break;
+                if (event.type === EventType.Push) {
+                    let transformed: U;
+                    try {
+                        transformed = transform(event.value, idx++);
+                    } catch (error) {
+                        sink(Throw(error));
+                        return;
                     }
-                    default:
-                        sink(event);
+                    sink(Push(transformed));
+                    return;
                 }
+                sink(event);
             });
 
             sink.add(sourceSink);
@@ -536,6 +590,37 @@ export function map<T, U>(
 export function mapTo<T>(value: T): Operator<unknown, T> {
     return map(() => value);
 }
+
+export function mapEvents<T, U>(
+    transform: (event: Event<T>, index: number) => Event<U>,
+): Operator<T, U> {
+    return (source) =>
+        Source((sink) => {
+            let idx = 0;
+
+            const sourceSink = Sink<T>((event) => {
+                let newEvent: Event<U>;
+                try {
+                    newEvent = transform(event, idx++);
+                } catch (error) {
+                    sink(Throw(error));
+                    return;
+                }
+                sink(newEvent);
+                if (event.type !== EventType.Push) {
+                    sink(End);
+                }
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export const wrapInPushEvents = mapEvents(<T>(event: Event<T>) => Push(event));
+export const unwrapFromPushEvents = mapEvents(<T>(event: Event<Event<T>>) => {
+    return event.type === EventType.Push ? event.value : event;
+});
 
 /**
  * Calls the predicate function for each Push event of the given source, only
@@ -907,7 +992,7 @@ export function spyPush<T>(
 
 export function spyThrow(
     onThrow: (throwEvent: Throw) => void,
-): <T>(source: Source<T>) => Source<T> {
+): IdentityOperator {
     return spyEvent((event) => {
         if (event.type === EventType.Throw) {
             onThrow(event);
@@ -915,9 +1000,7 @@ export function spyThrow(
     });
 }
 
-export function spyEnd(
-    onEnd: (endEvent: End) => void,
-): <T>(source: Source<T>) => Source<T> {
+export function spyEnd(onEnd: (endEvent: End) => void): IdentityOperator {
     return spyEvent((event) => {
         if (event.type === EventType.End) {
             onEnd(event);
@@ -927,7 +1010,7 @@ export function spyEnd(
 
 const toEmpty = () => empty;
 
-export function take(amount: number): <T>(source: Source<T>) => Source<T> {
+export function take(amount: number): IdentityOperator {
     if (amount < 1) {
         return toEmpty;
     }
@@ -1004,7 +1087,7 @@ export function takeWhile<T>(
  * last N=amount received Push event will be emitted along with the End event.
  * @param amount The amount of events to keep and distribute at the end.
  */
-export function takeLast(amount: number): <T>(source: Source<T>) => Source<T> {
+export function takeLast(amount: number): IdentityOperator {
     const amount_ = Math.floor(amount);
     if (amount_ < 1) {
         return toEmpty;
@@ -1042,9 +1125,7 @@ export function takeLast(amount: number): <T>(source: Source<T>) => Source<T> {
 
 export const last = takeLast(1);
 
-export function takeUntil(
-    stopSource: Source<unknown>,
-): <T>(source: Source<T>) => Source<T> {
+export function takeUntil(stopSource: Source<unknown>): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
             const stopSink = Sink<unknown>((event) => {
@@ -1057,7 +1138,7 @@ export function takeUntil(
         });
 }
 
-export function skip(amount: number): <T>(source: Source<T>) => Source<T> {
+export function skip(amount: number): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
             let count = 0;
@@ -1103,7 +1184,7 @@ export function skipWhile<T>(
         });
 }
 
-export function skipLast(amount: number): <T>(source: Source<T>) => Source<T> {
+export function skipLast(amount: number): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
             const pushEvents: Push<T>[] = [];
@@ -1133,9 +1214,7 @@ export function skipLast(amount: number): <T>(source: Source<T>) => Source<T> {
         });
 }
 
-export function skipUntil(
-    stopSource: Source<unknown>,
-): <T>(source: Source<T>) => Source<T> {
+export function skipUntil(stopSource: Source<unknown>): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
             let skip = true;
@@ -1191,4 +1270,131 @@ export function zipWith<T extends unknown[]>(
 ): <U>(source: Source<U>) => Source<Unshift<T, U>> {
     return <U>(source: Source<U>) =>
         zipSources(source, ...sources) as Source<Unshift<T, U>>;
+}
+
+export function delay(getDelaySource: () => Source<unknown>): IdentityOperator;
+export function delay<T>(
+    getDelaySource: (value: T, index: number) => Source<unknown>,
+): Operator<T, T>;
+export function delay<T>(
+    getDelaySource: (value: T, index: number) => Source<unknown>,
+): Operator<T, T> {
+    return (source) =>
+        Source((sink) => {
+            let idx = 0;
+            let active = 0;
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push) {
+                    let delaySource: Source<unknown>;
+                    try {
+                        delaySource = getDelaySource(event.value, idx++);
+                    } catch (error) {
+                        sink(Throw(error));
+                        return;
+                    }
+
+                    const delaySink = Sink<unknown>((innerEvent) => {
+                        active--;
+                        delaySink.dispose();
+                        sink(
+                            innerEvent.type === EventType.Throw
+                                ? innerEvent
+                                : event,
+                        );
+                    });
+
+                    sink.add(delaySink);
+                    active++;
+                    delaySource(delaySink);
+                    return;
+                }
+
+                if (event.type === EventType.End && active !== 0) {
+                    return;
+                }
+
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export function delayTo(source: Source<unknown>): IdentityOperator {
+    return delay(() => source);
+}
+
+export function schedulePushEvents(
+    schedule: ScheduleFunction,
+): IdentityOperator {
+    return delayTo(emptyScheduled(schedule));
+}
+
+export function delayMs(ms: number): IdentityOperator {
+    return schedulePushEvents(ScheduleTimeout(ms));
+}
+
+export function collect<T>(source: Source<T>): Source<T[]> {
+    return Source((sink) => {
+        const items: T[] = [];
+
+        const sourceSink = Sink<T>((event) => {
+            if (event.type === EventType.Push) {
+                items.push(event.value);
+                return;
+            }
+            if (event.type === EventType.End) {
+                sink(Push(items));
+            }
+            sink(event);
+        });
+
+        sink.add(sourceSink);
+        source(sourceSink);
+    });
+}
+
+export function scheduleLastWithSource(
+    scheduleSource: Source<unknown>,
+): IdentityOperator {
+    return <T>(source: Source<T>) =>
+        Source<T>((sink) => {
+            let lastPushEvent: Push<T> | undefined;
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push) {
+                    lastPushEvent = event;
+                    return;
+                }
+                sink(event);
+            });
+
+            const scheduleSink = Sink<unknown>((event) => {
+                if (event.type !== EventType.Push) {
+                    sink(event);
+                    return;
+                }
+
+                if (lastPushEvent) {
+                    sink(lastPushEvent);
+                }
+            });
+
+            sink.add(sourceSink);
+            sink.add(scheduleSink);
+            source(sourceSink);
+            scheduleSource(scheduleSink);
+        });
+}
+
+export function scheduleLastWithScheduleFunction(
+    schedule: ScheduleFunction,
+): IdentityOperator {
+    return scheduleLastWithSource(fromScheduleFunction(schedule));
+}
+
+export function scheduleLastWithInterval(delayMs: number): IdentityOperator {
+    return scheduleLastWithScheduleFunction(ScheduleInterval(delayMs));
 }
