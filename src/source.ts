@@ -984,7 +984,7 @@ export function spyEvent<T>(
 }
 
 export function spyPush<T>(
-    onPush: (pushEvent: Push<T>, index: number) => void,
+    onPush: (value: T, index: number) => void,
 ): Operator<T, T> {
     return (source) =>
         Source((sink) => {
@@ -992,26 +992,24 @@ export function spyPush<T>(
 
             spyEvent<T>((event) => {
                 if (event.type === EventType.Push) {
-                    onPush(event, idx++);
+                    onPush(event.value, idx++);
                 }
             })(source)(sink);
         });
 }
 
-export function spyThrow(
-    onThrow: (throwEvent: Throw) => void,
-): IdentityOperator {
+export function spyThrow(onThrow: (error: unknown) => void): IdentityOperator {
     return spyEvent((event) => {
         if (event.type === EventType.Throw) {
-            onThrow(event);
+            onThrow(event.error);
         }
     });
 }
 
-export function spyEnd(onEnd: (endEvent: End) => void): IdentityOperator {
+export function spyEnd(onEnd: () => void): IdentityOperator {
     return spyEvent((event) => {
         if (event.type === EventType.End) {
-            onEnd(event);
+            onEnd();
         }
     });
 }
