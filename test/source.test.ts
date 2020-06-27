@@ -1,3 +1,4 @@
+import { Disposable } from './../src/disposable';
 import {
     EventType,
     Push,
@@ -8,7 +9,6 @@ import {
     subscribe,
     zipSources,
 } from '../src/source';
-import { Disposable } from './../src/disposable';
 
 describe('EventType', () => {
     it('should have a Push property equal to zero', () => {

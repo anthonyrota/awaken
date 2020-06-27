@@ -1,3 +1,4 @@
+import { Disposable } from '../src/disposable';
 import {
     ScheduleQueued,
     ScheduleQueuedDiscrete,
@@ -10,11 +11,10 @@ import {
     ScheduleInterval,
     ScheduleFunction,
 } from '../src/schedule';
-import { Disposable } from '../src/disposable';
 import { throw_ } from './testUtils';
-import { RafMock } from './mockTypes/raf';
 
 import raf = require('raf');
+import { RafMock } from './mockTypes/raf';
 const rafMock = (raf as unknown) as RafMock;
 
 describe('ScheduleQueued', () => {

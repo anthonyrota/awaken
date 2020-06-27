@@ -5,8 +5,8 @@ import {
     ScheduleInterval,
     ScheduleTimeout,
 } from './schedule';
-import { asyncReportError, flow, forEach } from './util';
 import { Subject } from './subject';
+import { asyncReportError, flow, forEach } from './util';
 
 export const enum EventType {
     Push = 0,

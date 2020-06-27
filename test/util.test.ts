@@ -1,3 +1,4 @@
+import { Disposable } from '../src/disposable';
 import {
     pipe,
     flow,
@@ -7,12 +8,11 @@ import {
     setInterval,
     asyncReportError,
 } from '../src/util';
-import { Disposable } from '../src/disposable';
-import { RafMock } from './mockTypes/raf';
 import cloneDeep = require('lodash.clonedeep');
 import each from 'jest-each';
 
 import raf = require('raf');
+import { RafMock } from './mockTypes/raf';
 const rafMock = (raf as unknown) as RafMock;
 
 type CF = (x: string) => string;
