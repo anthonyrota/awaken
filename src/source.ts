@@ -494,7 +494,7 @@ export function zipSources<T extends unknown[]>(
               let hasCompletedSourceWithNoValues = false;
 
               for (let i = 0; sink.active && i < sources.length; i++) {
-                  const values = [];
+                  const values: unknown[] = [];
                   const info = { ended: false, values };
                   sourcesValues[i] = info;
 
@@ -507,6 +507,8 @@ export function zipSources<T extends unknown[]>(
                           if (!values.length) {
                               hasValueCount++;
                           }
+
+                          values.push(event.value);
 
                           if (hasValueCount === sources.length) {
                               const valuesToPush: unknown[] = [];
