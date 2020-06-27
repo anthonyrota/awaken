@@ -550,6 +550,26 @@ export function zipSources<T extends unknown[]>(
           });
 }
 
+export function combineWith<T extends unknown[]>(
+    ...sources: { [K in keyof T]: Source<T[K]> }
+): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    return <U>(source: Source<U>) =>
+        combineSources(source, ...sources) as Source<Unshift<T, U>>;
+}
+
+export function raceWith<T>(
+    ...sources: Source<T>[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) => raceSources<T | U>(source, ...sources);
+}
+
+export function zipWith<T extends unknown[]>(
+    ...sources: { [K in keyof T]: Source<T[K]> }
+): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    return <U>(source: Source<U>) =>
+        zipSources(source, ...sources) as Source<Unshift<T, U>>;
+}
+
 export interface Operator<T, U> {
     (source: Source<T>): Source<U>;
 }
@@ -933,26 +953,6 @@ export function concatWith<T>(
     ...sources: Source<T>[]
 ): <U>(source: Source<U>) => Source<T | U> {
     return <U>(source: Source<U>) => concatSources<T | U>(source, ...sources);
-}
-
-export function combineWith<T extends unknown[]>(
-    ...sources: { [K in keyof T]: Source<T[K]> }
-): <U>(source: Source<U>) => Source<Unshift<T, U>> {
-    return <U>(source: Source<U>) =>
-        combineSources(source, ...sources) as Source<Unshift<T, U>>;
-}
-
-export function raceWith<T>(
-    ...sources: Source<T>[]
-): <U>(source: Source<U>) => Source<T | U> {
-    return <U>(source: Source<U>) => raceSources<T | U>(source, ...sources);
-}
-
-export function zipWith<T extends unknown[]>(
-    ...sources: { [K in keyof T]: Source<T[K]> }
-): <U>(source: Source<U>) => Source<Unshift<T, U>> {
-    return <U>(source: Source<U>) =>
-        zipSources(source, ...sources) as Source<Unshift<T, U>>;
 }
 
 export function flatMap<T, U>(
