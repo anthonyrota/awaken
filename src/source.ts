@@ -6,6 +6,7 @@ import {
     ScheduleTimeout,
 } from './schedule';
 import { asyncReportError, flow, forEach } from './util';
+import { Subject } from './subject';
 
 export const enum EventType {
     Push = 0,
@@ -625,10 +626,18 @@ export function mapEvents<T, U>(
         });
 }
 
-export const wrapInPushEvents = mapEvents(<T>(event: Event<T>) => Push(event));
-export const unwrapFromPushEvents = mapEvents(<T>(event: Event<Event<T>>) => {
+export const wrapInPushEvents: <T>(
+    source: Source<T>,
+) => Source<Event<T>> = mapEvents(<T>(event: Event<T>) => Push(event));
+export const unwrapFromWrappedPushEvents: <T>(
+    source: Source<Event<T>>,
+) => Source<T> = mapEvents(<T>(event: Event<Event<T>>) => {
     return event.type === EventType.Push ? event.value : event;
 });
+
+export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
+    return map((value) => value[key]);
+}
 
 /**
  * Calls the predicate function for each Push event of the given source, only
@@ -924,6 +933,26 @@ export function concatWith<T>(
     ...sources: Source<T>[]
 ): <U>(source: Source<U>) => Source<T | U> {
     return <U>(source: Source<U>) => concatSources<T | U>(source, ...sources);
+}
+
+export function combineWith<T extends unknown[]>(
+    ...sources: { [K in keyof T]: Source<T[K]> }
+): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    return <U>(source: Source<U>) =>
+        combineSources(source, ...sources) as Source<Unshift<T, U>>;
+}
+
+export function raceWith<T>(
+    ...sources: Source<T>[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) => raceSources<T | U>(source, ...sources);
+}
+
+export function zipWith<T extends unknown[]>(
+    ...sources: { [K in keyof T]: Source<T[K]> }
+): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    return <U>(source: Source<U>) =>
+        zipSources(source, ...sources) as Source<Unshift<T, U>>;
 }
 
 export function flatMap<T, U>(
@@ -1248,8 +1277,159 @@ export function skipUntil(stopSource: Source<unknown>): IdentityOperator {
         });
 }
 
-export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
-    return map((value) => value[key]);
+export function catchError<T>(
+    getNewSource: (error: unknown) => Source<T>,
+): Operator<T, T> {
+    return (source) =>
+        Source((sink) => {
+            function onEvent(event: Event<T>): void {
+                if (event.type === EventType.Throw) {
+                    let newSource: Source<T>;
+                    try {
+                        newSource = getNewSource(event.error);
+                    } catch (error) {
+                        sink(Throw(error));
+                        return;
+                    }
+                    sourceSink = Sink(onEvent);
+                    sink.add(sourceSink);
+                    newSource(sourceSink);
+                    return;
+                }
+                sink(event);
+            }
+
+            let sourceSink = Sink(onEvent);
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export function window(
+    boundariesSource: Source<unknown>,
+): <T>(source: Source<T>) => Source<Source<T>> {
+    return <T>(source: Source<T>) =>
+        Source<Source<T>>((sink) => {
+            let currentWindow = Subject<T>();
+            sink(Push(currentWindow));
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type !== EventType.Push) {
+                    boundariesSink.dispose();
+                }
+                currentWindow(event);
+                if (event.type !== EventType.Push) {
+                    sink(event);
+                }
+            });
+
+            const boundariesSink = Sink<unknown>((event) => {
+                if (event.type === EventType.Push) {
+                    currentWindow(End);
+                    currentWindow = Subject();
+                    sink(Push(currentWindow));
+                    return;
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            sink.add(boundariesSink);
+            source(sourceSink);
+            boundariesSource(boundariesSink);
+        });
+}
+
+export function windowEach(
+    getWindowEndSource: () => Source<unknown>,
+): <T>(source: Source<T>) => Source<Source<T>> {
+    return <T>(source: Source<T>) =>
+        Source<Source<T>>((sink) => {
+            let currentWindow: Subject<T>;
+            let windowEndSink: Sink<unknown>;
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type !== EventType.Push) {
+                    windowEndSink.dispose();
+                }
+                currentWindow(event);
+                if (event.type !== EventType.Push) {
+                    sink(event);
+                }
+            });
+
+            function onWindowEndEvent(event: Event<unknown>): void {
+                if (event.type === EventType.Throw) {
+                    sink(event);
+                    return;
+                }
+                openWindow();
+            }
+
+            function openWindow(): void {
+                if (currentWindow) {
+                    windowEndSink.dispose();
+                    currentWindow(End);
+                }
+
+                currentWindow = Subject();
+                sink(Push(currentWindow));
+
+                let windowEndSource: Source<unknown>;
+                try {
+                    windowEndSource = getWindowEndSource();
+                } catch (error) {
+                    const throwEvent = Throw(error);
+                    currentWindow(throwEvent);
+                    sink(throwEvent);
+                    return;
+                }
+
+                windowEndSink = Sink(onWindowEndEvent);
+                sink.add(windowEndSink);
+                windowEndSource(windowEndSink);
+            }
+
+            openWindow();
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export function collect<T>(source: Source<T>): Source<T[]> {
+    return Source((sink) => {
+        const items: T[] = [];
+
+        const sourceSink = Sink<T>((event) => {
+            if (event.type === EventType.Push) {
+                items.push(event.value);
+                return;
+            }
+            if (event.type === EventType.End) {
+                sink(Push(items));
+            }
+            sink(event);
+        });
+
+        sink.add(sourceSink);
+        source(sourceSink);
+    });
+}
+
+const collectInner: <T>(source: Source<Source<T>>) => Source<T[]> = mergeMap(
+    collect,
+);
+
+export function buffer(
+    boundariesSource: Source<unknown>,
+): <T>(source: Source<T>) => Source<T[]> {
+    return flow(window(boundariesSource), mergeMap(collect));
+}
+
+export function bufferEach(
+    getWindowEndSource: () => Source<unknown>,
+): <T>(source: Source<T>) => Source<T[]> {
+    return flow(windowEach(getWindowEndSource), collectInner);
 }
 
 type Unshift<T extends unknown[], U> = ((h: U, ...t: T) => void) extends (
@@ -1257,26 +1437,6 @@ type Unshift<T extends unknown[], U> = ((h: U, ...t: T) => void) extends (
 ) => void
     ? R
     : never;
-
-export function combineWith<T extends unknown[]>(
-    ...sources: { [K in keyof T]: Source<T[K]> }
-): <U>(source: Source<U>) => Source<Unshift<T, U>> {
-    return <U>(source: Source<U>) =>
-        combineSources(source, ...sources) as Source<Unshift<T, U>>;
-}
-
-export function raceWith<T>(
-    ...sources: Source<T>[]
-): <U>(source: Source<U>) => Source<T | U> {
-    return <U>(source: Source<U>) => raceSources<T | U>(source, ...sources);
-}
-
-export function zipWith<T extends unknown[]>(
-    ...sources: { [K in keyof T]: Source<T[K]> }
-): <U>(source: Source<U>) => Source<Unshift<T, U>> {
-    return <U>(source: Source<U>) =>
-        zipSources(source, ...sources) as Source<Unshift<T, U>>;
-}
 
 export function delay(getDelaySource: () => Source<unknown>): IdentityOperator;
 export function delay<T>(
@@ -1342,29 +1502,7 @@ export function delayMs(ms: number): IdentityOperator {
     return schedulePushEvents(ScheduleTimeout(ms));
 }
 
-export function collect<T>(source: Source<T>): Source<T[]> {
-    return Source((sink) => {
-        const items: T[] = [];
-
-        const sourceSink = Sink<T>((event) => {
-            if (event.type === EventType.Push) {
-                items.push(event.value);
-                return;
-            }
-            if (event.type === EventType.End) {
-                sink(Push(items));
-            }
-            sink(event);
-        });
-
-        sink.add(sourceSink);
-        source(sourceSink);
-    });
-}
-
-export function scheduleLastWithSource(
-    scheduleSource: Source<unknown>,
-): IdentityOperator {
+export function sample(scheduleSource: Source<unknown>): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
             let lastPushEvent: Push<T> | undefined;
@@ -1393,14 +1531,4 @@ export function scheduleLastWithSource(
             source(sourceSink);
             scheduleSource(scheduleSink);
         });
-}
-
-export function scheduleLastWithScheduleFunction(
-    schedule: ScheduleFunction,
-): IdentityOperator {
-    return scheduleLastWithSource(fromScheduleFunction(schedule));
-}
-
-export function scheduleLastWithInterval(delayMs: number): IdentityOperator {
-    return scheduleLastWithScheduleFunction(ScheduleInterval(delayMs));
 }
