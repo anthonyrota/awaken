@@ -115,6 +115,9 @@ export interface Source<T> {
  */
 export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
     function safeSource(sink: Sink<T>): void {
+        if (!sink.active) {
+            return;
+        }
         try {
             base(sink);
         } catch (error) {
@@ -125,6 +128,9 @@ export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
                 // if it is active, it disposes itself.
                 active = sink.active;
             } catch (innerError) {
+                // This try/catch is to ensure that when sink.active throws
+                // synchronously, the original error caught when calling the
+                // base function is also reported.
                 asyncReportError(error);
                 throw innerError;
             }
