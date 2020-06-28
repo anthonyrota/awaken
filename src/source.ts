@@ -550,6 +550,14 @@ export function zipSources<T extends unknown[]>(
           });
 }
 
+export interface Operator<T, U> {
+    (source: Source<T>): Source<U>;
+}
+
+export interface IdentityOperator {
+    <T>(source: Source<T>): Source<T>;
+}
+
 export function combineWith<T extends unknown[]>(
     ...sources: { [K in keyof T]: Source<T[K]> }
 ): <U>(source: Source<U>) => Source<[U, ...T]> {
@@ -567,14 +575,6 @@ export function zipWith<T extends unknown[]>(
     ...sources: { [K in keyof T]: Source<T[K]> }
 ): <U>(source: Source<U>) => Source<[U, ...T]> {
     return <U>(source: Source<U>) => zipSources<[U, ...T]>(source, ...sources);
-}
-
-export interface Operator<T, U> {
-    (source: Source<T>): Source<U>;
-}
-
-export interface IdentityOperator {
-    <T>(source: Source<T>): Source<T>;
 }
 
 /**
@@ -1042,6 +1042,56 @@ export function spyEnd(onEnd: () => void): IdentityOperator {
     });
 }
 
+export function isEmpty(source: Source<unknown>): Source<boolean> {
+    return Source((sink) => {
+        const sourceSink = Sink((event) => {
+            if (event.type === EventType.Throw) {
+                sink(event);
+                return;
+            }
+            sink(Push(event.type === EventType.End));
+            sink(End);
+        });
+
+        sink.add(sourceSink);
+        source(sourceSink);
+    });
+}
+
+export function defaultIfEmpty<T>(
+    getDefaultValue: () => T,
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) =>
+        Source<T | U>((sink) => {
+            let empty = true;
+
+            const sourceSink = Sink<U>((event) => {
+                if (event.type === EventType.Push) {
+                    empty = false;
+                } else if (event.type === EventType.End && empty) {
+                    let defaultValue: T;
+                    try {
+                        defaultValue = getDefaultValue();
+                    } /* prettier-ignore */ catch (error: unknown) {
+                        sink(Throw(error));
+                        return;
+                    }
+                    sink(Push(defaultValue));
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export function throwIfEmpty(getError: () => unknown): IdentityOperator {
+    return defaultIfEmpty(() => {
+        throw getError();
+    });
+}
+
 const toEmpty = () => empty;
 
 export function take(amount: number): IdentityOperator {
@@ -1422,13 +1472,79 @@ const collectInner: <T>(source: Source<Source<T>>) => Source<T[]> = mergeMap(
 export function buffer(
     boundariesSource: Source<unknown>,
 ): <T>(source: Source<T>) => Source<T[]> {
-    return flow(window(boundariesSource), mergeMap(collect));
+    return flow(window(boundariesSource), collectInner);
 }
 
 export function bufferEach(
     getWindowEndSource: () => Source<unknown>,
 ): <T>(source: Source<T>) => Source<T[]> {
     return flow(windowEach(getWindowEndSource), collectInner);
+}
+
+export function debounce(
+    getDurationSource: () => Source<unknown>,
+): IdentityOperator;
+export function debounce<T>(
+    getDurationSource: (value: T, index: number) => Source<unknown>,
+): Operator<T, T>;
+export function debounce<T>(
+    getDurationSource: (value: T, index: number) => Source<unknown>,
+): Operator<T, T> {
+    return (source: Source<T>) =>
+        Source<T>((sink) => {
+            let latestPush: Push<T> | undefined;
+            let durationSink: Sink<unknown>;
+            let idx = 0;
+
+            function pushValue() {
+                durationSink.dispose();
+                const _latestPush = latestPush;
+                latestPush = undefined;
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                sink(_latestPush!);
+            }
+
+            function onDurationEvent(event: Event<unknown>) {
+                if (event.type === EventType.Throw) {
+                    sink(event);
+                    return;
+                }
+                pushValue();
+            }
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push) {
+                    let durationSource: Source<unknown>;
+                    try {
+                        durationSource = getDurationSource(event.value, idx++);
+                    } /* prettier-ignore */ catch (error: unknown) {
+                        sink(Throw(error));
+                        return;
+                    }
+                    latestPush = event;
+                    durationSink?.dispose();
+                    durationSink = Sink(onDurationEvent);
+                    sink.add(durationSink);
+                    durationSource(durationSink);
+                    return;
+                }
+
+                if (event.type === EventType.End && latestPush) {
+                    pushValue();
+                }
+
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export function debounceMs(durationMs: number): IdentityOperator {
+    const durationSource = emptyScheduled(ScheduleTimeout(durationMs));
+    return debounce(() => durationSource);
 }
 
 export function delay(getDelaySource: () => Source<unknown>): IdentityOperator;
@@ -1481,18 +1597,9 @@ export function delay<T>(
         });
 }
 
-export function delayTo(source: Source<unknown>): IdentityOperator {
-    return delay(() => source);
-}
-
-export function schedulePushEvents(
-    schedule: ScheduleFunction,
-): IdentityOperator {
-    return delayTo(emptyScheduled(schedule));
-}
-
 export function delayMs(ms: number): IdentityOperator {
-    return schedulePushEvents(ScheduleTimeout(ms));
+    const delaySource = emptyScheduled(ScheduleTimeout(ms));
+    return delay(() => delaySource);
 }
 
 export function sample(scheduleSource: Source<unknown>): IdentityOperator {
@@ -1524,4 +1631,8 @@ export function sample(scheduleSource: Source<unknown>): IdentityOperator {
             source(sourceSink);
             scheduleSource(scheduleSink);
         });
+}
+
+export function sampleMs(ms: number): IdentityOperator {
+    return sample(interval(ms));
 }
