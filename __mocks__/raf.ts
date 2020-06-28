@@ -20,7 +20,7 @@ const rafMock: RafMock = Object.assign(
             _callbacks.forEach((callback) => {
                 try {
                     callback(1379161.826);
-                } catch (error) {
+                } /* prettier-ignore */ catch (error: unknown) {
                     errors.push(error);
                 }
             });

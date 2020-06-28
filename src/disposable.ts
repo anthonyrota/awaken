@@ -103,7 +103,7 @@ class _DisposableImplementation implements _IDisposableImplementation {
         if (onDispose) {
             try {
                 onDispose();
-            } catch (error) {
+            } /* prettier-ignore */ catch (error: unknown) {
                 errors.push(error);
             }
         }
@@ -111,7 +111,7 @@ class _DisposableImplementation implements _IDisposableImplementation {
         for (let i = 0; i < children.length; i++) {
             try {
                 children[i].dispose();
-            } catch (error) {
+            } /* prettier-ignore */ catch (error: unknown) {
                 errors.push(error);
             }
         }

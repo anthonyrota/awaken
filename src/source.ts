@@ -88,7 +88,7 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
 
         try {
             onEvent(event);
-        } catch (error) {
+        } /* prettier-ignore */ catch (error: unknown) {
             asyncReportError(error);
             disposable.dispose();
         }
@@ -121,14 +121,14 @@ export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
         }
         try {
             base(sink);
-        } catch (error) {
+        } /* prettier-ignore */ catch (error: unknown) {
             let active: boolean;
             try {
                 // This can throw if one of the sink's parents is disposed but
                 // the sink itself is not disposed yet, meaning while checking
                 // if it is active, it disposes itself.
                 active = sink.active;
-            } catch (innerError) {
+            } /* prettier-ignore */ catch (innerError: unknown) {
                 // This try/catch is to ensure that when sink.active throws
                 // synchronously, the original error caught when calling the
                 // base function is also reported.
@@ -136,7 +136,7 @@ export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
                 throw innerError;
             }
             if (active) {
-                sink(error);
+                sink(Throw(error));
             } else {
                 asyncReportError(error);
             }
@@ -279,14 +279,14 @@ export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
                     if (!sink.active) {
                         break;
                     }
-                } catch (error) {
+                } /* prettier-ignore */ catch (error: unknown) {
                     // eslint-disable-next-line max-len
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     sinkDisposalError = { e: error };
                     break;
                 }
             }
-        } catch (iterableError) {
+        } /* prettier-ignore */ catch (iterableError: unknown) {
             if (sinkDisposalError) {
                 asyncReportError(iterableError);
             } else {
@@ -312,14 +312,14 @@ async function distributeAsyncIterable<T>(
                 if (!sink.active) {
                     break;
                 }
-            } catch (error) {
+            } /* prettier-ignore */ catch (error: unknown) {
                 // eslint-disable-next-line max-len
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 sinkDisposalError = { e: error };
                 break;
             }
         }
-    } catch (iterableError) {
+    } /* prettier-ignore */ catch (iterableError: unknown) {
         if (sinkDisposalError) {
             asyncReportError(iterableError);
         } else {
@@ -389,7 +389,7 @@ export function lazy<T>(createSource: () => Source<T>): Source<T> {
         let source: Source<T>;
         try {
             source = createSource();
-        } catch (error) {
+        } /* prettier-ignore */ catch (error: unknown) {
             sink(Throw(error));
             return;
         }
@@ -552,9 +552,9 @@ export function zipSources<T extends unknown[]>(
 
 export function combineWith<T extends unknown[]>(
     ...sources: { [K in keyof T]: Source<T[K]> }
-): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+): <U>(source: Source<U>) => Source<[U, ...T]> {
     return <U>(source: Source<U>) =>
-        combineSources(source, ...sources) as Source<Unshift<T, U>>;
+        combineSources<[U, ...T]>(source, ...sources);
 }
 
 export function raceWith<T>(
@@ -565,9 +565,8 @@ export function raceWith<T>(
 
 export function zipWith<T extends unknown[]>(
     ...sources: { [K in keyof T]: Source<T[K]> }
-): <U>(source: Source<U>) => Source<Unshift<T, U>> {
-    return <U>(source: Source<U>) =>
-        zipSources(source, ...sources) as Source<Unshift<T, U>>;
+): <U>(source: Source<U>) => Source<[U, ...T]> {
+    return <U>(source: Source<U>) => zipSources<[U, ...T]>(source, ...sources);
 }
 
 export interface Operator<T, U> {
@@ -597,7 +596,7 @@ export function map<T, U>(
                     let transformed: U;
                     try {
                         transformed = transform(event.value, idx++);
-                    } catch (error) {
+                    } /* prettier-ignore */ catch (error: unknown) {
                         sink(Throw(error));
                         return;
                     }
@@ -631,7 +630,7 @@ export function mapEvents<T, U>(
                 let newEvent: Event<U>;
                 try {
                     newEvent = transform(event, idx++);
-                } catch (error) {
+                } /* prettier-ignore */ catch (error: unknown) {
                     sink(Throw(error));
                     return;
                 }
@@ -686,7 +685,7 @@ export function filter<T>(
                     let passThrough: unknown;
                     try {
                         passThrough = predicate(event.value, idx++);
-                    } catch (error) {
+                    } /* prettier-ignore */ catch (error: unknown) {
                         sink(Throw(error));
                         return;
                     }
@@ -735,7 +734,7 @@ export function scan<T, R>(
                             event.value,
                             currentIndex++,
                         );
-                    } catch (error) {
+                    } /* prettier-ignore */ catch (error: unknown) {
                         sink(Throw(error));
                         return;
                     }
@@ -1000,7 +999,7 @@ export function spyEvent<T>(
             const sourceSink = Sink<T>((event) => {
                 try {
                     onEvent(event);
-                } catch (error) {
+                } /* prettier-ignore */ catch (error: unknown) {
                     sink(Throw(error));
                     return;
                 }
@@ -1100,7 +1099,7 @@ export function takeWhile<T>(
                     let keepGoing: unknown;
                     try {
                         keepGoing = shouldContinue(event.value, idx++);
-                    } catch (error) {
+                    } /* prettier-ignore */ catch (error: unknown) {
                         sink(Throw(error));
                         return;
                     }
@@ -1202,7 +1201,7 @@ export function skipWhile<T>(
                 if (event.type === EventType.Push && skipping) {
                     try {
                         skipping = !!shouldContinueSkipping(event.value, idx++);
-                    } catch (error) {
+                    } /* prettier-ignore */ catch (error: unknown) {
                         sink(Throw(error));
                         return;
                     }
@@ -1287,7 +1286,7 @@ export function catchError<T>(
                     let newSource: Source<T>;
                     try {
                         newSource = getNewSource(event.error);
-                    } catch (error) {
+                    } /* prettier-ignore */ catch (error: unknown) {
                         sink(Throw(error));
                         return;
                     }
@@ -1378,7 +1377,7 @@ export function windowEach(
                 let windowEndSource: Source<unknown>;
                 try {
                     windowEndSource = getWindowEndSource();
-                } catch (error) {
+                } /* prettier-ignore */ catch (error: unknown) {
                     const throwEvent = Throw(error);
                     currentWindow(throwEvent);
                     sink(throwEvent);
@@ -1432,12 +1431,6 @@ export function bufferEach(
     return flow(windowEach(getWindowEndSource), collectInner);
 }
 
-type Unshift<T extends unknown[], U> = ((h: U, ...t: T) => void) extends (
-    ...t: infer R
-) => void
-    ? R
-    : never;
-
 export function delay(getDelaySource: () => Source<unknown>): IdentityOperator;
 export function delay<T>(
     getDelaySource: (value: T, index: number) => Source<unknown>,
@@ -1455,7 +1448,7 @@ export function delay<T>(
                     let delaySource: Source<unknown>;
                     try {
                         delaySource = getDelaySource(event.value, idx++);
-                    } catch (error) {
+                    } /* prettier-ignore */ catch (error: unknown) {
                         sink(Throw(error));
                         return;
                     }

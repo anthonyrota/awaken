@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+/* eslint-disable */
 import {
     dispose,
     isDisposable,
@@ -459,7 +462,7 @@ describe('DisposalError', () => {
 
         try {
             disposable.dispose();
-        } catch (error) {
+        } /* prettier-ignore */ catch (error: unknown) {
             /* eslint-disable jest/no-try-expect */
             expect(error).toBeInstanceOf(DisposalError);
             expect((error as DisposalError).message).toMatchInlineSnapshot(`
@@ -497,7 +500,7 @@ describe('DisposalError', () => {
 
         try {
             disposable.dispose();
-        } catch (error) {
+        } /* prettier-ignore */ catch (error: unknown) {
             /* eslint-disable jest/no-try-expect */
             expect(error).toBeInstanceOf(DisposalError);
             expect((error as DisposalError).message).toMatchInlineSnapshot(`

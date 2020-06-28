@@ -143,7 +143,7 @@ export function ScheduleQueued<T extends any[] = []>(
                     }
 
                     isInCallback = false;
-                } catch (error) {
+                } /* prettier-ignore */ catch (error: unknown) {
                     callbacks = [];
                     isInCallback = false;
                     nestedCallNextArgs.length = 0;

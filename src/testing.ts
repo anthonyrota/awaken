@@ -71,7 +71,7 @@ export function TestSchedule(): TestSchedule {
             if (shouldCall) {
                 try {
                     callback();
-                } catch (error) {
+                } /* prettier-ignore */ catch (error: unknown) {
                     reset();
                     throw error;
                 }

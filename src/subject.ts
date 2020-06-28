@@ -120,8 +120,8 @@ export function Subject<T>(): Subject<T> {
                     let active = false;
                     try {
                         active = sink.active;
-                    } catch (error) {
-                        errors.push(error);
+                    } /* prettier-ignore */ catch (error: unknown) {
+                        errors.push(error as DisposalError);
                     }
 
                     if (!active) {
@@ -137,7 +137,7 @@ export function Subject<T>(): Subject<T> {
 
                     try {
                         sink(event);
-                    } catch (error) {
+                    } /* prettier-ignore */ catch (error: unknown) {
                         asyncReportError(error);
                         sinkInfo.didRemove = true;
                     }
