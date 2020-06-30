@@ -901,33 +901,6 @@ function _createSwitchOperator(
 export const switchEach = _createSwitchOperator(true);
 export const concatDrop = _createSwitchOperator(false);
 
-export function startWith<T>(
-    ...values: T[]
-): <U>(source: Source<U>) => Source<T | U> {
-    return <U>(source: Source<U>) =>
-        Source<T | U>((sink) => {
-            pushArrayItemsToSink(values, sink);
-            source(sink);
-        });
-}
-
-export function endWith<T>(
-    ...values: T[]
-): <U>(source: Source<U>) => Source<T | U> {
-    return <U>(source: Source<U>) =>
-        Source<T | U>((sink) => {
-            const sourceSink = Sink<U>((event) => {
-                if (event.type === EventType.End) {
-                    pushArrayItemsToSink(values, sink);
-                }
-                sink(event);
-            });
-
-            sink.add(sourceSink);
-            source(sourceSink);
-        });
-}
-
 export function flatWith<T>(
     ...sources: Source<T>[]
 ): <U>(source: Source<U>) => Source<T | U> {
@@ -989,6 +962,33 @@ export function concatDropMap<T, U>(
     transform: (value: T, index: number) => Source<U>,
 ): Operator<T, U> {
     return flow(map(transform), concatDrop);
+}
+
+export function startWith<T>(
+    ...values: T[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) =>
+        Source<T | U>((sink) => {
+            pushArrayItemsToSink(values, sink);
+            source(sink);
+        });
+}
+
+export function endWith<T>(
+    ...values: T[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) =>
+        Source<T | U>((sink) => {
+            const sourceSink = Sink<U>((event) => {
+                if (event.type === EventType.End) {
+                    pushArrayItemsToSink(values, sink);
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
 }
 
 export function spyEvent<T>(
