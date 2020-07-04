@@ -266,6 +266,10 @@ export function emptyScheduled(schedule: ScheduleFunction): Source<never> {
     return ofEventScheduled(End, schedule);
 }
 
+export function timer(durationMs: number): Source<never> {
+    return emptyScheduled(ScheduleTimeout(durationMs));
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const never = Source(() => {});
 
@@ -1481,57 +1485,215 @@ export function bufferEach(
     return flow(windowEach(getWindowEndSource), collectInner);
 }
 
+export interface DebounceConfig {
+    trailing?: boolean | null;
+    leading?: boolean | null;
+    emitPendingOnEnd?: boolean | null;
+    timeoutResubscribe?: boolean | null;
+}
+
+export type InitialDurationInfo =
+    | [
+          /* durationSource */ Source<unknown>,
+          /* maxDurationSource */ (Source<unknown> | undefined | null)?,
+      ]
+    | [
+          /* durationSource */ undefined | null,
+          /* maxDurationSource */ Source<unknown>,
+      ];
+
 export function debounce(
-    getDurationSource: () => Source<unknown>,
+    getDurationSource: (value: unknown, index: number) => Source<unknown>,
+    getInitialDurationRange?:
+        | ((value: unknown, index: number) => InitialDurationInfo)
+        | null,
+    config?: DebounceConfig | null,
+): IdentityOperator;
+export function debounce(
+    getDurationSource: undefined | null,
+    getInitialDurationRange: (
+        value: unknown,
+        index: number,
+    ) => InitialDurationInfo,
+    config?: DebounceConfig | null,
 ): IdentityOperator;
 export function debounce<T>(
     getDurationSource: (value: T, index: number) => Source<unknown>,
+    getInitialDurationRange?:
+        | ((firstDebouncedValue: T, index: number) => InitialDurationInfo)
+        | null,
+    config?: DebounceConfig | null,
 ): Operator<T, T>;
 export function debounce<T>(
-    getDurationSource: (value: T, index: number) => Source<unknown>,
+    getDurationSource: undefined | null,
+    getInitialDurationRange: (
+        firstDebouncedValue: T,
+        index: number,
+    ) => InitialDurationInfo,
+    config?: DebounceConfig | null,
+): Operator<T, T>;
+export function debounce<T>(
+    getDurationSource?: ((value: T, index: number) => Source<unknown>) | null,
+    getInitialDurationRange?:
+        | ((firstDebouncedValue: T, index: number) => InitialDurationInfo)
+        | null,
+    config?: DebounceConfig | null,
 ): Operator<T, T> {
+    const leading = config?.leading ?? false;
+    const trailing = config?.trailing ?? true;
+    const emitPendingOnEnd = config?.emitPendingOnEnd ?? true;
+    const timeoutResubscribe = config?.timeoutResubscribe ?? false;
+
     return (source: Source<T>) =>
         Source<T>((sink) => {
-            let latestPush: Push<T> | undefined;
+            let latestPush: Push<T>;
+            let multiplePushes = false;
+            let waitingForLeadingValueAfterResubscribe = false;
             let durationSink: Sink<unknown>;
+            let maxDurationSink: Sink<unknown> | true | undefined;
+            let distributingLeading = false;
             let idx = 0;
 
-            function pushValue() {
-                durationSink.dispose();
-                const _latestPush = latestPush;
-                latestPush = undefined;
-                // eslint-disable-next-line max-len
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                sink(_latestPush!);
-            }
-
-            function onDurationEvent(event: Event<unknown>) {
+            function onDurationEvent(event: Event<unknown>): void {
                 if (event.type === EventType.Throw) {
                     sink(event);
                     return;
                 }
-                pushValue();
+
+                const _multiplePushes = multiplePushes;
+                const _latestPush = latestPush;
+                multiplePushes = false;
+                durationSink?.dispose();
+                if (maxDurationSink && maxDurationSink !== true) {
+                    maxDurationSink.dispose();
+                }
+                maxDurationSink = undefined;
+
+                if (trailing && (!leading || _multiplePushes)) {
+                    sink(_latestPush);
+                }
+            }
+
+            function onMaxDurationEvent(event: Event<unknown>): void {
+                const _multiplePushes = multiplePushes;
+                const _idx = idx;
+
+                onDurationEvent(event);
+
+                if (timeoutResubscribe && _multiplePushes && _idx === idx) {
+                    waitingForLeadingValueAfterResubscribe = true;
+                    startDebounce();
+                }
+            }
+
+            function restartDebounce(durationSource?: Source<unknown>): void {
+                if (!getDurationSource) {
+                    return;
+                }
+
+                durationSink?.dispose();
+                durationSink = Sink(onDurationEvent);
+                sourceSink.add(durationSink);
+
+                let durationSource_ = durationSource;
+                if (!durationSource_) {
+                    try {
+                        durationSource_ = getDurationSource(
+                            latestPush.value,
+                            idx,
+                        );
+                    } catch (error) {
+                        sink(Throw(error));
+                        return;
+                    }
+                }
+
+                durationSource_(durationSink);
+            }
+
+            function startDebounce(): void {
+                const _latestPush = latestPush;
+                const _idx = idx;
+
+                // Mark debounce start here in case below calls source.
+                maxDurationSink = true;
+
+                if (leading && !waitingForLeadingValueAfterResubscribe) {
+                    distributingLeading = true;
+                    sink(_latestPush);
+                    distributingLeading = false;
+                }
+
+                if (getInitialDurationRange) {
+                    maxDurationSink = Sink(onMaxDurationEvent);
+                    sourceSink.add(maxDurationSink);
+                } else {
+                    // If above called the source don't resubscribe twice.
+                    if (_idx !== idx) {
+                        restartDebounce();
+                    }
+                    return;
+                }
+
+                let initialDurationInfo: InitialDurationInfo;
+                try {
+                    initialDurationInfo = getInitialDurationRange(
+                        _latestPush.value,
+                        _idx,
+                    );
+                } catch (error) {
+                    sink(Throw(error));
+                    return;
+                }
+
+                const [durationSource, maxDurationSource] = initialDurationInfo;
+
+                if (maxDurationSource) {
+                    maxDurationSource(maxDurationSink);
+                }
+
+                if (durationSource) {
+                    restartDebounce(durationSource);
+                }
             }
 
             const sourceSink = Sink<T>((event) => {
                 if (event.type === EventType.Push) {
-                    let durationSource: Source<unknown>;
-                    try {
-                        durationSource = getDurationSource(event.value, idx++);
-                    } /* prettier-ignore */ catch (error: unknown) {
-                        sink(Throw(error));
-                        return;
-                    }
                     latestPush = event;
-                    durationSink?.dispose();
-                    durationSink = Sink(onDurationEvent);
-                    sink.add(durationSink);
-                    durationSource(durationSink);
+                    idx++;
+
+                    if (maxDurationSink) {
+                        if (waitingForLeadingValueAfterResubscribe) {
+                            waitingForLeadingValueAfterResubscribe = false;
+                            if (leading) {
+                                sink(latestPush);
+                            }
+                        } else {
+                            multiplePushes = true;
+                        }
+                        if (
+                            // We we're called in the leading push to sink
+                            // above.
+                            !distributingLeading
+                        ) {
+                            restartDebounce();
+                        }
+                    } else {
+                        waitingForLeadingValueAfterResubscribe = false;
+                        startDebounce();
+                    }
+
                     return;
                 }
 
-                if (event.type === EventType.End && latestPush) {
-                    pushValue();
+                if (
+                    event.type === EventType.End &&
+                    emitPendingOnEnd &&
+                    maxDurationSink &&
+                    trailing &&
+                    (!leading || multiplePushes)
+                ) {
+                    sink(latestPush);
                 }
 
                 sink(event);
@@ -1542,12 +1704,76 @@ export function debounce<T>(
         });
 }
 
-export function debounceMs(durationMs: number): IdentityOperator {
-    const durationSource = emptyScheduled(ScheduleTimeout(durationMs));
-    return debounce(() => durationSource);
+export function debounceMs(
+    durationMs: number,
+    maxDurationMs?: number | null,
+    config?: DebounceConfig | null,
+): IdentityOperator;
+export function debounceMs(
+    durationMs: null | undefined,
+    maxDurationMs: number,
+    config?: DebounceConfig | null,
+): IdentityOperator;
+export function debounceMs(
+    durationMs?: number | null,
+    maxDurationMs?: number | null,
+    config?: DebounceConfig | null,
+): IdentityOperator {
+    const durationSource = durationMs == null ? durationMs : timer(durationMs);
+    const maxDuration =
+        maxDurationMs == null ? maxDurationMs : timer(maxDurationMs);
+
+    if (durationSource != null) {
+        return debounce(
+            () => durationSource,
+            maxDuration == null
+                ? maxDuration
+                : () => [durationSource, maxDuration],
+            config,
+        );
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return debounce(null, () => [null, maxDuration!], config);
 }
 
-export function delay(getDelaySource: () => Source<unknown>): IdentityOperator;
+export type ThrottleConfig = DebounceConfig;
+
+export function throttle(
+    getDurationSource: () => Source<unknown>,
+    config?: ThrottleConfig | null,
+): IdentityOperator;
+export function throttle<T>(
+    getDurationSource: (value: T, index: number) => Source<unknown>,
+    config?: ThrottleConfig | null,
+): Operator<T, T>;
+export function throttle<T>(
+    getDurationSource: (value: T, index: number) => Source<unknown>,
+    config?: ThrottleConfig | null,
+): Operator<T, T> {
+    return debounce<T>(
+        null,
+        (value, index) => [null, getDurationSource(value, index)],
+        config,
+    );
+}
+
+export function throttleMs(
+    durationMs: number,
+    config?: ThrottleConfig | null,
+): IdentityOperator {
+    return debounceMs(null, durationMs, {
+        ...config,
+        timeoutResubscribe:
+            config?.timeoutResubscribe == null
+                ? true
+                : config.timeoutResubscribe,
+    });
+}
+
+export function delay(
+    getDelaySource: (value: unknown, index: number) => Source<unknown>,
+): IdentityOperator;
 export function delay<T>(
     getDelaySource: (value: T, index: number) => Source<unknown>,
 ): Operator<T, T>;
@@ -1598,7 +1824,7 @@ export function delay<T>(
 }
 
 export function delayMs(ms: number): IdentityOperator {
-    const delaySource = emptyScheduled(ScheduleTimeout(ms));
+    const delaySource = timer(ms);
     return delay(() => delaySource);
 }
 
