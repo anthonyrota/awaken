@@ -1602,7 +1602,7 @@ export function debounce<T>(
                             latestPush.value,
                             idx,
                         );
-                    } catch (error) {
+                    } /* prettier-ignore */ catch (error: unknown) {
                         sink(Throw(error));
                         return;
                     }
@@ -1641,7 +1641,7 @@ export function debounce<T>(
                         _latestPush.value,
                         _idx,
                     );
-                } catch (error) {
+                } /* prettier-ignore */ catch (error: unknown) {
                     sink(Throw(error));
                     return;
                 }
