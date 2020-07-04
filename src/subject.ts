@@ -2,7 +2,6 @@ import { Disposable, implDisposable, DisposalError } from './disposable';
 import { createCustomError, joinErrors } from './errorBase';
 import { EventType, Event, Push, Throw, End, Source, Sink } from './source';
 import { removeOnce, asyncReportError } from './util';
-import isFunction = require('lodash.isfunction');
 
 export interface Subject<T> extends Source<T>, Sink<T> {}
 
@@ -50,7 +49,7 @@ export function Subject<T>(): Subject<T> {
 
         const { sinkInfos, sinksToAdd, eventsQueue } = state;
 
-        if (isFunction(eventOrSink)) {
+        if (typeof eventOrSink === 'function') {
             if (!eventOrSink.active) {
                 return;
             }
@@ -220,7 +219,7 @@ export function KeepFinalEventSubject<T>(): Subject<T> {
     let finalEvent: Throw | End | undefined;
 
     return implDisposable((eventOrSink: Event<T> | Sink<T>): void => {
-        if (isFunction(eventOrSink)) {
+        if (typeof eventOrSink === 'function') {
             if (finalEvent) {
                 eventOrSink(finalEvent);
             } else {
@@ -247,7 +246,7 @@ export function LastValueSubject<T>(): Subject<T> {
     let finalEvent: Throw | End | undefined;
 
     return implDisposable((eventOrSink: Event<T> | Sink<T>) => {
-        if (isFunction(eventOrSink)) {
+        if (typeof eventOrSink === 'function') {
             if (finalEvent) {
                 if (lastPushEvent && !base.active) {
                     eventOrSink(lastPushEvent);
