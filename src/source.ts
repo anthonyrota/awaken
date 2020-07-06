@@ -995,9 +995,7 @@ export function endWith<T>(
         });
 }
 
-export function spyEvent<T>(
-    onEvent: (event: Event<T>) => void,
-): Operator<T, T> {
+export function spy<T>(onEvent: (event: Event<T>) => void): Operator<T, T> {
     return (source) =>
         Source((sink) => {
             const sourceSink = Sink<T>((event) => {
@@ -1022,7 +1020,7 @@ export function spyPush<T>(
         Source((sink) => {
             let idx = 0;
 
-            spyEvent<T>((event) => {
+            spy<T>((event) => {
                 if (event.type === EventType.Push) {
                     onPush(event.value, idx++);
                 }
@@ -1031,7 +1029,7 @@ export function spyPush<T>(
 }
 
 export function spyThrow(onThrow: (error: unknown) => void): IdentityOperator {
-    return spyEvent((event) => {
+    return spy((event) => {
         if (event.type === EventType.Throw) {
             onThrow(event.error);
         }
@@ -1039,7 +1037,7 @@ export function spyThrow(onThrow: (error: unknown) => void): IdentityOperator {
 }
 
 export function spyEnd(onEnd: () => void): IdentityOperator {
-    return spyEvent((event) => {
+    return spy((event) => {
         if (event.type === EventType.End) {
             onEnd();
         }
@@ -1486,11 +1484,18 @@ export function bufferEach(
 }
 
 export interface DebounceConfig {
-    trailing?: boolean | null;
     leading?: boolean | null;
+    trailing?: boolean | null;
     emitPendingOnEnd?: boolean | null;
-    timeoutResubscribe?: boolean | null;
+    immediateRestart?: boolean | null;
 }
+
+export const defaultDebounceConfig: DebounceConfig = {
+    leading: false,
+    trailing: true,
+    emitPendingOnEnd: true,
+    immediateRestart: false,
+};
 
 export type InitialDurationInfo =
     | [
@@ -1539,19 +1544,20 @@ export function debounce<T>(
         | null,
     config?: DebounceConfig | null,
 ): Operator<T, T> {
-    const leading = config?.leading ?? false;
-    const trailing = config?.trailing ?? true;
-    const emitPendingOnEnd = config?.emitPendingOnEnd ?? true;
-    const timeoutResubscribe = config?.timeoutResubscribe ?? false;
+    const leading = config?.leading ?? defaultDebounceConfig.leading;
+    const trailing = config?.trailing ?? defaultDebounceConfig.trailing;
+    const emitPendingOnEnd =
+        config?.emitPendingOnEnd ?? defaultDebounceConfig.emitPendingOnEnd;
+    const immediateRestart =
+        config?.immediateRestart ?? defaultDebounceConfig.immediateRestart;
 
     return (source: Source<T>) =>
         Source<T>((sink) => {
             let latestPush: Push<T>;
             let multiplePushes = false;
-            let waitingForLeadingValueAfterResubscribe = false;
             let durationSink: Sink<unknown>;
             let maxDurationSink: Sink<unknown> | true | undefined;
-            let distributingLeading = false;
+            let distributing = false;
             let idx = 0;
 
             function onDurationEvent(event: Event<unknown>): void {
@@ -1562,6 +1568,7 @@ export function debounce<T>(
 
                 const _multiplePushes = multiplePushes;
                 const _latestPush = latestPush;
+                const _idx = idx;
                 multiplePushes = false;
                 durationSink?.dispose();
                 if (maxDurationSink && maxDurationSink !== true) {
@@ -1569,20 +1576,24 @@ export function debounce<T>(
                 }
                 maxDurationSink = undefined;
 
-                if (trailing && (!leading || _multiplePushes)) {
+                const shouldRestart = immediateRestart && _multiplePushes;
+
+                if (
+                    (shouldRestart && leading) ||
+                    (trailing && (!leading || _multiplePushes))
+                ) {
+                    distributing = true;
                     sink(_latestPush);
+                    distributing = false;
                 }
-            }
 
-            function onMaxDurationEvent(event: Event<unknown>): void {
-                const _multiplePushes = multiplePushes;
-                const _idx = idx;
-
-                onDurationEvent(event);
-
-                if (timeoutResubscribe && _multiplePushes && _idx === idx) {
-                    waitingForLeadingValueAfterResubscribe = true;
-                    startDebounce();
+                if (
+                    shouldRestart &&
+                    // If received another push event then we have already
+                    // restarted.
+                    _idx === idx
+                ) {
+                    startDebounce(_latestPush, _idx);
                 }
             }
 
@@ -1611,27 +1622,13 @@ export function debounce<T>(
                 durationSource_(durationSink);
             }
 
-            function startDebounce(): void {
-                const _latestPush = latestPush;
-                const _idx = idx;
-
-                // Mark debounce start here in case below calls source.
-                maxDurationSink = true;
-
-                if (leading && !waitingForLeadingValueAfterResubscribe) {
-                    distributingLeading = true;
-                    sink(_latestPush);
-                    distributingLeading = false;
-                }
-
+            function startDebounce(_latestPush: Push<T>, _idx: number): void {
                 if (getInitialDurationRange) {
-                    maxDurationSink = Sink(onMaxDurationEvent);
+                    maxDurationSink = Sink(onDurationEvent);
                     sourceSink.add(maxDurationSink);
                 } else {
-                    // If above called the source don't resubscribe twice.
-                    if (_idx !== idx) {
-                        restartDebounce();
-                    }
+                    maxDurationSink = true;
+                    restartDebounce();
                     return;
                 }
 
@@ -1648,11 +1645,12 @@ export function debounce<T>(
 
                 const [durationSource, maxDurationSource] = initialDurationInfo;
 
+                const _maxDurationSink = maxDurationSink;
                 if (maxDurationSource) {
-                    maxDurationSource(maxDurationSink);
+                    maxDurationSource(_maxDurationSink);
                 }
 
-                if (durationSource) {
+                if (durationSource && _maxDurationSink.active) {
                     restartDebounce(durationSource);
                 }
             }
@@ -1662,25 +1660,24 @@ export function debounce<T>(
                     latestPush = event;
                     idx++;
 
+                    if (distributing) {
+                        return;
+                    }
+
                     if (maxDurationSink) {
-                        if (waitingForLeadingValueAfterResubscribe) {
-                            waitingForLeadingValueAfterResubscribe = false;
-                            if (leading) {
-                                sink(latestPush);
-                            }
-                        } else {
-                            multiplePushes = true;
-                        }
-                        if (
-                            // We we're called in the leading push to sink
-                            // above.
-                            !distributingLeading
-                        ) {
-                            restartDebounce();
-                        }
+                        multiplePushes = true;
+                        restartDebounce();
                     } else {
-                        waitingForLeadingValueAfterResubscribe = false;
-                        startDebounce();
+                        const _latestPush = latestPush;
+                        const _idx = idx;
+
+                        if (leading) {
+                            distributing = true;
+                            sink(_latestPush);
+                            distributing = false;
+                        }
+
+                        startDebounce(_latestPush, _idx);
                     }
 
                     return;
@@ -1738,6 +1735,12 @@ export function debounceMs(
 }
 
 export type ThrottleConfig = DebounceConfig;
+export const defaultThrottleConfig: ThrottleConfig = {
+    leading: true,
+    trailing: true,
+    emitPendingOnEnd: true,
+    immediateRestart: true,
+};
 
 export function throttle(
     getDurationSource: () => Source<unknown>,
@@ -1754,7 +1757,16 @@ export function throttle<T>(
     return debounce<T>(
         null,
         (value, index) => [null, getDurationSource(value, index)],
-        config,
+        {
+            leading: config?.leading ?? defaultThrottleConfig.leading,
+            trailing: config?.trailing ?? defaultThrottleConfig.trailing,
+            emitPendingOnEnd:
+                config?.emitPendingOnEnd ??
+                defaultThrottleConfig.emitPendingOnEnd,
+            immediateRestart:
+                config?.immediateRestart ??
+                defaultThrottleConfig.immediateRestart,
+        },
     );
 }
 
@@ -1762,13 +1774,8 @@ export function throttleMs(
     durationMs: number,
     config?: ThrottleConfig | null,
 ): IdentityOperator {
-    return debounceMs(null, durationMs, {
-        ...config,
-        timeoutResubscribe:
-            config?.timeoutResubscribe == null
-                ? true
-                : config.timeoutResubscribe,
-    });
+    const durationSource = timer(durationMs);
+    return throttle(() => durationSource, config);
 }
 
 export function delay(
@@ -1784,6 +1791,7 @@ export function delay<T>(
         Source((sink) => {
             let idx = 0;
             let active = 0;
+            let ended = false;
 
             const sourceSink = Sink<T>((event) => {
                 if (event.type === EventType.Push) {
@@ -1796,13 +1804,18 @@ export function delay<T>(
                     }
 
                     const delaySink = Sink<unknown>((innerEvent) => {
+                        if (innerEvent.type === EventType.Throw) {
+                            sink(innerEvent);
+                            return;
+                        }
+
                         active--;
                         delaySink.dispose();
-                        sink(
-                            innerEvent.type === EventType.Throw
-                                ? innerEvent
-                                : event,
-                        );
+
+                        sink(event);
+                        if (ended && active === 0) {
+                            sink(End);
+                        }
                     });
 
                     sink.add(delaySink);
@@ -1812,6 +1825,7 @@ export function delay<T>(
                 }
 
                 if (event.type === EventType.End && active !== 0) {
+                    ended = true;
                     return;
                 }
 
@@ -1861,4 +1875,59 @@ export function sample(scheduleSource: Source<unknown>): IdentityOperator {
 
 export function sampleMs(ms: number): IdentityOperator {
     return sample(interval(ms));
+}
+
+export interface TimeProvider {
+    (): number;
+}
+
+export interface WithTime<T> {
+    value: T;
+    time: number;
+}
+
+export function withTime<T>(
+    provideTime: TimeProvider,
+): Operator<T, WithTime<T>> {
+    return map((value) => ({ value, time: provideTime() }));
+}
+
+export interface TimeInterval<T> {
+    value: T;
+    time: number;
+    startTime: number;
+    timeSinceStart: number;
+    lastTime: number;
+    timeDifference: number;
+}
+
+export function withTimeInterval<T>(
+    provideTime: TimeProvider,
+): Operator<T, TimeInterval<T>> {
+    return (source) =>
+        Source((sink) => {
+            const startTime = provideTime();
+            let lastTime = provideTime();
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === EventType.Push) {
+                    const currentTime = provideTime();
+                    const timeInfo: TimeInterval<T> = {
+                        value: event.value,
+                        time: currentTime,
+                        startTime,
+                        timeSinceStart: currentTime - startTime,
+                        lastTime,
+                        timeDifference: currentTime - lastTime,
+                    };
+                    lastTime = currentTime;
+                    sink(Push(timeInfo));
+                    return;
+                }
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
 }
