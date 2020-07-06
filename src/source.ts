@@ -1,4 +1,4 @@
-import { Disposable, implDisposable } from './disposable';
+import { Disposable, implDisposableMethods } from './disposable';
 import {
     ScheduleFunction,
     scheduleAnimationFrame,
@@ -77,7 +77,7 @@ export interface Sink<T> extends Disposable {
  */
 export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
     const disposable = Disposable();
-    return implDisposable((event: Event<T>): void => {
+    return implDisposableMethods((event: Event<T>): void => {
         if (!disposable.active) {
             return;
         }

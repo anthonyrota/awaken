@@ -1,4 +1,4 @@
-import { Disposable, implDisposable, DisposalError } from './disposable';
+import { Disposable, implDisposableMethods, DisposalError } from './disposable';
 import { createCustomError, joinErrors } from './errorBase';
 import { EventType, Event, Push, Throw, End, Source, Sink } from './source';
 import { removeOnce, asyncReportError } from './util';
@@ -42,7 +42,7 @@ export function Subject<T>(): Subject<T> {
         }
     });
 
-    const subject = implDisposable((eventOrSink: Event<T> | Sink<T>): void => {
+    return implDisposableMethods((eventOrSink: Event<T> | Sink<T>): void => {
         if (!state || !disposable.active) {
             return;
         }
@@ -174,8 +174,6 @@ export function Subject<T>(): Subject<T> {
             }
         }
     }, disposable);
-
-    return subject;
 }
 
 interface _SubjectDistributionSinkDisposalError extends Error {
@@ -218,7 +216,7 @@ export function KeepFinalEventSubject<T>(): Subject<T> {
     const base = Subject<T>();
     let finalEvent: Throw | End | undefined;
 
-    return implDisposable((eventOrSink: Event<T> | Sink<T>): void => {
+    return implDisposableMethods((eventOrSink: Event<T> | Sink<T>): void => {
         if (typeof eventOrSink === 'function') {
             if (finalEvent) {
                 eventOrSink(finalEvent);
@@ -245,7 +243,7 @@ export function LastValueSubject<T>(): Subject<T> {
     let lastPushEvent: Push<T> | undefined;
     let finalEvent: Throw | End | undefined;
 
-    return implDisposable((eventOrSink: Event<T> | Sink<T>) => {
+    return implDisposableMethods((eventOrSink: Event<T> | Sink<T>) => {
         if (typeof eventOrSink === 'function') {
             if (finalEvent) {
                 if (lastPushEvent && !base.active) {

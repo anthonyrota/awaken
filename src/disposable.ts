@@ -15,12 +15,14 @@ export interface Disposable {
 }
 
 interface _IDisposableImplementation extends Disposable {
-    __markParentDisposed(): void;
+    __children_(): _IDisposableImplementation[] | null;
+    __prepareForDisposal(): void;
 }
 
 class _DisposableImplementation implements _IDisposableImplementation {
     private __children: _IDisposableImplementation[] | null = [];
-    private __isParentDisposed = false;
+    private __parents: _IDisposableImplementation[] | null = [];
+    private __markedForDisposal = false;
     public [$$disposable]: typeof $$disposable_IdentifyingValue;
 
     constructor(private __onDispose?: () => void) {}
@@ -31,11 +33,15 @@ class _DisposableImplementation implements _IDisposableImplementation {
         }
         // If a disposable is determined to not be active, it should be ensured
         // that it's dispose method was called.
-        if (this.__isParentDisposed) {
+        if (this.__markedForDisposal) {
             this.dispose();
             return false;
         }
         return true;
+    }
+
+    public __children_(): _IDisposableImplementation[] | null {
+        return this.__children;
     }
 
     public add(child: _IDisposableImplementation): void {
@@ -44,22 +50,19 @@ class _DisposableImplementation implements _IDisposableImplementation {
             return;
         }
 
-        if (child === this) {
+        if (!child.__children_()) {
             return;
         }
 
-        if (this.__isParentDisposed) {
+        if (this.__markedForDisposal) {
             this.__children.push(child);
             // Already marked children as disposed -> have to manually here.
-            child.__markParentDisposed();
+            child.__prepareForDisposal();
             this.dispose();
             return;
         }
 
-        if (
-            // If the child is marked for disposal this will dispose it now.
-            !child.active
-        ) {
+        if (child === this) {
             return;
         }
 
@@ -67,18 +70,15 @@ class _DisposableImplementation implements _IDisposableImplementation {
     }
 
     public remove(child: _IDisposableImplementation): void {
-        if (!this.active) {
+        if (this.__markedForDisposal) {
+            // Note: Cannot remove the child if currently being disposed.
             return;
         }
 
-        if (
-            // If the child is marked for disposal this will dispose it now.
-            !child.active
-        ) {
+        if (!child.__children_()) {
             return;
         }
 
-        // Neither we nor the child are being/waiting to be disposed.
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         removeOnce(this.__children!, child);
     }
@@ -92,11 +92,18 @@ class _DisposableImplementation implements _IDisposableImplementation {
 
         // Walk the tree of all children and mark that one of their parents
         // has been disposed.
-        this.__markParentDisposed();
+        this.__prepareForDisposal();
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const parents = this.__parents!;
         const errors: unknown[] = [];
 
         this.__children = null;
+        this.__parents = null;
+
+        for (let i = 0; i < parents.length; i++) {
+            parents[i].remove(this);
+        }
 
         const onDispose = this.__onDispose;
 
@@ -121,14 +128,15 @@ class _DisposableImplementation implements _IDisposableImplementation {
         }
     }
 
-    public __markParentDisposed(): void {
-        const children = this.__children;
-        if (!children || this.__isParentDisposed) {
+    public __prepareForDisposal(): void {
+        if (this.__markedForDisposal) {
             return;
         }
-        this.__isParentDisposed = true;
+        this.__markedForDisposal = true;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const children = this.__children!;
         for (let i = 0; i < children.length; i++) {
-            children[i].__markParentDisposed();
+            children[i].__prepareForDisposal();
         }
     }
 }
@@ -201,12 +209,15 @@ export function isDisposable(value: unknown): value is Disposable {
 export const DISPOSED: Disposable = new _DisposableImplementation();
 DISPOSED.dispose();
 
-// eslint-disable-next-line max-len
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/unbound-method
-const _DisposableImplementation_activeGetter = Object.getOwnPropertyDescriptor(
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const activeDescriptor = Object.getOwnPropertyDescriptor(
     _DisposableImplementation.prototype,
     'active',
-)!.get!;
+)!;
+
+// eslint-disable-next-line max-len
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/unbound-method
+const activeGetter = activeDescriptor.get!;
 
 /**
  * Implements the Disposable Interface onto the given value by proxying the
@@ -215,45 +226,55 @@ const _DisposableImplementation_activeGetter = Object.getOwnPropertyDescriptor(
  * @param disposable The disposable to proxy to.
  * @returns The given value which has been mutated. In strict javascript this is
  *     unnecessary but here it is useful as the returned value will have the
- *     type of the given value & Disposable.
+ *     type `T & Disposable`
  */
-export function implDisposable<T>(
+export function implDisposableMethods<T>(
     value: T,
     disposable: Disposable,
 ): T & Disposable {
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (value as any)[$$disposable] = $$disposable_IdentifyingValue;
+
     if (disposable instanceof _DisposableImplementation) {
-        Object.defineProperties(value, {
-            [$$disposable]: { value: $$disposable_IdentifyingValue },
-            active: {
-                get: _DisposableImplementation_activeGetter.bind(disposable),
-            },
-            add: {
-                value: disposable.add.bind(disposable),
-            },
-            remove: {
-                value: disposable.remove.bind(disposable),
-            },
-            dispose: {
-                value: disposable.dispose.bind(disposable),
-            },
-            __markParentDisposed: {
-                value: disposable.__markParentDisposed.bind(disposable),
-            },
+        Object.defineProperty(value, 'active', {
+            get: activeGetter.bind(disposable),
+            enumerable: false,
+            configurable: true,
         });
+        // eslint-disable-next-line max-len
+        ((value as unknown) as _IDisposableImplementation).add = disposable.add.bind(
+            disposable,
+        );
+        // eslint-disable-next-line max-len
+        ((value as unknown) as _IDisposableImplementation).remove = disposable.remove.bind(
+            disposable,
+        );
+        // eslint-disable-next-line max-len
+        ((value as unknown) as _IDisposableImplementation).dispose = disposable.dispose.bind(
+            disposable,
+        );
+        // eslint-disable-next-line max-len
+        ((value as unknown) as _IDisposableImplementation).__children_ = disposable.__children_.bind(
+            disposable,
+        );
+        // eslint-disable-next-line max-len
+        ((value as unknown) as _IDisposableImplementation).__prepareForDisposal = disposable.__prepareForDisposal.bind(
+            disposable,
+        );
     } else {
-        Object.defineProperties(value, {
-            [$$disposable]: { value: $$disposable_IdentifyingValue },
-            /* eslint-disable @typescript-eslint/no-non-null-assertion */
-            active: Object.getOwnPropertyDescriptor(disposable, 'active')!,
-            add: Object.getOwnPropertyDescriptor(disposable, 'add')!,
-            remove: Object.getOwnPropertyDescriptor(disposable, 'remove')!,
-            dispose: Object.getOwnPropertyDescriptor(disposable, 'dispose')!,
-            __markParentDisposed: Object.getOwnPropertyDescriptor(
-                disposable,
-                '__markParentDisposed',
-            )!,
-            /* eslint-enable @typescript-eslint/no-non-null-assertion */
-        });
+        Object.defineProperty(value, 'active', activeDescriptor);
+        /* eslint-disable @typescript-eslint/unbound-method */
+        ((value as unknown) as _IDisposableImplementation).add = disposable.add;
+        ((value as unknown) as _IDisposableImplementation).remove =
+            disposable.remove;
+        ((value as unknown) as _IDisposableImplementation).dispose =
+            disposable.dispose;
+        // eslint-disable-next-line max-len
+        ((value as unknown) as _IDisposableImplementation).__children_ = (disposable as _IDisposableImplementation).__children_;
+        // eslint-disable-next-line max-len
+        ((value as unknown) as _IDisposableImplementation).__prepareForDisposal = (disposable as _IDisposableImplementation).__prepareForDisposal;
+        /* eslint-enable @typescript-eslint/unbound-method */
     }
     return value as T & Disposable;
 }
