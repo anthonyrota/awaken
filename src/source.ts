@@ -1856,14 +1856,13 @@ export function sample(scheduleSource: Source<unknown>): IdentityOperator {
             });
 
             const scheduleSink = Sink<unknown>((event) => {
-                if (event.type !== EventType.Push) {
-                    sink(event);
+                if (event.type === EventType.Push) {
+                    if (lastPushEvent) {
+                        sink(lastPushEvent);
+                    }
                     return;
                 }
-
-                if (lastPushEvent) {
-                    sink(lastPushEvent);
-                }
+                sink(event);
             });
 
             sink.add(sourceSink);
