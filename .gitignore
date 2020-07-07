@@ -10,8 +10,9 @@ npm-debug.log*
 node_modules/
 
 # Generated
-coverage
-build/
+coverage/
+dist/
+testing/dist/
 
 # .vscode
 !.vscode/tasks.js

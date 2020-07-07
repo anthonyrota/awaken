@@ -1,5 +1,4 @@
 import { Disposable } from './disposable';
-import raf = require('raf');
 
 function _call<T>(x: T, f: (x: T) => T): T {
     return f(x);
@@ -135,27 +134,32 @@ export function removeOnce<T>(array: ArrayLike<T>, item: T): void {
     }
 }
 
+// @todo fix
 /**
  * Disposable-based alternative to built-in `requestAnimationFrame`.
  * @param callback The callback to schedule.
  * @param subscription If this is disposed then the request will be cancelled.
  */
-export function requestAnimationFrame(
+function requestAnimationFrameImplementation(
     callback: FrameRequestCallback,
     subscription?: Disposable,
 ): void {
-    if (subscription?.active === false) {
+    if (subscription && !subscription.active) {
         return;
     }
 
-    const animationId = raf(callback);
+    const animationId = requestAnimationFrame(callback);
 
-    subscription?.add(
-        Disposable(() => {
-            raf.cancel(animationId);
-        }),
-    );
+    if (subscription) {
+        subscription.add(
+            Disposable(() => {
+                cancelAnimationFrame(animationId);
+            }),
+        );
+    }
 }
+
+export { requestAnimationFrameImplementation as requestAnimationFrame };
 
 /**
  * Disposable-based alternative to built-in `setTimeout`.
@@ -171,17 +175,19 @@ function setTimeoutImplementation<T extends any[]>(
     subscription?: Disposable,
     ...args: T
 ): void {
-    if (subscription?.active === false) {
+    if (subscription && !subscription.active) {
         return;
     }
 
     const id = setTimeout(callback, delayMs, ...args);
 
-    subscription?.add(
-        Disposable(() => {
-            clearTimeout(id);
-        }),
-    );
+    if (subscription) {
+        subscription.add(
+            Disposable(() => {
+                clearTimeout(id);
+            }),
+        );
+    }
 }
 
 export { setTimeoutImplementation as setTimeout };
@@ -200,17 +206,19 @@ function setIntervalImplementation<T extends any[]>(
     subscription?: Disposable,
     ...args: T
 ): void {
-    if (subscription?.active === false) {
+    if (subscription && !subscription.active) {
         return;
     }
 
     const id = setInterval(callback, delayMs, ...args);
 
-    subscription?.add(
-        Disposable(() => {
-            clearInterval(id);
-        }),
-    );
+    if (subscription) {
+        subscription.add(
+            Disposable(() => {
+                clearInterval(id);
+            }),
+        );
+    }
 }
 
 export { setIntervalImplementation as setInterval };

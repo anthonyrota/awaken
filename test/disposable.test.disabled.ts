@@ -8,7 +8,7 @@ import {
     Disposable,
     DisposalError,
     DISPOSED,
-} from '../src/disposable';
+} from 'awakening';
 import { throw_ } from './testUtils';
 import each from 'jest-each';
 
@@ -462,7 +462,7 @@ describe('DisposalError', () => {
 
         try {
             disposable.dispose();
-        } /* prettier-ignore */ catch (error: unknown) {
+        } catch (error) {
             /* eslint-disable jest/no-try-expect */
             expect(error).toBeInstanceOf(DisposalError);
             expect((error as DisposalError).message).toMatchInlineSnapshot(`
@@ -500,7 +500,7 @@ describe('DisposalError', () => {
 
         try {
             disposable.dispose();
-        } /* prettier-ignore */ catch (error: unknown) {
+        } catch (error) {
             /* eslint-disable jest/no-try-expect */
             expect(error).toBeInstanceOf(DisposalError);
             expect((error as DisposalError).message).toMatchInlineSnapshot(`

@@ -5,7 +5,11 @@ module.exports = {
         '^.+\\.tsx?$': 'ts-jest',
         '^.+\\.js$': 'babel-jest',
     },
-    testPathIgnorePatterns: ['/node_modules/', '/build/'],
+    moduleNameMapper: {
+        '^awakening$': '<rootDir>/src/index.ts',
+        '^awakening/testing$': '<rootDir>/testing/src/index.ts',
+    },
+    testPathIgnorePatterns: ['/node_modules/', '/dist/'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     testRegex: '.*\\.test\\.ts$',
     globals: {

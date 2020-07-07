@@ -1,34 +1,47 @@
 import { Disposable, implDisposableMethods, DisposalError } from './disposable';
 import { createCustomError, joinErrors } from './errorBase';
-import { EventType, Event, Push, Throw, End, Source, Sink } from './source';
+import {
+    PushType,
+    EndType,
+    Event,
+    Push,
+    Throw,
+    End,
+    Source,
+    Sink,
+} from './source';
 import { removeOnce, asyncReportError } from './util';
 
 export interface Subject<T> extends Source<T>, Sink<T> {}
 
 interface SinkInfo<T> {
-    sink: Sink<T>;
-    didRemove: boolean;
-    notAdded: boolean;
+    __sink: Sink<T>;
+    __didRemove: boolean;
+    __notAdded: boolean;
 }
 
 interface SubjectBasePrivateActiveState<T> {
-    sinkInfos: SinkInfo<T>[];
-    sinksToAdd: SinkInfo<T>[];
-    eventsQueue: Event<T>[];
+    __sinkInfos: SinkInfo<T>[];
+    __sinksToAdd: SinkInfo<T>[];
+    __eventsQueue: Event<T>[];
 }
 
 export function Subject<T>(): Subject<T> {
     let distributingEvent = false;
     let sinkIndex: number;
     let state: SubjectBasePrivateActiveState<T> | null = {
-        sinkInfos: [],
-        sinksToAdd: [],
-        eventsQueue: [],
+        __sinkInfos: [],
+        __sinksToAdd: [],
+        __eventsQueue: [],
     };
 
     function nullifyState(): void {
         if (state) {
-            const { sinkInfos, sinksToAdd, eventsQueue } = state;
+            const {
+                __sinkInfos: sinkInfos,
+                __sinksToAdd: sinksToAdd,
+                __eventsQueue: eventsQueue,
+            } = state;
             sinkInfos.length = 0;
             sinksToAdd.length = 0;
             eventsQueue.length = 0;
@@ -47,7 +60,11 @@ export function Subject<T>(): Subject<T> {
             return;
         }
 
-        const { sinkInfos, sinksToAdd, eventsQueue } = state;
+        const {
+            __sinkInfos: sinkInfos,
+            __sinksToAdd: sinksToAdd,
+            __eventsQueue: eventsQueue,
+        } = state;
 
         if (typeof eventOrSink === 'function') {
             if (!eventOrSink.active) {
@@ -56,23 +73,23 @@ export function Subject<T>(): Subject<T> {
 
             const addedInDistribution = distributingEvent;
             const sinkInfo: SinkInfo<T> = {
-                sink: eventOrSink,
-                didRemove: false,
-                notAdded: addedInDistribution,
+                __sink: eventOrSink,
+                __didRemove: false,
+                __notAdded: addedInDistribution,
             };
 
             const sinkList = addedInDistribution ? sinksToAdd : sinkInfos;
             sinkList.push(sinkInfo);
 
-            eventOrSink?.add(
+            eventOrSink.add(
                 Disposable(() => {
-                    if (!state || !disposable.active || sinkInfo.didRemove) {
+                    if (!state || !disposable.active || sinkInfo.__didRemove) {
                         return;
                     }
 
-                    sinkInfo.didRemove = true;
+                    sinkInfo.__didRemove = true;
 
-                    if (addedInDistribution && sinkInfo.notAdded) {
+                    if (addedInDistribution && sinkInfo.__notAdded) {
                         // The sink was added during the loop below, which is
                         // still running.
                         removeOnce(sinksToAdd, sinkInfo);
@@ -97,7 +114,7 @@ export function Subject<T>(): Subject<T> {
                 }),
             );
         } else if (sinkInfos.length > 0) {
-            if (eventOrSink.type !== EventType.Push) {
+            if (eventOrSink.type !== PushType) {
                 disposable.dispose();
             }
 
@@ -114,12 +131,12 @@ export function Subject<T>(): Subject<T> {
             while (event) {
                 for (sinkIndex = 0; sinkIndex < sinkInfos.length; sinkIndex++) {
                     const sinkInfo = sinkInfos[sinkIndex];
-                    const { sink } = sinkInfo;
+                    const { __sink: sink } = sinkInfo;
 
                     let active = false;
                     try {
                         active = sink.active;
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         errors.push(error as DisposalError);
                     }
 
@@ -128,7 +145,7 @@ export function Subject<T>(): Subject<T> {
                         // if the current event is a Throw or End event then
                         // there is no point in removing it now as it will be
                         // removed at the end of the loop.
-                        if (event.type === EventType.Push) {
+                        if (event.type === PushType) {
                             sinkInfos.splice(sinkIndex--, 1);
                         }
                         continue;
@@ -136,25 +153,25 @@ export function Subject<T>(): Subject<T> {
 
                     try {
                         sink(event);
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         asyncReportError(error);
-                        sinkInfo.didRemove = true;
+                        sinkInfo.__didRemove = true;
                     }
 
                     // Remove if it errored or was marked for removal during
                     // it's execution.
-                    if (sinkInfo.didRemove && event.type === EventType.Push) {
+                    if (sinkInfo.__didRemove && event.type === PushType) {
                         sinkInfos.splice(sinkIndex--, 1);
                     }
                 }
 
-                if (event.type !== EventType.Push) {
+                if (event.type !== PushType) {
                     break;
                 }
 
                 for (let i = 0; i < sinksToAdd.length; i++) {
                     const sinkToAdd = sinksToAdd[i];
-                    sinkToAdd.notAdded = false;
+                    sinkToAdd.__notAdded = false;
                 }
                 sinksToAdd.length = 0;
 
@@ -228,7 +245,7 @@ export function KeepFinalEventSubject<T>(): Subject<T> {
                 return;
             }
 
-            if (eventOrSink.type !== EventType.Push) {
+            if (eventOrSink.type !== PushType) {
                 finalEvent = eventOrSink;
             }
 
@@ -258,11 +275,11 @@ export function LastValueSubject<T>(): Subject<T> {
                 return;
             }
 
-            if (eventOrSink.type === EventType.Push) {
+            if (eventOrSink.type === PushType) {
                 lastPushEvent = eventOrSink;
             } else {
                 finalEvent = eventOrSink;
-                if (finalEvent.type === EventType.End && lastPushEvent) {
+                if (finalEvent.type === EndType && lastPushEvent) {
                     base(lastPushEvent);
                 } else {
                     lastPushEvent = undefined;

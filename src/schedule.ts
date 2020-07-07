@@ -13,8 +13,8 @@ export interface ScheduleFunction<T extends any[] = []> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ScheduleQueuedCallback<T extends any[]> {
-    callback: (...args: T) => void;
-    hasBeenRemovedFromQueue: boolean;
+    __callback: (...args: T) => void;
+    __hasBeenRemovedFromQueue: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,13 +30,13 @@ export function ScheduleQueued<T extends any[] = []>(
     const nestedCallNextArgs: T[] = [];
 
     return (callback, subscription) => {
-        if (subscription?.active === false) {
+        if (subscription && !subscription.active) {
             return;
         }
 
         const callbackInfo: ScheduleQueuedCallback<T> = {
-            callback,
-            hasBeenRemovedFromQueue: false,
+            __callback: callback,
+            __hasBeenRemovedFromQueue: false,
         };
         callbacks.push(callbackInfo);
 
@@ -50,12 +50,12 @@ export function ScheduleQueued<T extends any[] = []>(
                     // called in the future.
                     if (
                         _callbacks !== callbacks ||
-                        callbackInfo.hasBeenRemovedFromQueue
+                        callbackInfo.__hasBeenRemovedFromQueue
                     ) {
                         return;
                     }
 
-                    callbackInfo.hasBeenRemovedFromQueue = true;
+                    callbackInfo.__hasBeenRemovedFromQueue = true;
                     removeOnce(callbacks, callbackInfo);
 
                     // If we are executing a callback, then there is no need to
@@ -119,10 +119,10 @@ export function ScheduleQueued<T extends any[] = []>(
                 // eslint-disable-next-line max-len
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const callbackInfo = callbacks.shift()!;
-                callbackInfo.hasBeenRemovedFromQueue = true;
+                callbackInfo.__hasBeenRemovedFromQueue = true;
 
                 try {
-                    let { callback } = callbackInfo;
+                    let { __callback: callback } = callbackInfo;
                     isInCallback = true;
                     callback(...args);
 
@@ -136,14 +136,14 @@ export function ScheduleQueued<T extends any[] = []>(
                             break;
                         }
 
-                        callbackInfo.hasBeenRemovedFromQueue = true;
-                        callback = callbackInfo.callback;
+                        callbackInfo.__hasBeenRemovedFromQueue = true;
+                        callback = callbackInfo.__callback;
                         callback(...callNextArgs);
                         callNextArgs = nestedCallNextArgs.shift();
                     }
 
                     isInCallback = false;
-                } /* prettier-ignore */ catch (error: unknown) {
+                } catch (error) {
                     callbacks = [];
                     isInCallback = false;
                     nestedCallNextArgs.length = 0;
@@ -188,7 +188,7 @@ export function ScheduleQueuedDiscrete<T extends any[] = []>(
 }
 
 export const scheduleSync: ScheduleFunction = (callback, subscription) => {
-    if (subscription?.active === false) {
+    if (subscription && !subscription.active) {
         return;
     }
 

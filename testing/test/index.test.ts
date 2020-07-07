@@ -7,7 +7,7 @@ import {
     TestSource,
     SharedTestSource,
     watchSourceEvents,
-} from '../src/testing';
+} from 'awakening/testing';
 
 describe('TestSource', () => {
     it('works', () => {

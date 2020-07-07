@@ -1,19 +1,14 @@
-import { Disposable } from '../src/disposable';
+import { removeOnce } from '../src/util';
 import {
+    Disposable,
     pipe,
     flow,
-    removeOnce,
-    requestAnimationFrame,
+    // requestAnimationFrame,
     setTimeout,
     setInterval,
     asyncReportError,
-} from '../src/util';
-import cloneDeep = require('lodash.clonedeep');
+} from 'awakening';
 import each from 'jest-each';
-
-import raf = require('raf');
-import { RafMock } from './mockTypes/raf';
-const rafMock = (raf as unknown) as RafMock;
 
 type CF = (x: string) => string;
 const composableFunction1: CF = (x) => x + '+f1';
@@ -100,20 +95,19 @@ describe('removeOnce', () => {
     const B = { foo: 'baz' };
 
     each([
-        [[B]],
-        [[A, B, B, A]],
-        [[A, B, A, A, A, B]],
-        [{ length: 1, 0: A }],
-        [{ length: 29, 4: A, 17: B, 23: A }],
-    ]).it(
-        `should do nothing when removing "${x}" from %s`,
-        (input: unknown[]) => {
-            const copy = cloneDeep(input);
-            removeOnce(copy, x);
-            // eslint-disable-next-line jest/no-standalone-expect
-            expect(copy).toEqual(input);
-        },
-    );
+        [[[B]], [[B]]],
+        [[[A, B, B, A]], [[A, B, B, A]]],
+        [[[A, B, A, A, A, B]], [[A, B, A, A, A, B]]],
+        [[{ length: 1, 0: A }], [{ length: 1, 0: A }]],
+        [
+            [{ length: 29, 4: A, 17: B, 23: A }],
+            [{ length: 29, 4: A, 17: B, 23: A }],
+        ],
+    ]).it(`should do nothing when removing "${x}" from %s`, (input, copy) => {
+        removeOnce(input, x);
+        // eslint-disable-next-line jest/no-standalone-expect
+        expect(input).toEqual(copy);
+    });
 
     // prettier-ignore
     each([
@@ -149,58 +143,60 @@ describe('removeOnce', () => {
     });
 });
 
-describe('requestAnimationFrame', () => {
-    afterEach(jest.clearAllMocks);
-    afterEach(rafMock._resetQueue);
+/* eslint-disable */
+// describe('requestAnimationFrame', () => {
+//     afterEach(jest.clearAllMocks);
+//     afterEach(rafMock._resetQueue);
 
-    it('should be a function', () => {
-        expect(requestAnimationFrame).toBeFunction();
-    });
+//     it('should be a function', () => {
+//         expect(requestAnimationFrame).toBeFunction();
+//     });
 
-    it('should not call the callback immediately', () => {
-        const callback = jest.fn();
-        requestAnimationFrame(callback);
-        expect(callback).not.toHaveBeenCalled();
-    });
+//     it('should not call the callback immediately', () => {
+//         const callback = jest.fn();
+//         requestAnimationFrame(callback);
+//         expect(callback).not.toHaveBeenCalled();
+//     });
 
-    it('should raf the callback', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
-        requestAnimationFrame(callback);
-        expect(rafMock).toHaveBeenCalledTimes(1);
-        expect(rafMock).toHaveBeenCalledWith(callback);
-    });
+//     it('should raf the callback', () => {
+//         // eslint-disable-next-line @typescript-eslint/no-empty-function
+//         const callback = () => {};
+//         requestAnimationFrame(callback);
+//         expect(rafMock).toHaveBeenCalledTimes(1);
+//         expect(rafMock).toHaveBeenCalledWith(callback);
+//     });
 
-    it('should not raf the callback when given a disposed disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
-        const disposable = Disposable();
-        disposable.dispose();
-        requestAnimationFrame(callback, disposable);
-        expect(rafMock).not.toHaveBeenCalled();
-    });
+//     it('should not raf the callback when given a disposed disposable', () => {
+//         // eslint-disable-next-line @typescript-eslint/no-empty-function
+//         const callback = () => {};
+//         const disposable = Disposable();
+//         disposable.dispose();
+//         requestAnimationFrame(callback, disposable);
+//         expect(rafMock).not.toHaveBeenCalled();
+//     });
 
-    it('should raf the callback when given an active disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
-        const disposable = Disposable();
-        requestAnimationFrame(callback, disposable);
-        expect(rafMock).toHaveBeenCalledTimes(1);
-        expect(rafMock).toHaveBeenCalledWith(callback);
-    });
+//     it('should raf the callback when given an active disposable', () => {
+//         // eslint-disable-next-line @typescript-eslint/no-empty-function
+//         const callback = () => {};
+//         const disposable = Disposable();
+//         requestAnimationFrame(callback, disposable);
+//         expect(rafMock).toHaveBeenCalledTimes(1);
+//         expect(rafMock).toHaveBeenCalledWith(callback);
+//     });
 
-    it('should cancel the scheduled callback when the given disposable is disposed', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
-        const disposable = Disposable();
-        requestAnimationFrame(callback, disposable);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const id: number = rafMock.mock.results[0].value;
-        disposable.dispose();
-        expect(rafMock.cancel).toHaveBeenCalledTimes(1);
-        expect(rafMock.cancel).toHaveBeenCalledWith(id);
-    });
-});
+//     it('should cancel the scheduled callback when the given disposable is disposed', () => {
+//         // eslint-disable-next-line @typescript-eslint/no-empty-function
+//         const callback = () => {};
+//         const disposable = Disposable();
+//         requestAnimationFrame(callback, disposable);
+//         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+//         const id: number = rafMock.mock.results[0].value;
+//         disposable.dispose();
+//         expect(rafMock.cancel).toHaveBeenCalledTimes(1);
+//         expect(rafMock.cancel).toHaveBeenCalledWith(id);
+//     });
+// });
+/* eslint-enable */
 
 describe('setTimeout', () => {
     beforeEach(() => {

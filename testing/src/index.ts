@@ -1,6 +1,16 @@
-import { Disposable } from './disposable';
-import { EventType, Event, Push, Throw, End, Source, Sink } from './source';
-import { Subject as DefaultSubject } from './subject';
+import {
+    Disposable,
+    PushType,
+    ThrowType,
+    EndType,
+    Event,
+    Push,
+    Throw,
+    End,
+    Source,
+    Sink,
+    Subject as DefaultSubject,
+} from 'awakening';
 
 interface TestScheduleFunction {
     (
@@ -17,9 +27,9 @@ export interface TestSchedule extends TestScheduleFunction {
 }
 
 interface TestScheduleAction {
-    readonly callback: () => void;
-    readonly executionFrame: number;
-    shouldCall: boolean;
+    readonly __callback: () => void;
+    readonly __executionFrame: number;
+    __shouldCall: boolean;
 }
 
 export function TestSchedule(): TestSchedule {
@@ -32,24 +42,27 @@ export function TestSchedule(): TestSchedule {
         delayFrames,
         subscription,
     ) => {
-        if (subscription?.active === false) {
+        if (subscription && !subscription.active) {
             return;
         }
 
         const executionFrame = currentFrame + delayFrames;
         const index = getActionInsertIndex(actions, executionFrame);
         const action: TestScheduleAction = {
-            callback,
-            executionFrame,
-            shouldCall: true,
+            __callback: callback,
+            __executionFrame: executionFrame,
+            __shouldCall: true,
         };
 
         actions.splice(index, 0, action);
-        subscription?.add(
-            Disposable(() => {
-                action.shouldCall = false;
-            }),
-        );
+
+        if (subscription) {
+            subscription.add(
+                Disposable(() => {
+                    action.__shouldCall = false;
+                }),
+            );
+        }
     };
 
     Object.defineProperty(testSchedule, 'currentFrame', {
@@ -65,13 +78,13 @@ export function TestSchedule(): TestSchedule {
         isFlushing = true;
         let action = actions.shift();
         while (action) {
-            currentFrame = action.executionFrame;
-            const { callback, shouldCall } = action;
+            currentFrame = action.__executionFrame;
+            const { __callback: callback, __shouldCall: shouldCall } = action;
 
             if (shouldCall) {
                 try {
                     callback();
-                } /* prettier-ignore */ catch (error: unknown) {
+                } catch (error) {
                     reset();
                     throw error;
                 }
@@ -110,14 +123,17 @@ function getActionInsertIndex(
 
     while (low <= high) {
         let mid = ((low + high) / 2) | 0;
-        const { executionFrame } = actions[mid];
+        const { __executionFrame: executionFrame } = actions[mid];
 
         if (executionFrame < frame) {
             low = mid + 1;
         } else if (executionFrame > frame) {
             high = mid - 1;
         } else {
-            while (mid + 1 < len && actions[mid + 1].executionFrame === frame) {
+            while (
+                mid + 1 < len &&
+                actions[mid + 1].__executionFrame === frame
+            ) {
                 mid++;
             }
             return mid + 1;
@@ -154,11 +170,13 @@ function watchSubscriptionInfo(
         Infinity,
     );
 
-    subscription?.add(
-        Disposable(() => {
-            info.subscriptionEndFrame = testSchedule.currentFrame;
-        }),
-    );
+    if (subscription) {
+        subscription.add(
+            Disposable(() => {
+                info.subscriptionEndFrame = testSchedule.currentFrame;
+            }),
+        );
+    }
 
     return info;
 }
@@ -174,15 +192,15 @@ interface WithFrameProperty {
 export type TestSourceEvent<T> = Event<T> & WithFrameProperty;
 
 export function P<T>(value: T, frame: number): Push<T> & WithFrameProperty {
-    return { type: EventType.Push, value, frame };
+    return { type: PushType, value, frame };
 }
 
 export function T(error: unknown, frame: number): Throw & WithFrameProperty {
-    return { type: EventType.Throw, error, frame };
+    return { type: ThrowType, error, frame };
 }
 
 export function E(frame: number): End & WithFrameProperty {
-    return { type: EventType.End, frame };
+    return { type: EndType, frame };
 }
 
 export interface TestSource<T> extends Source<T> {

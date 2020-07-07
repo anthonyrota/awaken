@@ -1,6 +1,8 @@
-import { Disposable } from './../src/disposable';
 import {
-    EventType,
+    Disposable,
+    PushType,
+    ThrowType,
+    EndType,
     Push,
     Throw,
     End,
@@ -8,19 +10,23 @@ import {
     Sink,
     subscribe,
     zipSources,
-} from '../src/source';
+} from 'awakening';
 
-describe('EventType', () => {
-    it('should have a Push property equal to zero', () => {
-        expect(EventType.Push).toBe(0);
+describe('PushType', () => {
+    it('should be equal to zero', () => {
+        expect(PushType).toBe(0);
     });
+});
 
-    it('should have a Throw property equal to one', () => {
-        expect(EventType.Throw).toBe(1);
+describe('ThrowType', () => {
+    it('should be equal to one', () => {
+        expect(ThrowType).toBe(1);
     });
+});
 
-    it('should have an End property equal to two', () => {
-        expect(EventType.End).toBe(2);
+describe('EndType', () => {
+    it('should be equal to two', () => {
+        expect(EndType).toBe(2);
     });
 });
 
@@ -32,7 +38,7 @@ describe('Push', () => {
     it('should return a Push event', () => {
         const value = { foo: 'bar' };
         const event = Push(value);
-        expect(event).toEqual({ type: EventType.Push, value });
+        expect(event).toEqual({ type: PushType, value });
     });
 });
 
@@ -44,7 +50,7 @@ describe('Throw', () => {
     it('should return a Throw event', () => {
         const error = { foo: 'bar' };
         const event = Throw(error);
-        expect(event).toEqual({ type: EventType.Throw, error });
+        expect(event).toEqual({ type: ThrowType, error });
     });
 });
 
@@ -54,7 +60,7 @@ describe('End', () => {
     });
 
     it('should be an End event', () => {
-        expect(End).toEqual({ type: EventType.End });
+        expect(End).toEqual({ type: EndType });
     });
 });
 
@@ -106,7 +112,7 @@ import {
     E,
     TestSource,
     watchSourceEvents,
-} from '../src/testing';
+} from 'awakening/testing';
 
 /** @todo actual tests */
 describe('zipSources', () => {

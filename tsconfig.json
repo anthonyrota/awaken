@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
         "incremental": true,
-        "target": "es6",
-        "module": "commonjs",
+        "target": "esnext",
+        "module": "esnext",
         "moduleResolution": "node",
         "allowJs": true,
         "importHelpers": true,
@@ -21,7 +21,12 @@
         "downlevelIteration": true,
         "baseUrl": ".",
         "lib": ["esnext", "dom"],
-        "types": ["jest-extended"]
+        "types": ["jest-extended"],
+        "paths": {
+            "awakening": ["./src"],
+            "awakening/testing": ["./testing/src"]
+        }
     },
-    "include": ["src/**/*", "test/**/*", "__mocks__/**/*"]
+    "include": ["src/**/*", "test/**/*", "testing/**/*"],
+    "exclude": ["dist", "testing/dist"]
 }

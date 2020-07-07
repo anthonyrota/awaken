@@ -8,17 +8,19 @@ import {
 import { Subject } from './subject';
 import { asyncReportError, flow, forEach } from './util';
 
-export const enum EventType {
-    Push = 0,
-    Throw = 1,
-    End = 2,
-}
+export type PushType = 0;
+export const PushType: PushType = 0;
+export type ThrowType = 1;
+export const ThrowType: ThrowType = 1;
+export type EndType = 2;
+export const EndType: EndType = 2;
+export type EventType = PushType | ThrowType | EndType;
 
 /**
  * Represents an event which "pushes" a value to a sink.
  */
 export interface Push<T> {
-    readonly type: EventType.Push;
+    readonly type: PushType;
     readonly value: T;
 }
 
@@ -26,7 +28,7 @@ export interface Push<T> {
  * Represents an event where an error has been thrown.
  */
 export interface Throw {
-    readonly type: EventType.Throw;
+    readonly type: ThrowType;
     readonly error: unknown;
 }
 
@@ -34,7 +36,7 @@ export interface Throw {
  * Represents the end of a source.
  */
 export interface End {
-    readonly type: EventType.End;
+    readonly type: EndType;
 }
 
 export type Event<T> = Push<T> | Throw | End;
@@ -45,7 +47,7 @@ export type Event<T> = Push<T> | Throw | End;
  * @returns The created Push event.
  */
 export function Push<T>(value: T): Push<T> {
-    return { type: EventType.Push, value };
+    return { type: PushType, value };
 }
 
 /**
@@ -54,10 +56,10 @@ export function Push<T>(value: T): Push<T> {
  * @returns The created Throw event.
  */
 export function Throw(error: unknown): Throw {
-    return { type: EventType.Throw, error };
+    return { type: ThrowType, error };
 }
 
-export const End: End = { type: EventType.End };
+export const End: End = { type: EndType };
 
 /**
  * A Sink is what a Source subscribes to. All events emitted by the source will
@@ -82,13 +84,13 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
             return;
         }
 
-        if (event.type !== EventType.Push) {
+        if (event.type !== PushType) {
             disposable.dispose();
         }
 
         try {
             onEvent(event);
-        } /* prettier-ignore */ catch (error: unknown) {
+        } catch (error) {
             asyncReportError(error);
             disposable.dispose();
         }
@@ -121,14 +123,14 @@ export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
         }
         try {
             base(sink);
-        } /* prettier-ignore */ catch (error: unknown) {
+        } catch (error) {
             let active: boolean;
             try {
                 // This can throw if one of the sink's parents is disposed but
                 // the sink itself is not disposed yet, meaning while checking
                 // if it is active, it disposes itself.
                 active = sink.active;
-            } /* prettier-ignore */ catch (innerError: unknown) {
+            } catch (innerError) {
                 // This try/catch is to ensure that when sink.active throws
                 // synchronously, the original error caught when calling the
                 // base function is also reported.
@@ -283,14 +285,14 @@ export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
                     if (!sink.active) {
                         break;
                     }
-                } /* prettier-ignore */ catch (error: unknown) {
+                } catch (error) {
                     // eslint-disable-next-line max-len
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     sinkDisposalError = { e: error };
                     break;
                 }
             }
-        } /* prettier-ignore */ catch (iterableError: unknown) {
+        } catch (iterableError) {
             if (sinkDisposalError) {
                 asyncReportError(iterableError);
             } else {
@@ -316,14 +318,14 @@ async function distributeAsyncIterable<T>(
                 if (!sink.active) {
                     break;
                 }
-            } /* prettier-ignore */ catch (error: unknown) {
+            } catch (error) {
                 // eslint-disable-next-line max-len
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 sinkDisposalError = { e: error };
                 break;
             }
         }
-    } /* prettier-ignore */ catch (iterableError: unknown) {
+    } catch (iterableError) {
         if (sinkDisposalError) {
             asyncReportError(iterableError);
         } else {
@@ -393,7 +395,7 @@ export function lazy<T>(createSource: () => Source<T>): Source<T> {
         let source: Source<T>;
         try {
             source = createSource();
-        } /* prettier-ignore */ catch (error: unknown) {
+        } catch (error) {
             sink(Throw(error));
             return;
         }
@@ -444,7 +446,7 @@ export function combineSources<T extends unknown[]>(
 
               for (let i = 0; sink.active && i < sources.length; i++) {
                   const sourceSink = Sink<unknown>((event) => {
-                      if (event.type === EventType.Push) {
+                      if (event.type === PushType) {
                           if (values[i] === noValue) {
                               responded++;
                           }
@@ -473,7 +475,7 @@ export function raceSources<T>(...sources: Source<T>[]): Source<T> {
 
               for (let i = 0; sink.active && i < sources.length; i++) {
                   const sourceSink = Sink<T>((event) => {
-                      if (!hasSourceWonRace && event.type === EventType.Push) {
+                      if (!hasSourceWonRace && event.type === PushType) {
                           hasSourceWonRace = true;
                           sourceSinks.remove(sourceSink);
                           sink.add(sourceSink);
@@ -508,7 +510,7 @@ export function zipSources<T extends unknown[]>(
                           return;
                       }
 
-                      if (event.type === EventType.Push) {
+                      if (event.type === PushType) {
                           if (!values.length) {
                               hasValueCount++;
                           }
@@ -540,7 +542,7 @@ export function zipSources<T extends unknown[]>(
                           return;
                       }
 
-                      if (event.type === EventType.End && values.length !== 0) {
+                      if (event.type === EndType && values.length !== 0) {
                           info.ended = true;
                           return;
                       }
@@ -562,11 +564,17 @@ export interface IdentityOperator {
     <T>(source: Source<T>): Source<T>;
 }
 
+type Unshift<T extends unknown[], U> = ((head: U, ...tail: T) => void) extends (
+    ...args: infer A
+) => void
+    ? A
+    : never;
+
 export function combineWith<T extends unknown[]>(
     ...sources: { [K in keyof T]: Source<T[K]> }
-): <U>(source: Source<U>) => Source<[U, ...T]> {
+): <U>(source: Source<U>) => Source<Unshift<T, U>> {
     return <U>(source: Source<U>) =>
-        combineSources<[U, ...T]>(source, ...sources);
+        combineSources(source, ...sources) as Source<Unshift<T, U>>;
 }
 
 export function raceWith<T>(
@@ -577,8 +585,9 @@ export function raceWith<T>(
 
 export function zipWith<T extends unknown[]>(
     ...sources: { [K in keyof T]: Source<T[K]> }
-): <U>(source: Source<U>) => Source<[U, ...T]> {
-    return <U>(source: Source<U>) => zipSources<[U, ...T]>(source, ...sources);
+): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    return <U>(source: Source<U>) =>
+        zipSources(source, ...sources) as Source<Unshift<T, U>>;
 }
 
 /**
@@ -596,11 +605,11 @@ export function map<T, U>(
             let idx = 0;
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     let transformed: U;
                     try {
                         transformed = transform(event.value, idx++);
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         sink(Throw(error));
                         return;
                     }
@@ -634,12 +643,12 @@ export function mapEvents<T, U>(
                 let newEvent: Event<U>;
                 try {
                     newEvent = transform(event, idx++);
-                } /* prettier-ignore */ catch (error: unknown) {
+                } catch (error) {
                     sink(Throw(error));
                     return;
                 }
                 sink(newEvent);
-                if (event.type !== EventType.Push) {
+                if (event.type !== PushType) {
                     sink(End);
                 }
             });
@@ -655,7 +664,7 @@ export const wrapInPushEvents: <T>(
 export const unwrapFromWrappedPushEvents: <T>(
     source: Source<Event<T>>,
 ) => Source<T> = mapEvents(<T>(event: Event<Event<T>>) => {
-    return event.type === EventType.Push ? event.value : event;
+    return event.type === PushType ? event.value : event;
 });
 
 export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
@@ -685,11 +694,11 @@ export function filter<T>(
             let idx = 0;
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     let passThrough: unknown;
                     try {
                         passThrough = predicate(event.value, idx++);
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         sink(Throw(error));
                         return;
                     }
@@ -731,14 +740,14 @@ export function scan<T, R>(
             let currentIndex = 0;
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     try {
                         previousAccumulatedResult = transform(
                             previousAccumulatedResult,
                             event.value,
                             currentIndex++,
                         );
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         sink(Throw(error));
                         return;
                     }
@@ -784,12 +793,12 @@ export function flat<T>(source: Source<Source<T>>): Source<T> {
         let hasReceivedSource = false;
 
         const sourceSink = Sink<Source<T>>((event) => {
-            if (event.type === EventType.Push) {
+            if (event.type === PushType) {
                 hasReceivedSource = true;
                 event.value(sink);
                 return;
             }
-            if (event.type === EventType.End && !hasReceivedSource) {
+            if (event.type === EndType && !hasReceivedSource) {
                 sink(End);
             }
             sink(event);
@@ -810,7 +819,7 @@ export function mergeConcurrent(
             let active = 0;
 
             function onInnerEvent(event: Event<T>): void {
-                if (event.type === EventType.End) {
+                if (event.type === EndType) {
                     active--;
                     const nextSource = queue.shift();
                     if (nextSource) {
@@ -831,7 +840,7 @@ export function mergeConcurrent(
             }
 
             const sourceSink = Sink<Source<T>>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     if (active < max) {
                         subscribeNext(event.value);
                     } else {
@@ -840,7 +849,7 @@ export function mergeConcurrent(
                     return;
                 }
 
-                if (event.type === EventType.End) {
+                if (event.type === EndType) {
                     completed = true;
                     if (queue.length !== 0 || active !== 0) {
                         return;
@@ -867,18 +876,20 @@ function _createSwitchOperator(
             let innerSink: Sink<T> | undefined;
 
             function onInnerEvent(event: Event<T>): void {
-                if (event.type === EventType.End && !completed) {
+                if (event.type === EndType && !completed) {
                     return;
                 }
                 sink(event);
             }
 
             const sourceSink = Sink<Source<T>>((event) => {
-                if (event.type === EventType.Push) {
-                    if (overrideCurrent) {
-                        innerSink?.dispose();
-                    } else if (innerSink?.active) {
-                        return;
+                if (event.type === PushType) {
+                    if (innerSink && innerSink.active) {
+                        if (overrideCurrent) {
+                            innerSink.dispose();
+                        } else {
+                            return;
+                        }
                     }
 
                     innerSink = Sink(onInnerEvent);
@@ -887,9 +898,9 @@ function _createSwitchOperator(
                     return;
                 }
 
-                if (event.type === EventType.End) {
+                if (event.type === EndType) {
                     completed = true;
-                    if (innerSink?.active) {
+                    if (innerSink && innerSink.active) {
                         return;
                     }
                 }
@@ -984,7 +995,7 @@ export function endWith<T>(
     return <U>(source: Source<U>) =>
         Source<T | U>((sink) => {
             const sourceSink = Sink<U>((event) => {
-                if (event.type === EventType.End) {
+                if (event.type === EndType) {
                     pushArrayItemsToSink(values, sink);
                 }
                 sink(event);
@@ -1001,7 +1012,7 @@ export function spy<T>(onEvent: (event: Event<T>) => void): Operator<T, T> {
             const sourceSink = Sink<T>((event) => {
                 try {
                     onEvent(event);
-                } /* prettier-ignore */ catch (error: unknown) {
+                } catch (error) {
                     sink(Throw(error));
                     return;
                 }
@@ -1021,7 +1032,7 @@ export function spyPush<T>(
             let idx = 0;
 
             spy<T>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     onPush(event.value, idx++);
                 }
             })(source)(sink);
@@ -1030,7 +1041,7 @@ export function spyPush<T>(
 
 export function spyThrow(onThrow: (error: unknown) => void): IdentityOperator {
     return spy((event) => {
-        if (event.type === EventType.Throw) {
+        if (event.type === ThrowType) {
             onThrow(event.error);
         }
     });
@@ -1038,7 +1049,7 @@ export function spyThrow(onThrow: (error: unknown) => void): IdentityOperator {
 
 export function spyEnd(onEnd: () => void): IdentityOperator {
     return spy((event) => {
-        if (event.type === EventType.End) {
+        if (event.type === EndType) {
             onEnd();
         }
     });
@@ -1047,11 +1058,11 @@ export function spyEnd(onEnd: () => void): IdentityOperator {
 export function isEmpty(source: Source<unknown>): Source<boolean> {
     return Source((sink) => {
         const sourceSink = Sink((event) => {
-            if (event.type === EventType.Throw) {
+            if (event.type === ThrowType) {
                 sink(event);
                 return;
             }
-            sink(Push(event.type === EventType.End));
+            sink(Push(event.type === EndType));
             sink(End);
         });
 
@@ -1068,13 +1079,13 @@ export function defaultIfEmpty<T>(
             let empty = true;
 
             const sourceSink = Sink<U>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     empty = false;
-                } else if (event.type === EventType.End && empty) {
+                } else if (event.type === EndType && empty) {
                     let defaultValue: T;
                     try {
                         defaultValue = getDefaultValue();
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         sink(Throw(error));
                         return;
                     }
@@ -1109,7 +1120,7 @@ export function take(amount: number): IdentityOperator {
                 if (count >= amount) {
                     return;
                 }
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     count++;
                 }
                 sink(event);
@@ -1147,11 +1158,11 @@ export function takeWhile<T>(
             let idx = 0;
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     let keepGoing: unknown;
                     try {
                         keepGoing = shouldContinue(event.value, idx++);
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         sink(Throw(error));
                         return;
                     }
@@ -1187,7 +1198,7 @@ export function takeLast(amount: number): IdentityOperator {
                     return;
                 }
 
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     if (pushEvents.length >= amount_) {
                         pushEvents.shift();
                     }
@@ -1195,7 +1206,7 @@ export function takeLast(amount: number): IdentityOperator {
                     return;
                 }
 
-                if (event.type === EventType.End) {
+                if (event.type === EndType) {
                     const pushEvents_ = pushEvents;
                     pushEvents = null;
                     forEach(pushEvents_, sink);
@@ -1215,7 +1226,7 @@ export function takeUntil(stopSource: Source<unknown>): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
             const stopSink = Sink<unknown>((event) => {
-                sink(event.type === EventType.Throw ? event : End);
+                sink(event.type === ThrowType ? event : End);
             });
 
             sink.add(stopSink);
@@ -1230,7 +1241,7 @@ export function skip(amount: number): IdentityOperator {
             let count = 0;
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push && ++count <= amount) {
+                if (event.type === PushType && ++count <= amount) {
                     return;
                 }
                 sink(event);
@@ -1250,10 +1261,10 @@ export function skipWhile<T>(
             let idx = 0;
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push && skipping) {
+                if (event.type === PushType && skipping) {
                     try {
                         skipping = !!shouldContinueSkipping(event.value, idx++);
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         sink(Throw(error));
                         return;
                     }
@@ -1277,7 +1288,7 @@ export function skipLast(amount: number): IdentityOperator {
             let count = 0;
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     let idx = count++;
 
                     if (idx < amount) {
@@ -1306,7 +1317,7 @@ export function skipUntil(stopSource: Source<unknown>): IdentityOperator {
             let skip = true;
 
             const stopSink = Sink<unknown>((event) => {
-                if (event.type === EventType.Throw) {
+                if (event.type === ThrowType) {
                     sink(event);
                 } else {
                     skip = false;
@@ -1315,7 +1326,7 @@ export function skipUntil(stopSource: Source<unknown>): IdentityOperator {
             });
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push && skip) {
+                if (event.type === PushType && skip) {
                     return;
                 }
                 sink(event);
@@ -1334,11 +1345,11 @@ export function catchError<T>(
     return (source) =>
         Source((sink) => {
             function onEvent(event: Event<T>): void {
-                if (event.type === EventType.Throw) {
+                if (event.type === ThrowType) {
                     let newSource: Source<T>;
                     try {
                         newSource = getNewSource(event.error);
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         sink(Throw(error));
                         return;
                     }
@@ -1365,17 +1376,17 @@ export function window(
             sink(Push(currentWindow));
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type !== EventType.Push) {
+                if (event.type !== PushType) {
                     boundariesSink.dispose();
                 }
                 currentWindow(event);
-                if (event.type !== EventType.Push) {
+                if (event.type !== PushType) {
                     sink(event);
                 }
             });
 
             const boundariesSink = Sink<unknown>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     currentWindow(End);
                     currentWindow = Subject();
                     sink(Push(currentWindow));
@@ -1400,17 +1411,17 @@ export function windowEach(
             let windowEndSink: Sink<unknown>;
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type !== EventType.Push) {
+                if (event.type !== PushType) {
                     windowEndSink.dispose();
                 }
                 currentWindow(event);
-                if (event.type !== EventType.Push) {
+                if (event.type !== PushType) {
                     sink(event);
                 }
             });
 
             function onWindowEndEvent(event: Event<unknown>): void {
-                if (event.type === EventType.Throw) {
+                if (event.type === ThrowType) {
                     sink(event);
                     return;
                 }
@@ -1429,7 +1440,7 @@ export function windowEach(
                 let windowEndSource: Source<unknown>;
                 try {
                     windowEndSource = getWindowEndSource();
-                } /* prettier-ignore */ catch (error: unknown) {
+                } catch (error) {
                     const throwEvent = Throw(error);
                     currentWindow(throwEvent);
                     sink(throwEvent);
@@ -1452,11 +1463,11 @@ export function collect<T>(source: Source<T>): Source<T[]> {
         const items: T[] = [];
 
         const sourceSink = Sink<T>((event) => {
-            if (event.type === EventType.Push) {
+            if (event.type === PushType) {
                 items.push(event.value);
                 return;
             }
-            if (event.type === EventType.End) {
+            if (event.type === EndType) {
                 sink(Push(items));
             }
             sink(event);
@@ -1545,10 +1556,24 @@ export function debounce<T>(
         | null,
     config?: DebounceConfig | null,
 ): Operator<T, T> {
-    const leading = config?.leading ?? defaultDebounceConfig.leading;
-    const trailing = config?.trailing ?? defaultDebounceConfig.trailing;
-    const emitPendingOnEnd =
-        config?.emitPendingOnEnd ?? defaultDebounceConfig.emitPendingOnEnd;
+    let leading: DebounceConfig['leading'];
+    let trailing: DebounceConfig['trailing'];
+    let emitPendingOnEnd: DebounceConfig['emitPendingOnEnd'];
+
+    if (config) {
+        leading =
+            config.leading == null
+                ? defaultDebounceConfig.leading
+                : config.leading;
+        trailing =
+            config.trailing == null
+                ? defaultDebounceConfig.trailing
+                : config.trailing;
+        emitPendingOnEnd =
+            config.emitPendingOnEnd == null
+                ? defaultDebounceConfig.emitPendingOnEnd
+                : config.emitPendingOnEnd;
+    }
 
     return (source: Source<T>) =>
         Source<T>((sink) => {
@@ -1560,12 +1585,12 @@ export function debounce<T>(
             let idx = 0;
 
             function onDurationEvent(event: Event<unknown>): void {
-                if (event.type === EventType.Throw) {
+                if (event.type === ThrowType) {
                     sink(event);
                     return;
                 }
 
-                durationSink?.dispose();
+                if (durationSink) durationSink.dispose();
                 if (maxDurationSink && maxDurationSink !== true) {
                     maxDurationSink.dispose();
                 }
@@ -1594,7 +1619,7 @@ export function debounce<T>(
                     return;
                 }
 
-                durationSink?.dispose();
+                if (durationSink) durationSink.dispose();
                 durationSink = Sink(onDurationEvent);
                 sourceSink.add(durationSink);
 
@@ -1605,7 +1630,7 @@ export function debounce<T>(
                             latestPush.value,
                             idx,
                         );
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         sink(Throw(error));
                         return;
                     }
@@ -1630,7 +1655,7 @@ export function debounce<T>(
                         _latestPush.value,
                         _idx,
                     );
-                } /* prettier-ignore */ catch (error: unknown) {
+                } catch (error) {
                     sink(Throw(error));
                     return;
                 }
@@ -1648,7 +1673,7 @@ export function debounce<T>(
             }
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     latestPush = event;
                     idx++;
 
@@ -1676,7 +1701,7 @@ export function debounce<T>(
                 }
 
                 if (
-                    event.type === EventType.End &&
+                    event.type === EndType &&
                     emitPendingOnEnd &&
                     maxDurationSink &&
                     idx > lastPushedIdx
@@ -1749,18 +1774,29 @@ export function throttle<T>(
     getDurationSource: (value: T, index: number) => Source<unknown>,
     config?: ThrottleConfig | null,
 ): Operator<T, T> {
+    let leading: ThrottleConfig['leading'];
+    let trailing: ThrottleConfig['trailing'];
+    let emitPendingOnEnd: ThrottleConfig['emitPendingOnEnd'];
+
+    if (config) {
+        leading =
+            config.leading == null
+                ? defaultThrottleConfig.leading
+                : config.leading;
+        trailing =
+            config.trailing == null
+                ? defaultThrottleConfig.trailing
+                : config.trailing;
+        emitPendingOnEnd =
+            config.emitPendingOnEnd == null
+                ? defaultThrottleConfig.emitPendingOnEnd
+                : config.emitPendingOnEnd;
+    }
+
     return debounce<T>(
         null,
         (value, index) => [null, getDurationSource(value, index)],
-        {
-            leading: config?.leading ?? defaultThrottleConfig.leading,
-            trailing:
-                (config?.trailing ?? defaultThrottleConfig.trailing) &&
-                DebounceTrailingRestart,
-            emitPendingOnEnd:
-                config?.emitPendingOnEnd ??
-                defaultThrottleConfig.emitPendingOnEnd,
-        },
+        { leading, trailing, emitPendingOnEnd },
     );
 }
 
@@ -1788,17 +1824,17 @@ export function delay<T>(
             let ended = false;
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     let delaySource: Source<unknown>;
                     try {
                         delaySource = getDelaySource(event.value, idx++);
-                    } /* prettier-ignore */ catch (error: unknown) {
+                    } catch (error) {
                         sink(Throw(error));
                         return;
                     }
 
                     const delaySink = Sink<unknown>((innerEvent) => {
-                        if (innerEvent.type === EventType.Throw) {
+                        if (innerEvent.type === ThrowType) {
                             sink(innerEvent);
                             return;
                         }
@@ -1818,7 +1854,7 @@ export function delay<T>(
                     return;
                 }
 
-                if (event.type === EventType.End && active !== 0) {
+                if (event.type === EndType && active !== 0) {
                     ended = true;
                     return;
                 }
@@ -1842,7 +1878,7 @@ export function sample(scheduleSource: Source<unknown>): IdentityOperator {
             let lastPushEvent: Push<T> | undefined;
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     lastPushEvent = event;
                     return;
                 }
@@ -1850,7 +1886,7 @@ export function sample(scheduleSource: Source<unknown>): IdentityOperator {
             });
 
             const scheduleSink = Sink<unknown>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     if (lastPushEvent) {
                         sink(lastPushEvent);
                     }
@@ -1903,7 +1939,7 @@ export function withTimeInterval<T>(
             let lastTime = provideTime();
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type === EventType.Push) {
+                if (event.type === PushType) {
                     const currentTime = provideTime();
                     const timeInfo: TimeInterval<T> = {
                         value: event.value,
