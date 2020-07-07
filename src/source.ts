@@ -1483,18 +1483,19 @@ export function bufferEach(
     return flow(windowEach(getWindowEndSource), collectInner);
 }
 
+export type DebounceTrailingRestart = 'restart';
+export const DebounceTrailingRestart: DebounceTrailingRestart = 'restart';
+
 export interface DebounceConfig {
     leading?: boolean | null;
-    trailing?: boolean | null;
+    trailing?: boolean | DebounceTrailingRestart | null;
     emitPendingOnEnd?: boolean | null;
-    immediateRestart?: boolean | null;
 }
 
 export const defaultDebounceConfig: DebounceConfig = {
     leading: false,
     trailing: true,
     emitPendingOnEnd: true,
-    immediateRestart: false,
 };
 
 export type InitialDurationInfo =
@@ -1548,16 +1549,14 @@ export function debounce<T>(
     const trailing = config?.trailing ?? defaultDebounceConfig.trailing;
     const emitPendingOnEnd =
         config?.emitPendingOnEnd ?? defaultDebounceConfig.emitPendingOnEnd;
-    const immediateRestart =
-        config?.immediateRestart ?? defaultDebounceConfig.immediateRestart;
 
     return (source: Source<T>) =>
         Source<T>((sink) => {
             let latestPush: Push<T>;
-            let multiplePushes = false;
             let durationSink: Sink<unknown>;
             let maxDurationSink: Sink<unknown> | true | undefined;
             let distributing = false;
+            let lastPushedIdx = 0;
             let idx = 0;
 
             function onDurationEvent(event: Event<unknown>): void {
@@ -1566,34 +1565,27 @@ export function debounce<T>(
                     return;
                 }
 
-                const _multiplePushes = multiplePushes;
-                const _latestPush = latestPush;
-                const _idx = idx;
-                multiplePushes = false;
                 durationSink?.dispose();
                 if (maxDurationSink && maxDurationSink !== true) {
                     maxDurationSink.dispose();
                 }
                 maxDurationSink = undefined;
 
-                const shouldRestart = immediateRestart && _multiplePushes;
+                if (trailing && idx > lastPushedIdx) {
+                    if (trailing === DebounceTrailingRestart) {
+                        const _latestPush = latestPush;
+                        const _idx = idx;
 
-                if (
-                    (shouldRestart && leading) ||
-                    (trailing && (!leading || _multiplePushes))
-                ) {
-                    distributing = true;
-                    sink(_latestPush);
-                    distributing = false;
-                }
+                        distributing = true;
+                        lastPushedIdx = _idx;
+                        sink(_latestPush);
+                        distributing = false;
 
-                if (
-                    shouldRestart &&
-                    // If received another push event then we have already
-                    // restarted.
-                    _idx === idx
-                ) {
-                    startDebounce(_latestPush, _idx);
+                        startDebounce(_latestPush, _idx);
+                    } else {
+                        // No logic after this so we can straight up push.
+                        sink(latestPush);
+                    }
                 }
             }
 
@@ -1665,7 +1657,6 @@ export function debounce<T>(
                     }
 
                     if (maxDurationSink) {
-                        multiplePushes = true;
                         restartDebounce();
                     } else {
                         const _latestPush = latestPush;
@@ -1673,6 +1664,7 @@ export function debounce<T>(
 
                         if (leading) {
                             distributing = true;
+                            lastPushedIdx = idx;
                             sink(_latestPush);
                             distributing = false;
                         }
@@ -1687,8 +1679,7 @@ export function debounce<T>(
                     event.type === EventType.End &&
                     emitPendingOnEnd &&
                     maxDurationSink &&
-                    trailing &&
-                    (!leading || multiplePushes)
+                    idx > lastPushedIdx
                 ) {
                     sink(latestPush);
                 }
@@ -1734,12 +1725,16 @@ export function debounceMs(
     return debounce(null, () => [null, maxDuration!], config);
 }
 
-export type ThrottleConfig = DebounceConfig;
+export interface ThrottleConfig {
+    leading?: boolean | null;
+    trailing?: boolean | null;
+    emitPendingOnEnd?: boolean | null;
+}
+
 export const defaultThrottleConfig: ThrottleConfig = {
     leading: true,
     trailing: true,
     emitPendingOnEnd: true,
-    immediateRestart: true,
 };
 
 export function throttle(
@@ -1759,13 +1754,12 @@ export function throttle<T>(
         (value, index) => [null, getDurationSource(value, index)],
         {
             leading: config?.leading ?? defaultThrottleConfig.leading,
-            trailing: config?.trailing ?? defaultThrottleConfig.trailing,
+            trailing:
+                (config?.trailing ?? defaultThrottleConfig.trailing) &&
+                DebounceTrailingRestart,
             emitPendingOnEnd:
                 config?.emitPendingOnEnd ??
                 defaultThrottleConfig.emitPendingOnEnd,
-            immediateRestart:
-                config?.immediateRestart ??
-                defaultThrottleConfig.immediateRestart,
         },
     );
 }
