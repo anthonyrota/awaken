@@ -3,7 +3,7 @@
     "amdName": "awakening",
     "version": "0.0.1",
     "private": true,
-    "description": "A tiny and fast push stream library for TypeScript",
+    "description": "A fast and extremely lightweight push stream library for Typescript",
     "source": "src/index.ts",
     "main": "dist/awakening.js",
     "module": "dist/awakening.module.js",
