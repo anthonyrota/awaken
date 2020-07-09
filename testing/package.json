@@ -1,15 +1,14 @@
 {
     "name": "testing",
     "amdName": "awakeningTesting",
-    "version": "0.1.0",
+    "version": "0.0.1",
     "private": true,
-    "description": "Test utils for awakening",
-    "source": "src/index.ts",
+    "description": "Testing utils for awakening",
+    "source": "index.ts",
     "main": "dist/testing.js",
     "module": "dist/testing.module.js",
     "umd:main": "dist/testing.umd.js",
-    "unpkg": "dist/testing.umd.js",
-    "types": "dist/testing.d.ts",
+    "types": "dist/index.d.ts",
     "license": "MIT",
     "peerDependencies": {
         "awakening": "^0.0.1"

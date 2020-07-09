@@ -1,10 +1,10 @@
 {
     "compilerOptions": {
-        "incremental": true,
         "target": "esnext",
         "module": "esnext",
         "moduleResolution": "node",
         "allowJs": true,
+        "checkJs": true,
         "importHelpers": true,
         "jsx": "react",
         "alwaysStrict": true,
@@ -20,13 +20,22 @@
         "strictNullChecks": true,
         "downlevelIteration": true,
         "baseUrl": ".",
+        "noEmit": true,
+        "declaration": true,
+        "declarationMap": true,
         "lib": ["esnext", "dom"],
         "types": ["jest-extended"],
         "paths": {
-            "awakening": ["./src"],
-            "awakening/testing": ["./testing/src"]
+            "awakening": ["./src/index.ts"],
+            "awakening/testing": ["./testing/index.ts"]
         }
     },
-    "include": ["src/**/*", "test/**/*", "testing/**/*"],
+    "include": [
+        "src/**/*",
+        "test/**/*",
+        "testing/index.ts",
+        "testing/test/**/*",
+        "postbuild**"
+    ],
     "exclude": ["dist", "testing/dist"]
 }

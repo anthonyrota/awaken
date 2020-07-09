@@ -7,7 +7,7 @@ module.exports = {
     },
     moduleNameMapper: {
         '^awakening$': '<rootDir>/src/index.ts',
-        '^awakening/testing$': '<rootDir>/testing/src/index.ts',
+        '^awakening/testing$': '<rootDir>/testing/index.ts',
     },
     testPathIgnorePatterns: ['/node_modules/', '/dist/'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],

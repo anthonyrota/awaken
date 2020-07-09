@@ -151,7 +151,7 @@ interface _DisposalError extends Error {
 
 export interface DisposalError extends _DisposalError {
     /**
-     * The flattened list of errors thrown during disposable.
+     * The flattened list of errors thrown during disposal.
      */
     readonly errors: unknown[];
 }

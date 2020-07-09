@@ -3,16 +3,35 @@
     "amdName": "awakening",
     "version": "0.0.1",
     "private": true,
-    "description": "A fast and extremely lightweight push stream library for Typescript",
+    "description": "A fast and extremely lightweight reactive programming library for Typescript",
     "source": "src/index.ts",
     "main": "dist/awakening.js",
     "module": "dist/awakening.module.js",
     "umd:main": "dist/awakening.umd.js",
     "unpkg": "dist/awakening.umd.js",
-    "types": "dist/awakening.d.ts",
+    "jsdelivr": "dist/awakening.umd.js",
+    "types": "dist/index.d.ts",
     "license": "MIT",
-    "keywords": [],
-    "dependencies": {},
+    "keywords": [
+        "awakening",
+        "reactive",
+        "callbag",
+        "callback",
+        "observables",
+        "observable",
+        "iterable",
+        "stream",
+        "es6",
+        "es2015"
+    ],
+    "author": "Anthony Rota",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/anthonyrota/awakening.git"
+    },
+    "bugs": "https://github.com/anthonyrota/awakening/issues",
+    "homepage": "https://github.com/anthonyrota/awakening#readme",
+    "sideEffects": "false",
     "exports": {
         ".": {
             "browser": "./dist/awakening.module.js",
@@ -28,10 +47,35 @@
         },
         "./package.json": "./package.json"
     },
-    "sideEffects": "false",
+    "files": [
+        "src",
+        "dist",
+        "testing/index.ts",
+        "testing/dist",
+        "testing/package.json"
+    ],
+    "scripts": {
+        "build": "npm-run-all --parallel build:*",
+        "build:core": "npm run clean:core && microbundle build --raw --tsconfig tsconfig.build.core.json && node ./postbuildCore.js",
+        "build:testing": "npm run clean:testing && microbundle build --raw --cwd testing --tsconfig tsconfig.build.testing.json && node ./postbuildTesting.js",
+        "clean": "npm-run-all --parallel clean:*",
+        "clean:coverage": "rimraf coverage",
+        "clean:core": "rimraf dist",
+        "clean:testing": "rimraf testing/dist",
+        "lint": "eslint . --ext .ts,.tsx",
+        "test": "npm run test:source && npm run build && npm run test:build",
+        "test:clean": "npm run test && npm run clean:core && npm run clean:testing",
+        "test:source": "jest --runInBand",
+        "test:source:watch": "jest --watch --runInBand",
+        "test:coverage": "jest --coverage --runInBand",
+        "test:build": "jest --runInBand --config jest.config.build.js",
+        "test:both": "npm run test:source && npm run test:build"
+    },
+    "dependencies": {},
     "devDependencies": {
         "@types/jest": "^26.0.4",
         "@types/node": "^14.0.18",
+        "@types/rimraf": "^3.0.0",
         "@typescript-eslint/eslint-plugin": "^3.6.0",
         "@typescript-eslint/parser": "^3.6.0",
         "eslint": "^7.4.0",
@@ -46,21 +90,5 @@
         "rimraf": "^3.0.2",
         "ts-jest": "^26.1.1",
         "typescript": "^3.9.6"
-    },
-    "scripts": {
-        "build": "npm run clean && npm-run-all --parallel build:core build:testing",
-        "build:core": "microbundle build --raw",
-        "build:testing": "microbundle build --raw --cwd testing",
-        "postbuild": "node ./postbuild.js",
-        "dev": "microbundle watch --raw --format cjs",
-        "clean": "rimraf coverage tmp dist testing/dist",
-        "lint": "eslint . --ext .ts,.tsx",
-        "test": "npm run test:source && npm run build && npm run test:build",
-        "test:clean": "npm run test && npm run clean",
-        "test:source": "jest --runInBand",
-        "test:source:watch": "jest --watch --runInBand",
-        "test:source:coverage": "jest --coverage --runInBand",
-        "test:build": "jest --runInBand --config jest.config.build.js",
-        "test:both": "npm run test:source && npm run test:build"
     }
 }
