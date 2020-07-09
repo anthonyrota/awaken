@@ -809,49 +809,79 @@ export function flat<T>(source: Source<Source<T>>): Source<T> {
     });
 }
 
-export function mergeConcurrent(
-    max: number,
-): <T>(source: Source<Source<T>>) => Source<T> {
-    return <T>(source: Source<Source<T>>) =>
-        Source<T>((sink) => {
-            const queue: Source<T>[] = [];
+function _createMergeMapOperator(
+    expand: false,
+): <T, U>(
+    transform: (value: T, index: number) => Source<U>,
+    maxConcurrent?: number,
+) => Operator<T, U>;
+function _createMergeMapOperator(
+    expand: true,
+): <T>(
+    transform: (value: T, index: number) => Source<T>,
+    maxConcurrent?: number,
+) => Operator<T, T>;
+function _createMergeMapOperator(
+    expand: boolean,
+): <T, U>(
+    transform: (value: T, index: number) => Source<U>,
+    maxConcurrent?: number,
+) => Operator<T, U> {
+    return <T, U>(
+        transform: (value: T, index: number) => Source<U>,
+        maxConcurrent = Infinity,
+    ) => (source: Source<T>) =>
+        Source<U>((sink) => {
+            const pushEvents: Push<T>[] = [];
             let completed = false;
             let active = 0;
+            let idx = 0;
 
-            function onInnerEvent(event: Event<T>): void {
+            function onInnerEvent(event: Event<U>): void {
+                if (event.type === PushType && expand) {
+                    sourceSink((event as unknown) as Push<T>);
+                    return;
+                }
                 if (event.type === EndType) {
                     active--;
-                    const nextSource = queue.shift();
-                    if (nextSource) {
-                        subscribeNext(nextSource);
+                    const nextPush = pushEvents.shift();
+                    if (nextPush) {
+                        transformPush(nextPush);
                         return;
-                    }
-                    if (active !== 0 || !completed) {
+                    } else if (active !== 0 || !completed) {
                         return;
                     }
                 }
                 sink(event);
             }
 
-            function subscribeNext(innerSource: Source<T>): void {
+            function transformPush(pushEvent: Push<T>): void {
+                let innerSource: Source<U>;
+                try {
+                    innerSource = transform(pushEvent.value, idx++);
+                } catch (error) {
+                    sink(Throw(error));
+                    return;
+                }
+
                 const innerSink = Sink(onInnerEvent);
                 sink.add(innerSink);
                 innerSource(innerSink);
             }
 
-            const sourceSink = Sink<Source<T>>((event) => {
+            const sourceSink = Sink<T>((event) => {
                 if (event.type === PushType) {
-                    if (active < max) {
-                        subscribeNext(event.value);
+                    if (active < maxConcurrent) {
+                        transformPush(event);
                     } else {
-                        queue.push(event.value);
+                        pushEvents.push(event);
                     }
                     return;
                 }
 
                 if (event.type === EndType) {
                     completed = true;
-                    if (queue.length !== 0 || active !== 0) {
+                    if (pushEvents.length !== 0 || active !== 0) {
                         return;
                     }
                 }
@@ -864,8 +894,18 @@ export function mergeConcurrent(
         });
 }
 
+export const mergeMap = _createMergeMapOperator(false);
+export const expandMap = _createMergeMapOperator(true);
+
+const mergeMapIdentityTransform = <T>(source: Source<T>) => source;
+
+export function mergeConcurrent(
+    maxConcurrent: number,
+): <T>(source: Source<Source<T>>) => Source<T> {
+    return mergeMap(mergeMapIdentityTransform, maxConcurrent);
+}
+
 export const merge = mergeConcurrent(Infinity);
-export const concat = mergeConcurrent(1);
 
 function _createSwitchOperator(
     overrideCurrent: boolean,
@@ -948,24 +988,13 @@ export function flatMap<T, U>(
     return flow(map(transform), flat);
 }
 
-export function mergeMapConcurrent<T, U>(
-    max: number,
-    transform: (value: T, index: number) => Source<U>,
-): Operator<T, U> {
-    return flow(map(transform), mergeConcurrent(max));
-}
-
-export function mergeMap<T, U>(
-    transform: (value: T, index: number) => Source<U>,
-): Operator<T, U> {
-    return flow(map(transform), merge);
-}
-
 export function concatMap<T, U>(
     transform: (value: T, index: number) => Source<U>,
 ): Operator<T, U> {
-    return flow(map(transform), concat);
+    return mergeMap(transform, 1);
 }
+
+export const concat = concatMap(mergeMapIdentityTransform);
 
 export function switchMap<T, U>(
     transform: (value: T, index: number) => Source<U>,
