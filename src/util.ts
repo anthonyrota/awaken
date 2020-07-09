@@ -134,7 +134,6 @@ export function removeOnce<T>(array: ArrayLike<T>, item: T): void {
     }
 }
 
-// @todo fix
 /**
  * Disposable-based alternative to built-in `requestAnimationFrame`.
  * @param callback The callback to schedule.
