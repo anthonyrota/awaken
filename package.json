@@ -59,6 +59,7 @@
         "build:core": "npm run clean:core && microbundle build --raw --tsconfig tsconfig.build.core.json && node ./postbuildCore.js",
         "build:testing": "npm run clean:testing && microbundle build --raw --cwd testing --tsconfig tsconfig.build.testing.json && node ./postbuildTesting.js",
         "clean": "npm-run-all --parallel clean:*",
+        "clean:tmp": "rimraf tmp",
         "clean:coverage": "rimraf coverage",
         "clean:core": "rimraf dist",
         "clean:testing": "rimraf testing/dist",
