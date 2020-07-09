@@ -26,7 +26,7 @@ interface SubjectBasePrivateActiveState<T> {
     __eventsQueue: Event<T>[];
 }
 
-export function Subject<T>(): Subject<T> {
+export function SubjectBase<T>(): Subject<T> {
     let distributingEvent = false;
     let sinkIndex: number;
     let state: SubjectBasePrivateActiveState<T> | null = {
@@ -229,8 +229,8 @@ export const SubjectDistributionSinkDisposalError: SubjectDistributionSinkDispos
     },
 );
 
-export function KeepFinalEventSubject<T>(): Subject<T> {
-    const base = Subject<T>();
+export function Subject<T>(): Subject<T> {
+    const base = SubjectBase<T>();
     let finalEvent: Throw | End | undefined;
 
     return implDisposableMethods((eventOrSink: Event<T> | Sink<T>): void => {
@@ -254,16 +254,15 @@ export function KeepFinalEventSubject<T>(): Subject<T> {
     }, base);
 }
 
-/** @todo align with queuing behaviour */
 export function LastValueSubject<T>(): Subject<T> {
-    const base = Subject<T>();
+    const base = SubjectBase<T>();
     let lastPushEvent: Push<T> | undefined;
     let finalEvent: Throw | End | undefined;
 
     return implDisposableMethods((eventOrSink: Event<T> | Sink<T>) => {
         if (typeof eventOrSink === 'function') {
             if (finalEvent) {
-                if (lastPushEvent && !base.active) {
+                if (lastPushEvent) {
                     eventOrSink(lastPushEvent);
                 }
                 eventOrSink(finalEvent);

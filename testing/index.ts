@@ -9,7 +9,7 @@ import {
     End,
     Source,
     Sink,
-    Subject as DefaultSubject,
+    SubjectBase,
 } from 'awakening';
 
 interface TestScheduleFunction {
@@ -235,10 +235,9 @@ export interface SharedTestSource<T> extends TestSource<T> {
 export function SharedTestSource<T>(
     events: TestSourceEvent<T>[],
     testSchedule: TestSchedule,
-    Subject = DefaultSubject,
 ): SharedTestSource<T> {
     const subscriptions: TestSubscriptionInfo[] = [];
-    const subject = Subject<T>();
+    const subject = SubjectBase<T>();
 
     const base = Source<T>((sink) => {
         subscriptions.push(watchSubscriptionInfo(testSchedule, sink));
