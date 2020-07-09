@@ -994,7 +994,7 @@ export function concatMap<T, U>(
     return mergeMap(transform, 1);
 }
 
-export const concat = concatMap(mergeMapIdentityTransform);
+export const concat = mergeConcurrent(1);
 
 export function switchMap<T, U>(
     transform: (value: T, index: number) => Source<U>,
