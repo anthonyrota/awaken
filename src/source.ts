@@ -344,7 +344,7 @@ export function fromAsyncIterable<T>(iterable: AsyncIterable<T>): Source<T> {
     });
 }
 
-export function fromPromise<T>(promise: Promise<T>): Source<T> {
+export function fromPromise<T>(promise: PromiseLike<T>): Source<T> {
     return Source((sink) => {
         promise
             .then(
