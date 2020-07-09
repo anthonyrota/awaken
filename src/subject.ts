@@ -56,7 +56,7 @@ export function Subject<T>(): Subject<T> {
     });
 
     return implDisposableMethods((eventOrSink: Event<T> | Sink<T>): void => {
-        if (!state || !disposable.active) {
+        if (!disposable.active) {
             return;
         }
 
@@ -64,7 +64,8 @@ export function Subject<T>(): Subject<T> {
             __sinkInfos: sinkInfos,
             __sinksToAdd: sinksToAdd,
             __eventsQueue: eventsQueue,
-        } = state;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        } = state!;
 
         if (typeof eventOrSink === 'function') {
             if (!eventOrSink.active) {
@@ -83,7 +84,7 @@ export function Subject<T>(): Subject<T> {
 
             eventOrSink.add(
                 Disposable(() => {
-                    if (!state || !disposable.active || sinkInfo.__didRemove) {
+                    if (!disposable.active || sinkInfo.__didRemove) {
                         return;
                     }
 
@@ -228,7 +229,6 @@ export const SubjectDistributionSinkDisposalError: SubjectDistributionSinkDispos
     },
 );
 
-/** @todo align with queueing behaviour */
 export function KeepFinalEventSubject<T>(): Subject<T> {
     const base = Subject<T>();
     let finalEvent: Throw | End | undefined;
