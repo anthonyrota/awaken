@@ -17,3 +17,6 @@ testing/dist/
 # .vscode
 !.vscode/tasks.js
 !.vscode/launch.json
+
+# Other
+tmp/
