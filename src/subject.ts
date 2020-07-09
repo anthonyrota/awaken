@@ -174,6 +174,7 @@ export function SubjectBase<T>(): Subject<T> {
                     const sinkToAdd = sinksToAdd[i];
                     sinkToAdd.__notAdded = false;
                 }
+                Array.prototype.push.apply(sinkInfos, sinksToAdd);
                 sinksToAdd.length = 0;
 
                 event = eventsQueue.shift();
