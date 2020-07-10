@@ -3,7 +3,7 @@ import {
     Disposable,
     pipe,
     flow,
-    // requestAnimationFrame,
+    requestAnimationFrame,
     setTimeout,
     setInterval,
     asyncReportError,
@@ -143,67 +143,89 @@ describe('removeOnce', () => {
     });
 });
 
-/* eslint-disable */
-// describe('requestAnimationFrame', () => {
-//     afterEach(jest.clearAllMocks);
-//     afterEach(rafMock._resetQueue);
+describe('requestAnimationFrame', () => {
+    const _requestAnimationFrame = global.requestAnimationFrame;
+    const _cancelAnimationFrame = global.cancelAnimationFrame;
+    const requestAnimationFrameMock = jest.fn();
+    const cancelAnimationFrameMock = jest.fn();
+    beforeAll(() => {
+        global.requestAnimationFrame = requestAnimationFrameMock;
+        global.cancelAnimationFrame = cancelAnimationFrameMock;
+    });
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    afterAll(() => {
+        global.requestAnimationFrame = _requestAnimationFrame;
+        global.cancelAnimationFrame = _cancelAnimationFrame;
+    });
 
-//     it('should be a function', () => {
-//         expect(requestAnimationFrame).toBeFunction();
-//     });
+    it('should be a function', () => {
+        expect(requestAnimationFrame).toBeFunction();
+    });
 
-//     it('should not call the callback immediately', () => {
-//         const callback = jest.fn();
-//         requestAnimationFrame(callback);
-//         expect(callback).not.toHaveBeenCalled();
-//     });
+    it('should not call the callback immediately', () => {
+        const callback = jest.fn();
+        requestAnimationFrame(callback);
+        expect(callback).not.toHaveBeenCalled();
+    });
 
-//     it('should raf the callback', () => {
-//         // eslint-disable-next-line @typescript-eslint/no-empty-function
-//         const callback = () => {};
-//         requestAnimationFrame(callback);
-//         expect(rafMock).toHaveBeenCalledTimes(1);
-//         expect(rafMock).toHaveBeenCalledWith(callback);
-//     });
+    it('should raf the callback', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        requestAnimationFrame(callback);
+        expect(requestAnimationFrameMock).toHaveBeenCalledTimes(1);
+        expect(requestAnimationFrameMock).toHaveBeenCalledWith(callback);
+    });
 
-//     it('should not raf the callback when given a disposed disposable', () => {
-//         // eslint-disable-next-line @typescript-eslint/no-empty-function
-//         const callback = () => {};
-//         const disposable = Disposable();
-//         disposable.dispose();
-//         requestAnimationFrame(callback, disposable);
-//         expect(rafMock).not.toHaveBeenCalled();
-//     });
+    it('should not raf the callback when given a disposed disposable', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const disposable = Disposable();
+        disposable.dispose();
+        requestAnimationFrame(callback, disposable);
+        expect(requestAnimationFrameMock).not.toHaveBeenCalled();
+    });
 
-//     it('should raf the callback when given an active disposable', () => {
-//         // eslint-disable-next-line @typescript-eslint/no-empty-function
-//         const callback = () => {};
-//         const disposable = Disposable();
-//         requestAnimationFrame(callback, disposable);
-//         expect(rafMock).toHaveBeenCalledTimes(1);
-//         expect(rafMock).toHaveBeenCalledWith(callback);
-//     });
+    it('should raf the callback when given an active disposable', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const disposable = Disposable();
+        requestAnimationFrame(callback, disposable);
+        expect(requestAnimationFrameMock).toHaveBeenCalledTimes(1);
+        expect(requestAnimationFrameMock).toHaveBeenCalledWith(callback);
+    });
 
-//     it('should cancel the scheduled callback when the given disposable is disposed', () => {
-//         // eslint-disable-next-line @typescript-eslint/no-empty-function
-//         const callback = () => {};
-//         const disposable = Disposable();
-//         requestAnimationFrame(callback, disposable);
-//         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-//         const id: number = rafMock.mock.results[0].value;
-//         disposable.dispose();
-//         expect(rafMock.cancel).toHaveBeenCalledTimes(1);
-//         expect(rafMock.cancel).toHaveBeenCalledWith(id);
-//     });
-// });
-/* eslint-enable */
+    it('should cancel the scheduled callback when the given disposable is disposed', () => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const callback = () => {};
+        const disposable = Disposable();
+        requestAnimationFrame(callback, disposable);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const id: number = requestAnimationFrameMock.mock.results[0].value;
+        disposable.dispose();
+        expect(cancelAnimationFrameMock).toHaveBeenCalledTimes(1);
+        expect(cancelAnimationFrameMock).toHaveBeenCalledWith(id);
+    });
+});
 
 describe('setTimeout', () => {
-    beforeEach(() => {
-        jest.useFakeTimers('legacy');
+    const _setTimeout = global.setTimeout;
+    const _clearTimeout = global.clearTimeout;
+    const setTimeoutMock = jest.fn();
+    const clearTimeoutMock = jest.fn();
+    beforeAll(() => {
+        // eslint-disable-next-line max-len
+        global.setTimeout = (setTimeoutMock as unknown) as typeof global.setTimeout;
+        global.clearTimeout = clearTimeoutMock;
     });
-    afterEach(jest.useRealTimers);
-    afterEach(jest.clearAllTimers);
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    afterAll(() => {
+        global.setTimeout = _setTimeout;
+        global.clearTimeout = _clearTimeout;
+    });
 
     it('should be a function', () => {
         expect(setTimeout).toBeFunction();
@@ -220,8 +242,8 @@ describe('setTimeout', () => {
         const callback = () => {};
         const delay = 16;
         setTimeout(callback, delay);
-        expect(global.setTimeout).toHaveBeenCalledTimes(1);
-        expect(global.setTimeout).toHaveBeenCalledWith(callback, delay);
+        expect(setTimeoutMock).toHaveBeenCalledTimes(1);
+        expect(setTimeoutMock).toHaveBeenCalledWith(callback, delay);
     });
 
     it('should call native setTimeout with any additional arguments given', () => {
@@ -232,8 +254,8 @@ describe('setTimeout', () => {
         const callback = (..._args: typeof extraArgs) => {};
         const delay = 49;
         setTimeout(callback, delay, Disposable(), ...extraArgs);
-        expect(global.setTimeout).toHaveBeenCalledTimes(1);
-        expect(global.setTimeout).toHaveBeenCalledWith(
+        expect(setTimeoutMock).toHaveBeenCalledTimes(1);
+        expect(setTimeoutMock).toHaveBeenCalledWith(
             callback,
             delay,
             ...extraArgs,
@@ -244,8 +266,8 @@ describe('setTimeout', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
         setTimeout(callback);
-        expect(global.setTimeout).toHaveBeenCalledTimes(1);
-        expect(global.setTimeout).toHaveBeenCalledWith(callback, 0);
+        expect(setTimeoutMock).toHaveBeenCalledTimes(1);
+        expect(setTimeoutMock).toHaveBeenCalledWith(callback, 0);
     });
 
     it('should not call native setTimeout when given a disposed disposable', () => {
@@ -255,7 +277,7 @@ describe('setTimeout', () => {
         const disposable = Disposable();
         disposable.dispose();
         setTimeout(callback, delay, disposable);
-        expect(global.setTimeout).not.toHaveBeenCalled();
+        expect(setTimeoutMock).not.toHaveBeenCalled();
     });
 
     it('should call native setTimeout with the callback and delay when given an active disposable', () => {
@@ -264,8 +286,8 @@ describe('setTimeout', () => {
         const disposable = Disposable();
         const delay = 0;
         setTimeout(callback, delay, disposable);
-        expect(global.setTimeout).toHaveBeenCalledTimes(1);
-        expect(global.setTimeout).toHaveBeenCalledWith(callback, delay);
+        expect(setTimeoutMock).toHaveBeenCalledTimes(1);
+        expect(setTimeoutMock).toHaveBeenCalledWith(callback, delay);
     });
 
     it('should cancel the scheduled callback when the given disposable is disposed', () => {
@@ -275,20 +297,46 @@ describe('setTimeout', () => {
         const delay = 0;
         setTimeout(callback, delay, disposable);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const id: number = ((global.setTimeout as unknown) as jest.Mock).mock
+        const id: number = ((setTimeoutMock as unknown) as jest.Mock).mock
             .results[0].value;
         disposable.dispose();
-        expect(global.clearTimeout).toHaveBeenCalledTimes(1);
-        expect(global.clearTimeout).toHaveBeenCalledWith(id);
+        expect(clearTimeoutMock).toHaveBeenCalledTimes(1);
+        expect(clearTimeoutMock).toHaveBeenCalledWith(id);
     });
 });
 
 describe('setInterval', () => {
-    beforeEach(() => {
-        jest.useFakeTimers('legacy');
+    let _fakeSetInterval;
+    let _fakeClearInterval;
+    let setIntervalMock: jest.Mock;
+    let clearIntervalMock: jest.Mock;
+    function replaceIntervalsWithMock(): void {
+        // eslint-disable-next-line max-len
+        global.setInterval = (setIntervalMock as unknown) as typeof global.setInterval;
+        global.clearInterval = clearIntervalMock;
+    }
+    function restoreFakeTimers(): void {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        global.setInterval = _fakeSetInterval;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        global.clearInterval = _fakeClearInterval;
+    }
+    beforeAll(() => {
+        _fakeSetInterval = global.setInterval;
+        _fakeClearInterval = global.clearInterval;
+        setIntervalMock = jest.fn(_fakeSetInterval);
+        clearIntervalMock = jest.fn(_fakeClearInterval);
+        replaceIntervalsWithMock();
     });
-    afterEach(jest.useRealTimers);
-    afterEach(jest.clearAllTimers);
+    afterEach(() => {
+        jest.clearAllMocks();
+        restoreFakeTimers();
+        jest.clearAllTimers();
+        replaceIntervalsWithMock();
+    });
+    afterAll(() => {
+        restoreFakeTimers();
+    });
 
     it('should be a function', () => {
         expect(setInterval).toBeFunction();
@@ -305,8 +353,8 @@ describe('setInterval', () => {
         const callback = () => {};
         const delay = 16;
         setInterval(callback, delay);
-        expect(global.setInterval).toHaveBeenCalledTimes(1);
-        expect(global.setInterval).toHaveBeenCalledWith(callback, delay);
+        expect(setIntervalMock).toHaveBeenCalledTimes(1);
+        expect(setIntervalMock).toHaveBeenCalledWith(callback, delay);
     });
 
     it('should call native setInterval with any additional arguments given', () => {
@@ -317,8 +365,8 @@ describe('setInterval', () => {
         const callback = (..._args: typeof extraArgs) => {};
         const delay = 32;
         setInterval(callback, delay, Disposable(), ...extraArgs);
-        expect(global.setInterval).toHaveBeenCalledTimes(1);
-        expect(global.setInterval).toHaveBeenCalledWith(
+        expect(setIntervalMock).toHaveBeenCalledTimes(1);
+        expect(setIntervalMock).toHaveBeenCalledWith(
             callback,
             delay,
             ...extraArgs,
@@ -329,8 +377,8 @@ describe('setInterval', () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const callback = () => {};
         setInterval(callback);
-        expect(global.setInterval).toHaveBeenCalledTimes(1);
-        expect(global.setInterval).toHaveBeenCalledWith(callback, 0);
+        expect(setIntervalMock).toHaveBeenCalledTimes(1);
+        expect(setIntervalMock).toHaveBeenCalledWith(callback, 0);
     });
 
     it('should not call native setInterval when given a disposed disposable', () => {
@@ -340,7 +388,7 @@ describe('setInterval', () => {
         const disposable = Disposable();
         disposable.dispose();
         setInterval(callback, delay, disposable);
-        expect(global.setInterval).not.toHaveBeenCalled();
+        expect(setIntervalMock).not.toHaveBeenCalled();
     });
 
     it('should call native setInterval with the callback and delay when given an active disposable', () => {
@@ -349,8 +397,8 @@ describe('setInterval', () => {
         const disposable = Disposable();
         const delay = 0;
         setInterval(callback, delay, disposable);
-        expect(global.setInterval).toHaveBeenCalledTimes(1);
-        expect(global.setInterval).toHaveBeenCalledWith(callback, delay);
+        expect(setIntervalMock).toHaveBeenCalledTimes(1);
+        expect(setIntervalMock).toHaveBeenCalledWith(callback, delay);
     });
 
     it('should not cancel the interval after the scheduled callback is called if the disposable is still active', () => {
@@ -361,8 +409,8 @@ describe('setInterval', () => {
         setInterval(callback, delay, disposable);
         for (let i = 0; i < 5; i++) {
             jest.runOnlyPendingTimers();
-            expect(global.setInterval).toHaveBeenCalledTimes(1);
-            expect(global.clearInterval).not.toHaveBeenCalled();
+            expect(setIntervalMock).toHaveBeenCalledTimes(1);
+            expect(clearIntervalMock).not.toHaveBeenCalled();
         }
     });
 
@@ -373,11 +421,10 @@ describe('setInterval', () => {
         const delay = 2983;
         setInterval(callback, delay, disposable);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const id: number = (global.setInterval as jest.Mock).mock.results[0]
-            .value;
+        const id: number = setIntervalMock.mock.results[0].value;
         disposable.dispose();
-        expect(global.clearInterval).toHaveBeenCalledTimes(1);
-        expect(global.clearInterval).toHaveBeenCalledWith(id);
+        expect(clearIntervalMock).toHaveBeenCalledTimes(1);
+        expect(clearIntervalMock).toHaveBeenCalledWith(id);
     });
 
     it('should cancel the interval when the given disposable is disposed after a few interval durations', () => {
@@ -387,23 +434,42 @@ describe('setInterval', () => {
         const delay = 91;
         setInterval(callback, delay, disposable);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const id: number = (global.setInterval as jest.Mock).mock.results[0]
-            .value;
+        const id: number = setIntervalMock.mock.results[0].value;
         for (let i = 0; i < 5; i++) {
             jest.runOnlyPendingTimers();
         }
         disposable.dispose();
-        expect(global.clearInterval).toHaveBeenCalledTimes(1);
-        expect(global.clearInterval).toHaveBeenCalledWith(id);
+        expect(clearIntervalMock).toHaveBeenCalledTimes(1);
+        expect(clearIntervalMock).toHaveBeenCalledWith(id);
     });
 });
 
+// eslint-disable-next-line jest/no-focused-tests
 describe('asyncReportError', () => {
-    beforeEach(() => {
-        jest.useFakeTimers('legacy');
+    let _fakeSetTimeout;
+    let setTimeoutMock: jest.Mock;
+    function replaceSetTimeoutWithMock(): void {
+        // eslint-disable-next-line max-len
+        global.setTimeout = (setTimeoutMock as unknown) as typeof global.setTimeout;
+    }
+    function restoreFakeTimers(): void {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        global.setTimeout = _fakeSetTimeout;
+    }
+    beforeAll(() => {
+        _fakeSetTimeout = global.setTimeout;
+        setTimeoutMock = jest.fn(_fakeSetTimeout);
+        replaceSetTimeoutWithMock();
     });
-    afterEach(jest.useRealTimers);
-    afterEach(jest.clearAllTimers);
+    afterEach(() => {
+        jest.clearAllMocks();
+        restoreFakeTimers();
+        jest.clearAllTimers();
+        replaceSetTimeoutWithMock();
+    });
+    afterAll(() => {
+        restoreFakeTimers();
+    });
 
     it('should be a function', () => {
         expect(asyncReportError).toBeFunction();
@@ -415,8 +481,8 @@ describe('asyncReportError', () => {
 
     it('should call setTimeout with a delay of zero', () => {
         asyncReportError(new Error('foo'));
-        expect(global.setTimeout).toHaveBeenCalledTimes(1);
-        expect(global.setTimeout).toHaveBeenCalledWith(expect.any(Function));
+        expect(setTimeoutMock).toHaveBeenCalledTimes(1);
+        expect(setTimeoutMock).toHaveBeenCalledWith(expect.any(Function));
     });
 
     it('should call setTimeout with a callback that throws the given error', () => {
@@ -425,7 +491,15 @@ describe('asyncReportError', () => {
         expect(
             // eslint-disable-next-line max-len
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            ((global.setTimeout as unknown) as jest.Mock).mock.calls[0][0],
+            setTimeoutMock.mock.calls[0][0],
         ).toThrow(error);
+    });
+
+    it('should schedule a timeout that throws the error', () => {
+        const error = new Error('bar');
+        asyncReportError(error);
+        expect(jest.getTimerCount()).toBe(1);
+        expect(() => jest.advanceTimersToNextTimer()).toThrow(error);
+        expect(jest.getTimerCount()).toBe(0);
     });
 });

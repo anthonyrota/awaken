@@ -20,4 +20,5 @@ module.exports = {
     setupFilesAfterEnv: ['jest-extended'],
     coverageDirectory: 'coverage',
     collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}', '!src/**/*.d.ts'],
+    timers: 'modern',
 };
