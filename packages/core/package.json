@@ -1,0 +1,55 @@
+{
+    "name": "@awaken/core",
+    "amdName": "awaken",
+    "version": "0.0.0",
+    "description": "A fast and extremely lightweight reactive programming library for Typescript",
+    "source": "src/index.ts",
+    "main": "dist/awaken.js",
+    "module": "dist/awaken.module.js",
+    "umd:main": "dist/awaken.umd.js",
+    "unpkg": "dist/awaken.umd.js",
+    "jsdelivr": "dist/awaken.umd.js",
+    "types": "dist/index.d.ts",
+    "license": "MIT",
+    "keywords": [
+        "awaken",
+        "reactive",
+        "callbag",
+        "callback",
+        "observables",
+        "observable",
+        "iterable",
+        "stream",
+        "es6",
+        "es2015"
+    ],
+    "author": "Anthony Rota",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/anthonyrota/awaken.git",
+        "directory": "packages/core"
+    },
+    "bugs": "https://github.com/anthonyrota/awaken/issues",
+    "sideEffects": "false",
+    "exports": {
+        ".": {
+            "browser": "./dist/awaken.module.js",
+            "umd": "./dist/awaken.umd.js",
+            "import": "./dist/awaken.mjs",
+            "require": "./dist/awaken.js"
+        },
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "src",
+        "dist"
+    ],
+    "scripts": {
+        "build": "microbundle build --raw --tsconfig ./tsconfig.build.json && node ./postbuild.js",
+        "clean": "rimraf dist && node ../../clearMicrobundleCache.js"
+    },
+    "dependencies": {},
+    "publishConfig": {
+        "access": "public"
+    }
+}

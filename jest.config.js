@@ -5,20 +5,18 @@ module.exports = {
         '^.+\\.tsx?$': 'ts-jest',
         '^.+\\.js$': 'babel-jest',
     },
-    moduleNameMapper: {
-        '^awakening$': '<rootDir>/src/index.ts',
-        '^awakening/testing$': '<rootDir>/testing/index.ts',
-    },
     testPathIgnorePatterns: ['/node_modules/', '/dist/'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     testRegex: '.*\\.test\\.ts$',
-    globals: {
-        'ts-jest': {
-            tsConfig: 'tsconfig.test.json',
-        },
+    moduleNameMapper: {
+        '^@awaken/core$': '<rootDir>/packages/core/src/index.ts',
+        '^@awaken/testing$': '<rootDir>/packages/testing/src/index.ts',
     },
     setupFilesAfterEnv: ['jest-extended'],
-    coverageDirectory: 'coverage',
-    collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}', '!src/**/*.d.ts'],
     timers: 'modern',
+    collectCoverageFrom: [
+        './packages/core/src/**/*.ts',
+        './packages/testing/src/**/*.ts',
+    ],
+    coverageDirectory: 'coverage',
 };

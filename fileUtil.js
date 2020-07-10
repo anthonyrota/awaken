@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { writeFileSync, readFileSync } = require('fs');
+const fs = require('fs');
 const path = require('path');
 const cwd = process.cwd();
 
@@ -18,7 +18,7 @@ function getAbsolutePath(...path_) {
  * @param {string} to The absolute path to copy to.
  */
 function copyFile(from, to) {
-    writeFileSync(to, readFileSync(from));
+    fs.writeFileSync(to, fs.readFileSync(from));
 }
 
 /**
@@ -27,7 +27,7 @@ function copyFile(from, to) {
  */
 function readJSON(path) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return JSON.parse(readFileSync(path, 'utf-8'));
+    return JSON.parse(fs.readFileSync(path, 'utf-8'));
 }
 
 /**
@@ -35,7 +35,7 @@ function readJSON(path) {
  * @param {*} json
  */
 function writeJSON(path, json) {
-    writeFileSync(path, JSON.stringify(json), 'utf-8');
+    fs.writeFileSync(path, JSON.stringify(json), 'utf-8');
 }
 
 /**

@@ -7,7 +7,7 @@ import {
     setTimeout,
     setInterval,
     asyncReportError,
-} from 'awakening';
+} from '@awaken/core';
 import each from 'jest-each';
 
 type CF = (x: string) => string;

@@ -10,7 +10,7 @@ import {
     ScheduleTimeoutQueued,
     ScheduleInterval,
     ScheduleFunction,
-} from 'awakening';
+} from '@awaken/core';
 import { throw_, createFakeRAFUtil } from './testUtils';
 
 describe('ScheduleQueued', () => {

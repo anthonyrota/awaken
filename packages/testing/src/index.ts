@@ -10,7 +10,7 @@ import {
     Source,
     Sink,
     SubjectBase,
-} from 'awakening';
+} from '@awaken/core';
 
 interface TestScheduleFunction {
     (

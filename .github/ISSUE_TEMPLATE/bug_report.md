@@ -11,7 +11,7 @@ title: 'Bug: '
     your issue has not already been fixed.
 -->
 
-Awakening version: <!--  -->
+Awaken version: <!--  -->
 
 ## Steps To Reproduce
 

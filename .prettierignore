@@ -1,3 +1,5 @@
 coverage
 dist
 testing/dist
+*.md
+mangle.json

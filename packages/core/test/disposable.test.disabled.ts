@@ -8,7 +8,7 @@ import {
     Disposable,
     DisposalError,
     DISPOSED,
-} from 'awakening';
+} from '@awaken/core';
 import { throw_ } from './testUtils';
 import each from 'jest-each';
 

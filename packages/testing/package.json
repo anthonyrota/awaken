@@ -1,0 +1,57 @@
+{
+    "name": "@awaken/testing",
+    "amdName": "awakenTesting",
+    "version": "0.0.0",
+    "description": "Testing utils for awaken",
+    "source": "src/index.ts",
+    "main": "dist/testing.js",
+    "module": "dist/testing.module.js",
+    "umd:main": "dist/testing.umd.js",
+    "unpkg": "dist/testing.umd.js",
+    "jsdelivr": "dist/testing.umd.js",
+    "types": "dist/index.d.ts",
+    "license": "MIT",
+    "keywords": [
+        "awaken",
+        "reactive",
+        "callbag",
+        "callback",
+        "observables",
+        "observable",
+        "iterable",
+        "stream",
+        "es6",
+        "es2015"
+    ],
+    "author": "Anthony Rota",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/anthonyrota/awaken.git",
+        "directory": "packages/testing"
+    },
+    "bugs": "https://github.com/anthonyrota/awaken/issues",
+    "sideEffects": "false",
+    "exports": {
+        ".": {
+            "browser": "./dist/testing.module.js",
+            "umd": "./dist/testing.umd.js",
+            "import": "./dist/testing.mjs",
+            "require": "./dist/testing.js"
+        },
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "src",
+        "dist"
+    ],
+    "scripts": {
+        "build": "microbundle build --raw --tsconfig ./tsconfig.build.json && node ./postbuild.js",
+        "clean": "rimraf dist && node ../../clearMicrobundleCache.js"
+    },
+    "dependencies": {
+        "@awaken/core": "^0.0.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}

@@ -10,7 +10,7 @@ import {
     Sink,
     subscribe,
     zipSources,
-} from 'awakening';
+} from '@awaken/core';
 
 describe('PushType', () => {
     it('should be equal to zero', () => {
@@ -112,7 +112,7 @@ import {
     E,
     TestSource,
     watchSourceEvents,
-} from 'awakening/testing';
+} from '@awaken/testing';
 
 /** @todo actual tests */
 describe('zipSources', () => {

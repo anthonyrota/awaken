@@ -1,10 +1,10 @@
-const config = require('./jest.config');
+const baseConfig = require('./jest.config');
 
 module.exports = {
-    ...config,
+    ...baseConfig,
     moduleNameMapper: {
-        ...config.moduleNameMapper,
-        '^awakening$': '<rootDir>/dist/awakening.js',
-        '^awakening/testing$': '<rootDir>/testing/dist/testing.js',
+        ...baseConfig.moduleNameMapper,
+        '^@awaken/core$': '<rootDir>/packages/core/dist/awaken.js',
+        '^@awaken/testing$': '<rootDir>/packages/testing/dist/testing.js',
     },
 };
