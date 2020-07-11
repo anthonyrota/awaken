@@ -51,7 +51,7 @@ export function joinErrors(errors: unknown[]): string {
 
     return errors
         .map((error, index) => {
-            const prefix_ = `  [#${index}] `;
+            const prefix_ = `  [#${index + 1}] `;
             const prefix =
                 '\n' +
                 Array(lastPrefixLength - prefix_.length + 1).join(' ') +
