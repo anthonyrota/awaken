@@ -1,0 +1,5 @@
+{
+    "path": "./node_modules/cz-conventional-changelog",
+    "maxHeaderWidth": 72,
+    "maxLineWidth": 72
+}

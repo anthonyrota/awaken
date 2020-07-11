@@ -4,7 +4,10 @@ logs
 npm-debug.log*
 .npm
 .eslintcache
-.DS_Store
+.node_repl_history
+*.tgz
+.env
+.next
 
 # Dependencies
 node_modules/
@@ -12,11 +15,16 @@ node_modules/
 # Generated
 coverage/
 dist/
-testing/dist/
 
-# .vscode
+# Editor-specific
 !.vscode/tasks.js
 !.vscode/launch.json
+.vs
+.DS_Store
+.idea
+_ts3.4
+*.tsbuildinfo
+.watchmanconfig
 
 # Other
 tmp/

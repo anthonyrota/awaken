@@ -38,18 +38,5 @@
         "lint": "eslint . && prettier --list-different .",
         "typecheck": "tsc --noEmit",
         "cz": "git-cz"
-    },
-    "config": {
-        "commitizen": {
-            "path": "./node_modules/cz-conventional-changelog",
-            "maxHeaderWidth": 72,
-            "maxLineWidth": 72
-        }
-    },
-    "husky": {
-        "hooks": {
-            "pre-commit": "npm run lint && npm run typecheck && npm run test:build",
-            "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-        }
     }
 }
