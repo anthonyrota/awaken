@@ -30,7 +30,7 @@
         "typescript": "^3.9.6"
     },
     "scripts": {
-        "build": "lerna run clean && lerna run build",
+        "build": "lerna run clean:prebuild && lerna run build",
         "clean": "npm run clean:coverage && lerna run clean",
         "clean:coverage": "rimraf coverage",
         "test": "npm run clean:coverage && jest --runInBand --coverage --watchAll=false",

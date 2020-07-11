@@ -46,7 +46,8 @@
     ],
     "scripts": {
         "build": "microbundle build --raw --tsconfig ./tsconfig.build.json && node ./postbuild.js",
-        "clean": "rimraf dist && node ../../clearMicrobundleCache.js"
+        "clean": "rimraf dist && node ../../clearMicrobundleCache.js",
+        "clean:prebuild": "rimraf dist"
     },
     "dependencies": {
         "@awaken/core": "^0.0.0"
