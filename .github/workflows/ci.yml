@@ -33,6 +33,28 @@ jobs:
             - name: Typecheck packages
               run: npm run typecheck
 
+    test_on_other_node_versions:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [10.x, 11.x, 12.x, 13.x]
+
+        name: Node ${{ matrix.node-version }} tests
+
+        steps:
+            - uses: actions/checkout@v2
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v1
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - name: Install dependencies
+              run: |
+                  npm install -g npm@latest
+                  npm ci
+            - name: Test packages
+              run: npm run test
+
     test_on_primary_node_version:
         runs-on: ubuntu-latest
 
@@ -55,25 +77,3 @@ jobs:
               with:
                   flags: unittest
                   name: codecov
-
-    test_on_other_node_versions:
-        runs-on: ubuntu-latest
-
-        strategy:
-            matrix:
-                node-version: [10.x, 11.x, 12.x, 13.x]
-
-        name: Node ${{ matrix.node-version }} tests
-
-        steps:
-            - uses: actions/checkout@v2
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v1
-              with:
-                  node-version: ${{ matrix.node-version }}
-            - name: Install dependencies
-              run: |
-                  npm install -g npm@latest
-                  npm ci
-            - name: Test packages
-              run: npm run test
