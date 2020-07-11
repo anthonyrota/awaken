@@ -8,9 +8,6 @@ on:
         branches:
             - '**'
 
-env:
-    PRIMARY_NODE_VERSION: 14.x
-
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -39,14 +36,14 @@ jobs:
     test_on_primary_node_version:
         runs-on: ubuntu-latest
 
-        name: Node ${{ env.PRIMARY_NODE_VERSION }} tests
+        name: Node 14.x tests
 
         steps:
             - uses: actions/checkout@v2
-            - name: Use Node.js ${{ env.PRIMARY_NODE_VERSION }}
+            - name: Use Node.js 14.x
               uses: actions/setup-node@v1
               with:
-                  node-version: ${{ env.PRIMARY_NODE_VERSION }}
+                  node-version: 14.x
             - name: Install dependencies
               run: |
                   npm install -g npm@latest
@@ -66,7 +63,7 @@ jobs:
             matrix:
                 node-version: [10.x, 11.x, 12.x, 13.x]
 
-        name: Node ${{ matrix.node_version }} tests
+        name: Node ${{ matrix.node-version }} tests
 
         steps:
             - uses: actions/checkout@v2
