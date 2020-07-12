@@ -590,6 +590,64 @@ export function zipWith<T extends unknown[]>(
         zipSources(source, ...sources) as Source<Unshift<T, U>>;
 }
 
+function _pluckValue<T>(event: { value: T }): T {
+    return event.value;
+}
+
+export function withLatestFrom<T extends unknown[]>(
+    ...sources: { [K in keyof T]: Source<T[K]> }
+): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    return <U>(source: Source<U>) =>
+        Source<Unshift<T, U>>((sink) => {
+            const latestPushEvents: Push<unknown>[] = [];
+            let responded = 0;
+
+            for (let i = 1; sink.active && i <= sources.length; i++) {
+                const sourceSink = Sink<unknown>((event) => {
+                    if (event.type === PushType) {
+                        if (!latestPushEvents[i]) {
+                            responded++;
+                        }
+
+                        latestPushEvents[i] = event;
+                        return;
+                    }
+
+                    if (event.type === EndType && latestPushEvents[i]) {
+                        return;
+                    }
+
+                    sink(event);
+                });
+
+                sink.add(sourceSink);
+                sources[i - 1](sourceSink);
+            }
+
+            const sourceSink = Sink<U>((event) => {
+                if (event.type === PushType) {
+                    if (responded === sources.length) {
+                        latestPushEvents[0] = event;
+                        sink(
+                            Push(
+                                latestPushEvents.map(_pluckValue) as Unshift<
+                                    T,
+                                    U
+                                >,
+                            ),
+                        );
+                    }
+                    return;
+                }
+
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
 /**
  * Calls the given transform function for each Push event of the given source
  * and passes through the result.
