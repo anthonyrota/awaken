@@ -195,12 +195,12 @@ export function SubjectBase<T>(): Subject<T> {
     }, disposable);
 }
 
-interface _SubjectDistributionSinkDisposalError extends Error {
+interface SubjectDistributionSinkDisposalErrorImplementation extends Error {
     errors: DisposalError[];
 }
 
 export interface SubjectDistributionSinkDisposalError
-    extends _SubjectDistributionSinkDisposalError {
+    extends SubjectDistributionSinkDisposalErrorImplementation {
     /**
      * The list of errors caught.
      */
@@ -218,7 +218,10 @@ export interface SubjectDistributionSinkDisposalErrorConstructor {
  */
 // eslint-disable-next-line max-len
 export const SubjectDistributionSinkDisposalError: SubjectDistributionSinkDisposalErrorConstructor = createCustomError(
-    (self: _SubjectDistributionSinkDisposalError, errors: DisposalError[]) => {
+    (
+        self: SubjectDistributionSinkDisposalErrorImplementation,
+        errors: DisposalError[],
+    ) => {
         self.message = `${errors.length} error${
             errors.length === 1 ? ' was' : 's were'
         } caught while distributing an event through a subject.${joinErrors(

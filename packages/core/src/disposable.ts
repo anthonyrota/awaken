@@ -260,11 +260,11 @@ export function implDisposableMethods<T extends object>(
     return (fakeDisposable as unknown) as T & Disposable;
 }
 
-interface _DisposalError extends Error {
+interface DisposalErrorImplementation extends Error {
     errors: unknown[];
 }
 
-export interface DisposalError extends _DisposalError {
+export interface DisposalError extends DisposalErrorImplementation {
     /**
      * The flattened list of errors thrown during disposal.
      */
@@ -280,7 +280,7 @@ export interface DisposalErrorConstructor {
  * Thrown when at least one error is caught during the disposal of a disposable.
  */
 export const DisposalError: DisposalErrorConstructor = createCustomError(
-    (self: _DisposalError, errors: unknown[]) => {
+    (self: DisposalErrorImplementation, errors: unknown[]) => {
         const flattenedErrors = flattenDisposalErrors(errors);
 
         self.message = `Failed to dispose a resource. ${
