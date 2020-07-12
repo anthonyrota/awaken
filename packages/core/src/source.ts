@@ -6,7 +6,7 @@ import {
     ScheduleTimeout,
 } from './schedule';
 import { Subject } from './subject';
-import { asyncReportError, flow, forEach, pipe } from './util';
+import { pipe, flow, asyncReportError, forEach, identity } from './util';
 
 export type PushType = 0;
 export const PushType: PushType = 0;
@@ -277,7 +277,7 @@ export const never = Source(() => {});
 
 export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
     return Source((sink) => {
-        let sinkDisposalError: { e: unknown } | undefined;
+        let sinkDisposalError: { __error: unknown } | undefined;
         try {
             for (const item of iterable) {
                 try {
@@ -288,7 +288,7 @@ export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
                 } catch (error) {
                     // eslint-disable-next-line max-len
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    sinkDisposalError = { e: error };
+                    sinkDisposalError = { __error: error };
                     break;
                 }
             }
@@ -300,7 +300,7 @@ export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
             }
         }
         if (sinkDisposalError) {
-            throw sinkDisposalError.e;
+            throw sinkDisposalError.__error;
         }
         sink(End);
     });
@@ -310,7 +310,7 @@ async function distributeAsyncIterable<T>(
     iterable: AsyncIterable<T>,
     sink: Sink<T>,
 ): Promise<void> {
-    let sinkDisposalError: { e: unknown } | undefined;
+    let sinkDisposalError: { __error: unknown } | undefined;
     try {
         for await (const item of iterable) {
             try {
@@ -321,7 +321,7 @@ async function distributeAsyncIterable<T>(
             } catch (error) {
                 // eslint-disable-next-line max-len
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                sinkDisposalError = { e: error };
+                sinkDisposalError = { __error: error };
                 break;
             }
         }
@@ -333,7 +333,7 @@ async function distributeAsyncIterable<T>(
         }
     }
     if (sinkDisposalError) {
-        throw sinkDisposalError.e;
+        throw sinkDisposalError.__error;
     }
     sink(End);
 }
@@ -497,13 +497,17 @@ export function zipSources<T extends unknown[]>(
     return sources.length === 0
         ? empty
         : Source((sink) => {
-              const sourcesValues: { ended: boolean; values: unknown[] }[] = [];
+              type SourceValues = { __ended: boolean; __values: unknown[] };
+              const sourcesValues: SourceValues[] = [];
               let hasValueCount = 0;
               let hasCompletedSourceWithNoValues = false;
 
               for (let i = 0; sink.active && i < sources.length; i++) {
                   const values: unknown[] = [];
-                  const info = { ended: false, values };
+                  const info: SourceValues = {
+                      __ended: false,
+                      __values: values,
+                  };
                   sourcesValues[i] = info;
 
                   const sourceSink = Sink<unknown>((event) => {
@@ -521,7 +525,10 @@ export function zipSources<T extends unknown[]>(
                           if (hasValueCount === sources.length) {
                               const valuesToPush: unknown[] = [];
                               for (let i = 0; i < sourcesValues.length; i++) {
-                                  const { values, ended } = sourcesValues[i];
+                                  const {
+                                      __values: values,
+                                      __ended: ended,
+                                  } = sourcesValues[i];
                                   // eslint-disable-next-line max-len
                                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                                   valuesToPush.push(values.shift()!);
@@ -544,7 +551,7 @@ export function zipSources<T extends unknown[]>(
                       }
 
                       if (event.type === EndType && values.length !== 0) {
-                          info.ended = true;
+                          info.__ended = true;
                           return;
                       }
 
@@ -773,12 +780,9 @@ export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
  *     source. If and only if the function returns a truthy value, then the
  *     event will pass through.
  */
-export function filter(
-    predicate: (value: unknown, index: number) => false,
-): Operator<unknown, never>;
-export function filter(
-    predicate: (value: unknown, index: number) => unknown,
-): IdentityOperator;
+export function filter<T>(
+    predicate: (value: T, index: number) => false,
+): Operator<T, never>;
 export function filter<T, S extends T>(
     predicate: (value: T, index: number) => value is S,
 ): Operator<T, S>;
@@ -864,8 +868,7 @@ export function every<T>(
     predicate: (value: T, index: number) => unknown,
 ): Operator<T, boolean> {
     return flow(
-        /** @todo Investigate. Type annotation shouldn't be needed. */
-        filter<T>((value, index) => !predicate(value, index)),
+        filter((value, index) => !predicate(value, index)),
         isEmpty,
     );
 }
@@ -1113,12 +1116,10 @@ function _createMergeMapOperator(
 export const mergeMap = _createMergeMapOperator(false);
 export const expandMap = _createMergeMapOperator(true);
 
-const mergeMapIdentityTransform = <T>(source: Source<T>) => source;
-
 export function mergeConcurrent(
     maxConcurrent: number,
 ): <T>(source: Source<Source<T>>) => Source<T> {
-    return mergeMap(mergeMapIdentityTransform, maxConcurrent);
+    return mergeMap(identity, maxConcurrent);
 }
 
 export const merge = mergeConcurrent(Infinity);
@@ -1362,6 +1363,98 @@ export function throwIfEmpty(getError: () => unknown): IdentityOperator {
     return defaultIfEmpty(() => {
         throw getError();
     });
+}
+
+/**
+ * Note: This operator requires a Set (or WeakSet) implementation, which may
+ * have to be polyfilled for older browsers.
+ */
+export function distinct(
+    getKey?: undefined,
+    useWeakSet?: false,
+): IdentityOperator;
+export function distinct(
+    getKey: undefined,
+    useWeakSet: true,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+): <T extends object>(source: Source<T>) => Source<T>;
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function distinct<T, K extends object>(
+    getKey: (value: T, index: number) => K,
+    useWeakSet: true,
+): Operator<T, T>;
+export function distinct<T, K>(
+    getKey: (value: T, index: number) => K,
+    useWeakSet?: false,
+): Operator<T, T>;
+export function distinct<T, K>(
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+    getKey: (value: T, index: number) => K = identity as any,
+    useWeakSet?: boolean,
+): Operator<T, T> {
+    return (source) =>
+        lazy(() => {
+            const keys = new (useWeakSet ? WeakSet : Set)();
+
+            return pipe(
+                source,
+                filter((value, index) => {
+                    const key = getKey(value, index);
+                    // eslint-disable-next-line @typescript-eslint/ban-types
+                    const unique = !keys.has((key as unknown) as object);
+                    if (unique) {
+                        // eslint-disable-next-line @typescript-eslint/ban-types
+                        keys.add((key as unknown) as object);
+                    }
+                    return unique;
+                }),
+            );
+        });
+}
+
+export function distinctFromLast(): IdentityOperator;
+export function distinctFromLast<T>(
+    isDifferent: (keyA: T, keyB: T, currentIndex: number) => unknown,
+): Operator<T, T>;
+export function distinctFromLast<T, K>(
+    isDifferent:
+        | ((keyA: K, keyB: K, currentIndex: number) => unknown)
+        | undefined,
+    getKey: (value: T) => K,
+): Operator<T, T>;
+export function distinctFromLast<T, K>(
+    isDifferent: (keyA: K, keyB: K, currentIndex: number) => unknown = (
+        a: K,
+        b: K,
+    ) => a === b,
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+    getKey: (value: T) => K = identity as any,
+): Operator<T, T> {
+    return (source) =>
+        lazy(() => {
+            let lastKey: { __value: K } | undefined;
+
+            return pipe(
+                source,
+                filter((value, index) => {
+                    if (!lastKey) {
+                        return true;
+                    }
+                    const currentKey = getKey(value);
+                    const changed = isDifferent(
+                        lastKey.__value,
+                        currentKey,
+                        index,
+                    );
+                    if (changed) {
+                        lastKey = { __value: currentKey };
+                    }
+                    return changed;
+                }),
+            );
+        });
 }
 
 const toEmpty = () => empty;
@@ -1831,21 +1924,6 @@ export type InitialDurationInfo =
           /* maxDurationSource */ Source<unknown>,
       ];
 
-export function debounce(
-    getDurationSource: (value: unknown, index: number) => Source<unknown>,
-    getInitialDurationRange?:
-        | ((value: unknown, index: number) => InitialDurationInfo)
-        | null,
-    config?: DebounceConfig | null,
-): IdentityOperator;
-export function debounce(
-    getDurationSource: undefined | null,
-    getInitialDurationRange: (
-        value: unknown,
-        index: number,
-    ) => InitialDurationInfo,
-    config?: DebounceConfig | null,
-): IdentityOperator;
 export function debounce<T>(
     getDurationSource: (value: T, index: number) => Source<unknown>,
     getInitialDurationRange?:
@@ -1887,7 +1965,7 @@ export function debounce<T>(
                 : config.emitPendingOnEnd;
     }
 
-    return (source: Source<T>) =>
+    return (source) =>
         Source<T>((sink) => {
             let latestPush: Push<T>;
             let durationSink: Sink<unknown>;
@@ -2120,9 +2198,6 @@ export function throttleMs(
     return throttle(() => durationSource, config);
 }
 
-export function delay(
-    getDelaySource: (value: unknown, index: number) => Source<unknown>,
-): IdentityOperator;
 export function delay<T>(
     getDelaySource: (value: T, index: number) => Source<unknown>,
 ): Operator<T, T>;

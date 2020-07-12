@@ -237,3 +237,7 @@ export function forEach<T>(array: T[], callback: (value: T) => void): void {
         callback(array[i]);
     }
 }
+
+export function identity<T>(value: T): T {
+    return value;
+}
