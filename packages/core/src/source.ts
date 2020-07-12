@@ -6,7 +6,7 @@ import {
     ScheduleTimeout,
 } from './schedule';
 import { Subject } from './subject';
-import { asyncReportError, flow, forEach } from './util';
+import { asyncReportError, flow, forEach, pipe } from './util';
 
 export type PushType = 0;
 export const PushType: PushType = 0;
@@ -251,15 +251,15 @@ export function ofEventScheduled<T>(
     });
 }
 
-export function throwError(error: unknown): Source<never> {
-    return ofEvent(Throw(error));
+export function throwError(getError: () => unknown): Source<never> {
+    return lazy(() => ofEvent(Throw(getError())));
 }
 
 export function throwErrorScheduled(
-    error: unknown,
+    getError: () => unknown,
     schedule: ScheduleFunction,
 ): Source<never> {
-    return ofEventScheduled(Throw(error), schedule);
+    return lazy(() => ofEventScheduled(Throw(getError()), schedule));
 }
 
 export const empty = ofEvent(End);
@@ -386,8 +386,9 @@ export function interval(delayMs: number): Source<number> {
     );
 }
 
-export const animationFrames: Source<number> = pluck<[number], 0>(0)(
+export const animationFrames: Source<number> = pipe(
     fromScheduleFunction(scheduleAnimationFrame),
+    pluck<[number], 0>(0),
 );
 
 export function lazy<T>(createSource: () => Source<T>): Source<T> {
@@ -594,6 +595,17 @@ function _pluckValue<T>(event: { value: T }): T {
     return event.value;
 }
 
+export function withLatestFromLazy<T extends unknown[]>(
+    getSources: () => { [K in keyof T]: Source<T[K]> },
+): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    return <U>(source: Source<U>) =>
+        lazy(() =>
+            // eslint-disable-next-line max-len
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+            pipe(source, (withLatestFrom.apply as any)(0, getSources())),
+        );
+}
+
 export function withLatestFrom<T extends unknown[]>(
     ...sources: { [K in keyof T]: Source<T[K]> }
 ): <U>(source: Source<U>) => Source<Unshift<T, U>> {
@@ -691,21 +703,23 @@ export function mapTo<T>(value: T): Operator<unknown, T> {
 }
 
 export function mapEvents<T, U>(
-    transform: (event: Event<T>, index: number) => Event<U>,
+    transform: (event: Event<T>, index: number) => Event<U> | undefined | null,
 ): Operator<T, U> {
     return (source) =>
         Source((sink) => {
             let idx = 0;
 
             const sourceSink = Sink<T>((event) => {
-                let newEvent: Event<U>;
+                let newEvent: Event<U> | undefined | null;
                 try {
                     newEvent = transform(event, idx++);
                 } catch (error) {
                     sink(Throw(error));
                     return;
                 }
-                sink(newEvent);
+                if (newEvent) {
+                    sink(newEvent);
+                }
                 if (event.type !== PushType) {
                     sink(End);
                 }
@@ -716,14 +730,35 @@ export function mapEvents<T, U>(
         });
 }
 
+export function mapPushEvents<T>(
+    transform: (pushEvents: Push<T>, index: number) => Throw | End,
+): Operator<T, never>;
+export function mapPushEvents<T, U>(
+    transform: (
+        pushEvent: Push<T>,
+        index: number,
+    ) => Event<U> | undefined | null,
+): Operator<T, U>;
+export function mapPushEvents<T, U>(
+    transform: (
+        pushEvent: Push<T>,
+        index: number,
+    ) => Event<U> | undefined | null,
+): Operator<T, U> {
+    return mapEvents((event, index) =>
+        event.type === PushType ? transform(event, index) : event,
+    );
+}
+
 export const wrapInPushEvents: <T>(
     source: Source<T>,
 ) => Source<Event<T>> = mapEvents(<T>(event: Event<T>) => Push(event));
+
 export const unwrapFromWrappedPushEvents: <T>(
     source: Source<Event<T>>,
-) => Source<T> = mapEvents(<T>(event: Event<Event<T>>) => {
-    return event.type === PushType ? event.value : event;
-});
+) => Source<T> = mapPushEvents(
+    <T>(pushEvent: Push<Event<T>>) => pushEvent.value,
+);
 
 export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
     return map((value) => value[key]);
@@ -738,6 +773,12 @@ export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
  *     source. If and only if the function returns a truthy value, then the
  *     event will pass through.
  */
+export function filter(
+    predicate: (value: unknown, index: number) => false,
+): Operator<unknown, never>;
+export function filter(
+    predicate: (value: unknown, index: number) => unknown,
+): IdentityOperator;
 export function filter<T, S extends T>(
     predicate: (value: T, index: number) => value is S,
 ): Operator<T, S>;
@@ -772,6 +813,96 @@ export function filter<T>(
         });
 }
 
+export interface WithIndex<T> {
+    value: T;
+    index: number;
+}
+
+export function findWithIndex<T, S extends T>(
+    predicate: (value: T, index: number) => value is S,
+): Operator<T, WithIndex<S>>;
+export function findWithIndex<T>(
+    predicate: (value: T, index: number) => unknown,
+): Operator<T, WithIndex<T>>;
+export function findWithIndex<T>(
+    predicate: (value: T, index: number) => unknown,
+): Operator<T, WithIndex<T>> {
+    return (source) =>
+        Source((sink) => {
+            let index: number;
+            pipe(
+                source,
+                filter<T>((value, index_) => {
+                    index = index_;
+                    return predicate(value, index);
+                }),
+                first,
+                map((value) => ({ value, index })),
+            )(sink);
+        });
+}
+
+export function find<T, S extends T>(
+    predicate: (value: T, index: number) => value is S,
+): Operator<T, S>;
+export function find<T>(
+    predicate: (value: T, index: number) => unknown,
+): Operator<T, T>;
+export function find<T>(
+    predicate: (value: T, index: number) => unknown,
+): Operator<T, T> {
+    return flow(filter(predicate), first);
+}
+
+export function findIndex<T>(
+    predicate: (value: T, index: number) => unknown,
+): Operator<T, number> {
+    return flow(findWithIndex(predicate), pluck('index'));
+}
+
+export function every<T>(
+    predicate: (value: T, index: number) => unknown,
+): Operator<T, boolean> {
+    return flow(
+        /** @todo Investigate. Type annotation shouldn't be needed. */
+        filter<T>((value, index) => !predicate(value, index)),
+        isEmpty,
+    );
+}
+
+export function some<T>(
+    predicate: (value: T, index: number) => unknown,
+): Operator<T, boolean> {
+    return flow(filter(predicate), first, mapTo(true), defaultIfEmptyTo(false));
+}
+
+export function finalize(callback: () => void): IdentityOperator {
+    return <T>(source: Source<T>) =>
+        Source<T>((sink) => {
+            sink.add(Disposable(callback));
+            source(sink);
+        });
+}
+
+export const ignorePushEvents: Operator<unknown, never> = filter(() => false);
+
+export function withPrevious<T>(source: Source<T>): Source<[T, T]> {
+    return lazy(() => {
+        let previousPush: Push<T> | undefined;
+        return pipe(
+            source,
+            mapPushEvents((pushEvent) => {
+                const pair: [T, T] | undefined = previousPush && [
+                    previousPush.value,
+                    pushEvent.value,
+                ];
+                previousPush = pushEvent;
+                return pair && Push(pair);
+            }),
+        );
+    });
+}
+
 /**
  * Calls the specified transform function for all the values pushed by the given
  * source. The return value of the transform function is the accumulated result,
@@ -784,17 +915,17 @@ export function filter<T>(
  *     accumulation. The first call to the transform function provides this
  *     as the previousAccumulatedResult.
  */
-export function scan<T, R>(
+export function scan<T, R, I>(
     transform: (
-        previousAccumulatedResult: R,
+        previousAccumulatedResult: R | I,
         currentValue: T,
         currentIndex: number,
     ) => R,
-    initialValue: R,
+    initialValue: I,
 ): Operator<T, R> {
     return (source) =>
         Source((sink) => {
-            let previousAccumulatedResult = initialValue;
+            let previousAccumulatedResult: I | R = initialValue;
             let currentIndex = 0;
 
             const sourceSink = Sink<T>((event) => {
@@ -835,16 +966,43 @@ export function scan<T, R>(
  *     accumulation. The first call to the transform function provides this
  *     as the previousAccumulatedResult.
  */
-export function reduce<T, R>(
+export function reduce<T, R, I>(
     transform: (
-        previousAccumulatedResult: R,
+        previousAccumulatedResult: R | I,
         currentValue: T,
         currentIndex: number,
     ) => R,
-    initialValue: R,
+    initialValue: I,
 ): Operator<T, R> {
     return flow(scan(transform, initialValue), last);
 }
+
+function _unwrap<T>(box: [T]): T {
+    return box[0];
+}
+
+export function maxCompare<T>(compare: (a: T, b: T) => number): Operator<T, T> {
+    return flow(
+        reduce<T, [T], null>(
+            (acc, val) =>
+                acc === null ? [val] : compare(acc[0], val) > 0 ? acc : [val],
+            null,
+        ),
+        map(_unwrap),
+    );
+}
+
+function compareNumbers(a: number, b: number): number {
+    return a > b ? 1 : -1;
+}
+
+export const max: Operator<number, number> = maxCompare(compareNumbers);
+
+export function minCompare<T>(compare: (a: T, b: T) => number): Operator<T, T> {
+    return maxCompare((a, b) => (compare(a, b) > 0 ? -1 : 1));
+}
+
+export const min: Operator<number, number> = minCompare(compareNumbers);
 
 export function flat<T>(source: Source<Source<T>>): Source<T> {
     return Source((sink) => {
@@ -1034,6 +1192,12 @@ export function mergeWith<T>(
     return <U>(source: Source<U>) => mergeSources<T | U>(source, ...sources);
 }
 
+export function startWithSources<T>(
+    ...sources: Source<T>[]
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) => concatSources<T | U>(...sources, source);
+}
+
 export function concatWith<T>(
     ...sources: Source<T>[]
 ): <U>(source: Source<U>) => Source<T | U> {
@@ -1115,14 +1279,16 @@ export function spyPush<T>(
     onPush: (value: T, index: number) => void,
 ): Operator<T, T> {
     return (source) =>
-        Source((sink) => {
+        lazy(() => {
             let idx = 0;
-
-            spy<T>((event) => {
-                if (event.type === PushType) {
-                    onPush(event.value, idx++);
-                }
-            })(source)(sink);
+            return pipe(
+                source,
+                spy<T>((event) => {
+                    if (event.type === PushType) {
+                        onPush(event.value, idx++);
+                    }
+                }),
+            );
         });
 }
 
@@ -1184,6 +1350,12 @@ export function defaultIfEmpty<T>(
             sink.add(sourceSink);
             source(sourceSink);
         });
+}
+
+export function defaultIfEmptyTo<T>(
+    value: T,
+): <U>(source: Source<U>) => Source<T | U> {
+    return defaultIfEmpty(() => value);
 }
 
 export function throwIfEmpty(getError: () => unknown): IdentityOperator {
@@ -1309,6 +1481,11 @@ export function takeLast(amount: number): IdentityOperator {
 
 export const last = takeLast(1);
 
+export const count: Operator<unknown, number> = flow(
+    replaceWithValueIndex,
+    last,
+);
+
 export function takeUntil(stopSource: Source<unknown>): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
@@ -1424,6 +1601,54 @@ export function skipUntil(stopSource: Source<unknown>): IdentityOperator {
             stopSource(stopSink);
             source(sourceSink);
         });
+}
+
+export function repeat(times: number): IdentityOperator {
+    if (times <= 0) {
+        return toEmpty;
+    }
+    return <T>(source: Source<T>) =>
+        Source<T>((sink) => {
+            let timesLeft = times;
+            function onEvent(event: Event<T>) {
+                if (event.type === EndType && timesLeft >= 0) {
+                    timesLeft--;
+                    sourceSink = Sink(onEvent);
+                    sink.add(sourceSink);
+                    source(sourceSink);
+                    return;
+                }
+                sink(event);
+            }
+            let sourceSink = Sink<T>(onEvent);
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+export const loop = repeat(Infinity);
+
+export function timeout<T>(
+    timeoutSource: Source<unknown>,
+    replacementSource: Source<T>,
+): <U>(source: Source<U>) => Source<T | U> {
+    return <U>(source: Source<U>) =>
+        pipe(
+            timeoutSource,
+            mapPushEvents(() => End),
+            startWith(0 as const),
+            endWith(1 as const),
+            switchMap<0 | 1, T | U>((t) =>
+                t === 0 ? source : replacementSource,
+            ),
+        );
+}
+
+export function timeoutMs<T>(
+    ms: number,
+    replacementSource: Source<T>,
+): <U>(source: Source<U>) => Source<T | U> {
+    return timeout(timer(ms), replacementSource);
 }
 
 export function catchError<T>(
@@ -2046,4 +2271,18 @@ export function withTimeInterval<T>(
             sink.add(sourceSink);
             source(sourceSink);
         });
+}
+
+export function schedulePushEvents(
+    schedule: ScheduleFunction,
+): IdentityOperator {
+    const delaySource = emptyScheduled(schedule);
+    return delay(() => delaySource);
+}
+
+export function scheduleSubscription(
+    schedule: ScheduleFunction,
+): IdentityOperator {
+    return <T>(source: Source<T>) =>
+        concatSources(emptyScheduled(schedule), source);
 }
