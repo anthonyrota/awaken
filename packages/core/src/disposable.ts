@@ -208,10 +208,6 @@ export function implDisposableMethods<T extends object>(
     value: T,
     disposable: Disposable,
 ): T & Disposable {
-    if (isDisposable(value)) {
-        return value;
-    }
-
     // This gets optimized out.
     const fakeDisposable = (value as unknown) as FakeDisposableImplementation;
     // eslint-disable-next-line max-len
@@ -224,7 +220,7 @@ export function implDisposableMethods<T extends object>(
         disposableImplementation.__implementationIdentifier ===
         realDisposableImplementationIdentifier
     ) {
-        const activeDescriptor: FakeDisposableImplementation['__activeDescriptor'] = {
+        const activeDescriptor: FakeDisposableActiveDescriptor = {
             get: activeGetter.bind(disposableImplementation),
             enumerable: false,
             configurable: true,

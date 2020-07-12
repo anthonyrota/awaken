@@ -180,29 +180,6 @@ describe('implDisposableMethods', () => {
         );
     }
 
-    it('should do nothing when given a real Disposable', () => {
-        const disposable = Object.seal(Disposable());
-        expect(implDisposableMethods(disposable, Disposable())).toBe(
-            disposable,
-        );
-        expect(
-            implDisposableMethods(
-                disposable,
-                realImpl({}, () => {
-                    /**/
-                }),
-            ),
-        ).toBe(disposable);
-        expect(
-            implDisposableMethods(
-                disposable,
-                fakeImpl({}, () => {
-                    /**/
-                }),
-            ),
-        ).toBe(disposable);
-    });
-
     describe('when implementing the methods of a real Disposable', () => {
         runTests(realImpl);
     });
