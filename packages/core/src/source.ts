@@ -1126,7 +1126,7 @@ export function minCompare<T>(
 
 export const min: Operator<number, number> = minCompare(compareNumbers);
 
-export function isEqualWith<T, U>(
+export function isEqualTo<T, U>(
     otherSource: Source<U>,
     areValuesEqual: (a: T, b: U, index: number) => unknown,
 ): Operator<T, boolean> {

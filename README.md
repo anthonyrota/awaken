@@ -79,7 +79,7 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | `sample`                  | ☑                   |                                                                  |
 | `sampleTime`              | ☑                   | Name: `sampleMs`                                                 |
 | `scan`                    | ☑                   |                                                                  |
-| `sequenceEqual`           | ☑                   | Name: `isEqualWith`                                              |
+| `sequenceEqual`           | ☑                   | Name: `isEqualTo`                                                |
 | `share`                   | ☐                   |                                                                  |
 | `shareReplay`             | ☐                   |                                                                  |
 | `single`                  | ☐                   | Not needed.                                                      |
