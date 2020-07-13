@@ -1,25 +1,8 @@
 import { createCustomError, joinErrors } from './errorBase';
 import { removeOnce, forEach } from './util';
 
-// Bypasses minifier inlining.
-function createImplementationIdentifier<Name extends 'rd'>(
-    name: Name,
-): 'awaken/rd';
-function createImplementationIdentifier<Name extends 'fd'>(
-    name: Name,
-): 'awaken/fd';
-function createImplementationIdentifier(name: string): string {
-    return 'awaken/' + name;
-}
-
-// eslint-disable-next-line max-len
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-const realDisposableImplementationIdentifier = createImplementationIdentifier(
-    'rd',
-);
-const fakeDisposableImplementationIdentifier = createImplementationIdentifier(
-    'fd',
-);
+const realDisposableImplementationIdentifier = 'awaken/rd';
+const fakeDisposableImplementationIdentifier = 'awaken/fd';
 // eslint-disable-next-line max-len
 type RealImplementationIdentifier = typeof realDisposableImplementationIdentifier;
 // eslint-disable-next-line max-len
