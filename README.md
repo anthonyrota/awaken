@@ -34,7 +34,7 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | `distinct`                | ☑                   |                                                                  |
 | `distinctUntilChanged`    | ☑                   | Name: `distinctFromLast`                                         |
 | `distinctUntilKeyChanged` | ☐                   | Not needed.                                                      |
-| `elementAt`               | ☐                   |                                                                  |
+| `elementAt`               | ☑                   | Name: `at`                                                       |
 | `endWith`                 | ☑                   |                                                                  |
 | `every`                   | ☑                   |                                                                  |
 | `exhaust`                 | ☑                   | Name: `concatDrop`                                               |
@@ -56,14 +56,14 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | `mergeAll`                | ☑                   | Name: `merge`                                                    |
 | `mergeMap`                | ☑                   |                                                                  |
 | `mergeMapTo`              | ☐                   | Not needed.                                                      |
-| `mergeScan`               | ☐                   |                                                                  |
+| `mergeScan`               | ☐                   | Not needed.                                                      |
 | `mergeWith`               | ☑                   |                                                                  |
 | `min`                     | ☑                   |                                                                  |
 | `multicast`               | ☐                   |                                                                  |
 | `observeOn`               | ☑                   | Name: `schedulePushEvents`                                       |
 | `onErrorResumeNext`       | ☐                   | Not needed. See row in the RxJS Observable Mappings table below. |
 | `pairwise`                | ☑                   | Name: `withPrevious`                                             |
-| `partition`               | ☐                   |                                                                  |
+| `partition`               | ☐                   | Not needed.                                                      |
 | `pluck`                   | ☑                   |                                                                  |
 | `publish`                 | ☐                   |                                                                  |
 | `publishBehavior`         | ☐                   |                                                                  |
@@ -73,16 +73,16 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | `reduce`                  | ☑                   |                                                                  |
 | `refCount`                | ☐                   |                                                                  |
 | `repeat`                  | ☑                   |                                                                  |
-| `repeatWhen`              | ☐                   |                                                                  |
-| `retry`                   | ☐                   |                                                                  |
-| `retryWhen`               | ☐                   |                                                                  |
+| `repeatWhen`              | ☑                   | Note: Differing behaviour.                                       |
+| `retry`                   | ☑                   |                                                                  |
+| `retryWhen`               | ☐                   | Not needed. Behaviour available through `repeatWhen`             |
 | `sample`                  | ☑                   |                                                                  |
 | `sampleTime`              | ☑                   | Name: `sampleMs`                                                 |
 | `scan`                    | ☑                   |                                                                  |
-| `sequenceEqual`           | ☐                   |                                                                  |
+| `sequenceEqual`           | ☑                   | Name: `isEqualWith`                                              |
 | `share`                   | ☐                   |                                                                  |
 | `shareReplay`             | ☐                   |                                                                  |
-| `single`                  | ☐                   |                                                                  |
+| `single`                  | ☐                   | Not needed.                                                      |
 | `skip`                    | ☑                   |                                                                  |
 | `skipLast`                | ☑                   |                                                                  |
 | `skipUntil`               | ☑                   |                                                                  |
@@ -100,10 +100,10 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | `throttle`                | ☑                   |                                                                  |
 | `throttleTime`            | ☑                   | Name: `throttleMs`                                               |
 | `throwIfEmpty`            | ☑                   |                                                                  |
-| `timeInterval`            | ☑                   |                                                                  |
+| `timeInterval`            | ☑                   | Name: `withTimeInterval`                                         |
 | `timeout`                 | ☑                   | Name: `timeoutMs`                                                |
 | `timeoutWith`             | ☑                   |                                                                  |
-| `timestamp`               | ☑                   |                                                                  |
+| `timestamp`               | ☑                   | Name: `withTime`                                                 |
 | `toArray`                 | ☑                   | Name: `collect`                                                  |
 | `window`                  | ☑                   |                                                                  |
 | `windowCount`             | ☐                   |                                                                  |
@@ -116,6 +116,6 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 
 ## RxJS Observable Mappings
 
-| RxJS Observable | Has Implementation | Notes |
-| :-------------- | :----------------- |:---|
-| `onErrorResumeNext` | ☐ |Not needed (ignoring errors is a bad pattern, but this operator can be implemented with `concatSources(...sources.map(mapEvents(throw -> end)))`).   |
+| RxJS Observable     | Has Implementation | Notes                                                                                                                                              |
+| :------------------ | :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onErrorResumeNext` | ☐                  | Not needed (ignoring errors is a bad pattern, but this operator can be implemented with `concatSources(...sources.map(mapEvents(throw -> end)))`). |

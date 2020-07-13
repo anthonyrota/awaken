@@ -413,6 +413,104 @@ export function range(count: number, start = 0): Source<number> {
     });
 }
 
+export function isEqual<T, U>(
+    sourceA: Source<T>,
+    sourceB: Source<U>,
+    areValuesEqual: (a: T, b: U, index: number) => unknown,
+): Source<boolean> {
+    return Source((sink) => {
+        const valuesA: T[] = [];
+        const valuesB: U[] = [];
+        let endedA: true | undefined;
+        let endedB: true | undefined;
+        let idx = 0;
+
+        function onEvent<X extends T | U>(
+            event: Event<X>,
+            myValues: X[],
+        ): void {
+            if (event.type === PushType) {
+                if (myValues === valuesA ? endedB : endedA) {
+                    sink(Push(false));
+                    sink(End);
+                    return;
+                }
+
+                const theirValues = myValues === valuesA ? valuesB : valuesA;
+
+                if (theirValues.length === 0) {
+                    myValues.push(event.value);
+                    return;
+                }
+
+                const myValue = event.value;
+                const theirValue = theirValues.shift() as T | U;
+
+                idx++;
+
+                let equal: unknown;
+                try {
+                    equal =
+                        myValues === valuesA
+                            ? areValuesEqual(myValue as T, theirValue as U, idx)
+                            : areValuesEqual(
+                                  theirValue as T,
+                                  myValue as U,
+                                  idx,
+                              );
+                } catch (error) {
+                    sink(Throw(error));
+                    return;
+                }
+
+                if (!equal) {
+                    sink(Push(false));
+                    sink(End);
+                }
+
+                return;
+            }
+
+            if (event.type === EndType) {
+                if (myValues === valuesA) {
+                    if (endedB) {
+                        // Both ended.
+                        sink(Push(true));
+                    } else {
+                        // Only A ended.
+                        endedA = true;
+                        return;
+                    }
+                } else {
+                    if (endedA) {
+                        // Both ended.
+                        sink(Push(true));
+                    } else {
+                        // Only B ended.
+                        endedB = true;
+                        return;
+                    }
+                }
+            }
+
+            sink(event);
+        }
+
+        const sinkA = Sink<T>((event) => {
+            onEvent(event, valuesA);
+        });
+
+        const sinkB = Sink<U>((event) => {
+            onEvent(event, valuesB);
+        });
+
+        sink.add(sinkA);
+        sink.add(sinkB);
+        sourceA(sinkA);
+        sourceB(sinkB);
+    });
+}
+
 export function flatSources<T>(...sources: Source<T>[]): Source<T> {
     return flat(fromArray(sources));
 }
@@ -864,6 +962,13 @@ export function findIndex<T>(
     return flow(findWithIndex(predicate), pluck('index'));
 }
 
+export function at(index: number): IdentityOperator {
+    return flow(
+        filter((_, idx) => idx === index),
+        first,
+    );
+}
+
 export function every<T>(
     predicate: (value: T, index: number) => unknown,
 ): Operator<T, boolean> {
@@ -984,11 +1089,17 @@ function _unwrap<T>(box: [T]): T {
     return box[0];
 }
 
-export function maxCompare<T>(compare: (a: T, b: T) => number): Operator<T, T> {
+export function maxCompare<T>(
+    compare: (
+        currentValue: T,
+        lastValue: T,
+        currentValueIndex: number,
+    ) => number,
+): Operator<T, T> {
     return flow(
         reduce<T, [T], null>(
-            (acc, val) =>
-                acc === null ? [val] : compare(acc[0], val) > 0 ? acc : [val],
+            (acc, val, index) =>
+                acc === null || compare(val, acc[0], index) > 0 ? [val] : acc,
             null,
         ),
         map(_unwrap),
@@ -1001,11 +1112,26 @@ function compareNumbers(a: number, b: number): number {
 
 export const max: Operator<number, number> = maxCompare(compareNumbers);
 
-export function minCompare<T>(compare: (a: T, b: T) => number): Operator<T, T> {
-    return maxCompare((a, b) => (compare(a, b) > 0 ? -1 : 1));
+export function minCompare<T>(
+    compare: (
+        currentValue: T,
+        lastValue: T,
+        currentValueIndex: number,
+    ) => number,
+): Operator<T, T> {
+    return maxCompare((currentValue, lastValue, currentIndex) =>
+        compare(currentValue, lastValue, currentIndex) > 0 ? -1 : 1,
+    );
 }
 
 export const min: Operator<number, number> = minCompare(compareNumbers);
+
+export function isEqualWith<T, U>(
+    otherSource: Source<U>,
+    areValuesEqual: (a: T, b: U, index: number) => unknown,
+): Operator<T, boolean> {
+    return (source) => isEqual(source, otherSource, areValuesEqual);
+}
 
 export function flat<T>(source: Source<Source<T>>): Source<T> {
     return Source((sink) => {
@@ -1696,30 +1822,104 @@ export function skipUntil(stopSource: Source<unknown>): IdentityOperator {
         });
 }
 
-export function repeat(times: number): IdentityOperator {
-    if (times <= 0) {
-        return toEmpty;
-    }
-    return <T>(source: Source<T>) =>
-        Source<T>((sink) => {
-            let timesLeft = times;
-            function onEvent(event: Event<T>) {
-                if (event.type === EndType && timesLeft >= 0) {
-                    timesLeft--;
+function _createRepeatOperator(
+    finalEventType: ThrowType | EndType,
+): (times: number) => IdentityOperator {
+    return (times) => {
+        if (times <= 0) {
+            return toEmpty;
+        }
+        return <T>(source: Source<T>) =>
+            Source<T>((sink) => {
+                let timesLeft = times;
+                let sourceSink: Sink<T>;
+
+                function subscribeSource(): void {
                     sourceSink = Sink(onEvent);
                     sink.add(sourceSink);
                     source(sourceSink);
+                }
+
+                function onEvent(event: Event<T>): void {
+                    if (event.type === finalEventType && timesLeft >= 0) {
+                        timesLeft--;
+                        subscribeSource();
+                        return;
+                    }
+                    sink(event);
+                }
+
+                subscribeSource();
+            });
+    };
+}
+
+export const repeat = _createRepeatOperator(EndType);
+export const retry = _createRepeatOperator(ThrowType);
+export const loop = repeat(Infinity);
+export const retryAlways = retry(Infinity);
+
+export function repeatWhen<T>(
+    getRepeatSource: (sourceEvents: Source<Event<T>>) => Source<unknown>,
+): Operator<T, T> {
+    return (source) =>
+        Source<T>((sink) => {
+            const sourceEvents = Subject<Event<T>>();
+            let sourceSink: Sink<T> | undefined;
+
+            function onEvent(event: Event<T>): void {
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const _sourceSink = sourceSink!;
+                sourceEvents(Push(event));
+                // Will not be active if we repeated.
+                if (_sourceSink.active) {
+                    sink(event);
+                }
+            }
+
+            function subscribeSource(): void {
+                sourceSink = Sink(onEvent);
+                sink.add(sourceSink);
+                source(sourceSink);
+            }
+
+            const repeatSink = Sink<unknown>((event) => {
+                if (event.type === PushType) {
+                    // Will equal undefined when subscribing repeatSource.
+                    if (sourceSink) {
+                        sourceSink.dispose();
+                        subscribeSource();
+                    }
+                    return;
+                }
+                if (
+                    event.type === EndType &&
+                    !(
+                        // If sourceSink is undefined then that means that we
+                        // are subscribing to repeatSource, in which we should
+                        // not push the End event.
+                        (sourceSink && sourceSink.active)
+                    )
+                ) {
                     return;
                 }
                 sink(event);
+            });
+            sink.add(repeatSink);
+
+            let repeatSource: Source<unknown>;
+            try {
+                repeatSource = getRepeatSource(sourceEvents);
+            } catch (error) {
+                sink(Throw(error));
+                return;
             }
-            let sourceSink = Sink<T>(onEvent);
-            sink.add(sourceSink);
-            source(sourceSink);
+
+            repeatSource(repeatSink);
+            subscribeSource();
         });
 }
-
-export const loop = repeat(Infinity);
 
 export function timeout<T>(
     timeoutSource: Source<unknown>,
