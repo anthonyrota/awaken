@@ -330,13 +330,13 @@ export function ReplaySubject<T>(
         }
     }
 
-    function trimTime(startFrom: number): void {
+    function trimTime(): void {
         const currentTime = provideTime();
         const firstValidIndex_ = binarySearchNextLargestIndex(
             deadlines,
             identity,
             currentTime,
-            startFrom,
+            firstValidIndex,
         );
 
         if (isDistributing) {
@@ -359,7 +359,7 @@ export function ReplaySubject<T>(
             }
 
             if (hasTimeout) {
-                trimTime(firstValidIndex);
+                trimTime();
             }
 
             const isDistributing_ = isDistributing;
@@ -370,7 +370,8 @@ export function ReplaySubject<T>(
                 i++
             ) {
                 if (hasTimeout && provideTime() >= deadlines[i]) {
-                    trimTime(i + 1);
+                    firstValidIndex = i + 1;
+                    trimTime();
                     i = firstValidIndex;
                     continue;
                 }
@@ -380,10 +381,10 @@ export function ReplaySubject<T>(
                 isDistributing = false;
                 buffer.splice(0, firstValidIndex);
                 deadlines.splice(0, firstValidIndex);
-                if (hasTimeout) {
-                    trimTime(0);
-                }
                 firstValidIndex = 0;
+                if (hasTimeout) {
+                    trimTime();
+                }
             }
 
             if (finalEvent) {
@@ -396,7 +397,7 @@ export function ReplaySubject<T>(
 
                 if (hasTimeout) {
                     deadlines.push(provideTime() + timeout);
-                    trimTime(firstValidIndex);
+                    trimTime();
                 }
 
                 trimCount();
