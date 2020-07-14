@@ -9,6 +9,7 @@ import { Subject } from './subject';
 import {
     pipe,
     flow,
+    removeOnce,
     asyncReportError,
     forEach,
     identity,
@@ -1613,7 +1614,7 @@ export function groupBy<T, K>(
                     try {
                         key = getKey(event.value, idx++);
                     } catch (error) {
-                        sink(Throw(error));
+                        sourceSink(Throw(error));
                         return;
                     }
 
@@ -1633,13 +1634,17 @@ export function groupBy<T, K>(
                         );
 
                         groups.push(group);
-                        sink(Push(group));
+                        sink(Push(group as GroupSource<T, K>));
                     }
 
                     group.__subject(Push(event.value));
                     return;
                 }
 
+                for (let i = 0; i < groups.length; i++) {
+                    groups[i].removed = true;
+                    groups[i].key = null;
+                }
                 for (let i = 0; i < groups.length; i++) {
                     groups[i].__subject(event);
                 }
@@ -1654,16 +1659,26 @@ export function groupBy<T, K>(
 
 interface _GroupSource<T, K> extends Source<T> {
     __subject: Subject<T>;
-    key: K;
+    key: K | null;
     removed: boolean;
     remove(): void;
 }
 
-export interface GroupSource<T, K> extends Source<T> {
-    readonly key: K;
-    readonly removed: boolean;
+interface GroupSourceBase<T> extends Source<T> {
     remove(): void;
 }
+
+export interface ActiveGroupSource<T, K> extends GroupSourceBase<T> {
+    removed: false;
+    key: K;
+}
+
+export interface RemovedGroupSource<T> extends GroupSourceBase<T> {
+    removed: true;
+    key: null;
+}
+
+export type GroupSource<T, K> = ActiveGroupSource<T, K> | RemovedGroupSource<T>;
 
 function GroupSource<T, K>(
     key: K,
@@ -1698,13 +1713,9 @@ function GroupSource<T, K>(
 
     function remove(): void {
         if (!source.removed) {
-            for (let i = 0; i < groups.length; i++) {
-                if (groups[i].key === key) {
-                    groups.splice(i, 1);
-                    return;
-                }
-            }
+            removeOnce(groups, source);
             source.removed = true;
+            source.key = null;
             subject(End);
         }
     }

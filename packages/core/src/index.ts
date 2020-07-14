@@ -10,4 +10,5 @@ export {
     setInterval,
     asyncReportError,
     binarySearchNextLargestIndex as _b,
+    TimeProvider,
 } from './util';

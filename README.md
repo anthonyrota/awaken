@@ -6,6 +6,7 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 
 - Allow returning `undefined|null` in operators such as delay?
 - Allow optional parameters to be equal to null?
+- Look at error instances and make sure we are handling them properly (eg. some operators might need have special error handling build in, eg. reporting to subjects, and errors should go through that).
 
 ## RxJS Operator Mappings
 
