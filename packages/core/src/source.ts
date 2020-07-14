@@ -1697,8 +1697,9 @@ function GroupSource<T, K>(
                     return;
                 }
             }
+            source.removed = true;
+            subject(End);
         }
-        source.removed = true;
     }
 
     source.__subject = subject;
