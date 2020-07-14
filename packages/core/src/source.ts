@@ -1491,49 +1491,52 @@ export function throwIfEmpty(getError: () => unknown): IdentityOperator {
     });
 }
 
-/**
- * Note: This operator requires a Set (or WeakSet) implementation, which may
- * have to be polyfilled for older browsers.
- */
-export function distinct(
-    getKey?: undefined,
-    useWeakSet?: false,
-): IdentityOperator;
-export function distinct(
-    getKey: undefined,
-    useWeakSet: true,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-): <T extends object>(source: Source<T>) => Source<T>;
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function distinct<T, K extends object>(
-    getKey: (value: T, index: number) => K,
-    useWeakSet: true,
-): Operator<T, T>;
-export function distinct<T, K>(
-    getKey: (value: T, index: number) => K,
-    useWeakSet?: false,
-): Operator<T, T>;
 export function distinct<T, K>(
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
     getKey: (value: T, index: number) => K = identity as any,
-    useWeakSet?: boolean,
 ): Operator<T, T> {
     return (source) =>
         lazy(() => {
-            const keys = new (useWeakSet ? WeakSet : Set)();
+            const hasSet = typeof Set !== 'undefined';
+            const keysSet: Set<K> | K[] = hasSet ? new Set<K>() : [];
+            const keysWeakSet = typeof WeakSet !== 'undefined' && new WeakSet();
 
             return pipe(
                 source,
                 filter((value, index) => {
                     const key = getKey(value, index);
-                    // eslint-disable-next-line @typescript-eslint/ban-types
-                    const unique = !keys.has((key as unknown) as object);
-                    if (unique) {
-                        // eslint-disable-next-line @typescript-eslint/ban-types
-                        keys.add((key as unknown) as object);
+                    let hasKey: boolean | undefined;
+                    if (keysWeakSet) {
+                        try {
+                            hasKey = keysWeakSet.has(
+                                // eslint-disable-next-line max-len
+                                // eslint-disable-next-line @typescript-eslint/ban-types
+                                (key as unknown) as object,
+                            );
+                            if (!hasKey) {
+                                // eslint-disable-next-line max-len
+                                // eslint-disable-next-line @typescript-eslint/ban-types
+                                keysWeakSet.add((key as unknown) as object);
+                            }
+                        } catch {
+                            // Key does not extend type object.
+                        }
                     }
-                    return unique;
+                    if (hasKey === undefined) {
+                        if (hasSet) {
+                            hasKey = (keysSet as Set<K>).has(key);
+                            if (!hasKey) {
+                                (keysSet as Set<K>).add(key);
+                            }
+                        } else {
+                            hasKey = (keysSet as K[]).indexOf(key) !== -1;
+                            if (!hasKey) {
+                                (keysSet as K[]).push(key);
+                            }
+                        }
+                    }
+                    return !hasKey;
                 }),
             );
         });
