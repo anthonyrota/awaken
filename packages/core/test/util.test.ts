@@ -482,7 +482,7 @@ describe('asyncReportError', () => {
     it('should call setTimeout with a delay of zero', () => {
         asyncReportError(new Error('foo'));
         expect(setTimeoutMock).toHaveBeenCalledTimes(1);
-        expect(setTimeoutMock).toHaveBeenCalledWith(expect.any(Function));
+        expect(setTimeoutMock).toHaveBeenCalledWith(expect.any(Function), 0);
     });
 
     it('should call setTimeout with a callback that throws the given error', () => {

@@ -10,7 +10,7 @@ import {
     Source,
     Sink,
     SubjectBase,
-    binarySearchNextLargestIndex,
+    _b as binarySearchNextLargestIndex,
 } from '@awaken/core';
 
 interface TestScheduleFunction {

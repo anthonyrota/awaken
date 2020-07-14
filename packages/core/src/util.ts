@@ -134,6 +134,9 @@ export function removeOnce<T>(array: ArrayLike<T>, item: T): void {
     }
 }
 
+declare function requestAnimationFrame(callback: FrameRequestCallback): number;
+declare function cancelAnimationFrame(id: number): void;
+
 /**
  * Disposable-based alternative to built-in `requestAnimationFrame`.
  * @param callback The callback to schedule.
@@ -178,7 +181,13 @@ function setTimeoutImplementation<T extends any[]>(
         return;
     }
 
-    const id = setTimeout(callback, delayMs, ...args);
+    const id = setTimeout(
+        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval, @typescript-eslint/no-explicit-any
+        callback as (...args: any[]) => void,
+        delayMs,
+        ...args,
+    );
 
     if (subscription) {
         subscription.add(
@@ -209,7 +218,13 @@ function setIntervalImplementation<T extends any[]>(
         return;
     }
 
-    const id = setInterval(callback, delayMs, ...args);
+    const id = setInterval(
+        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval, @typescript-eslint/no-explicit-any
+        callback as (...args: any[]) => void,
+        delayMs,
+        ...args,
+    );
 
     if (subscription) {
         subscription.add(
@@ -229,7 +244,7 @@ export { setIntervalImplementation as setInterval };
 export function asyncReportError(error: unknown): void {
     setTimeout(() => {
         throw error;
-    });
+    }, 0);
 }
 
 export function forEach<T>(array: T[], callback: (value: T) => void): void {
@@ -282,4 +297,8 @@ export function binarySearchNextLargestIndex<T>(
 
 export interface TimeProvider {
     (): number;
+}
+
+export interface FrameRequestCallback {
+    (time: number): void;
 }

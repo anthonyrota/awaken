@@ -4,21 +4,34 @@ const path = require('path');
 const cwd = process.cwd();
 
 /**
- * Gets the absolute path of a file/directory
- * @param {string[]} path_ The path to the directory file/directory.
- * @returns {string} The absolute path of the file/directory.
+ * @param {string[]} path_
+ * @returns {string}
  */
 function getAbsolutePath(...path_) {
     return path.join(cwd, ...path_);
 }
 
 /**
- * Copies the source file into the given output path.
- * @param {string} from The absolute path of the file to copy.
- * @param {string} to The absolute path to copy to.
+ * @param {string} from
+ * @param {string} to
  */
 function copyFile(from, to) {
     fs.writeFileSync(to, fs.readFileSync(from));
+}
+
+/**
+ * @param {string} path
+ * @returns {string}
+ */
+function readFile(path) {
+    return fs.readFileSync(path, 'utf-8');
+}
+
+/**
+ * @param {string} path
+ */
+function writeFile(path, text) {
+    fs.writeFileSync(path, text, 'utf-8');
 }
 
 /**
@@ -27,7 +40,7 @@ function copyFile(from, to) {
  */
 function readJSON(path) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return JSON.parse(fs.readFileSync(path, 'utf-8'));
+    return JSON.parse(readFile(path));
 }
 
 /**
@@ -35,19 +48,15 @@ function readJSON(path) {
  * @param {*} json
  */
 function writeJSON(path, json) {
-    fs.writeFileSync(path, JSON.stringify(json), 'utf-8');
+    writeFile(path, JSON.stringify(json));
 }
 
 /**
- * Creates a copy of the given source module and it's source map into the given
- * output path.
  * @param {object} params
- * @param {string} params.from The path of the module.
- * @param {string} params.toDir The path of the output module directory.
- * @param {string} params.toName The name of the output module to point the
- *     source map to.
- * @param {(sourceMap: *) => void} [params.transformSourceMap] Optional function
- *     to mutate the source map before it is written to the given output path.
+ * @param {string} params.from
+ * @param {string} params.toDir
+ * @param {string} params.toName
+ * @param {(sourceMap: *) => void} [params.transformSourceMap]
  */
 function renameOutputModule({ from, toDir, toName, transformSourceMap }) {
     const to = path.join(toDir, toName);
@@ -62,5 +71,7 @@ function renameOutputModule({ from, toDir, toName, transformSourceMap }) {
 
 module.exports = {
     getAbsolutePath,
+    readFile,
+    writeFile,
     renameOutputModule,
 };

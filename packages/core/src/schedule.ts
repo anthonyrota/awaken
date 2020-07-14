@@ -4,6 +4,7 @@ import {
     setTimeout,
     setInterval,
     removeOnce,
+    FrameRequestCallback,
 } from './util';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

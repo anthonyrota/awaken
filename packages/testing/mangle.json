@@ -2,7 +2,7 @@
   "minify": {
     "mangle": {
       "properties": {
-        "regex": "^_"
+        "regex": "^__"
       }
     }
   }

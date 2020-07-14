@@ -9,5 +9,5 @@ export {
     setTimeout,
     setInterval,
     asyncReportError,
-    binarySearchNextLargestIndex,
+    binarySearchNextLargestIndex as _b,
 } from './util';
