@@ -20,7 +20,13 @@ interface TestScheduleFunction {
     ): void;
 }
 
-export interface TestSchedule extends TestScheduleFunction {
+interface _TestSchedule extends TestScheduleFunction {
+    currentFrame: number;
+    flush: () => void;
+    reset: () => void;
+}
+
+export interface TestSchedule extends _TestSchedule {
     readonly currentFrame: number;
     readonly flush: () => void;
     readonly reset: () => void;
@@ -34,19 +40,14 @@ interface TestScheduleAction {
 
 export function TestSchedule(): TestSchedule {
     const actions: TestScheduleAction[] = [];
-    let currentFrame = 0;
     let isFlushing = false;
 
-    const testSchedule: TestScheduleFunction = (
-        callback,
-        delayFrames,
-        subscription,
-    ) => {
+    const testSchedule = (((callback, delayFrames, subscription) => {
         if (subscription && !subscription.active) {
             return;
         }
 
-        const executionFrame = currentFrame + delayFrames;
+        const executionFrame = testSchedule.currentFrame + delayFrames;
         const index = getActionInsertIndex(actions, executionFrame);
         const action: TestScheduleAction = {
             __callback: callback,
@@ -63,12 +64,9 @@ export function TestSchedule(): TestSchedule {
                 }),
             );
         }
-    };
+    }) as TestScheduleFunction) as _TestSchedule;
 
-    Object.defineProperty(testSchedule, 'currentFrame', {
-        enumerable: true,
-        get: (): number => currentFrame,
-    });
+    testSchedule.currentFrame = 0;
 
     function flush(): void {
         if (isFlushing) {
@@ -78,7 +76,7 @@ export function TestSchedule(): TestSchedule {
         isFlushing = true;
         let action = actions.shift();
         while (action) {
-            currentFrame = action.__executionFrame;
+            testSchedule.currentFrame = action.__executionFrame;
             const { __callback: callback, __shouldCall: shouldCall } = action;
 
             if (shouldCall) {
@@ -95,20 +93,16 @@ export function TestSchedule(): TestSchedule {
         isFlushing = false;
     }
 
-    Object.defineProperty(testSchedule, 'flush', {
-        value: flush,
-    });
+    testSchedule.flush = flush;
 
     function reset(): void {
         actions.length = 0;
-        currentFrame = 0;
+        testSchedule.currentFrame = 0;
         // If reset mid-execution.
         isFlushing = false;
     }
 
-    Object.defineProperty(testSchedule, 'reset', {
-        value: reset,
-    });
+    testSchedule.reset = reset;
 
     return testSchedule as TestSchedule;
 }
@@ -203,7 +197,11 @@ export function E(frame: number): End & WithFrameProperty {
     return { type: EndType, frame };
 }
 
-export interface TestSource<T> extends Source<T> {
+interface _TestSource<T> extends Source<T> {
+    subscriptions: TestSourceSubscriptions;
+}
+
+export interface TestSource<T> extends _TestSource<T> {
     readonly subscriptions: TestSourceSubscriptions;
 }
 
@@ -215,20 +213,23 @@ export function TestSource<T>(
 
     const base = Source<T>((sink) => {
         subscriptions.push(watchSubscriptionInfo(testSchedule, sink));
-        events.forEach((event) => {
+        for (let i = 0; i < events.length; i++) {
+            const event = events[i];
             testSchedule(() => sink(event), event.frame, sink);
-        });
-    });
+        }
+    }) as _TestSource<T>;
 
-    Object.defineProperty(base, 'subscriptions', {
-        enumerable: true,
-        get: (): TestSourceSubscriptions => subscriptions,
-    });
+    base.subscriptions = subscriptions;
 
     return base as TestSource<T>;
 }
 
-export interface SharedTestSource<T> extends TestSource<T> {
+interface _SharedTestSource<T> extends _TestSource<T> {
+    schedule: (subscription?: Disposable) => void;
+}
+
+export interface SharedTestSource<T> extends _SharedTestSource<T> {
+    readonly subscriptions: TestSourceSubscriptions;
     readonly schedule: (subscription?: Disposable) => void;
 }
 
@@ -242,20 +243,18 @@ export function SharedTestSource<T>(
     const base = Source<T>((sink) => {
         subscriptions.push(watchSubscriptionInfo(testSchedule, sink));
         subject(sink);
-    });
+    }) as _SharedTestSource<T>;
 
-    Object.defineProperty(base, 'subscriptions', {
-        enumerable: true,
-        get: (): TestSourceSubscriptions => subscriptions,
-    });
+    base.subscriptions = subscriptions;
 
-    Object.defineProperty(base, 'schedule', {
-        value: (subscription?: Disposable): void => {
-            events.forEach((event) => {
-                testSchedule(() => subject(event), event.frame, subscription);
-            });
-        },
-    });
+    function schedule(subscription?: Disposable): void {
+        for (let i = 0; i < events.length; i++) {
+            const event = events[i];
+            testSchedule(() => subject(event), event.frame, subscription);
+        }
+    }
+
+    base.schedule = schedule;
 
     return base as SharedTestSource<T>;
 }
