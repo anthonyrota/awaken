@@ -11,6 +11,7 @@ export interface FakeRAFUtil {
 }
 
 export function createFakeRAFUtil(): FakeRAFUtil {
+    let isFlushing: boolean;
     let id = -23;
     let callbacks = new Map<number, FrameRequestCallback>();
 
@@ -27,16 +28,21 @@ export function createFakeRAFUtil(): FakeRAFUtil {
     });
 
     function flushQueue(): void {
+        if (isFlushing) {
+            return;
+        }
         const _callbacks = callbacks;
         resetQueue();
+        isFlushing = true;
         const errors: unknown[] = [];
-        _callbacks.forEach((callback) => {
+        for (const [, callback] of _callbacks) {
             try {
                 callback(1379161.826);
             } catch (error) {
                 errors.push(error);
             }
-        });
+        }
+        isFlushing = false;
         if (errors.length > 0) {
             throw errors;
         }
@@ -47,6 +53,10 @@ export function createFakeRAFUtil(): FakeRAFUtil {
     }
 
     function resetQueue(): void {
+        if (isFlushing) {
+            throw new Error('[FakeRAFUtil] Cannot reset queue while flushing.');
+        }
+        isFlushing = false;
         id = -23;
         callbacks = new Map<number, FrameRequestCallback>();
     }

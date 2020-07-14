@@ -34,6 +34,7 @@
         "clean": "npm run clean:coverage && lerna run clean",
         "clean:coverage": "rimraf coverage",
         "test": "npm run clean:coverage && jest --runInBand --coverage --watchAll=false",
+        "test:watch": "jest --runInBand --watch",
         "test:build": "npm run test && npm run build && jest --runInBand --config ./jest.config.build.js",
         "lint": "eslint . && prettier --list-different .",
         "typecheck": "tsc --noEmit",
