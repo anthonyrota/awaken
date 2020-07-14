@@ -241,3 +241,45 @@ export function forEach<T>(array: T[], callback: (value: T) => void): void {
 export function identity<T>(value: T): T {
     return value;
 }
+
+export function binarySearchNextLargestIndex<T>(
+    items: T[],
+    getValue: (item: T) => number,
+    value: number,
+    offset = 0,
+): number {
+    const length = items.length - offset;
+    let low = 0;
+    let high = length - 1;
+
+    while (low <= high) {
+        let mid = ((low + high) / 2) | 0;
+        const midValue = getValue(items[mid + offset]);
+
+        if (midValue < value) {
+            low = mid + 1;
+        } else if (midValue > value) {
+            high = mid - 1;
+        } else {
+            while (
+                mid + 1 < length &&
+                getValue(items[mid + 1 + offset]) === value
+            ) {
+                mid++;
+            }
+            return mid + 1 + offset;
+        }
+    }
+
+    if (high < 0) {
+        return offset; // < first
+    } else if (low > length - 1) {
+        return length + offset; // >= last
+    } else {
+        return (low < high ? low + 1 : high + 1) + offset;
+    }
+}
+
+export interface TimeProvider {
+    (): number;
+}

@@ -10,6 +10,7 @@ import {
     Source,
     Sink,
     SubjectBase,
+    binarySearchNextLargestIndex,
 } from '@awaken/core';
 
 interface TestScheduleFunction {
@@ -38,6 +39,10 @@ interface TestScheduleAction {
     __shouldCall: boolean;
 }
 
+function getActionExecutionFrame(action: TestScheduleAction): number {
+    return action.__executionFrame;
+}
+
 export function TestSchedule(): TestSchedule {
     const actions: TestScheduleAction[] = [];
     let isFlushing = false;
@@ -48,7 +53,11 @@ export function TestSchedule(): TestSchedule {
         }
 
         const executionFrame = testSchedule.currentFrame + delayFrames;
-        const index = getActionInsertIndex(actions, executionFrame);
+        const index = binarySearchNextLargestIndex(
+            actions,
+            getActionExecutionFrame,
+            executionFrame,
+        );
         const action: TestScheduleAction = {
             __callback: callback,
             __executionFrame: executionFrame,
@@ -105,42 +114,6 @@ export function TestSchedule(): TestSchedule {
     testSchedule.reset = reset;
 
     return testSchedule as TestSchedule;
-}
-
-function getActionInsertIndex(
-    actions: TestScheduleAction[],
-    frame: number,
-): number {
-    const len = actions.length;
-    let low = 0;
-    let high = len - 1;
-
-    while (low <= high) {
-        let mid = ((low + high) / 2) | 0;
-        const { __executionFrame: executionFrame } = actions[mid];
-
-        if (executionFrame < frame) {
-            low = mid + 1;
-        } else if (executionFrame > frame) {
-            high = mid - 1;
-        } else {
-            while (
-                mid + 1 < len &&
-                actions[mid + 1].__executionFrame === frame
-            ) {
-                mid++;
-            }
-            return mid + 1;
-        }
-    }
-
-    if (high < 0) {
-        return 0; // frame < first frame
-    } else if (low > len - 1) {
-        return len; // frame >= last frame
-    } else {
-        return low < high ? low + 1 : high + 1;
-    }
 }
 
 export interface TestSubscriptionInfo {

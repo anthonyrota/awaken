@@ -9,10 +9,19 @@ import {
     End,
     Source,
     Sink,
+    ThrowType,
 } from './source';
-import { removeOnce, asyncReportError } from './util';
+import {
+    removeOnce,
+    asyncReportError,
+    identity,
+    binarySearchNextLargestIndex,
+    TimeProvider,
+} from './util';
 
-export interface Subject<T> extends Source<T>, Sink<T> {}
+export interface Subject<T> extends Source<T>, Sink<T> {
+    (eventOrSink: Event<T> | Sink<T>): void;
+}
 
 interface SinkInfo<T> {
     __sink: Sink<T>;
@@ -255,6 +264,148 @@ export function Subject<T>(): Subject<T> {
 
             base(eventOrSink);
         }
+    }, base);
+}
+
+export interface CurrentValueSubject<T> extends Subject<T> {
+    currentValue: T;
+}
+
+export function CurrentValueSubject<T>(initialValue: T): Subject<T> {
+    const base = Subject<T>();
+
+    const subject = implDisposableMethods((eventOrSink: Event<T> | Sink<T>) => {
+        if (typeof eventOrSink === 'function') {
+            base(eventOrSink);
+            if (eventOrSink.active) {
+                eventOrSink(Push(subject.currentValue));
+            }
+        } else {
+            base(eventOrSink);
+        }
+    }, base) as CurrentValueSubject<T>;
+
+    subject.currentValue = initialValue;
+
+    return subject;
+}
+
+export interface ReplaySubjectTimeoutConfig {
+    maxDuration: number;
+    provideTime?: TimeProvider | null;
+}
+
+export function ReplaySubject<T>(
+    count_?: number | null,
+    timeoutConfig_?: ReplaySubjectTimeoutConfig | null,
+): Subject<T> {
+    const count = count_ == null ? Infinity : count_;
+    let hasTimeout: boolean | undefined;
+    let timeout: number;
+    let provideTime: TimeProvider;
+    if (timeoutConfig_) {
+        hasTimeout = true;
+        timeout = timeoutConfig_.maxDuration;
+        provideTime = timeoutConfig_.provideTime || Date.now;
+    }
+    const base = SubjectBase<T>();
+    const buffer: Push<T>[] = [];
+    const deadlines: number[] = [];
+    let finalEvent: End | Throw | undefined;
+    let isDistributing = false;
+    let firstValidIndex = 0;
+
+    function trimCount(): void {
+        const overflow = buffer.length - count;
+
+        if (overflow <= 0) {
+            return;
+        }
+
+        if (isDistributing) {
+            firstValidIndex = Math.max(firstValidIndex, overflow);
+        } else {
+            buffer.splice(0, overflow);
+            deadlines.splice(0, overflow);
+        }
+    }
+
+    function trimTime(startFrom: number): void {
+        const currentTime = provideTime();
+        const firstValidIndex_ = binarySearchNextLargestIndex(
+            deadlines,
+            identity,
+            currentTime,
+            startFrom,
+        );
+
+        if (isDistributing) {
+            firstValidIndex = firstValidIndex_;
+        } else if (firstValidIndex_ > 0) {
+            buffer.splice(0, firstValidIndex_);
+            deadlines.splice(0, firstValidIndex_);
+        }
+    }
+
+    return implDisposableMethods((eventOrSink: Event<T> | Sink<T>) => {
+        if (typeof eventOrSink === 'function') {
+            if (!eventOrSink.active) {
+                return;
+            }
+
+            if (finalEvent && finalEvent.type === ThrowType) {
+                eventOrSink(finalEvent);
+                return;
+            }
+
+            if (hasTimeout) {
+                trimTime(firstValidIndex);
+            }
+
+            const isDistributing_ = isDistributing;
+            isDistributing = true;
+            for (
+                let i = firstValidIndex;
+                i < buffer.length && eventOrSink.active;
+                i++
+            ) {
+                if (hasTimeout && provideTime() >= deadlines[i]) {
+                    trimTime(i + 1);
+                    i = firstValidIndex;
+                    continue;
+                }
+                eventOrSink(buffer[i]);
+            }
+            if (!isDistributing_) {
+                isDistributing = false;
+                buffer.splice(0, firstValidIndex);
+                deadlines.splice(0, firstValidIndex);
+                if (hasTimeout) {
+                    trimTime(0);
+                }
+                firstValidIndex = 0;
+            }
+
+            if (finalEvent) {
+                eventOrSink(finalEvent);
+                return;
+            }
+        } else {
+            if (eventOrSink.type === PushType) {
+                buffer.push(eventOrSink);
+
+                if (hasTimeout) {
+                    deadlines.push(provideTime() + timeout);
+                    trimTime(firstValidIndex);
+                }
+
+                trimCount();
+            } else {
+                finalEvent = eventOrSink;
+            }
+        }
+
+        base(eventOrSink);
     }, base);
 }
 

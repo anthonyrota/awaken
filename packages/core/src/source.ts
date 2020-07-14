@@ -6,7 +6,14 @@ import {
     ScheduleTimeout,
 } from './schedule';
 import { Subject } from './subject';
-import { pipe, flow, asyncReportError, forEach, identity } from './util';
+import {
+    pipe,
+    flow,
+    asyncReportError,
+    forEach,
+    identity,
+    TimeProvider,
+} from './util';
 
 export type PushType = 0;
 export const PushType: PushType = 0;
@@ -2620,10 +2627,6 @@ export function sample(scheduleSource: Source<unknown>): IdentityOperator {
 
 export function sampleMs(ms: number): IdentityOperator {
     return sample(interval(ms));
-}
-
-export interface TimeProvider {
-    (): number;
 }
 
 export interface WithTime<T> {
