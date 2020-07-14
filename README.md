@@ -5,6 +5,7 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 ## TODO
 
 - Allow returning `undefined|null` in operators such as delay?
+- Allow optional parameters to be equal to null?
 
 ## RxJS Operator Mappings
 
@@ -45,7 +46,7 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | `find`                    | ☑                   |                                                                  |
 | `findIndex`               | ☑                   |                                                                  |
 | `first`                   | ☑                   |                                                                  |
-| `groupBy`                 | ☐                   |                                                                  |
+| `groupBy`                 | ☑                   |                                                                  |
 | `ignoreElements`          | ☑                   | Name: `ignorePushEvents`                                         |
 | `isEmpty`                 | ☑                   |                                                                  |
 | `last`                    | ☑                   |                                                                  |

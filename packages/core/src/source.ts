@@ -1491,6 +1491,10 @@ export function throwIfEmpty(getError: () => unknown): IdentityOperator {
     });
 }
 
+export function distinct(): IdentityOperator;
+export function distinct<T, K>(
+    getKey: (value: T, index: number) => K,
+): Operator<T, T>;
 export function distinct<T, K>(
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
@@ -1586,7 +1590,128 @@ export function distinctFromLast<T, K>(
         });
 }
 
-const toEmpty = () => empty;
+export function groupBy<T, K>(
+    getKey: (value: T, index: number) => K,
+    Subject_ = Subject,
+    removeGroupWhenNoSubscribers = true,
+): Operator<T, GroupSource<T, K>> {
+    return (source) =>
+        Source((sink) => {
+            const groups: _GroupSource<T, K>[] = [];
+            let idx = 0;
+
+            const sourceSink = Sink<T>((event) => {
+                if (event.type === PushType) {
+                    let key: K;
+                    try {
+                        key = getKey(event.value, idx++);
+                    } catch (error) {
+                        sink(Throw(error));
+                        return;
+                    }
+
+                    let group: _GroupSource<T, K> | undefined;
+                    for (let i = 0; i < groups.length; i++) {
+                        if (key === groups[i].key) {
+                            group = groups[i];
+                        }
+                    }
+
+                    if (!group) {
+                        group = GroupSource(
+                            key,
+                            groups,
+                            Subject_,
+                            removeGroupWhenNoSubscribers,
+                        );
+
+                        groups.push(group);
+                        sink(Push(group));
+                    }
+
+                    group.__subject(Push(event.value));
+                    return;
+                }
+
+                for (let i = 0; i < groups.length; i++) {
+                    groups[i].__subject(event);
+                }
+                groups.length = 0;
+                sink(event);
+            });
+
+            sink.add(sourceSink);
+            source(sourceSink);
+        });
+}
+
+interface _GroupSource<T, K> extends Source<T> {
+    __subject: Subject<T>;
+    key: K;
+    removed: boolean;
+    remove(): void;
+}
+
+export interface GroupSource<T, K> extends Source<T> {
+    readonly key: K;
+    readonly removed: boolean;
+    remove(): void;
+}
+
+function GroupSource<T, K>(
+    key: K,
+    groups: _GroupSource<T, K>[],
+    Subject_: typeof Subject,
+    removeGroupWhenNoSubscribers: boolean,
+): _GroupSource<T, K> {
+    const subject = Subject_<T>();
+    let source: _GroupSource<T, K>;
+
+    if (removeGroupWhenNoSubscribers) {
+        let subscriptions = 0;
+        source = Source<T>((sink) => {
+            if (!source.removed) {
+                subscriptions++;
+                sink.add(
+                    Disposable(() => {
+                        if (!source.removed) {
+                            subscriptions--;
+                            if (subscriptions === 0) {
+                                remove();
+                            }
+                        }
+                    }),
+                );
+            }
+            subject(sink);
+        }) as _GroupSource<T, K>;
+    } else {
+        source = Source(subject) as _GroupSource<T, K>;
+    }
+
+    function remove(): void {
+        source.removed = true;
+        if (!source.removed) {
+            for (let i = 0; i < groups.length; i++) {
+                if (groups[i].key === key) {
+                    groups.splice(i, 1);
+                    return;
+                }
+            }
+        }
+    }
+
+    source.__subject = subject;
+    source.key = key;
+    source.removed = false;
+    source.remove = remove;
+
+    return source;
+}
+
+function toEmpty(): Source<never> {
+    return empty;
+}
 
 export function take(amount: number): IdentityOperator {
     if (amount < 1) {
