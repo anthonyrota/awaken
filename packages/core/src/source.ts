@@ -1690,7 +1690,6 @@ function GroupSource<T, K>(
     }
 
     function remove(): void {
-        source.removed = true;
         if (!source.removed) {
             for (let i = 0; i < groups.length; i++) {
                 if (groups[i].key === key) {
@@ -1699,6 +1698,7 @@ function GroupSource<T, K>(
                 }
             }
         }
+        source.removed = true;
     }
 
     source.__subject = subject;
