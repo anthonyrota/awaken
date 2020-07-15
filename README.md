@@ -75,9 +75,9 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | `reduce`                  | ☑                   |                                                                  |
 | `refCount`                | ☐                   |                                                                  |
 | `repeat`                  | ☑                   |                                                                  |
-| `repeatWhen`              | ☑                   | Note: Differing behavior.                                       |
+| `repeatWhen`              | ☑                   | Note: Differing behavior.                                        |
 | `retry`                   | ☑                   |                                                                  |
-| `retryWhen`               | ☐                   | Not needed. Behavior available through `repeatWhen`             |
+| `retryWhen`               | ☐                   | Not needed. Behavior available through `repeatWhen`              |
 | `sample`                  | ☑                   |                                                                  |
 | `sampleTime`              | ☑                   | Name: `sampleMs`                                                 |
 | `scan`                    | ☑                   |                                                                  |
@@ -107,10 +107,10 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | `timeoutWith`             | ☑                   |                                                                  |
 | `timestamp`               | ☑                   | Name: `withTime`                                                 |
 | `toArray`                 | ☑                   | Name: `collect`                                                  |
-| `window`                  | ☑                   |                                                                  |
-| `windowCount`             | ☐                   |                                                                  |
-| `windowTime`              | ☐                   |                                                                  |
-| `windowToggle`            | ☐                   |                                                                  |
+| `window`                  | ☑                   | Name: `windowEvery`                                              |
+| `windowCount`             | ☑                   |                                                                  |
+| `windowTime`              | ☑                   |                                                                  |
+| `windowToggle`            | ☑                   | Name: `windowControlled`                                         |
 | `windowWhen`              | ☑                   | Name: `windowEach`                                               |
 | `withLatestFrom`          | ☑                   |                                                                  |
 | `zipAll`                  | ☐                   | Not needed.                                                      |
@@ -152,18 +152,18 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 
 ## RxJS Subject Mappings
 
-| RxJS Subject       | Has Implementation | Notes                       |
-| :----------------- | :----------------- | :-------------------------- |
-| `Subject`          | ☑                  |                             |
+| RxJS Subject      | Has Implementation | Notes                       |
+| :---------------- | :----------------- | :-------------------------- |
+| `Subject`         | ☑                  |                             |
 | `BehaviorSubject` | ☑                  | Name: `CurrentValueSubject` |
-| `AsyncSubject`     | ☑                  | Name: `FinalValueSubject`   |
-| `ReplaySubject`    | ☑                  |                             |
+| `AsyncSubject`    | ☑                  | Name: `FinalValueSubject`   |
+| `ReplaySubject`   | ☑                  |                             |
 
 ## RxJS Scheduler Mappings
 
 | RxJS Scheduler            | Has Implementation | Notes                                                              |
 | :------------------------ | :----------------- | :----------------------------------------------------------------- |
-| `AnimationFrameScheduler` | ☑                  | Name: `scheduleAnimationFrame`/`ScheduleAnimationFrameQueued`       |
+| `AnimationFrameScheduler` | ☑                  | Name: `scheduleAnimationFrame`/`ScheduleAnimationFrameQueued`      |
 | `AsapScheduler`           | ☐                  | Not needed.                                                        |
 | `AsyncScheduler`          | ☑                  | Name: `ScheduleTimeout`/`ScheduleTimeoutQueued`/`ScheduleInterval` |
 | `QueueScheduler`          | ☑                  | Name: `scheduleSync`/`ScheduleSyncQueued`                          |

@@ -54,7 +54,9 @@ export type Event<T> = Push<T> | Throw | End;
  * @param value The value to send.
  * @returns The created Push event.
  */
-export function Push<T>(value: T): Push<T> {
+export function Push<T>(): Push<undefined>;
+export function Push<T>(value: T): Push<T>;
+export function Push<T>(value?: T): Push<T | undefined> {
     return { type: PushType, value };
 }
 
@@ -1063,7 +1065,8 @@ export function finalize(callback: () => void): IdentityOperator {
         });
 }
 
-export const ignorePushEvents: Operator<unknown, never> = filter(() => false);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const ignorePushEvents = filter(<T>(_: T) => false);
 
 export function withPrevious<T>(source: Source<T>): Source<[T, T]> {
     return lazy(() => {
@@ -1455,56 +1458,91 @@ export function endWith<T>(
         });
 }
 
-export function spy<T>(onEvent: (event: Event<T>) => void): Operator<T, T> {
-    return (source) =>
-        Source((sink) => {
-            const sourceSink = Sink<T>((event) => {
-                try {
-                    onEvent(event);
-                } catch (error) {
-                    sink(Throw(error));
-                    return;
-                }
-                sink(event);
-            });
-
-            sink.add(sourceSink);
-            source(sourceSink);
-        });
+interface SpyOperators {
+    __spy: <T>(onEvent: (event: Event<T>) => void) => Operator<T, T>;
+    __spyPush: <T>(onPush: (value: T, index: number) => void) => Operator<T, T>;
+    __spyThrow: (onThrow: (error: unknown) => void) => IdentityOperator;
+    __spyEnd: (onEnd: () => void) => IdentityOperator;
 }
 
-export function spyPush<T>(
-    onPush: (value: T, index: number) => void,
-): Operator<T, T> {
-    return (source) =>
-        lazy(() => {
-            let idx = 0;
-            return pipe(
-                source,
-                spy<T>((event) => {
-                    if (event.type === PushType) {
-                        onPush(event.value, idx++);
+function _createSpyOperators(callBefore: boolean): SpyOperators {
+    function spy<T>(onEvent: (event: Event<T>) => void): Operator<T, T> {
+        return (source) =>
+            Source((sink) => {
+                const sourceSink = Sink<T>((event) => {
+                    if (callBefore) {
+                        sink(event);
                     }
-                }),
-            );
+                    try {
+                        onEvent(event);
+                    } catch (error) {
+                        sink(Throw(error));
+                        return;
+                    }
+                    if (!callBefore) {
+                        sink(event);
+                    }
+                });
+
+                sink.add(sourceSink);
+                source(sourceSink);
+            });
+    }
+
+    function spyPush<T>(
+        onPush: (value: T, index: number) => void,
+    ): Operator<T, T> {
+        return (source) =>
+            lazy(() => {
+                let idx = 0;
+                return pipe(
+                    source,
+                    spy<T>((event) => {
+                        if (event.type === PushType) {
+                            onPush(event.value, idx++);
+                        }
+                    }),
+                );
+            });
+    }
+
+    function spyThrow(onThrow: (error: unknown) => void): IdentityOperator {
+        return spy((event) => {
+            if (event.type === ThrowType) {
+                onThrow(event.error);
+            }
         });
+    }
+
+    function spyEnd(onEnd: () => void): IdentityOperator {
+        return spy((event) => {
+            if (event.type === EndType) {
+                onEnd();
+            }
+        });
+    }
+
+    return {
+        __spy: spy,
+        __spyPush: spyPush,
+        __spyThrow: spyThrow,
+        __spyEnd: spyEnd,
+    };
 }
 
-export function spyThrow(onThrow: (error: unknown) => void): IdentityOperator {
-    return spy((event) => {
-        if (event.type === ThrowType) {
-            onThrow(event.error);
-        }
-    });
-}
+export const {
+    __spy: spyBefore,
+    __spyPush: spyPushBefore,
+    __spyThrow: spyThrowBefore,
+    __spyEnd: spyEndBefore,
+} = _createSpyOperators(true);
 
-export function spyEnd(onEnd: () => void): IdentityOperator {
-    return spy((event) => {
-        if (event.type === EndType) {
-            onEnd();
-        }
-    });
-}
+export const {
+    __spy: spyAfter,
+    __spyPush: spyPushAfter,
+    __spyThrow: spyThrowAfter,
+    __spyEnd: spyEndAfter,
+} = _createSpyOperators(false);
 
 export function isEmpty(source: Source<unknown>): Source<boolean> {
     return Source((sink) => {
@@ -2182,7 +2220,7 @@ export function catchError<T>(
         });
 }
 
-export function window(
+export function windowEvery(
     boundariesSource: Source<unknown>,
 ): <T>(source: Source<T>) => Source<Source<T>> {
     return <T>(source: Source<T>) =>
@@ -2217,60 +2255,138 @@ export function window(
         });
 }
 
-export function windowEach(
-    getWindowEndSource: () => Source<unknown>,
-): <T>(source: Source<T>) => Source<Source<T>> {
-    return <T>(source: Source<T>) =>
+export function windowControlled(
+    getWindowOpeningsSource: <T>(sharedSource: Source<T>) => Source<unknown>,
+    getWindowClosingSource: <T>(currentWindow: Source<T>) => Source<unknown>,
+): <T>(source: Source<T>) => Source<Source<T>>;
+export function windowControlled<T>(
+    getWindowOpeningsSource: (sharedSource: Source<T>) => Source<unknown>,
+    getWindowClosingSource: (currentWindow: Source<T>) => Source<unknown>,
+): (source: Source<T>) => Source<Source<T>>;
+export function windowControlled<T>(
+    getWindowOpeningsSource: (sharedSource: Source<T>) => Source<unknown>,
+    getWindowClosingSource: (currentWindow: Source<T>) => Source<unknown>,
+): (source: Source<T>) => Source<Source<T>> {
+    return (source: Source<T>) =>
         Source<Source<T>>((sink) => {
-            let currentWindow: Subject<T>;
-            let windowEndSink: Sink<unknown>;
+            const sharedSource = Subject<T>();
+
+            let windowOpeningsSource: Source<unknown>;
+            try {
+                windowOpeningsSource = getWindowOpeningsSource(sharedSource);
+            } catch (error) {
+                sink(Throw(error));
+                return;
+            }
+
+            let active = 0;
+            const windowOpeningsSink = Sink<unknown>((event) => {
+                if (event.type === PushType) {
+                    const window = Subject<T>();
+                    sharedSource(window);
+                    let windowClosingSource: Source<unknown>;
+                    try {
+                        windowClosingSource = getWindowClosingSource(window);
+                    } catch (error) {
+                        sink(Throw(error));
+                        return;
+                    }
+                    active++;
+                    const windowClosingSink = Sink<unknown>((event) => {
+                        if (event.type === ThrowType) {
+                            sink(event);
+                            return;
+                        }
+                        active--;
+                        windowClosingSink.dispose();
+                        window(End);
+                    });
+                    sourceSink.add(windowClosingSink);
+                    windowClosingSource(windowClosingSink);
+                    if (windowClosingSink.active) {
+                        sink(Push(window));
+                    }
+                    return;
+                }
+
+                if (event.type === EndType && active !== 0) {
+                    return;
+                }
+
+                sink(event);
+            });
+            sink.add(windowOpeningsSink);
+            windowOpeningsSource(windowOpeningsSink);
 
             const sourceSink = Sink<T>((event) => {
-                if (event.type !== PushType) {
-                    windowEndSink.dispose();
-                }
-                currentWindow(event);
+                sharedSource(event);
                 if (event.type !== PushType) {
                     sink(event);
                 }
             });
-
-            function onWindowEndEvent(event: Event<unknown>): void {
-                if (event.type === ThrowType) {
-                    sink(event);
-                    return;
-                }
-                openWindow();
-            }
-
-            function openWindow(): void {
-                if (currentWindow) {
-                    windowEndSink.dispose();
-                    currentWindow(End);
-                }
-
-                currentWindow = Subject();
-                sink(Push(currentWindow));
-
-                let windowEndSource: Source<unknown>;
-                try {
-                    windowEndSource = getWindowEndSource();
-                } catch (error) {
-                    const throwEvent = Throw(error);
-                    currentWindow(throwEvent);
-                    sink(throwEvent);
-                    return;
-                }
-
-                windowEndSink = Sink(onWindowEndEvent);
-                sink.add(windowEndSink);
-                windowEndSource(windowEndSink);
-            }
-
-            openWindow();
             sink.add(sourceSink);
             source(sourceSink);
         });
+}
+
+export function windowEach(
+    getWindowClosingSource: <T>(currentWindow: Source<T>) => Source<unknown>,
+): <T>(source: Source<T>) => Source<Source<T>>;
+export function windowEach<T>(
+    getWindowClosingSource: (currentWindow: Source<T>) => Source<unknown>,
+): (source: Source<T>) => Source<Source<T>>;
+export function windowEach<T>(
+    getWindowClosingSource: (currentWindow: Source<T>) => Source<unknown>,
+): (source: Source<T>) => Source<Source<T>> {
+    return (source: Source<T>): Source<Source<T>> =>
+        lazy(() => {
+            const newWindow = Subject<undefined>();
+            return pipe(
+                source,
+                windowControlled(
+                    () => pipe(newWindow, startWith(undefined)),
+                    flow(
+                        getWindowClosingSource,
+                        spyEndAfter(() => {
+                            newWindow(Push());
+                        }),
+                    ),
+                ),
+            );
+        });
+}
+
+export function windowCount(
+    maxWindowLength: number,
+    createEvery?: number,
+): <T>(source: Source<T>) => Source<Source<T>> {
+    const takeMaxWindowLength = flow(take(maxWindowLength), ignorePushEvents);
+    if (createEvery) {
+        return windowControlled(
+            filter((_, index: number) => (index + 1) % createEvery === 0),
+            takeMaxWindowLength,
+        );
+    }
+    return windowEach(takeMaxWindowLength);
+}
+
+export function windowTime(
+    maxWindowDuration?: number | null,
+    creationInterval?: number | null,
+    maxWindowLength = Infinity,
+): <T>(source: Source<T>) => Source<Source<T>> {
+    const takeMaxWindowLength = flow(take(maxWindowLength), ignorePushEvents);
+    const getWindowClosingSource =
+        maxWindowDuration == null
+            ? takeMaxWindowLength
+            : flow(takeMaxWindowLength, timeoutMs(maxWindowDuration, empty));
+    if (creationInterval == null) {
+        return windowEach(getWindowClosingSource);
+    }
+    return windowControlled(
+        () => pipe(interval(creationInterval), startWith(undefined)),
+        getWindowClosingSource,
+    );
 }
 
 export function collect<T>(source: Source<T>): Source<T[]> {
