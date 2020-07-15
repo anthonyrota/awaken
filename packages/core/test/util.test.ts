@@ -85,12 +85,6 @@ describe('removeOnce', () => {
         expect(array).toEqual([]);
     });
 
-    it('should do nothing when given an empty array-like object', () => {
-        const array = { length: 0 };
-        removeOnce(array, x);
-        expect(array).toEqual({ length: 0 });
-    });
-
     const A = 'A';
     const B = { foo: 'baz' };
 
@@ -98,11 +92,6 @@ describe('removeOnce', () => {
         [[[B]], [[B]]],
         [[[A, B, B, A]], [[A, B, B, A]]],
         [[[A, B, A, A, A, B]], [[A, B, A, A, A, B]]],
-        [[{ length: 1, 0: A }], [{ length: 1, 0: A }]],
-        [
-            [{ length: 29, 4: A, 17: B, 23: A }],
-            [{ length: 29, 4: A, 17: B, 23: A }],
-        ],
     ]).it(`should do nothing when removing "${x}" from %s`, (input, copy) => {
         removeOnce(input, x);
         // eslint-disable-next-line jest/no-standalone-expect
@@ -112,15 +101,9 @@ describe('removeOnce', () => {
     // prettier-ignore
     each([
         [[x], []],
-        [{ length: 1, 0: x }, { length: 0 }],
         [[A, x], [A]],
-        [{ length: 2, 1: x }, { length: 1 }],
-        // eslint-disable-next-line max-len
-        [{ length: 2, 0: A, 1: x, 2: A, 3: B }, { length: 1, 0: A, 2: A, 3: B }],
         [[x, B], [B]],
-        [{ length: 2, 0: x, 1: B }, { length: 1, 0: B }],
         [[A, x, B, B, A], [A, B, B, A]],
-        [{ length: 28, '-1': B, 1: x, 3: B, 16: A }, { length: 27, '-1': B, 2: B, 15: A }],
     ]).it(`should remove the only "${x}" from %s`, (input, output) => {
         removeOnce(input, x);
         // eslint-disable-next-line jest/no-standalone-expect
@@ -130,12 +113,8 @@ describe('removeOnce', () => {
     // prettier-ignore
     each([
         [[x, x, x, x], [x, x, x]],
-        [{ length: 2, 0: x, 1: x, 2: x }, { length: 1, 0: x, 2: x }],
         [[A,x, B, x, A], [A, B, x, A]],
-        [{ length: 3, 0: A, 1: x, 2: x }, { length: 2, 0: A, 1: x }],
-        [{ length: 23, '-6': A, 3: x, 4: x, 5: B }, { length: 22, '-6': A, 3: x, 4: B }],
         [[x, B, x, A], [B, x, A]],
-        [{ length: 4, 0: x, 1: B, 2: x, 3: A }, { length: 3, 0: B, 1: x, 2: A }]
     ]).it(`should remove only the first "${x}" from %s`, (input, output) => {
         removeOnce(input, x);
         // eslint-disable-next-line jest/no-standalone-expect

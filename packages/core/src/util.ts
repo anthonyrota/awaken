@@ -127,10 +127,10 @@ export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T {
  * @param array The array to remove the value from.
  * @param item The value to remove from the array.
  */
-export function removeOnce<T>(array: ArrayLike<T>, item: T): void {
-    const index = Array.prototype.indexOf.call(array, item);
+export function removeOnce<T>(array: T[], item: T): void {
+    const index = array.indexOf(item);
     if (index !== -1) {
-        Array.prototype.splice.call(array, index, 1);
+        array.splice(index, 1);
     }
 }
 

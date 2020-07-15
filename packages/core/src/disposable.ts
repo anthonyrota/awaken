@@ -282,7 +282,8 @@ function flattenDisposalErrors(errors: unknown[]): unknown[] {
 
     forEach(errors, (error) => {
         if (error instanceof DisposalError) {
-            Array.prototype.push.apply(flattened, error.errors);
+            // eslint-disable-next-line prefer-spread
+            flattened.push.apply(flattened, error.errors);
         } else {
             flattened.push(error);
         }

@@ -37,7 +37,7 @@ interface SubjectBasePrivateActiveState<T> {
 
 export function SubjectBase<T>(): Subject<T> {
     let distributingEvent = false;
-    let sinkIndex: number;
+    let sinkIndex = 0;
     let state: SubjectBasePrivateActiveState<T> | null = {
         __sinkInfos: [],
         __sinksToAdd: [],
@@ -124,22 +124,30 @@ export function SubjectBase<T>(): Subject<T> {
                 }),
             );
         } else if (sinkInfos.length > 0) {
+            const _distributingEvent = distributingEvent;
+            distributingEvent = true;
+
             if (eventOrSink.type !== PushType) {
                 disposable.dispose();
             }
 
-            if (distributingEvent) {
+            if (_distributingEvent) {
                 eventsQueue.push(eventOrSink);
                 return;
             }
 
+            const errors: DisposalError[] = [];
             let event: Event<T> | undefined = eventOrSink;
 
-            const errors: DisposalError[] = [];
-
-            distributingEvent = true;
             while (event) {
-                for (sinkIndex = 0; sinkIndex < sinkInfos.length; sinkIndex++) {
+                if (sinkInfos.length === 0) {
+                    if (event.type === ThrowType) {
+                        asyncReportError(event.error);
+                    }
+                    break;
+                }
+
+                for (; sinkIndex < sinkInfos.length; sinkIndex++) {
                     const sinkInfo = sinkInfos[sinkIndex];
                     const { __sink: sink } = sinkInfo;
 
@@ -175,15 +183,17 @@ export function SubjectBase<T>(): Subject<T> {
                     }
                 }
 
+                sinkIndex = 0;
+
                 if (event.type !== PushType) {
                     break;
                 }
 
                 for (let i = 0; i < sinksToAdd.length; i++) {
-                    const sinkToAdd = sinksToAdd[i];
-                    sinkToAdd.__notAdded = false;
+                    sinksToAdd[i].__notAdded = false;
                 }
-                Array.prototype.push.apply(sinkInfos, sinksToAdd);
+                // eslint-disable-next-line prefer-spread
+                sinkInfos.push.apply(sinkInfos, sinksToAdd);
                 sinksToAdd.length = 0;
 
                 event = eventsQueue.shift();
