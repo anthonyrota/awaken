@@ -21,7 +21,10 @@
         "iterable",
         "stream",
         "es6",
-        "es2015"
+        "es2015",
+        "test",
+        "testing",
+        "spec"
     ],
     "author": "Anthony Rota",
     "repository": {
