@@ -2293,22 +2293,6 @@ export function collect<T>(source: Source<T>): Source<T[]> {
     });
 }
 
-const collectInner: <T>(source: Source<Source<T>>) => Source<T[]> = mergeMap(
-    collect,
-);
-
-export function buffer(
-    boundariesSource: Source<unknown>,
-): <T>(source: Source<T>) => Source<T[]> {
-    return flow(window(boundariesSource), collectInner);
-}
-
-export function bufferEach(
-    getWindowEndSource: () => Source<unknown>,
-): <T>(source: Source<T>) => Source<T[]> {
-    return flow(windowEach(getWindowEndSource), collectInner);
-}
-
 export type DebounceTrailingRestart = 'restart';
 export const DebounceTrailingRestart: DebounceTrailingRestart = 'restart';
 

@@ -14,11 +14,11 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | :------------------------ | :------------------ | :--------------------------------------------------------------- |
 | `audit`                   | ☑                   |                                                                  |
 | `auditTime`               | ☑                   |                                                                  |
-| `buffer`                  | ☑                   |                                                                  |
-| `bufferCount`             | ☐                   |                                                                  |
-| `bufferTime`              | ☐                   |                                                                  |
-| `bufferToggle`            | ☐                   |                                                                  |
-| `bufferWhen`              | ☑                   | Name: `bufferEach`                                               |
+| `buffer`                  | ☐                   | Not needed.                                                      |
+| `bufferCount`             | ☐                   | Not needed.                                                      |
+| `bufferTime`              | ☐                   | Not needed.                                                      |
+| `bufferToggle`            | ☐                   | Not needed.                                                      |
+| `bufferWhen`              | ☐                   | Not needed.                                                      |
 | `catchError`              | ☑                   |                                                                  |
 | `combineAll`              | ☐                   | Not needed.                                                      |
 | `combineLatestWith`       | ☑                   | Name: `combineWith`                                              |
@@ -156,7 +156,7 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | :----------------- | :----------------- | :-------------------------- |
 | `Subject`          | ☑                  |                             |
 | `BehaviourSubject` | ☑                  | Name: `CurrentValueSubject` |
-| `AsyncSubject`     | ☑                  | Name: `FinalValueSubject`    |
+| `AsyncSubject`     | ☑                  | Name: `FinalValueSubject`   |
 | `ReplaySubject`    | ☑                  |                             |
 
 ## RxJS Scheduler Mappings
