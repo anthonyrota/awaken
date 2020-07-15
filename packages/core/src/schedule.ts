@@ -60,10 +60,10 @@ export function ScheduleQueued<T extends any[] = []>(
                     removeOnce(callbacks, callbackInfo);
 
                     // If we are executing a callback, then there is no need to
-                    // handle unsubscription logic here as it will be handled
-                    // after the callback is called. This also avoids
-                    // unnecessary unsubscription in the case where the callback
-                    // flushes all future callbacks, then queues a new callback.
+                    // handle disposal logic here as it will be handled after
+                    // the callback is called. This also avoids unnecessary
+                    // disposal in the case where the callback flushes all
+                    // future callbacks, then queues a new callback.
                     if (isInCallback) {
                         return;
                     }

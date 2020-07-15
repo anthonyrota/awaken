@@ -120,8 +120,8 @@ export interface Source<T> {
  * sink, and will stop when the given subscription is disposed.
  * @param base This will be called with a safe version of a Sink and a
  *     subscription when the source is subscribed to. The safeSink is a sink
- *     which additionally handles errors and unsubscription logic. When the
- *     given subscription is disposed, the safeSink will stop accepting events.
+ *     which additionally handles errors and disposal logic. When the given
+ *     subscription is disposed, the safeSink will stop accepting events.
  * @returns The created source.
  */
 export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
@@ -178,7 +178,7 @@ function pushArrayItemsToSink<T>(array: ArrayLike<T>, sink: Sink<T>): void {
 
 /**
  * Creates a Source from the given array/array-like. The values of the array
- * will be synchronously emitted by the created source upon each susbcription.
+ * will be synchronously emitted by the created source upon each subscription.
  * @param array The array/array-like to iterate over.
  * @returns The created source.
  */

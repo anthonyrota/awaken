@@ -10,6 +10,7 @@
         "@typescript-eslint/eslint-plugin": "3.6.1",
         "@typescript-eslint/parser": "3.6.1",
         "commitizen": "4.1.2",
+        "cspell": "^4.0.63",
         "cz-conventional-changelog": "3.2.0",
         "eslint": "7.4.0",
         "eslint-config-prettier": "6.11.0",
@@ -36,8 +37,7 @@
         "test": "npm run clean:coverage && jest --runInBand --coverage --watchAll=false",
         "test:watch": "jest --runInBand --watch",
         "test:build": "npm run test && npm run build && jest --runInBand --config ./jest.config.build.js",
-        "lint": "eslint . && prettier --list-different .",
-        "typecheck": "tsc --noEmit",
+        "lint": "eslint . && prettier --list-different . && cspell '**/*.{ts,js,md}' && tsc --noEmit",
         "cz": "git-cz"
     }
 }

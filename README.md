@@ -6,7 +6,7 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 
 - Allow returning `undefined|null` in operators such as delay?
 - Allow optional parameters to be equal to null?
-- Look at error instances and make sure we are handling them properly (eg. some operators might need have special error handling build in, eg. reporting to subjects, and errors should go through that).
+- Look at error instances and make sure we are handling them properly (eg. some operators have special error handling built in, eg. reporting to subjects, and errors should go through that).
 
 ## RxJS Operator Mappings
 
@@ -75,9 +75,9 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | `reduce`                  | ☑                   |                                                                  |
 | `refCount`                | ☐                   |                                                                  |
 | `repeat`                  | ☑                   |                                                                  |
-| `repeatWhen`              | ☑                   | Note: Differing behaviour.                                       |
+| `repeatWhen`              | ☑                   | Note: Differing behavior.                                       |
 | `retry`                   | ☑                   |                                                                  |
-| `retryWhen`               | ☐                   | Not needed. Behaviour available through `repeatWhen`             |
+| `retryWhen`               | ☐                   | Not needed. Behavior available through `repeatWhen`             |
 | `sample`                  | ☑                   |                                                                  |
 | `sampleTime`              | ☑                   | Name: `sampleMs`                                                 |
 | `scan`                    | ☑                   |                                                                  |
@@ -155,7 +155,7 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 | RxJS Subject       | Has Implementation | Notes                       |
 | :----------------- | :----------------- | :-------------------------- |
 | `Subject`          | ☑                  |                             |
-| `BehaviourSubject` | ☑                  | Name: `CurrentValueSubject` |
+| `BehaviorSubject` | ☑                  | Name: `CurrentValueSubject` |
 | `AsyncSubject`     | ☑                  | Name: `FinalValueSubject`   |
 | `ReplaySubject`    | ☑                  |                             |
 
@@ -163,7 +163,7 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 
 | RxJS Scheduler            | Has Implementation | Notes                                                              |
 | :------------------------ | :----------------- | :----------------------------------------------------------------- |
-| `AnimationFrameScheduler` | ☑                  | Name: `scheduleAnimationFrame`/`SchedulAnimationFrameQueued`       |
+| `AnimationFrameScheduler` | ☑                  | Name: `scheduleAnimationFrame`/`ScheduleAnimationFrameQueued`       |
 | `AsapScheduler`           | ☐                  | Not needed.                                                        |
 | `AsyncScheduler`          | ☑                  | Name: `ScheduleTimeout`/`ScheduleTimeoutQueued`/`ScheduleInterval` |
 | `QueueScheduler`          | ☑                  | Name: `scheduleSync`/`ScheduleSyncQueued`                          |

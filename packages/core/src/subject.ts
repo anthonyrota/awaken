@@ -176,8 +176,8 @@ export function SubjectBase<T>(): Subject<T> {
                         sinkInfo.__didRemove = true;
                     }
 
-                    // Remove if it errored or was marked for removal during
-                    // it's execution.
+                    // Remove if it was marked for removal during it's
+                    // execution.
                     if (sinkInfo.__didRemove && event.type === PushType) {
                         sinkInfos.splice(sinkIndex--, 1);
                     }

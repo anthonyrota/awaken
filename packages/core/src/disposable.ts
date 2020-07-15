@@ -86,7 +86,7 @@ class RealDisposableImplementation implements DisposableImplementationBase {
             //     1. We have already been disposed, which means we have no
             //            children and should return.
             //     2. We are being disposed.
-            // In case two, there are two subcases:
+            // There are two cases for case two:
             //     a. The child is not in our children's list and we should
             //            return.
             //     b. The child is in our children's list, meaning it has been
@@ -178,7 +178,7 @@ type DisposableImplementation =
     | FakeDisposableImplementation;
 
 /**
- * Implements the Disposable Interface onto the given value by proxying the
+ * Implements the Disposable Interface onto the given value by copying the
  * disposable methods & properties from the given value to the given disposable.
  * @param value The value to implement the Disposable Interface on.
  * @param disposableImplementation The disposable to proxy to.

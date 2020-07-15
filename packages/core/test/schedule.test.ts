@@ -164,7 +164,7 @@ describe('ScheduleSyncQueued', () => {
             return (fn: jest.Mock) =>
                 fn.mock.invocationCallOrder.map((i) => i - zero);
         });
-        const icof1 = getShiftIcoToStartFromOne();
+        const icoFromOne = getShiftIcoToStartFromOne();
         const scheduleSyncQueued = ScheduleSyncQueued();
         const main1_3 = jest.fn();
         const main1_1 = jest.fn(() => {
@@ -203,10 +203,10 @@ describe('ScheduleSyncQueued', () => {
         // (2) main1_1(); (queue): [main1_2, main1_3]
         // (3) main1_2(); (4) main1_3();
         // end execution: main1
-        expect(icof1(main1)).toEqual([1]);
-        expect(icof1(main1_1)).toEqual([2]);
-        expect(icof1(main1_2)).toEqual([3]);
-        expect(icof1(main1_3)).toEqual([4]);
+        expect(icoFromOne(main1)).toEqual([1]);
+        expect(icoFromOne(main1_1)).toEqual([2]);
+        expect(icoFromOne(main1_2)).toEqual([3]);
+        expect(icoFromOne(main1_3)).toEqual([4]);
         /* eslint-disable max-len */
         // start execution: main2
         // (5) main2();   (queue): [main2, main2_1]
@@ -231,16 +231,18 @@ describe('ScheduleSyncQueued', () => {
         // (54) main2_1_3(); (55) main2_1_4(); (56) main2_1_1(); (57) main2_1_2(); (58) main2_1(); (queue): [main2_1_3, main2_1_4, main2_1_1, main2_1_2, main2_1_3, main2_1_4]
         // (59) main2_1_3(); (60) main2_1_4(); (61) main2_1_1(); (62) main2_1_2(); (63) main2_1_3(); (64) main2_1_4();
         // end execution: main2
-        expect(icof1(main2)).toEqual([5, 6, 8, 14, 20, 26, 32, 38, 44, 50]);
-        expect(icof1(main2_1)).toEqual([7, 11, 17, 23, 29, 35, 41, 47, 53, 58]);
         // prettier-ignore
-        expect(icof1(main2_1_1)).toEqual([9, 15, 21, 27, 33, 39, 45, 51, 56, 61]);
+        expect(icoFromOne(main2)).toEqual([5, 6, 8, 14, 20, 26, 32, 38, 44, 50]);
         // prettier-ignore
-        expect(icof1(main2_1_2)).toEqual([10, 16, 22, 28, 34, 40, 46, 52, 57, 62]);
+        expect(icoFromOne(main2_1)).toEqual([7, 11, 17, 23, 29, 35, 41, 47, 53, 58]);
         // prettier-ignore
-        expect(icof1(main2_1_3)).toEqual([12, 18, 24, 30, 36, 42, 48, 54, 59, 63]);
+        expect(icoFromOne(main2_1_1)).toEqual([9, 15, 21, 27, 33, 39, 45, 51, 56, 61]);
         // prettier-ignore
-        expect(icof1(main2_1_4)).toEqual([13, 19, 25, 31, 37, 43, 49, 55, 60, 64]);
+        expect(icoFromOne(main2_1_2)).toEqual([10, 16, 22, 28, 34, 40, 46, 52, 57, 62]);
+        // prettier-ignore
+        expect(icoFromOne(main2_1_3)).toEqual([12, 18, 24, 30, 36, 42, 48, 54, 59, 63]);
+        // prettier-ignore
+        expect(icoFromOne(main2_1_4)).toEqual([13, 19, 25, 31, 37, 43, 49, 55, 60, 64]);
         /* eslint-enable max-len */
     });
 
@@ -391,7 +393,7 @@ describe('ScheduleSyncQueued', () => {
         expect(nested2).not.toHaveBeenCalled();
     });
 
-    it('should be able to schedule more main callbacks after the previous one errored', () => {
+    it('should be able to schedule more main callbacks after the previous one threw an error', () => {
         const scheduleSyncQueued = ScheduleSyncQueued();
         const throws1 = jest.fn(throw_('foo'));
         const throws2 = jest.fn(throw_('bar'));
@@ -410,7 +412,7 @@ describe('ScheduleSyncQueued', () => {
         expect(callback2).toHaveBeenCalledWith();
     });
 
-    it('should be able to schedule more nested main callbacks after the previous one errored', () => {
+    it('should be able to schedule more nested main callbacks after the previous one threw an error', () => {
         const scheduleSyncQueued = ScheduleSyncQueued();
         const throws = jest.fn(throw_('foo'));
         const nested1_1 = jest.fn();
