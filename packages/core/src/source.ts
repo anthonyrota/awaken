@@ -386,6 +386,44 @@ export function fromScheduleFunction<T extends unknown[]>(
     });
 }
 
+export function fromReactiveValue<T extends unknown[], Signal>(
+    addCallback: (handler: (...args: T) => void) => Signal,
+    removeCallback: (
+        handler: (...args: T) => void,
+        signal: { value: Signal } | undefined,
+    ) => void,
+): Source<T> {
+    return Source<T>((sink) => {
+        function callback(...values: T): void {
+            sink(Push(values));
+        }
+
+        sink.add(
+            Disposable(() => {
+                removeCallback(callback, signal);
+            }),
+        );
+
+        let signal: { value: Signal } | undefined;
+        try {
+            signal = { value: addCallback(callback) };
+        } catch (error) {
+            sink(Throw(error));
+            return;
+        }
+    });
+}
+
+export function fromSingularReactiveValue<T, Signal>(
+    addCallback: (handler: (value: T) => void) => Signal,
+    removeCallback: (
+        handler: (value: T) => void,
+        signal: { value: Signal } | undefined,
+    ) => void,
+): Source<T> {
+    return pipe(fromReactiveValue(addCallback, removeCallback), pluck(0));
+}
+
 const replaceWithValueIndex = map((_: unknown, idx) => idx);
 
 export function interval(delayMs: number): Source<number> {
@@ -409,6 +447,16 @@ export function lazy<T>(createSource: () => Source<T>): Source<T> {
             return;
         }
         source(sink);
+    });
+}
+
+export function iif<T>(
+    condition: () => unknown,
+    createSourceIfTrue: () => Source<T>,
+    createSourceIfFalse: () => Source<T>,
+): Source<T> {
+    return lazy(() => {
+        return condition() ? createSourceIfTrue() : createSourceIfFalse();
     });
 }
 
@@ -542,8 +590,10 @@ export function concatSources<T>(...sources: Source<T>[]): Source<T> {
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
 const noValue: unique symbol = {} as any;
 
+type WrapValuesInSource<T> = { [K in keyof T]: Source<T[K]> };
+
 export function combineSources<T extends unknown[]>(
-    ...sources: { [K in keyof T]: Source<T[K]> }
+    ...sources: WrapValuesInSource<T>
 ): Source<T> {
     return sources.length === 0
         ? empty
@@ -572,6 +622,19 @@ export function combineSources<T extends unknown[]>(
           });
 }
 
+export function all<T extends unknown[]>(
+    sources: WrapValuesInSource<T>,
+): Source<T> {
+    return pipe(
+        // eslint-disable-next-line prefer-spread
+        combineSources.apply<null, WrapValuesInSource<T>, Source<T>>(
+            null,
+            sources,
+        ),
+        last,
+    );
+}
+
 export function raceSources<T>(...sources: Source<T>[]): Source<T> {
     return sources.length === 0
         ? empty
@@ -598,7 +661,7 @@ export function raceSources<T>(...sources: Source<T>[]): Source<T> {
 }
 
 export function zipSources<T extends unknown[]>(
-    ...sources: { [K in keyof T]: Source<T[K]> }
+    ...sources: WrapValuesInSource<T>
 ): Source<T> {
     return sources.length === 0
         ? empty
@@ -685,7 +748,7 @@ type Unshift<T extends unknown[], U> = ((head: U, ...tail: T) => void) extends (
     : never;
 
 export function combineWith<T extends unknown[]>(
-    ...sources: { [K in keyof T]: Source<T[K]> }
+    ...sources: WrapValuesInSource<T>
 ): <U>(source: Source<U>) => Source<Unshift<T, U>> {
     return <U>(source: Source<U>) =>
         combineSources(source, ...sources) as Source<Unshift<T, U>>;
@@ -698,7 +761,7 @@ export function raceWith<T>(
 }
 
 export function zipWith<T extends unknown[]>(
-    ...sources: { [K in keyof T]: Source<T[K]> }
+    ...sources: WrapValuesInSource<T>
 ): <U>(source: Source<U>) => Source<Unshift<T, U>> {
     return <U>(source: Source<U>) =>
         zipSources(source, ...sources) as Source<Unshift<T, U>>;
@@ -709,7 +772,7 @@ function _pluckValue<T>(event: { value: T }): T {
 }
 
 export function withLatestFromLazy<T extends unknown[]>(
-    getSources: () => { [K in keyof T]: Source<T[K]> },
+    getSources: () => WrapValuesInSource<T>,
 ): <U>(source: Source<U>) => Source<Unshift<T, U>> {
     return <U>(source: Source<U>) =>
         lazy(() =>
@@ -720,7 +783,7 @@ export function withLatestFromLazy<T extends unknown[]>(
 }
 
 export function withLatestFrom<T extends unknown[]>(
-    ...sources: { [K in keyof T]: Source<T[K]> }
+    ...sources: WrapValuesInSource<T>
 ): <U>(source: Source<U>) => Source<Unshift<T, U>> {
     return <U>(source: Source<U>) =>
         Source<Unshift<T, U>>((sink) => {

@@ -120,4 +120,50 @@ A fast and extremely lightweight reactive programming library for Typescript, in
 
 | RxJS Observable     | Has Implementation | Notes                                                                                                                                              |
 | :------------------ | :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bindCallback`      | ☐                  | Not needed.                                                                                                                                        |
+| `bindNodeCallback`  | ☐                  | Not needed.                                                                                                                                        |
+| `combineLatest`     | ☑                  | Name: `combine`                                                                                                                                    |
+| `concat`            | ☑                  | Name: `concatSources`                                                                                                                              |
+| `defer`             | ☑                  | Name: `lazy`                                                                                                                                       |
+| `empty`             | ☑                  |                                                                                                                                                    |
+| `forkJoin`          | ☑                  | Name: `all`                                                                                                                                        |
+| `from`              | ☐                  | Not needed.                                                                                                                                        |
+| `fromArray`         | ☑                  |                                                                                                                                                    |
+| `fromEvent`         | ☐                  | Not needed.                                                                                                                                        |
+| `fromEventPattern`  | ☑                  | Name: `fromReactiveValue`                                                                                                                          |
+| `fromIterable`      | ☑                  |                                                                                                                                                    |
+| `fromObservable`    | ☐                  | Not needed.                                                                                                                                        |
+| `fromPromise`       | ☑                  |                                                                                                                                                    |
+| `generate`          | ☐                  | Not needed.                                                                                                                                        |
+| `iif`               | ☑                  |                                                                                                                                                    |
+| `interval`          | ☑                  |                                                                                                                                                    |
+| `merge`             | ☑                  | Name: `mergeSources`                                                                                                                               |
+| `never`             | ☑                  |                                                                                                                                                    |
+| `of`                | ☑                  |                                                                                                                                                    |
 | `onErrorResumeNext` | ☐                  | Not needed (ignoring errors is a bad pattern, but this operator can be implemented with `concatSources(...sources.map(mapEvents(throw -> end)))`). |
+| `pairs`             | ☐                  | Not needed.                                                                                                                                        |
+| `partition`         | ☐                  | Not needed.                                                                                                                                        |
+| `race`              | ☑                  | Name: `raceSources`                                                                                                                                |
+| `range`             | ☑                  |                                                                                                                                                    |
+| `throwError`        | ☑                  |                                                                                                                                                    |
+| `timer`             | ☑                  | Note: doesn't start an interval, only delays completion.                                                                                           |
+| `using`             | ☐                  | Not needed.                                                                                                                                        |
+| `zip`               | ☑                  | Name: `zipSources`                                                                                                                                 |
+
+## RxJS Subject Mappings
+
+| RxJS Subject       | Has Implementation | Notes                       |
+| :----------------- | :----------------- | :-------------------------- |
+| `Subject`          | ☑                  |                             |
+| `BehaviourSubject` | ☑                  | Name: `CurrentValueSubject` |
+| `AsyncSubject`     | ☑                  | Name: `FinalValueSubject`    |
+| `ReplaySubject`    | ☑                  |                             |
+
+## RxJS Scheduler Mappings
+
+| RxJS Scheduler            | Has Implementation | Notes                                                              |
+| :------------------------ | :----------------- | :----------------------------------------------------------------- |
+| `AnimationFrameScheduler` | ☑                  | Name: `scheduleAnimationFrame`/`SchedulAnimationFrameQueued`       |
+| `AsapScheduler`           | ☐                  | Not needed.                                                        |
+| `AsyncScheduler`          | ☑                  | Name: `ScheduleTimeout`/`ScheduleTimeoutQueued`/`ScheduleInterval` |
+| `QueueScheduler`          | ☑                  | Name: `scheduleSync`/`ScheduleSyncQueued`                          |

@@ -420,7 +420,7 @@ export function ReplaySubject<T>(
     }, base);
 }
 
-export function LastValueSubject<T>(): Subject<T> {
+export function FinalValueSubject<T>(): Subject<T> {
     const base = SubjectBase<T>();
     let lastPushEvent: Push<T> | undefined;
     let finalEvent: Throw | End | undefined;
