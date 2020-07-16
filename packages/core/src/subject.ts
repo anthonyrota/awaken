@@ -8,9 +8,12 @@ import {
     Throw,
     End,
     Source,
+    isSource,
     Sink,
+    isSink,
     ThrowType,
 } from './source';
+import { $$Sink, $$Source } from './symbols';
 import {
     removeOnce,
     asyncReportError,
@@ -19,8 +22,23 @@ import {
     TimeProvider,
 } from './util';
 
-export interface Subject<T> extends Source<T>, Sink<T> {
+export interface NonMarkedSubject<T> extends Disposable {
     (eventOrSink: Event<T> | Sink<T>): void;
+}
+
+export interface Subject<T> extends Source<T>, Sink<T>, NonMarkedSubject<T> {}
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function markAsSubject<T>(
+    subjectFunction: NonMarkedSubject<T>,
+): Subject<T> {
+    subjectFunction[$$Sink] = undefined;
+    subjectFunction[$$Source] = undefined;
+    return subjectFunction as Subject<T>;
+}
+
+export function isSubject(value: unknown): value is Subject<unknown> {
+    return isSource(value) && isSink(value);
 }
 
 interface SinkInfo<T> {
@@ -64,156 +82,159 @@ export function SubjectBase<T>(): Subject<T> {
         }
     });
 
-    return implDisposableMethods((eventOrSink: Event<T> | Sink<T>): void => {
-        if (!disposable.active) {
-            return;
-        }
-
-        const {
-            __sinkInfos: sinkInfos,
-            __sinksToAdd: sinksToAdd,
-            __eventsQueue: eventsQueue,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        } = state!;
-
-        if (typeof eventOrSink === 'function') {
-            if (!eventOrSink.active) {
+    return markAsSubject(
+        implDisposableMethods((eventOrSink: Event<T> | Sink<T>): void => {
+            if (!disposable.active) {
                 return;
             }
 
-            const addedInDistribution = distributingEvent;
-            const sinkInfo: SinkInfo<T> = {
-                __sink: eventOrSink,
-                __didRemove: false,
-                __notAdded: addedInDistribution,
-            };
+            const {
+                __sinkInfos: sinkInfos,
+                __sinksToAdd: sinksToAdd,
+                __eventsQueue: eventsQueue,
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            } = state!;
 
-            const sinkList = addedInDistribution ? sinksToAdd : sinkInfos;
-            sinkList.push(sinkInfo);
+            if (typeof eventOrSink === 'function') {
+                if (!eventOrSink.active) {
+                    return;
+                }
 
-            eventOrSink.add(
-                Disposable(() => {
-                    if (!disposable.active || sinkInfo.__didRemove) {
-                        return;
-                    }
+                const addedInDistribution = distributingEvent;
+                const sinkInfo: SinkInfo<T> = {
+                    __sink: eventOrSink,
+                    __didRemove: false,
+                    __notAdded: addedInDistribution,
+                };
 
-                    sinkInfo.__didRemove = true;
+                const sinkList = addedInDistribution ? sinksToAdd : sinkInfos;
+                sinkList.push(sinkInfo);
 
-                    if (addedInDistribution && sinkInfo.__notAdded) {
-                        // The sink was added during the loop below, which is
-                        // still running.
-                        removeOnce(sinksToAdd, sinkInfo);
-                        return;
-                    }
-
-                    if (distributingEvent) {
-                        // We are in the loop below.
-                        if (sinkInfos[sinkIndex] === sinkInfo) {
+                eventOrSink.add(
+                    Disposable(() => {
+                        if (!disposable.active || sinkInfo.__didRemove) {
                             return;
                         }
-                        const index = sinkInfos.indexOf(sinkInfo);
-                        if (index < sinkIndex) {
-                            sinkIndex--;
+
+                        sinkInfo.__didRemove = true;
+
+                        if (addedInDistribution && sinkInfo.__notAdded) {
+                            // The sink was added during the loop below, which
+                            // is still running.
+                            removeOnce(sinksToAdd, sinkInfo);
+                            return;
                         }
-                        sinkInfos.splice(index, 1);
-                        return;
-                    }
 
-                    // Nothing is happening in relation to this subject.
-                    removeOnce(sinkInfos, sinkInfo);
-                }),
-            );
-        } else if (sinkInfos.length > 0) {
-            const _distributingEvent = distributingEvent;
-            distributingEvent = true;
+                        if (distributingEvent) {
+                            // We are in the loop below.
+                            if (sinkInfos[sinkIndex] === sinkInfo) {
+                                return;
+                            }
+                            const index = sinkInfos.indexOf(sinkInfo);
+                            if (index < sinkIndex) {
+                                sinkIndex--;
+                            }
+                            sinkInfos.splice(index, 1);
+                            return;
+                        }
 
-            if (eventOrSink.type !== PushType) {
-                disposable.dispose();
-            }
+                        // Nothing is happening in relation to this subject.
+                        removeOnce(sinkInfos, sinkInfo);
+                    }),
+                );
+            } else if (sinkInfos.length > 0) {
+                const _distributingEvent = distributingEvent;
+                distributingEvent = true;
 
-            if (_distributingEvent) {
-                eventsQueue.push(eventOrSink);
-                return;
-            }
-
-            const errors: DisposalError[] = [];
-            let event: Event<T> | undefined = eventOrSink;
-
-            while (event) {
-                if (sinkInfos.length === 0) {
-                    if (event.type === ThrowType) {
-                        asyncReportError(event.error);
-                    }
-                    break;
+                if (eventOrSink.type !== PushType) {
+                    disposable.dispose();
                 }
 
-                for (; sinkIndex < sinkInfos.length; sinkIndex++) {
-                    const sinkInfo = sinkInfos[sinkIndex];
-                    const { __sink: sink } = sinkInfo;
+                if (_distributingEvent) {
+                    eventsQueue.push(eventOrSink);
+                    return;
+                }
 
-                    let active = false;
-                    try {
-                        active = sink.active;
-                    } catch (error) {
-                        errors.push(error as DisposalError);
+                const errors: DisposalError[] = [];
+                let event: Event<T> | undefined = eventOrSink;
+
+                while (event) {
+                    if (sinkInfos.length === 0) {
+                        if (event.type === ThrowType) {
+                            asyncReportError(event.error);
+                        }
+                        break;
                     }
 
-                    if (!active) {
-                        // Only remove if the current event is a Push event as
-                        // if the current event is a Throw or End event then
-                        // there is no point in removing it now as it will be
-                        // removed at the end of the loop.
-                        if (event.type === PushType) {
+                    for (; sinkIndex < sinkInfos.length; sinkIndex++) {
+                        const sinkInfo = sinkInfos[sinkIndex];
+                        const { __sink: sink } = sinkInfo;
+
+                        let active = false;
+                        try {
+                            active = sink.active;
+                        } catch (error) {
+                            errors.push(error as DisposalError);
+                        }
+
+                        if (!active) {
+                            // Only remove if the current event is a Push event
+                            // as if the current event is a Throw or End event
+                            // then there is no point in removing it now as it
+                            // will be removed at the end of the loop.
+                            if (event.type === PushType) {
+                                sinkInfos.splice(sinkIndex--, 1);
+                            }
+                            continue;
+                        }
+
+                        try {
+                            sink(event);
+                        } catch (error) {
+                            asyncReportError(error);
+                            sinkInfo.__didRemove = true;
+                        }
+
+                        // Remove if it was marked for removal during it's
+                        // execution.
+                        if (sinkInfo.__didRemove && event.type === PushType) {
                             sinkInfos.splice(sinkIndex--, 1);
                         }
-                        continue;
                     }
 
-                    try {
-                        sink(event);
-                    } catch (error) {
-                        asyncReportError(error);
-                        sinkInfo.__didRemove = true;
+                    sinkIndex = 0;
+
+                    if (event.type !== PushType) {
+                        break;
                     }
 
-                    // Remove if it was marked for removal during it's
-                    // execution.
-                    if (sinkInfo.__didRemove && event.type === PushType) {
-                        sinkInfos.splice(sinkIndex--, 1);
+                    for (let i = 0; i < sinksToAdd.length; i++) {
+                        sinksToAdd[i].__notAdded = false;
                     }
+                    // eslint-disable-next-line prefer-spread
+                    sinkInfos.push.apply(sinkInfos, sinksToAdd);
+                    sinksToAdd.length = 0;
+
+                    event = eventsQueue.shift();
+                }
+                distributingEvent = false;
+
+                if (
+                    // Cannot throw.
+                    !disposable.active
+                ) {
+                    nullifyState();
                 }
 
-                sinkIndex = 0;
-
-                if (event.type !== PushType) {
-                    break;
+                if (errors.length > 0) {
+                    throw new SubjectDistributionSinkDisposalError(errors);
                 }
-
-                for (let i = 0; i < sinksToAdd.length; i++) {
-                    sinksToAdd[i].__notAdded = false;
-                }
-                // eslint-disable-next-line prefer-spread
-                sinkInfos.push.apply(sinkInfos, sinksToAdd);
-                sinksToAdd.length = 0;
-
-                event = eventsQueue.shift();
+            } else if (eventOrSink.type !== PushType) {
+                disposable.dispose();
             }
-            distributingEvent = false;
-
-            if (
-                // Cannot throw.
-                !disposable.active
-            ) {
-                nullifyState();
-            }
-
-            if (errors.length > 0) {
-                throw new SubjectDistributionSinkDisposalError(errors);
-            }
-        } else if (eventOrSink.type !== PushType) {
-            disposable.dispose();
-        }
-    }, disposable);
+        }, disposable),
+    );
 }
 
 interface SubjectDistributionSinkDisposalErrorImplementation extends Error {
@@ -258,25 +279,27 @@ export function Subject<T>(): Subject<T> {
     const base = SubjectBase<T>();
     let finalEvent: Throw | End | undefined;
 
-    return implDisposableMethods((eventOrSink: Event<T> | Sink<T>): void => {
-        if (typeof eventOrSink === 'function') {
-            if (finalEvent) {
-                eventOrSink(finalEvent);
+    return markAsSubject(
+        implDisposableMethods((eventOrSink: Event<T> | Sink<T>): void => {
+            if (typeof eventOrSink === 'function') {
+                if (finalEvent) {
+                    eventOrSink(finalEvent);
+                } else {
+                    base(eventOrSink);
+                }
             } else {
+                if (!base.active) {
+                    return;
+                }
+
+                if (eventOrSink.type !== PushType) {
+                    finalEvent = eventOrSink;
+                }
+
                 base(eventOrSink);
             }
-        } else {
-            if (!base.active) {
-                return;
-            }
-
-            if (eventOrSink.type !== PushType) {
-                finalEvent = eventOrSink;
-            }
-
-            base(eventOrSink);
-        }
-    }, base);
+        }, base),
+    );
 }
 
 export interface CurrentValueSubject<T> extends Subject<T> {
@@ -286,20 +309,24 @@ export interface CurrentValueSubject<T> extends Subject<T> {
 export function CurrentValueSubject<T>(initialValue: T): Subject<T> {
     const base = Subject<T>();
 
-    const subject = implDisposableMethods((eventOrSink: Event<T> | Sink<T>) => {
-        if (typeof eventOrSink === 'function') {
-            base(eventOrSink);
-            if (eventOrSink.active) {
-                eventOrSink(Push(subject.currentValue));
+    const subject: Subject<T> = markAsSubject(
+        implDisposableMethods((eventOrSink: Event<T> | Sink<T>) => {
+            if (typeof eventOrSink === 'function') {
+                base(eventOrSink);
+                if (eventOrSink.active) {
+                    eventOrSink(
+                        Push((subject as CurrentValueSubject<T>).currentValue),
+                    );
+                }
+            } else {
+                base(eventOrSink);
             }
-        } else {
-            base(eventOrSink);
-        }
-    }, base) as CurrentValueSubject<T>;
+        }, base),
+    );
 
-    subject.currentValue = initialValue;
+    (subject as CurrentValueSubject<T>).currentValue = initialValue;
 
-    return subject;
+    return subject as CurrentValueSubject<T>;
 }
 
 export interface ReplaySubjectTimeoutConfig {
@@ -359,67 +386,69 @@ export function ReplaySubject<T>(
         }
     }
 
-    return implDisposableMethods((eventOrSink: Event<T> | Sink<T>) => {
-        if (typeof eventOrSink === 'function') {
-            if (!eventOrSink.active) {
-                return;
-            }
-
-            if (finalEvent && finalEvent.type === ThrowType) {
-                eventOrSink(finalEvent);
-                return;
-            }
-
-            if (hasTimeout) {
-                trimTime();
-            }
-
-            const isDistributing_ = isDistributing;
-            isDistributing = true;
-            for (
-                let i = firstValidIndex;
-                i < buffer.length && eventOrSink.active;
-                i++
-            ) {
-                if (hasTimeout && provideTime() >= deadlines[i]) {
-                    firstValidIndex = i + 1;
-                    trimTime();
-                    i = firstValidIndex;
-                    continue;
+    return markAsSubject(
+        implDisposableMethods((eventOrSink: Event<T> | Sink<T>) => {
+            if (typeof eventOrSink === 'function') {
+                if (!eventOrSink.active) {
+                    return;
                 }
-                eventOrSink(buffer[i]);
-            }
-            if (!isDistributing_) {
-                isDistributing = false;
-                buffer.splice(0, firstValidIndex);
-                deadlines.splice(0, firstValidIndex);
-                firstValidIndex = 0;
+
+                if (finalEvent && finalEvent.type === ThrowType) {
+                    eventOrSink(finalEvent);
+                    return;
+                }
+
                 if (hasTimeout) {
                     trimTime();
                 }
-            }
 
-            if (finalEvent) {
-                eventOrSink(finalEvent);
-                return;
-            }
-        } else {
-            if (eventOrSink.type === PushType) {
-                buffer.push(eventOrSink);
-
-                if (hasTimeout) {
-                    deadlines.push(provideTime() + timeout);
-                    trimTime();
+                const isDistributing_ = isDistributing;
+                isDistributing = true;
+                for (
+                    let i = firstValidIndex;
+                    i < buffer.length && eventOrSink.active;
+                    i++
+                ) {
+                    if (hasTimeout && provideTime() >= deadlines[i]) {
+                        firstValidIndex = i + 1;
+                        trimTime();
+                        i = firstValidIndex;
+                        continue;
+                    }
+                    eventOrSink(buffer[i]);
+                }
+                if (!isDistributing_) {
+                    isDistributing = false;
+                    buffer.splice(0, firstValidIndex);
+                    deadlines.splice(0, firstValidIndex);
+                    firstValidIndex = 0;
+                    if (hasTimeout) {
+                        trimTime();
+                    }
                 }
 
-                trimCount();
+                if (finalEvent) {
+                    eventOrSink(finalEvent);
+                    return;
+                }
             } else {
-                finalEvent = eventOrSink;
-            }
-        }
+                if (eventOrSink.type === PushType) {
+                    buffer.push(eventOrSink);
 
-        base(eventOrSink);
-    }, base);
+                    if (hasTimeout) {
+                        deadlines.push(provideTime() + timeout);
+                        trimTime();
+                    }
+
+                    trimCount();
+                } else {
+                    finalEvent = eventOrSink;
+                }
+            }
+
+            base(eventOrSink);
+        }, base),
+    );
 }
 
 export function FinalValueSubject<T>(): Subject<T> {
@@ -427,32 +456,34 @@ export function FinalValueSubject<T>(): Subject<T> {
     let lastPushEvent: Push<T> | undefined;
     let finalEvent: Throw | End | undefined;
 
-    return implDisposableMethods((eventOrSink: Event<T> | Sink<T>) => {
-        if (typeof eventOrSink === 'function') {
-            if (finalEvent) {
-                if (lastPushEvent) {
-                    eventOrSink(lastPushEvent);
-                }
-                eventOrSink(finalEvent);
-            } else {
-                base(eventOrSink);
-            }
-        } else {
-            if (!base.active) {
-                return;
-            }
-
-            if (eventOrSink.type === PushType) {
-                lastPushEvent = eventOrSink;
-            } else {
-                finalEvent = eventOrSink;
-                if (finalEvent.type === EndType && lastPushEvent) {
-                    base(lastPushEvent);
+    return markAsSubject(
+        implDisposableMethods((eventOrSink: Event<T> | Sink<T>) => {
+            if (typeof eventOrSink === 'function') {
+                if (finalEvent) {
+                    if (lastPushEvent) {
+                        eventOrSink(lastPushEvent);
+                    }
+                    eventOrSink(finalEvent);
                 } else {
-                    lastPushEvent = undefined;
+                    base(eventOrSink);
                 }
-                base(finalEvent);
+            } else {
+                if (!base.active) {
+                    return;
+                }
+
+                if (eventOrSink.type === PushType) {
+                    lastPushEvent = eventOrSink;
+                } else {
+                    finalEvent = eventOrSink;
+                    if (finalEvent.type === EndType && lastPushEvent) {
+                        base(lastPushEvent);
+                    } else {
+                        lastPushEvent = undefined;
+                    }
+                    base(finalEvent);
+                }
             }
-        }
-    }, base);
+        }, base),
+    );
 }

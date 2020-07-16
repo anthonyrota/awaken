@@ -1,15 +1,6 @@
 import { createCustomError, joinErrors } from './errorBase';
+import { $$Disposable } from './symbols';
 import { removeOnce, forEach } from './util';
-
-const realDisposableImplementationIdentifier = 'awaken/rd';
-const fakeDisposableImplementationIdentifier = 'awaken/fd';
-// eslint-disable-next-line max-len
-type RealImplementationIdentifier = typeof realDisposableImplementationIdentifier;
-// eslint-disable-next-line max-len
-type FakeImplementationIdentifier = typeof fakeDisposableImplementationIdentifier;
-type ImplementationIdentifier =
-    | RealImplementationIdentifier
-    | FakeImplementationIdentifier;
 
 interface DisposableBase<Self> {
     readonly active: boolean;
@@ -18,13 +9,17 @@ interface DisposableBase<Self> {
     dispose(): void;
 }
 
+const enum DisposableImplementationIdentifier {
+    RealDisposable,
+    FakeDisposable,
+}
+
 export interface Disposable extends DisposableBase<Disposable> {
-    readonly '': unique symbol;
+    [$$Disposable]: DisposableImplementationIdentifier;
 }
 
 interface DisposableImplementationBase
     extends DisposableBase<DisposableImplementationBase> {
-    __implementationIdentifier: ImplementationIdentifier;
     __children_: () => DisposableImplementationBase[] | null;
     __prepareForDisposal: () => void;
 }
@@ -34,7 +29,8 @@ class RealDisposableImplementation implements DisposableImplementationBase {
     private __parents: DisposableImplementationBase[] | null = [];
     private __markedForDisposal = false;
     // eslint-disable-next-line max-len
-    public __implementationIdentifier: RealImplementationIdentifier = realDisposableImplementationIdentifier;
+    public [$$Disposable]: DisposableImplementationIdentifier.RealDisposable =
+        DisposableImplementationIdentifier.RealDisposable;
 
     constructor(private __onDispose?: () => void) {}
 
@@ -169,7 +165,7 @@ interface FakeDisposableActiveDescriptor {
 }
 
 interface FakeDisposableImplementation extends DisposableImplementationBase {
-    __implementationIdentifier: FakeImplementationIdentifier;
+    [$$Disposable]: DisposableImplementationIdentifier.FakeDisposable;
     __activeDescriptor: FakeDisposableActiveDescriptor;
 }
 
@@ -197,11 +193,12 @@ export function implDisposableMethods<T extends object>(
     const disposableImplementation = (disposable as unknown) as DisposableImplementation;
 
     // eslint-disable-next-line max-len
-    fakeDisposable.__implementationIdentifier = fakeDisposableImplementationIdentifier;
+    fakeDisposable[$$Disposable] =
+        DisposableImplementationIdentifier.FakeDisposable;
 
     if (
-        disposableImplementation.__implementationIdentifier ===
-        realDisposableImplementationIdentifier
+        disposableImplementation[$$Disposable] ===
+        DisposableImplementationIdentifier.RealDisposable
     ) {
         const activeDescriptor: FakeDisposableActiveDescriptor = {
             get: activeGetter.bind(disposableImplementation),
@@ -227,7 +224,9 @@ export function implDisposableMethods<T extends object>(
             disposableImplementation,
         );
     } else {
-        const activeDescriptor = disposableImplementation.__activeDescriptor;
+        // eslint-disable-next-line max-len
+        const activeDescriptor = (disposableImplementation as FakeDisposableImplementation)
+            .__activeDescriptor;
         fakeDisposable.__activeDescriptor = activeDescriptor;
         Object.defineProperty(value, 'active', activeDescriptor);
         /* eslint-disable @typescript-eslint/unbound-method */
@@ -303,14 +302,15 @@ export function isDisposable(value: unknown): value is Disposable {
         return false;
     }
 
-    // eslint-disable-next-line max-len
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    const implementationIdentifier = (value as DisposableImplementation)
-        .__implementationIdentifier;
+    const implementationIdentifier = (value as DisposableImplementation)[
+        $$Disposable
+    ];
 
     return (
-        implementationIdentifier === realDisposableImplementationIdentifier ||
-        implementationIdentifier === fakeDisposableImplementationIdentifier
+        implementationIdentifier ===
+            DisposableImplementationIdentifier.RealDisposable ||
+        implementationIdentifier ===
+            DisposableImplementationIdentifier.FakeDisposable
     );
 }
 

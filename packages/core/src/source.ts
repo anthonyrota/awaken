@@ -6,6 +6,7 @@ import {
     ScheduleTimeout,
 } from './schedule';
 import { Subject } from './subject';
+import { $$Sink, $$Source } from './symbols';
 import {
     pipe,
     flow,
@@ -77,6 +78,7 @@ export const End: End = { type: EndType };
  * be passed to the sink that has been given to the source.
  */
 export interface Sink<T> extends Disposable {
+    [$$Sink]: undefined;
     (event: Event<T>): void;
 }
 
@@ -90,7 +92,7 @@ export interface Sink<T> extends Disposable {
  */
 export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
     const disposable = Disposable();
-    return implDisposableMethods((event: Event<T>): void => {
+    const sink = implDisposableMethods((event: Event<T>): void => {
         if (!disposable.active) {
             return;
         }
@@ -106,6 +108,13 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
             disposable.dispose();
         }
     }, disposable);
+    sink[$$Sink] = undefined;
+    return (sink as unknown) as Sink<T>;
+}
+
+export function isSink(value: unknown): value is Sink<unknown> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return value != null && $$Sink in (value as any);
 }
 
 /**
@@ -114,6 +123,7 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
  * when the given subscription is disposed.
  */
 export interface Source<T> {
+    [$$Source]: undefined;
     (sink: Sink<T>): void;
 }
 
@@ -156,7 +166,14 @@ export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
         }
     }
 
-    return safeSource;
+    safeSource[$$Source] = undefined;
+
+    return safeSource as Source<T>;
+}
+
+export function isSource(value: unknown): value is Sink<unknown> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return value != null && $$Source in (value as any);
 }
 
 /**
