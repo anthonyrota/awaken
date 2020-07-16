@@ -257,6 +257,9 @@ export function identity<T>(value: T): T {
     return value;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export function noop(): void {}
+
 export function binarySearchNextLargestIndex<T>(
     items: T[],
     getValue: (item: T) => number,

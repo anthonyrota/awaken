@@ -210,6 +210,8 @@ export function SubjectBase<T>(): Subject<T> {
             if (errors.length > 0) {
                 throw new SubjectDistributionSinkDisposalError(errors);
             }
+        } else if (eventOrSink.type !== PushType) {
+            disposable.dispose();
         }
     }, disposable);
 }

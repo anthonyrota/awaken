@@ -1,3 +1,5 @@
+import { noop } from '../src/util';
+import { throw_, createFakeRAFUtil } from './testUtils';
 import {
     Disposable,
     ScheduleQueued,
@@ -11,7 +13,6 @@ import {
     ScheduleInterval,
     ScheduleFunction,
 } from '@awaken/core';
-import { throw_, createFakeRAFUtil } from './testUtils';
 
 describe('ScheduleQueued', () => {
     it('should be a function', () => {
@@ -465,16 +466,14 @@ describe('scheduleAnimationFrame', () => {
     });
 
     it('should raf the callback', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         scheduleAnimationFrame(callback);
         expect(requestAnimationFrameMock).toHaveBeenCalledTimes(1);
         expect(requestAnimationFrameMock).toHaveBeenCalledWith(callback);
     });
 
     it('should raf the callback when given an active disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         scheduleAnimationFrame(callback, disposable);
         expect(requestAnimationFrameMock).toHaveBeenCalledTimes(1);
@@ -482,8 +481,7 @@ describe('scheduleAnimationFrame', () => {
     });
 
     it('should not raf the callback when given a disposed disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         disposable.dispose();
         scheduleAnimationFrame(callback, disposable);
@@ -491,10 +489,8 @@ describe('scheduleAnimationFrame', () => {
     });
 
     it('should support multiple schedules', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback1 = () => {};
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback2 = () => {};
+        const callback1 = noop;
+        const callback2 = noop;
         scheduleAnimationFrame(callback1);
         expect(requestAnimationFrameMock).toHaveBeenCalledTimes(1);
         scheduleAnimationFrame(callback2);
@@ -506,8 +502,7 @@ describe('scheduleAnimationFrame', () => {
     });
 
     it('should be able to cancel the callback', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         scheduleAnimationFrame(callback, disposable);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -571,16 +566,14 @@ describe('ScheduleAnimationFrameQueued', () => {
     it('should call rAF', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
         expect(fakeRAFUtil.requestAnimationFrameMock).not.toHaveBeenCalled();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleAnimationFrameQueued(() => {});
+        scheduleAnimationFrameQueued(noop);
         expect(fakeRAFUtil.getActiveCount()).toBe(1);
         expect(fakeRAFUtil.requestAnimationFrameMock).toHaveBeenCalledTimes(1);
     });
 
     it('should call rAF when given an active disposable', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleAnimationFrameQueued(() => {}, Disposable());
+        scheduleAnimationFrameQueued(noop, Disposable());
         expect(fakeRAFUtil.getActiveCount()).toBe(1);
         expect(fakeRAFUtil.requestAnimationFrameMock).toHaveBeenCalledTimes(1);
     });
@@ -589,8 +582,7 @@ describe('ScheduleAnimationFrameQueued', () => {
         const scheduleAnimationFrameQueued = ScheduleAnimationFrameQueued();
         const disposed = Disposable();
         disposed.dispose();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleAnimationFrameQueued(() => {}, disposed);
+        scheduleAnimationFrameQueued(noop, disposed);
         expect(fakeRAFUtil.getActiveCount()).toBe(0);
         expect(fakeRAFUtil.requestAnimationFrameMock).not.toHaveBeenCalled();
     });
@@ -1074,8 +1066,7 @@ describe('ScheduleTimeout', () => {
     });
 
     it('should call native setTimeout with the callback and delay', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const delay = 33;
         const scheduleTimeout = ScheduleTimeout(delay);
         scheduleTimeout(callback);
@@ -1084,8 +1075,7 @@ describe('ScheduleTimeout', () => {
     });
 
     it('should call native setTimeout with the callback and delay when given an active disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const delay = 0;
         const disposable = Disposable();
         const scheduleTimeout = ScheduleTimeout(delay);
@@ -1095,8 +1085,7 @@ describe('ScheduleTimeout', () => {
     });
 
     it('should not call native setTimeout when given a disposed disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         disposable.dispose();
         const scheduleTimeout = ScheduleTimeout(13);
@@ -1105,10 +1094,8 @@ describe('ScheduleTimeout', () => {
     });
 
     it('should support multiple schedules', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback1 = () => {};
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback2 = () => {};
+        const callback1 = noop;
+        const callback2 = noop;
         const delay = 4391;
         const scheduleTimeout = ScheduleTimeout(delay);
         scheduleTimeout(callback1);
@@ -1122,8 +1109,7 @@ describe('ScheduleTimeout', () => {
     });
 
     it('should cancel the scheduled callback when the given disposable is disposed', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         const scheduleTimeout = ScheduleTimeout(0);
         scheduleTimeout(callback, disposable);
@@ -1216,8 +1202,7 @@ describe('ScheduleTimeoutQueued', () => {
         const delay = 29;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
         expect(setTimeoutMock).not.toHaveBeenCalled();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleTimeoutQueued(() => {});
+        scheduleTimeoutQueued(noop);
         expect(jest.getTimerCount()).toBe(1);
         expect(setTimeoutMock).toHaveBeenCalledTimes(1);
         expect(setTimeoutMock).toHaveBeenCalledWith(
@@ -1229,8 +1214,7 @@ describe('ScheduleTimeoutQueued', () => {
     it('should schedule setTimeout with the given delay when given an active disposable', () => {
         const delay = 0;
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(delay);
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleTimeoutQueued(() => {}, Disposable());
+        scheduleTimeoutQueued(noop, Disposable());
         expect(jest.getTimerCount()).toBe(1);
         expect(setTimeoutMock).toHaveBeenCalledTimes(1);
         expect(setTimeoutMock).toHaveBeenCalledWith(
@@ -1243,8 +1227,7 @@ describe('ScheduleTimeoutQueued', () => {
         const scheduleTimeoutQueued = ScheduleTimeoutQueued(5);
         const disposed = Disposable();
         disposed.dispose();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleTimeoutQueued(() => {}, disposed);
+        scheduleTimeoutQueued(noop, disposed);
         expect(jest.getTimerCount()).toBe(0);
         expect(setTimeoutMock).not.toHaveBeenCalled();
     });
@@ -1791,8 +1774,7 @@ describe('ScheduleInterval', () => {
 
     it('should not call setTimeout', () => {
         const scheduleInterval = ScheduleInterval(39);
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleInterval(() => {});
+        scheduleInterval(noop);
         expect(setTimeoutMock).not.toHaveBeenCalled();
     });
 
@@ -1800,8 +1782,7 @@ describe('ScheduleInterval', () => {
         const delay = 429;
         const scheduleInterval = ScheduleInterval(delay);
         expect(setIntervalMock).not.toBeCalled();
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleInterval(() => {});
+        scheduleInterval(noop);
         expect(jest.getTimerCount()).toBe(1);
         expect(setIntervalMock).toHaveBeenCalledTimes(1);
         expect(setIntervalMock).toHaveBeenCalledWith(
@@ -1813,8 +1794,7 @@ describe('ScheduleInterval', () => {
     it('should schedule an interval with the given delay when given an active disposable', () => {
         const delay = 429;
         const scheduleInterval = ScheduleInterval(delay);
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        scheduleInterval(() => {}, Disposable());
+        scheduleInterval(noop, Disposable());
         expect(jest.getTimerCount()).toBe(1);
         expect(setIntervalMock).toHaveBeenCalledTimes(1);
         expect(setIntervalMock).toHaveBeenCalledWith(

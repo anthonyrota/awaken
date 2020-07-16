@@ -21,13 +21,13 @@ interface TestScheduleFunction {
     ): void;
 }
 
-interface _TestSchedule extends TestScheduleFunction {
+interface TestScheduleImplementation extends TestScheduleFunction {
     currentFrame: number;
     flush: () => void;
     reset: () => void;
 }
 
-export interface TestSchedule extends _TestSchedule {
+export interface TestSchedule extends TestScheduleImplementation {
     readonly currentFrame: number;
     readonly flush: () => void;
     readonly reset: () => void;
@@ -73,7 +73,7 @@ export function TestSchedule(): TestSchedule {
                 }),
             );
         }
-    }) as TestScheduleFunction) as _TestSchedule;
+    }) as TestScheduleFunction) as TestScheduleImplementation;
 
     testSchedule.currentFrame = 0;
 
@@ -170,11 +170,11 @@ export function E(frame: number): End & WithFrameProperty {
     return { type: EndType, frame };
 }
 
-interface _TestSource<T> extends Source<T> {
+interface TestSourceImplementation<T> extends Source<T> {
     subscriptions: TestSourceSubscriptions;
 }
 
-export interface TestSource<T> extends _TestSource<T> {
+export interface TestSource<T> extends TestSourceImplementation<T> {
     readonly subscriptions: TestSourceSubscriptions;
 }
 
@@ -190,18 +190,19 @@ export function TestSource<T>(
             const event = events[i];
             testSchedule(() => sink(event), event.frame, sink);
         }
-    }) as _TestSource<T>;
+    }) as TestSourceImplementation<T>;
 
     base.subscriptions = subscriptions;
 
     return base as TestSource<T>;
 }
 
-interface _SharedTestSource<T> extends _TestSource<T> {
+interface SharedTestSourceImplementation<T>
+    extends TestSourceImplementation<T> {
     schedule: (subscription?: Disposable) => void;
 }
 
-export interface SharedTestSource<T> extends _SharedTestSource<T> {
+export interface SharedTestSource<T> extends SharedTestSourceImplementation<T> {
     readonly subscriptions: TestSourceSubscriptions;
     readonly schedule: (subscription?: Disposable) => void;
 }
@@ -216,7 +217,7 @@ export function SharedTestSource<T>(
     const base = Source<T>((sink) => {
         subscriptions.push(watchSubscriptionInfo(testSchedule, sink));
         subject(sink);
-    }) as _SharedTestSource<T>;
+    }) as SharedTestSourceImplementation<T>;
 
     base.subscriptions = subscriptions;
 

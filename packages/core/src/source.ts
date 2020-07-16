@@ -13,6 +13,7 @@ import {
     asyncReportError,
     forEach,
     identity,
+    noop,
     TimeProvider,
 } from './util';
 
@@ -166,7 +167,9 @@ export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
  * @param sink The sink to be given to the received source.
  * @returns The higher order function which takes a source to subscribe to.
  */
-export function subscribe<T>(sink: Sink<T>): (source: Source<T>) => void {
+export function subscribe<T>(
+    sink = Sink<T>(noop),
+): (source: Source<T>) => void {
     return (source) => {
         source(sink);
     };
@@ -282,8 +285,7 @@ export function timer(durationMs: number): Source<never> {
     return emptyScheduled(ScheduleTimeout(durationMs));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export const never = Source(() => {});
+export const never = Source(noop);
 
 export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
     return Source((sink) => {
@@ -426,7 +428,7 @@ export function fromSingularReactiveValue<T, Signal>(
     return pipe(fromReactiveValue(addCallback, removeCallback), pluck(0));
 }
 
-const replaceWithValueIndex = map((_: unknown, idx) => idx);
+const replaceWithValueIndex = map((_, idx: number) => idx);
 
 export function interval(delayMs: number): Source<number> {
     return replaceWithValueIndex(
@@ -845,6 +847,12 @@ export function withLatestFrom<T extends unknown[]>(
  *     method calls the transform function one time for each Push event of the
  *     given source and passes through the result.
  */
+export function map<U>(
+    transform: <T>(value: T, index: number) => U,
+): <T>(source: Source<T>) => Source<U>;
+export function map<T, U>(
+    transform: (value: T, index: number) => U,
+): Operator<T, U>;
 export function map<T, U>(
     transform: (value: T, index: number) => U,
 ): Operator<T, U> {
@@ -876,7 +884,7 @@ export function map<T, U>(
  * Replaces the value of each received Push event with the given value.
  * @param value The value to push.
  */
-export function mapTo<T>(value: T): Operator<unknown, T> {
+export function mapTo<U>(value: U): <T>(source: Source<T>) => Source<U> {
     return map(() => value);
 }
 
@@ -939,7 +947,7 @@ export const unwrapFromWrappedPushEvents: <T>(
 );
 
 export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
-    return map((value) => value[key]);
+    return map((value: T) => value[key]);
 }
 
 /**
@@ -1007,12 +1015,12 @@ export function findWithIndex<T>(
             let index: number;
             pipe(
                 source,
-                filter<T>((value, index_) => {
+                filter((value, index_) => {
                     index = index_;
                     return predicate(value, index);
                 }),
                 first,
-                map((value) => ({ value, index })),
+                map((value: T) => ({ value, index })),
             )(sink);
         });
 }
@@ -1465,12 +1473,12 @@ interface SpyOperators {
     __spyEnd: (onEnd: () => void) => IdentityOperator;
 }
 
-function _createSpyOperators(callBefore: boolean): SpyOperators {
+function _createSpyOperators(spyAfter: boolean): SpyOperators {
     function spy<T>(onEvent: (event: Event<T>) => void): Operator<T, T> {
         return (source) =>
             Source((sink) => {
                 const sourceSink = Sink<T>((event) => {
-                    if (callBefore) {
+                    if (spyAfter) {
                         sink(event);
                     }
                     try {
@@ -1479,7 +1487,7 @@ function _createSpyOperators(callBefore: boolean): SpyOperators {
                         sink(Throw(error));
                         return;
                     }
-                    if (!callBefore) {
+                    if (!spyAfter) {
                         sink(event);
                     }
                 });
@@ -1535,14 +1543,14 @@ export const {
     __spyPush: spyPushBefore,
     __spyThrow: spyThrowBefore,
     __spyEnd: spyEndBefore,
-} = _createSpyOperators(true);
+} = _createSpyOperators(false);
 
 export const {
     __spy: spyAfter,
     __spyPush: spyPushAfter,
     __spyThrow: spyThrowAfter,
     __spyEnd: spyEndAfter,
-} = _createSpyOperators(false);
+} = _createSpyOperators(true);
 
 export function isEmpty(source: Source<unknown>): Source<boolean> {
     return Source((sink) => {
@@ -1706,7 +1714,7 @@ export function groupBy<T, K>(
 ): Operator<T, GroupSource<T, K>> {
     return (source) =>
         Source((sink) => {
-            const groups: _GroupSource<T, K>[] = [];
+            const groups: GroupSourceImplementation<T, K>[] = [];
             let idx = 0;
 
             const sourceSink = Sink<T>((event) => {
@@ -1719,7 +1727,7 @@ export function groupBy<T, K>(
                         return;
                     }
 
-                    let group: _GroupSource<T, K> | undefined;
+                    let group: GroupSourceImplementation<T, K> | undefined;
                     for (let i = 0; i < groups.length; i++) {
                         if (key === groups[i].key) {
                             group = groups[i];
@@ -1758,7 +1766,7 @@ export function groupBy<T, K>(
         });
 }
 
-interface _GroupSource<T, K> extends Source<T> {
+interface GroupSourceImplementation<T, K> extends Source<T> {
     __subject: Subject<T>;
     key: K | null;
     removed: boolean;
@@ -1783,12 +1791,12 @@ export type GroupSource<T, K> = ActiveGroupSource<T, K> | RemovedGroupSource<T>;
 
 function GroupSource<T, K>(
     key: K,
-    groups: _GroupSource<T, K>[],
+    groups: GroupSourceImplementation<T, K>[],
     Subject_: typeof Subject,
     removeGroupWhenNoSubscribers: boolean,
-): _GroupSource<T, K> {
+): GroupSourceImplementation<T, K> {
     const subject = Subject_<T>();
-    let source: _GroupSource<T, K>;
+    let source: GroupSourceImplementation<T, K>;
 
     if (removeGroupWhenNoSubscribers) {
         let subscriptions = 0;
@@ -1807,9 +1815,9 @@ function GroupSource<T, K>(
                 );
             }
             subject(sink);
-        }) as _GroupSource<T, K>;
+        }) as GroupSourceImplementation<T, K>;
     } else {
-        source = Source(subject) as _GroupSource<T, K>;
+        source = Source(subject) as GroupSourceImplementation<T, K>;
     }
 
     function remove(): void {
@@ -1948,7 +1956,7 @@ export function takeLast(amount: number): IdentityOperator {
 
 export const last = takeLast(1);
 
-export const count: Operator<unknown, number> = flow(
+export const count: <T>(source: Source<T>) => Source<number> = flow(
     replaceWithValueIndex,
     last,
 );
@@ -2360,14 +2368,17 @@ export function windowCount(
     maxWindowLength: number,
     createEvery?: number,
 ): <T>(source: Source<T>) => Source<Source<T>> {
-    const takeMaxWindowLength = flow(take(maxWindowLength), ignorePushEvents);
+    const getWindowClosingSource = flow(
+        take(maxWindowLength),
+        ignorePushEvents,
+    );
     if (createEvery) {
         return windowControlled(
             filter((_, index: number) => (index + 1) % createEvery === 0),
-            takeMaxWindowLength,
+            getWindowClosingSource,
         );
     }
-    return windowEach(takeMaxWindowLength);
+    return windowEach(getWindowClosingSource);
 }
 
 export function windowTime(
@@ -2375,11 +2386,11 @@ export function windowTime(
     creationInterval?: number | null,
     maxWindowLength = Infinity,
 ): <T>(source: Source<T>) => Source<Source<T>> {
-    const takeMaxWindowLength = flow(take(maxWindowLength), ignorePushEvents);
+    const takeMaxAndIgnorePush = flow(take(maxWindowLength), ignorePushEvents);
     const getWindowClosingSource =
         maxWindowDuration == null
-            ? takeMaxWindowLength
-            : flow(takeMaxWindowLength, timeoutMs(maxWindowDuration, empty));
+            ? takeMaxAndIgnorePush
+            : flow(takeMaxAndIgnorePush, timeoutMs(maxWindowDuration, empty));
     if (creationInterval == null) {
         return windowEach(getWindowClosingSource);
     }
@@ -2811,7 +2822,7 @@ export interface WithTime<T> {
 export function withTime<T>(
     provideTime: TimeProvider,
 ): Operator<T, WithTime<T>> {
-    return map((value) => ({ value, time: provideTime() }));
+    return map((value: T) => ({ value, time: provideTime() }));
 }
 
 export interface TimeInterval<T> {
@@ -2829,7 +2840,7 @@ export function withTimeInterval<T>(
     return (source) =>
         Source((sink) => {
             const startTime = provideTime();
-            let lastTime = provideTime();
+            let lastTime = startTime;
 
             const sourceSink = Sink<T>((event) => {
                 if (event.type === PushType) {
@@ -2866,4 +2877,134 @@ export function scheduleSubscription(
 ): IdentityOperator {
     return <T>(source: Source<T>) =>
         concatSources(emptyScheduled(schedule), source);
+}
+
+export interface ControllableSource<T> extends Source<T> {
+    produce(): void;
+}
+
+export function shareControlled<T>(
+    Subject_: () => Subject<T>,
+): (source: Source<T>) => ControllableSource<T>;
+export function shareControlled(
+    Subject_?: typeof Subject,
+): <T>(source: Source<T>) => ControllableSource<T>;
+export function shareControlled(
+    Subject_ = Subject,
+): <T>(source: Source<T>) => ControllableSource<T> {
+    return <T>(source: Source<T>) => {
+        let subject: Subject<T> | undefined;
+
+        const controllable = Source<T>((sink) => {
+            if (!subject || !subject.active) {
+                subject = Subject_();
+            }
+            subject(sink);
+        }) as ControllableSource<T>;
+
+        function produce(): void {
+            if (!subject || !subject.active) {
+                subject = Subject_();
+            }
+            source(subject);
+        }
+
+        controllable.produce = produce;
+
+        return controllable;
+    };
+}
+
+export function share<T>(Subject_: () => Subject<T>): Operator<T, T>;
+export function share(Subject_?: typeof Subject): IdentityOperator;
+export function share(Subject_ = Subject): IdentityOperator {
+    return <T>(source: Source<T>): Source<T> => {
+        let subject: Subject<T>;
+        const shared = pipe(
+            source,
+            shareControlled(() => {
+                subject = Subject_();
+                return subject;
+            }),
+        );
+        let subscriberCount = 0;
+
+        return Source((sink) => {
+            sink.add(
+                Disposable(() => {
+                    subscriberCount--;
+                    if (subscriberCount === 0) {
+                        subject.dispose();
+                    }
+                }),
+            );
+            const _subscriberCount = subscriberCount;
+            subscriberCount++;
+            shared(sink);
+            if (_subscriberCount === 0 && subscriberCount !== 0) {
+                shared.produce();
+            }
+        });
+    };
+}
+
+export function shareOnce<T>(Subject_: () => Subject<T>): Operator<T, T>;
+export function shareOnce(Subject_?: typeof Subject): IdentityOperator;
+export function shareOnce(Subject_ = Subject): IdentityOperator {
+    return <T>(source: Source<T>): Source<T> => {
+        const subject = Subject_<T>();
+        return pipe(
+            source,
+            share(() => subject),
+        );
+    };
+}
+
+export function sharePersist<T>(Subject_: () => Subject<T>): Operator<T, T>;
+export function sharePersist(Subject_?: typeof Subject): IdentityOperator;
+export function sharePersist(Subject_ = Subject): IdentityOperator {
+    return <T>(source: Source<T>): Source<T> => {
+        let subject: Subject<T> | undefined;
+        const shared = pipe(
+            source,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            shareControlled(() => subject!),
+        );
+
+        return Source((sink) => {
+            if (!subject) {
+                subject = Subject_();
+            }
+            shared(sink);
+            shared.produce();
+        });
+    };
+}
+
+export function shareTransform<T, U>(
+    Subject_: () => Subject<T>,
+    transform: (shared: Source<T>) => Source<U>,
+): Operator<T, U>;
+export function shareTransform<U>(
+    Subject_: typeof Subject,
+    transform: <T>(source: Source<T>) => Source<U>,
+): <T>(shared: Source<T>) => Source<U>;
+export function shareTransform<T, U>(
+    Subject_: () => Subject<T>,
+    transform: (shared: Source<T>) => Source<U>,
+): Operator<T, U> {
+    return (source) =>
+        Source((sink) => {
+            const subject = Subject_();
+            let transformed: Source<U>;
+            try {
+                transformed = transform(subject);
+            } catch (error) {
+                sink(Throw(error));
+                return;
+            }
+            transformed(sink);
+            sink.add(subject);
+            source(subject);
+        });
 }

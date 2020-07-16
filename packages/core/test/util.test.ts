@@ -1,4 +1,4 @@
-import { removeOnce } from '../src/util';
+import { removeOnce, noop } from '../src/util';
 import {
     Disposable,
     pipe,
@@ -150,16 +150,14 @@ describe('requestAnimationFrame', () => {
     });
 
     it('should raf the callback', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         requestAnimationFrame(callback);
         expect(requestAnimationFrameMock).toHaveBeenCalledTimes(1);
         expect(requestAnimationFrameMock).toHaveBeenCalledWith(callback);
     });
 
     it('should not raf the callback when given a disposed disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         disposable.dispose();
         requestAnimationFrame(callback, disposable);
@@ -167,8 +165,7 @@ describe('requestAnimationFrame', () => {
     });
 
     it('should raf the callback when given an active disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         requestAnimationFrame(callback, disposable);
         expect(requestAnimationFrameMock).toHaveBeenCalledTimes(1);
@@ -176,8 +173,7 @@ describe('requestAnimationFrame', () => {
     });
 
     it('should cancel the scheduled callback when the given disposable is disposed', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         requestAnimationFrame(callback, disposable);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -217,8 +213,7 @@ describe('setTimeout', () => {
     });
 
     it('should call native setTimeout with the callback and delay', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const delay = 16;
         setTimeout(callback, delay);
         expect(setTimeoutMock).toHaveBeenCalledTimes(1);
@@ -226,13 +221,17 @@ describe('setTimeout', () => {
     });
 
     it('should call native setTimeout with any additional arguments given', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const extraArgs = [2, { foo: 'bar' }, () => {}, Symbol()] as const;
+        const extraArgs = [2, { foo: 'bar' }, noop, Symbol()];
         // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-        const callback = (..._args: typeof extraArgs) => {};
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const callback = noop;
         const delay = 49;
-        setTimeout(callback, delay, Disposable(), ...extraArgs);
+        setTimeout<typeof extraArgs>(
+            callback,
+            delay,
+            Disposable(),
+            ...extraArgs,
+        );
         expect(setTimeoutMock).toHaveBeenCalledTimes(1);
         expect(setTimeoutMock).toHaveBeenCalledWith(
             callback,
@@ -242,16 +241,14 @@ describe('setTimeout', () => {
     });
 
     it('should default delay to zero', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         setTimeout(callback);
         expect(setTimeoutMock).toHaveBeenCalledTimes(1);
         expect(setTimeoutMock).toHaveBeenCalledWith(callback, 0);
     });
 
     it('should not call native setTimeout when given a disposed disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const delay = 13;
         const disposable = Disposable();
         disposable.dispose();
@@ -260,8 +257,7 @@ describe('setTimeout', () => {
     });
 
     it('should call native setTimeout with the callback and delay when given an active disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         const delay = 0;
         setTimeout(callback, delay, disposable);
@@ -270,8 +266,7 @@ describe('setTimeout', () => {
     });
 
     it('should cancel the scheduled callback when the given disposable is disposed', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         const delay = 0;
         setTimeout(callback, delay, disposable);
@@ -328,8 +323,7 @@ describe('setInterval', () => {
     });
 
     it('should call native setInterval with the callback and delay', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const delay = 16;
         setInterval(callback, delay);
         expect(setIntervalMock).toHaveBeenCalledTimes(1);
@@ -337,13 +331,17 @@ describe('setInterval', () => {
     });
 
     it('should call native setInterval with any additional arguments given', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const extraArgs = [2, { foo: 'bar' }, () => {}, Symbol()] as const;
+        const extraArgs = [2, { foo: 'bar' }, noop, Symbol()];
         // eslint-disable-next-line max-len
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-        const callback = (..._args: typeof extraArgs) => {};
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const callback = noop;
         const delay = 32;
-        setInterval(callback, delay, Disposable(), ...extraArgs);
+        setInterval<typeof extraArgs>(
+            callback,
+            delay,
+            Disposable(),
+            ...extraArgs,
+        );
         expect(setIntervalMock).toHaveBeenCalledTimes(1);
         expect(setIntervalMock).toHaveBeenCalledWith(
             callback,
@@ -353,16 +351,14 @@ describe('setInterval', () => {
     });
 
     it('should default delay to zero', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         setInterval(callback);
         expect(setIntervalMock).toHaveBeenCalledTimes(1);
         expect(setIntervalMock).toHaveBeenCalledWith(callback, 0);
     });
 
     it('should not call native setInterval when given a disposed disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const delay = 13;
         const disposable = Disposable();
         disposable.dispose();
@@ -371,8 +367,7 @@ describe('setInterval', () => {
     });
 
     it('should call native setInterval with the callback and delay when given an active disposable', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         const delay = 0;
         setInterval(callback, delay, disposable);
@@ -381,8 +376,7 @@ describe('setInterval', () => {
     });
 
     it('should not cancel the interval after the scheduled callback is called if the disposable is still active', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         const delay = 29;
         setInterval(callback, delay, disposable);
@@ -394,8 +388,7 @@ describe('setInterval', () => {
     });
 
     it('should cancel the interval when the given disposable is disposed', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         const delay = 2983;
         setInterval(callback, delay, disposable);
@@ -407,8 +400,7 @@ describe('setInterval', () => {
     });
 
     it('should cancel the interval when the given disposable is disposed after a few interval durations', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const callback = () => {};
+        const callback = noop;
         const disposable = Disposable();
         const delay = 91;
         setInterval(callback, delay, disposable);

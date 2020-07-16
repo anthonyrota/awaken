@@ -1,3 +1,5 @@
+import { noop } from '../src/util';
+import { throw_ } from './testUtils';
 import {
     Disposable,
     DisposalError,
@@ -5,7 +7,6 @@ import {
     DISPOSED,
     implDisposableMethods,
 } from '@awaken/core';
-import { throw_ } from './testUtils';
 import each from 'jest-each';
 
 describe('isDisposable', () => {
@@ -20,12 +21,10 @@ describe('isDisposable', () => {
         ['a boolean', true],
         ['a string', 'foo'],
         ['a symbol', Symbol('foo')],
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        ['a function', () => {}],
+        ['a function', noop],
         [
             "an object that isn't a disposable but has a `dispose` method",
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            { dispose() {} },
+            { dispose: noop },
         ],
     ]).it('should return false when given %s', (_, value) => {
         // eslint-disable-next-line jest/no-standalone-expect

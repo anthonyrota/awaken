@@ -1,3 +1,4 @@
+import { noop } from '../src/util';
 import {
     Disposable,
     PushType,
@@ -70,8 +71,7 @@ describe('Source', () => {
     });
 
     it('should return a function', () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const source = Source(() => {});
+        const source = Source(noop);
         expect(source).toBeFunction();
     });
 });
