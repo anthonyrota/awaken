@@ -269,6 +269,9 @@ export function SubjectBase<T>(): Subject<T> {
                     throw new SubjectDistributionSinkDisposalError(errors);
                 }
             } else if (eventOrSink.type !== PushType) {
+                if (eventOrSink.type === ThrowType) {
+                    asyncReportError(eventOrSink.error);
+                }
                 disposable.dispose();
             }
         }, disposable),
