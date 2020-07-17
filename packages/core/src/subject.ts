@@ -37,6 +37,28 @@ export function markAsSubject<T>(
     return subjectFunction as Subject<T>;
 }
 
+/**
+ * Determines whether the given value is a Subject.
+ * @param value The value to check.
+ * @returns Whether the value is a Subject.
+ *
+ * @example
+ * isSubject(Sink(() => {})); // false.
+ * isSubject(Source(() => {})) // false.
+ * isSubject(Subject()); // true.
+ * isSubject(Disposable()); // false.
+ * isSubject({}); // false.
+ * isSubject(() => {}); // false.
+ * isSubject(null); // false.
+ *
+ * @see {@link Sink}
+ * @see {@link Source}
+ * @see {@link Subject}
+ * @see {@link Disposable}
+ * @see {@link isDisposable}
+ * @see {@link isSink}
+ * @see {@link isSource}
+ */
 export function isSubject(value: unknown): value is Subject<unknown> {
     return isSource(value) && isSink(value);
 }

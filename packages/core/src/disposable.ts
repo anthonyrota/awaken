@@ -173,6 +173,13 @@ type DisposableImplementation =
     | RealDisposableImplementation
     | FakeDisposableImplementation;
 
+// eslint-disable-next-line max-len
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/unbound-method
+const activeGetter = Object.getOwnPropertyDescriptor(
+    RealDisposableImplementation.prototype,
+    'active',
+)!.get as () => boolean;
+
 /**
  * Implements the Disposable Interface onto the given value by copying the
  * disposable methods & properties from the given value to the given disposable.
@@ -297,6 +304,28 @@ export function Disposable(onDispose?: () => void): Disposable {
     ) as unknown) as Disposable;
 }
 
+/*
+ * Determines whether the given value is a Disposable.
+ * @param value The value to check.
+ * @returns Whether the value is a Disposable.
+ *
+ * @example
+ * isDisposable(Sink(() => {})); // true.
+ * isDisposable(Source(() => {})) // false.
+ * isDisposable(Subject()); // true.
+ * isDisposable(Disposable()); // true.
+ * isDisposable({}); // false.
+ * isDisposable(() => {}); // false.
+ * isDisposable(null); // false.
+ *
+ * @see {@link Sink}
+ * @see {@link Source}
+ * @see {@link Subject}
+ * @see {@link Disposable}
+ * @see {@link isSink}
+ * @see {@link isSource}
+ * @see {@link isSubject}
+ */
 export function isDisposable(value: unknown): value is Disposable {
     if (value == null) {
         return false;
@@ -316,10 +345,3 @@ export function isDisposable(value: unknown): value is Disposable {
 
 export const DISPOSED: Disposable = Disposable();
 DISPOSED.dispose();
-
-// eslint-disable-next-line max-len
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/unbound-method
-const activeGetter = Object.getOwnPropertyDescriptor(
-    RealDisposableImplementation.prototype,
-    'active',
-)!.get as () => boolean;

@@ -26,35 +26,84 @@ export type EndType = 2;
 export const EndType: EndType = 2;
 export type EventType = PushType | ThrowType | EndType;
 
-/**
- * Represents an event which "pushes" a value to a sink.
- */
 export interface Push<T> {
     readonly type: PushType;
     readonly value: T;
 }
 
-/**
- * Represents an event where an error has been thrown.
- */
 export interface Throw {
     readonly type: ThrowType;
     readonly error: unknown;
 }
 
-/**
- * Represents the end of a source.
- */
 export interface End {
     readonly type: EndType;
 }
 
+/**
+ * This is the base construct for distributing values/messages. All things
+ * pushed and received to and from {@link Sink|Sinks} will be events. An event
+ * is an object which consists of a `type` field, which determines the type of
+ * the event. There are three types of events: {@link Push}, {@link Throw} and
+ * {@link End} events:
+ *
+ * - A Push event represents the "pushing" of a value to a sink, and has a
+ *   `value` field equal to the value the event is carrying.
+ *
+ * - A Throw represents the "throwing" of an error, and has an `error` field
+ *   equal to the error the event is carrying. After a Sink receives an Error
+ *   event, it will be disposed and will not take any more events.
+ *
+ * - An End event represents the "end" of a source, and has no additional
+ *   properties. After a Sink receives an End event, it will be disposed and
+ *   will not take any more events.
+ *
+ * When determining an event's type, you should **always** use either
+ * {@link PushType}, {@link ThrowType} or {@link EndType} directly instead of
+ * their constant number values.
+ *
+ * @example
+ * const sink = Sink<number>(event => {
+ *     console.log(event.type); // Either `PushType`, `ThrowType` or `EndType`.
+ *     if (event.type === PushType) {
+ *         // In this case event.value this will be of type `number`.
+ *         console.log('value:', event.value);
+ *     } else if (event.type === ThrowType) {
+ *         const error = event.error; // This is of type `unknown`.
+ *         console.log('error', event.error);
+ *     }
+ * });
+ * sink(Push(2)); // `${PushType}`, value: 2.
+ * sink(Throw(new Error('...'))); // `${ThrowType}`, Error(...).
+ *
+ * @see {@link Push}
+ * @see {@link Throw}
+ * @see {@link End}
+ * @see {@link PushType}
+ * @see {@link ThrowType}
+ * @see {@link EndType}
+ * @see {@link Source}
+ * @see {@link Sink}
+ */
 export type Event<T> = Push<T> | Throw | End;
 
 /**
- * Creates a Push event.
+ * A Push event represents the "pushing" of a value to a {@link Sink}, and has a
+ * `value` field equal to the value the event is carrying.
+ *
  * @param value The value to send.
  * @returns The created Push event.
+ *
+ * @example
+ * const event = Push([1, 2, 3]);
+ * console.log(event.type); // `${PushType}`.
+ * console.log(event.value); // [1, 2, 3].
+ *
+ * @see {@link Event}
+ * @see {@link Throw}
+ * @see {@link End}
+ * @see {@link Source}
+ * @see {@link Sink}
  */
 export function Push<T>(): Push<undefined>;
 export function Push<T>(value: T): Push<T>;
@@ -63,37 +112,233 @@ export function Push<T>(value?: T): Push<T | undefined> {
 }
 
 /**
- * Creates a Throw event.
+ * A Throw represents the "throwing" of an error, and has an `error` field equal
+ * to the error the event is carrying. After a {@link Sink} receives an Error
+ * event, it will be disposed and will not take any more events.
+ *
  * @param error The error to be thrown.
  * @returns The created Throw event.
+ *
+ * @example
+ * const event = Throw(new Error(...));
+ * console.log(event.type); // `${ThrowType}`.
+ * console.log(event.value); // Error(...).
+ *
+ * @see {@link Event}
+ * @see {@link Push}
+ * @see {@link End}
+ * @see {@link Source}
+ * @see {@link Sink}
  */
 export function Throw(error: unknown): Throw {
     return { type: ThrowType, error };
 }
 
+/**
+ * An End event represents the "end" of a {@link Source}, and has no additional
+ * properties. After a Sink receives an End event, it will be disposed and will
+ * not take any more events.
+ *
+ * @example
+ * function onEvent(event: Event<unknown>): void {
+ *     console.log(event.type);
+ * };
+ * const sink = Sink(onEvent);
+ * sink(End); // This disposes the sink, then calls `onEvent` above.
+ * // Logs:
+ * // `${EndType}`
+ *
+ * @see {@link Event}
+ * @see {@link Push}
+ * @see {@link Throw}
+ * @see {@link Source}
+ * @see {@link Sink}
+ */
 export const End: End = { type: EndType };
 
-/**
- * A Sink is what a Source subscribes to. All events emitted by the source will
- * be passed to the sink that has been given to the source.
- */
 export interface Sink<T> extends Disposable {
     [$$Sink]: undefined;
     (event: Event<T>): void;
 }
 
 /**
- * Creates a Sink. A Sink is what a Source subscribes to. All events emitted by
- * the source will be passed to the sink that has been given to the source.
+ * A Sink is what a {@link Source} subscribes to. All events emitted by the
+ * source will be passed to the sink that has been given to the source.
+ *
+ * The shape of a Sink is a function which takes an {@link Event} and
+ * distributes it to the `onEvent` function as described below. Sinks also
+ * implement the {@link Disposable} construct, and has all of the methods of the
+ * Disposable type, and can be treated as a Disposable. This is important as the
+ * way to stop a sink (and also unsubscribe the sources subscribed to the sink)
+ * is to dispose the sink itself. This also means that the way to cleanup or
+ * cancel some process when a Sink stops taking values (for example, when
+ * creating a custom Source), is to add a child to the Sink (as done on a
+ * disposable), which will then be called when the Sink is disposed. An example
+ * of this cancellation ability is say, cancelling a http request.
+ *
+ * The sink constructor takes an `onEvent` function, which is called every time
+ * an event is received. When a sink is disposed, it will stop taking values and
+ * will ignore all subsequent events received. As well as this, when the sink is
+ * active and when the event received is a ThrowEvent or an EndEvent, then the
+ * sink will be disposed and then *after* this the `onEvent` function will
+ * called with the given event. If the `onEvent` function throws upon receiving
+ * an event, then the sink will immediately be disposed and the error will be
+ * thrown asynchronously in a `setTimeout` with delay zero.
+ *
  * @param onEvent The callback for when an event is received.
- * @param subscription When this is disposed this sink will stop taking values,
- *     and any source which this sink has subscribed to will stop emitting
- *     values to this sink.
+ * @returns The created Sink.
+ *
+ * @example
+ * const sink = Sink<number>(event => {
+ *     if (event.type === PushType) {
+ *         console.log(event.value);
+ *     } else if (event.type === EndType) {
+ *         console.log('ended');
+ *     }
+ * });
+ * sink(Push(1));
+ * sink(Push(2));
+ * sinK(End);
+ * // Logs:
+ * // 1
+ * // 2
+ * // ended
+ *
+ * @example
+ * const sink = Sink<number>(event => {
+ *     console.log(event);
+ * });
+ * sink(Push(1));
+ * sink(Throw(new Error('some error was caught')));
+ * sink(Push(4)); // Ignored.
+ * sink(End); // Ignored.
+ * sink(Throw(...)); // Ignored.
+ * // Logs:
+ * // { type: PushType, value: 1 }
+ * // { type: ThrowType, error: Error }
+ *
+ * @example
+ * const sink = Sink<number>(event => {
+ *     if (event.type === PushType && event.value === 5) {
+ *         // This means that the Sink will stop receiving values, and all
+ *         // disposable children added to this Sink will be disposed, allowing
+ *         // for cleanup, for example in sources subscribed to this Sink.
+ *         sink.dispose();
+ *     }
+ *     console.log(event);
+ * });
+ * for (let i = 0; i < 1_000_000_000 && sink.active; i++) {
+ *     // Because the loop above checks if `sink.active` is true at the start of
+ *     // every iteration, the loop will be exited when i === 6 before the
+ *     // following is called, meaning that the following will never be reached
+ *     // when i > 5. This is important as we want to stop iterating after the
+ *     // source is disposed, meaning it won't take any more values. This
+ *     // optimization prevents us from iterating pointlessly one billion times,
+ *     // and instead we only iterate six times, with the `sink.active` check
+ *     // breaking the loop on the seventh iteration.
+ *     sink(Push(i));
+ * }
+ * sink(End); // This is ignored.
+ * // Logs:
+ * // { type: PushType, value: 0 }
+ * // { type: PushType, value: 1 }
+ * // { type: PushType, value: 2 }
+ * // { type: PushType, value: 3 }
+ * // { type: PushType, value: 4 }
+ * // { type: PushType, value: 5 }
+ * // Note: The End event is ignored here, as the sink was disposed upon
+ * // receiving the Push(5) event.
+ *
+ * @example
+ * function onEvent(event: Event<unknown>): void {
+ *     console.log(event);
+ *     if (event.type === PushType && event.value === 2) {
+ *         throw new Error('I don\'t like the value two. Begone.');
+ *     }
+ * }
+ * const sink = Sink<number>(onEvent);
+ * for (let i = 0; i < 10 && sink.active; i++) {
+ *     // When i === 2, after the event is logged above, `onEvent` will throw an
+ *     // error. When this happens, the sink will catch the error and it will be
+ *     // thrown asynchronously in a setTimeout. As well as this, the sink will
+ *     // be disposed immediately, unsubscribing anything subscribed to it.
+ *     // Because the loop above checks if `sink.active` is true at the start of
+ *     // every iteration, the loop will be exited when i === 3 before the
+ *     // following is called.
+ *     sink(Push(i));
+ * }
+ * sink(End); // This is ignored.
+ * // Logs:
+ * // { type: PushType, value: 0 }
+ * // { type: PushType, value: 1 }
+ * // { type: PushType, value: 2 }
+ *
+ * @example
+ * import { Request, startRequest, cancelRequest } from './my-api.ts';
+ *
+ * const sink = Sink(() => {});
+ * // This is important as, in the case where the sink is disposed later
+ * // (meaning it will no longer take events), the request should be cancelled.
+ * // Note that in this case, cancelRequest will be called straight after the
+ * // sink receives the End event, which happens after the request completes and
+ * // the sink has already received a Push event with the result of the request.
+ * // However, in this example it is presumed that the cancelRequest function
+ * // will do nothing when given an already completed request.
+ * sink.add(() => {
+ *     cancelRequest(myRequest);
+ * });
+ * const myRequest = startRequest(result => {
+ *     sink(Push(result)));
+ *     sink(End);
+ * });
+ *
+ * // Alternatively, if `startRequest` takes a Disposable and will automatically
+ * // cancel the request when the disposable is disposed, in a similar manner to
+ * // `ScheduleFunction`, we can directly pass the sink to the `startRequest`
+ * // function and the request will automatically be cancelled when the sink is
+ * // disposed.
+ * const sink = Sink(() => {});
+ * startRequest(result => {
+ *     sink(Push(result));
+ *     sink(End)
+ * }, sink);
+ *
+ * @example
+ * // In this example the source emits values 0..49.
+ * const source = range(50);
+ * const sink = Sink(event => {
+ *     console.log(event);
+ *     if (event.value === 3) {
+ *         sink.dispose();
+ *     }
+ * })
+ * source(sink);
+ * // Logs:
+ * // Push(0)
+ * // Push(1)
+ * // Push(2)
+ * // Push(3)
+ *
+ * @see {@link Disposable}
+ * @see {@link Event}
+ * @see {@link Source}
+ * @see {@link Subject}
+ * @see {@link asyncReportError}
  */
 export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
     const disposable = Disposable();
     const sink = implDisposableMethods((event: Event<T>): void => {
         if (!disposable.active) {
+            if (event.type === ThrowType) {
+                const { error } = event;
+                throw new Error(
+                    `A Throw event was intercepted by a disposed Sink: ${
+                        // eslint-disable-next-line max-len
+                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                        (error instanceof Error && error.stack) || error
+                    }`,
+                );
+            }
             return;
         }
 
@@ -112,38 +357,200 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
     return (sink as unknown) as Sink<T>;
 }
 
+/**
+ * Determines whether the given value is a Sink.
+ * @param value The value to check.
+ * @returns Whether the value is a Sink.
+ *
+ * @example
+ * isSink(Sink(() => {})); // true.
+ * isSink(Source(() => {})) // false.
+ * isSink(Subject()); // true.
+ * isSink(Disposable()); // false.
+ * isSink({}); // false.
+ * isSink(() => {}); // false.
+ * isSink(null); // false.
+ *
+ * @see {@link Sink}
+ * @see {@link Source}
+ * @see {@link Subject}
+ * @see {@link Disposable}
+ * @see {@link isDisposable}
+ * @see {@link isSource}
+ * @see {@link isSubject}
+ */
 export function isSink(value: unknown): value is Sink<unknown> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return value != null && $$Sink in (value as any);
 }
 
-/**
- * A Source is a function which can be subscribed to with a sink and optionally
- * a subscription. The source will emit values to the given sink, and will stop
- * when the given subscription is disposed.
- */
 export interface Source<T> {
     [$$Source]: undefined;
     (sink: Sink<T>): void;
 }
 
 /**
- * Creates a Source. A Source is a function which can be subscribed to with a
- * sink and optionally a subscription. The source will emit values to the given
- * sink, and will stop when the given subscription is disposed.
- * @param base This will be called with a safe version of a Sink and a
- *     subscription when the source is subscribed to. The safeSink is a sink
- *     which additionally handles errors and disposal logic. When the given
- *     subscription is disposed, the safeSink will stop accepting events.
- * @returns The created source.
+ * A Source is a function which can be subscribed to with a {@link Sink}. This
+ * construct is the basis of all reactive programming done with this library.
+ * Sources are by default essentially a lazy push-style stream/observable which
+ * will produce new values every subscription. The "lazy" part can be thought of
+ * as follows:
+ *
+ * ```ts
+ * function mySource(): void {
+ *     return (sink: Sink<mySourceType>) => {
+ *         const producer = Producer();
+ *         // ...add subscriber to producer.
+ *         producer.produce();
+ *     }
+ * }
+ * ```
+ *
+ * Compared to a less lazy and more eager implementation:
+ *
+ * ```ts
+ * function mySource(): void {
+ *     const producer = Producer();
+ *     producer.produce();
+ *     return (sink: Sink<mySourceType>) => {
+ *          // ...add subscriber to producer.
+ *     }
+ * }
+ * ```
+ *
+ * The shape of a Source is a function which takes a Sink, which will be passed
+ * to the "produce" function given at the creation of the Source whose job is to
+ * fill up the Sink with values. When the Source is subscribed to, this produce
+ * function is called with the sink given to the source. The given produce
+ * function should stop trying to emit values to the subscribed sink when the
+ * subscribed sink is disposed, and should stop/cleanup any ongoing side
+ * processes.
+ *
+ * If the given (subscribed) sink is disposed (meaning it will not take any more
+ * values), then the given produce function will never be called and the sink
+ * will just be ignored. On the other hand, if the sink is active, then the
+ * given produce function will be called with the sink as the only parameter.
+ *
+ * However, if the given produce function throws an error during initial
+ * execution, the error will be passed to the sink if it is active at the time
+ * of throwing (it might not be active in the case where it is disposed inside
+ * the given produce function, and then *after* this the given produce function
+ * throws), then the error will be passed to the sink as a Throw event,
+ * otherwise is will be asynchronously reported through a `setTimeout` with
+ * delay zero, similar to how Promises don't synchronously throw errors during
+ * construction. Because of this error handling behavior, it is *always* a good
+ * practice to wrap any functions called asynchronously after subscription in a
+ * try/catch, then to pass the error on in a Throw event to the subscribed sink
+ * which can then handle it.
+ *
+ * The implementation for Source is very basic, and can roughly be thought of as
+ * follows:
+ *
+ * ```ts
+ * const Source = produce => sink => {
+ *     if (sink.active) {
+ *         try { produce(sink) }
+ *         catch (error) {
+ *             if (sink.active) sink(Throw(error));
+ *             else setTimeout(() => { throw error })
+ *         }
+ *     }
+ * }
+ * ```
+ *
+ * @param produce This will be called with the given sink each subscription.
+ *     When the sink is disposed this function should stop trying to emit
+ *     values, and should stop/cleanup any ongoing side processes
+ * @returns The created Source.
+ *
+ * @example
+ * // Creating a Source which synchronously produces values 0..50
+ * const source = Source(sink => {
+ *     // Note: It is guaranteed (at the start of execution of this function
+ *     // at least) that the sink here is active.
+ *     for (let i = 0; i <= 50 && sink.active; i++) {
+ *         sink(Push(i));
+ *     }
+ *     // Even if the above loop breaks, and the sink is no longer active, it
+ *     // will just ignore this End event, meaning there is no need to check
+ *     // whether the sink is active for distributing singular events like this
+ *     // at the end of execution.
+ *     sink(End);
+ * });
+ * source(Sink(console.log));
+ * source(Sink(console.log));
+ * // Logs:
+ * // Push(0)
+ * // Push(1)
+ * // ...
+ * // Push(50)
+ * // End
+ * // Push(0)
+ * // Push(1)
+ * // ...
+ * // Push(50)
+ * // End
+ *
+ * @example
+ * // Creating a Factory function which creates a Source that emits all the
+ * // values in the provided array at construction.
+ * function fromArray<T>(array: ArrayLike<T>): Source<T> {
+ *     return Source(sink => {
+ *         for (let i = 0; i < array.length && sink.active; i++) {
+ *             sink(Push(array[i]));
+ *         }
+ *         sink(End);
+ *     });
+ * }
+ * const array = [1, 2];
+ * fromArray(array)(Sink(console.log));
+ * fromArray(array)(Sink(console.log));
+ * // Logs:
+ * // Push(1)
+ * // Push(2)
+ * // End
+ * // Push(1)
+ * // Push(2)
+ * // End
+ *
+ * @example
+ * // Creating a Source that maps an external api into a reactive one.
+ * import { MyExternalSubscriptionToken, myExternalApi } from './myExternalApi';
+ * const source = Source(sink => {
+ *     let subscriptionToken: { v: MyExternalSubscriptionToken } | undefined;
+ *     sink.add(() => {
+ *         if (subscriptionToken) {
+ *              myExternalApi.cancel(subscriptionToken);
+ *         }
+ *     })
+ *     // In this example myExternalApi may throw.
+ *     try {
+ *         subscriptionToken = myExternalApi.request((value, error) => {
+ *             if (error) {
+ *                 sink(Throw(error));
+ *                 return;
+ *             }
+ *             sink(Push(value));
+ *             sink(End);
+ *         });
+ *     } catch (error) {
+ *         sink(Throw(error));
+ *     }
+ * });
+ *
+ * @see {@link Disposable}
+ * @see {@link Event}
+ * @see {@link Sink}
+ * @see {@link Subject}
+ * @see {@link asyncReportError}
  */
-export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
+export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
     function safeSource(sink: Sink<T>): void {
         if (!sink.active) {
             return;
         }
         try {
-            base(sink);
+            produce(sink);
         } catch (error) {
             let active: boolean;
             try {
@@ -171,6 +578,28 @@ export function Source<T>(base: (sink: Sink<T>) => void): Source<T> {
     return safeSource as Source<T>;
 }
 
+/**
+ * Determines whether the given value is a Source.
+ * @param value The value to check.
+ * @returns Whether the value is a Source.
+ *
+ * @example
+ * isSource(Sink(() => {})); // false.
+ * isSource(Source(() => {})); // true.
+ * isSource(Subject()); // true.
+ * isSource(Disposable()); // false.
+ * isSource({}); // false.
+ * isSource(() => {}); // false.
+ * isSource(null); // false.
+ *
+ * @see {@link Sink}
+ * @see {@link Source}
+ * @see {@link Subject}
+ * @see {@link Disposable}
+ * @see {@link isDisposable}
+ * @see {@link isSink}
+ * @see {@link isSubject}
+ */
 export function isSource(value: unknown): value is Sink<unknown> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return value != null && $$Source in (value as any);
@@ -181,8 +610,34 @@ export function isSource(value: unknown): value is Sink<unknown> {
  * receives a source that will be subscribed to using the given sink. This is
  * useful, for example, at the end of pipe calls in order to subscribe to the
  * transformed source.
+ *
  * @param sink The sink to be given to the received source.
  * @returns The higher order function which takes a source to subscribe to.
+ *
+ * @example
+ * import { DogPictures, myGetDogPictures } from './myApi.ts';
+ * import { MyRequestTimeoutError } from './myRequestTimeoutError.ts';
+ * import { myReportError } from './myReportError.ts'
+ * import { myUpdateViewWithDogs } from './myUpdateViewWithDogs.ts'
+ *
+ * const sink = Sink<DogPictures>(event => {
+ *     if (event.type === ThrowType) {
+ *         myReportError(event.error)
+ *     } else if (event.type === EndType) {
+ *         return;
+ *     }
+ *     myUpdateViewWithDogs(event.value)
+ * });
+ *
+ * pipe(
+ *     myGetDogPictures(...),
+ *     timeoutMs(5000, throwError(() => new MyRequestTimeoutError())),
+ *     retry(3),
+ *     subscribe(sink)
+ * );
+ *
+ * @see {@link Source}
+ * @see {@link Sink}
  */
 export function subscribe<T>(
     sink = Sink<T>(noop),

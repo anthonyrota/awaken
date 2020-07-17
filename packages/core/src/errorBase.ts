@@ -60,7 +60,7 @@ export function joinErrors(errors: unknown[]): string {
             const displayedError = `${
                 // eslint-disable-next-line max-len
                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                error instanceof Error && error.stack ? error.stack : error
+                (error instanceof Error && error.stack) || error
             }`;
 
             return (
