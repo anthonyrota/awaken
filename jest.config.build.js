@@ -4,7 +4,7 @@ module.exports = {
     ...baseConfig,
     moduleNameMapper: {
         ...baseConfig.moduleNameMapper,
-        '^@awaken/core$': '<rootDir>/packages/core/dist/awaken.js',
-        '^@awaken/testing$': '<rootDir>/packages/testing/dist/testing.js',
+        '^@awaken/core$': '<rootDir>/packages/core/dist/awakenCore.js',
+        '^@awaken/testing$': '<rootDir>/packages/testing/dist/awakenTesting.js',
     },
 };

@@ -5,3 +5,5 @@
 *.ts eol=lf
 *.tsx eol=lf
 *.yml eol=lf
+
+*.json linguist-language=JSON-with-Comments

@@ -18,6 +18,6 @@
         "filetypes"
     ],
     "ignoreRegExpList": [],
-    "words": ["callbags", "commitlint"],
+    "words": ["callbags", "commitlint", "tsdoc"],
     "overrides": []
 }

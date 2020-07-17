@@ -7,6 +7,9 @@ import {
     FrameRequestCallback,
 } from './util';
 
+/**
+ * @public
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface ScheduleFunction<T extends any[] = []> {
     (callback: (...args: T) => void, subscription?: Disposable): void;
@@ -18,6 +21,9 @@ interface ScheduleQueuedCallback<T extends any[]> {
     __hasBeenRemovedFromQueue: boolean;
 }
 
+/**
+ * @public
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ScheduleQueued<T extends any[] = []>(
     schedule: (
@@ -164,6 +170,9 @@ export function ScheduleQueued<T extends any[] = []>(
     };
 }
 
+/**
+ * @public
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ScheduleQueuedDiscrete<T extends any[] = []>(
     schedule: (
@@ -188,6 +197,9 @@ export function ScheduleQueuedDiscrete<T extends any[] = []>(
     });
 }
 
+/**
+ * @public
+ */
 export const scheduleSync: ScheduleFunction = (callback, subscription) => {
     if (subscription && !subscription.active) {
         return;
@@ -205,31 +217,52 @@ function ScheduleSyncQueuedInner(
     } while (subscription.active);
 }
 
+/**
+ * @public
+ */
 export function ScheduleSyncQueued(): ScheduleFunction {
     return ScheduleQueued(ScheduleSyncQueuedInner);
 }
 
+/**
+ * @public
+ */
 export type ScheduleAnimationFrameFunction = ScheduleFunction<
     Parameters<FrameRequestCallback>
 >;
 
+/**
+ * @public
+ */
 // eslint-disable-next-line max-len
 export const scheduleAnimationFrame: ScheduleAnimationFrameFunction = requestAnimationFrame;
 
+/**
+ * @public
+ */
 export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
     return ScheduleQueuedDiscrete(scheduleAnimationFrame);
 }
 
+/**
+ * @public
+ */
 export function ScheduleTimeout(delayMs: number): ScheduleFunction {
     return (callback, subscription) => {
         setTimeout(callback, delayMs, subscription);
     };
 }
 
+/**
+ * @public
+ */
 export function ScheduleTimeoutQueued(delayMs: number): ScheduleFunction {
     return ScheduleQueuedDiscrete(ScheduleTimeout(delayMs));
 }
 
+/**
+ * @public
+ */
 export function ScheduleInterval(delayMs: number): ScheduleFunction {
     return ScheduleQueued((callNext, subscription) => {
         setInterval(callNext, delayMs, subscription);

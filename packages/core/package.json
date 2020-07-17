@@ -1,15 +1,15 @@
 {
     "name": "@awaken/core",
-    "amdName": "awaken",
+    "amdName": "awakenCore",
     "version": "0.0.0",
     "description": "A fast and extremely lightweight reactive programming library for Typescript",
     "source": "src/index.ts",
-    "main": "dist/awaken.js",
-    "module": "dist/awaken.module.js",
-    "umd:main": "dist/awaken.umd.js",
-    "unpkg": "dist/awaken.umd.js",
-    "jsdelivr": "dist/awaken.umd.js",
-    "types": "dist/index.d.ts",
+    "main": "dist/awakenCore.js",
+    "module": "dist/awakenCore.module.js",
+    "umd:main": "dist/awakenCore.umd.js",
+    "unpkg": "dist/awakenCore.umd.js",
+    "jsdelivr": "dist/awakenCore.umd.js",
+    "types": "dist/awakenCore.d.ts",
     "license": "MIT",
     "keywords": [
         "awaken",
@@ -33,10 +33,10 @@
     "sideEffects": "false",
     "exports": {
         ".": {
-            "browser": "./dist/awaken.module.js",
-            "umd": "./dist/awaken.umd.js",
-            "import": "./dist/awaken.mjs",
-            "require": "./dist/awaken.js"
+            "browser": "./dist/awakenCore.module.js",
+            "umd": "./dist/awakenCore.umd.js",
+            "import": "./dist/awakenCore.mjs",
+            "require": "./dist/awakenCore.js"
         },
         "./package.json": "./package.json"
     },
@@ -45,7 +45,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "microbundle build --raw --tsconfig ./tsconfig.build.json && node ./postbuild.js",
+        "build": "microbundle build --raw --tsconfig ./tsconfig.build.json && api-extractor run --local --verbose && node ./postbuild.js",
         "clean": "rimraf dist && node ../../clearMicrobundleCache.js",
         "clean:prebuild": "rimraf dist"
     },

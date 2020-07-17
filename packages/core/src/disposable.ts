@@ -14,6 +14,9 @@ const enum DisposableImplementationIdentifier {
     FakeDisposable,
 }
 
+/**
+ * @public
+ */
 export interface Disposable extends DisposableBase<Disposable> {
     [$$Disposable]: DisposableImplementationIdentifier;
 }
@@ -183,11 +186,14 @@ const activeGetter = Object.getOwnPropertyDescriptor(
 /**
  * Implements the Disposable Interface onto the given value by copying the
  * disposable methods & properties from the given value to the given disposable.
- * @param value The value to implement the Disposable Interface on.
- * @param disposableImplementation The disposable to proxy to.
+ *
+ * @param value - The value to implement the Disposable Interface on.
+ * @param disposableImplementation - The disposable to proxy to.
  * @returns The given value which has been mutated. In strict javascript this is
  *     unnecessary but here it is useful as the returned value will have the
  *     type `T & Disposable`
+ *
+ * @public
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function implDisposableMethods<T extends object>(
@@ -253,6 +259,9 @@ interface DisposalErrorImplementation extends Error {
     errors: unknown[];
 }
 
+/**
+ * @public
+ */
 export interface DisposalError extends DisposalErrorImplementation {
     /**
      * The flattened list of errors thrown during disposal.
@@ -260,6 +269,9 @@ export interface DisposalError extends DisposalErrorImplementation {
     readonly errors: unknown[];
 }
 
+/**
+ * @public
+ */
 export interface DisposalErrorConstructor {
     new (errors: unknown[]): DisposalError;
     prototype: DisposalError;
@@ -267,6 +279,8 @@ export interface DisposalErrorConstructor {
 
 /**
  * Thrown when at least one error is caught during the disposal of a disposable.
+ *
+ * @public
  */
 export const DisposalError: DisposalErrorConstructor = createCustomError(
     (self: DisposalErrorImplementation, errors: unknown[]) => {
@@ -298,18 +312,22 @@ function flattenDisposalErrors(errors: unknown[]): unknown[] {
     return flattened;
 }
 
+/**
+ * @public
+ */
 export function Disposable(onDispose?: () => void): Disposable {
     return (new RealDisposableImplementation(
         onDispose,
     ) as unknown) as Disposable;
 }
 
-/*
+/**
  * Determines whether the given value is a Disposable.
- * @param value The value to check.
+ * @param value - The value to check.
  * @returns Whether the value is a Disposable.
  *
  * @example
+ * ```
  * isDisposable(Sink(() => {})); // true.
  * isDisposable(Source(() => {})) // false.
  * isDisposable(Subject()); // true.
@@ -317,14 +335,17 @@ export function Disposable(onDispose?: () => void): Disposable {
  * isDisposable({}); // false.
  * isDisposable(() => {}); // false.
  * isDisposable(null); // false.
+ * ```
  *
- * @see {@link Sink}
- * @see {@link Source}
- * @see {@link Subject}
- * @see {@link Disposable}
+ * @see {@link (Sink:function)}
+ * @see {@link (Source:function)}
+ * @see {@link (Subject:function)}
+ * @see {@link (Disposable:function)}
  * @see {@link isSink}
  * @see {@link isSource}
  * @see {@link isSubject}
+ *
+ * @public
  */
 export function isDisposable(value: unknown): value is Disposable {
     if (value == null) {
@@ -343,5 +364,8 @@ export function isDisposable(value: unknown): value is Disposable {
     );
 }
 
+/**
+ * @public
+ */
 export const DISPOSED: Disposable = Disposable();
 DISPOSED.dispose();

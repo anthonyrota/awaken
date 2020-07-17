@@ -4,6 +4,7 @@
     "devDependencies": {
         "@commitlint/cli": "9.1.1",
         "@commitlint/config-conventional": "9.1.1",
+        "@microsoft/api-extractor": "7.9.2",
         "@types/jest": "26.0.4",
         "@types/node": "14.0.23",
         "@types/rimraf": "3.0.0",
@@ -27,8 +28,8 @@
         "prettier": "2.0.5",
         "rimraf": "3.0.2",
         "standard-version": "8.0.2",
-        "ts-jest": "26.1.2",
-        "typescript": "3.9.6"
+        "ts-jest": "26.1.3",
+        "typescript": "3.9.7"
     },
     "scripts": {
         "build": "lerna run clean:prebuild && lerna run build",
@@ -39,5 +40,6 @@
         "test:build": "npm run test && npm run build && jest --runInBand --config ./jest.config.build.js",
         "lint": "eslint . && prettier --list-different . && cspell '**/*.{ts,js,md}' && tsc --noEmit",
         "cz": "git-cz"
-    }
+    },
+    "dependencies": {}
 }

@@ -18,16 +18,25 @@ import {
     removeOnce,
     asyncReportError,
     identity,
-    binarySearchNextLargestIndex,
+    _binarySearchNextLargestIndex,
     TimeProvider,
 } from './util';
 
+/**
+ * @public
+ */
 export interface NonMarkedSubject<T> extends Disposable {
     (eventOrSink: Event<T> | Sink<T>): void;
 }
 
+/**
+ * @public
+ */
 export interface Subject<T> extends Source<T>, Sink<T>, NonMarkedSubject<T> {}
 
+/**
+ * @public
+ */
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function markAsSubject<T>(
     subjectFunction: NonMarkedSubject<T>,
@@ -39,10 +48,11 @@ export function markAsSubject<T>(
 
 /**
  * Determines whether the given value is a Subject.
- * @param value The value to check.
+ * @param value - The value to check.
  * @returns Whether the value is a Subject.
  *
  * @example
+ * ```
  * isSubject(Sink(() => {})); // false.
  * isSubject(Source(() => {})) // false.
  * isSubject(Subject()); // true.
@@ -50,14 +60,17 @@ export function markAsSubject<T>(
  * isSubject({}); // false.
  * isSubject(() => {}); // false.
  * isSubject(null); // false.
+ * ```
  *
- * @see {@link Sink}
- * @see {@link Source}
- * @see {@link Subject}
- * @see {@link Disposable}
+ * @see {@link (Sink:function)}
+ * @see {@link (Source:function)}
+ * @see {@link (Subject:function)}
+ * @see {@link (Disposable:function)}
  * @see {@link isDisposable}
  * @see {@link isSink}
  * @see {@link isSource}
+ *
+ * @public
  */
 export function isSubject(value: unknown): value is Subject<unknown> {
     return isSource(value) && isSink(value);
@@ -75,6 +88,9 @@ interface SubjectBasePrivateActiveState<T> {
     __eventsQueue: Event<T>[];
 }
 
+/**
+ * @public
+ */
 export function SubjectBase<T>(): Subject<T> {
     let distributingEvent = false;
     let sinkIndex = 0;
@@ -263,6 +279,9 @@ interface SubjectDistributionSinkDisposalErrorImplementation extends Error {
     errors: DisposalError[];
 }
 
+/**
+ * @public
+ */
 export interface SubjectDistributionSinkDisposalError
     extends SubjectDistributionSinkDisposalErrorImplementation {
     /**
@@ -271,6 +290,9 @@ export interface SubjectDistributionSinkDisposalError
     readonly errors: DisposalError[];
 }
 
+/**
+ * @public
+ */
 export interface SubjectDistributionSinkDisposalErrorConstructor {
     new (errors: DisposalError[]): SubjectDistributionSinkDisposalError;
     prototype: SubjectDistributionSinkDisposalError;
@@ -279,6 +301,8 @@ export interface SubjectDistributionSinkDisposalErrorConstructor {
 /**
  * Thrown when at least least one error is caught during the checking of whether
  * a subscribed sink is active or not.
+ *
+ * @public
  */
 // eslint-disable-next-line max-len
 export const SubjectDistributionSinkDisposalError: SubjectDistributionSinkDisposalErrorConstructor = createCustomError(
@@ -297,6 +321,9 @@ export const SubjectDistributionSinkDisposalError: SubjectDistributionSinkDispos
     },
 );
 
+/**
+ * @public
+ */
 export function Subject<T>(): Subject<T> {
     const base = SubjectBase<T>();
     let finalEvent: Throw | End | undefined;
@@ -324,10 +351,16 @@ export function Subject<T>(): Subject<T> {
     );
 }
 
+/**
+ * @public
+ */
 export interface CurrentValueSubject<T> extends Subject<T> {
     currentValue: T;
 }
 
+/**
+ * @public
+ */
 export function CurrentValueSubject<T>(initialValue: T): Subject<T> {
     const base = Subject<T>();
 
@@ -351,11 +384,17 @@ export function CurrentValueSubject<T>(initialValue: T): Subject<T> {
     return subject as CurrentValueSubject<T>;
 }
 
+/**
+ * @public
+ */
 export interface ReplaySubjectTimeoutConfig {
     maxDuration: number;
     provideTime?: TimeProvider | null;
 }
 
+/**
+ * @public
+ */
 export function ReplaySubject<T>(
     count_?: number | null,
     timeoutConfig_?: ReplaySubjectTimeoutConfig | null,
@@ -393,7 +432,7 @@ export function ReplaySubject<T>(
 
     function trimTime(): void {
         const currentTime = provideTime();
-        const firstValidIndex_ = binarySearchNextLargestIndex(
+        const firstValidIndex_ = _binarySearchNextLargestIndex(
             deadlines,
             identity,
             currentTime,
@@ -473,6 +512,9 @@ export function ReplaySubject<T>(
     );
 }
 
+/**
+ * @public
+ */
 export function FinalValueSubject<T>(): Subject<T> {
     const base = SubjectBase<T>();
     let lastPushEvent: Push<T> | undefined;

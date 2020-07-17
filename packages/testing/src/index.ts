@@ -13,21 +13,26 @@ import {
     _b as binarySearchNextLargestIndex,
 } from '@awaken/core';
 
-interface TestScheduleFunction {
+interface TestScheduleImplementation {
     (
         callback: () => void,
         delayFrames: number,
         subscription?: Disposable,
     ): void;
-}
-
-interface TestScheduleImplementation extends TestScheduleFunction {
     currentFrame: number;
     flush: () => void;
     reset: () => void;
 }
 
-export interface TestSchedule extends TestScheduleImplementation {
+/**
+ * @public
+ */
+export interface TestSchedule {
+    (
+        callback: () => void,
+        delayFrames: number,
+        subscription?: Disposable,
+    ): void;
     readonly currentFrame: number;
     readonly flush: () => void;
     readonly reset: () => void;
@@ -43,11 +48,18 @@ function getActionExecutionFrame(action: TestScheduleAction): number {
     return action.__executionFrame;
 }
 
+/**
+ * @public
+ */
 export function TestSchedule(): TestSchedule {
     const actions: TestScheduleAction[] = [];
     let isFlushing = false;
 
-    const testSchedule = (((callback, delayFrames, subscription) => {
+    const testSchedule = ((
+        callback: () => void,
+        delayFrames: number,
+        subscription?: Disposable,
+    ) => {
         if (subscription && !subscription.active) {
             return;
         }
@@ -73,7 +85,7 @@ export function TestSchedule(): TestSchedule {
                 }),
             );
         }
-    }) as TestScheduleFunction) as TestScheduleImplementation;
+    }) as TestScheduleImplementation;
 
     testSchedule.currentFrame = 0;
 
@@ -116,11 +128,17 @@ export function TestSchedule(): TestSchedule {
     return testSchedule as TestSchedule;
 }
 
+/**
+ * @public
+ */
 export interface TestSubscriptionInfo {
     subscriptionStartFrame: number;
     subscriptionEndFrame: number;
 }
 
+/**
+ * @public
+ */
 export function TestSubscriptionInfo(
     subscriptionStartFrame: number,
     subscriptionEndFrame: number,
@@ -148,25 +166,52 @@ function watchSubscriptionInfo(
     return info;
 }
 
+/**
+ * @public
+ */
 export type TestSourceSubscriptions = ReadonlyArray<
     Readonly<TestSubscriptionInfo>
 >;
 
-interface WithFrameProperty {
+/**
+ * @public
+ */
+export type TestSourceEvent<T> = Event<T> & {
     readonly frame: number;
-}
+};
 
-export type TestSourceEvent<T> = Event<T> & WithFrameProperty;
-
-export function P<T>(value: T, frame: number): Push<T> & WithFrameProperty {
+/**
+ * @public
+ */
+export function P<T>(
+    value: T,
+    frame: number,
+): Push<T> & {
+    readonly frame: number;
+} {
     return { type: PushType, value, frame };
 }
 
-export function T(error: unknown, frame: number): Throw & WithFrameProperty {
+/**
+ * @public
+ */
+export function T(
+    error: unknown,
+    frame: number,
+): Throw & {
+    readonly frame: number;
+} {
     return { type: ThrowType, error, frame };
 }
 
-export function E(frame: number): End & WithFrameProperty {
+/**
+ * @public
+ */
+export function E(
+    frame: number,
+): End & {
+    readonly frame: number;
+} {
     return { type: EndType, frame };
 }
 
@@ -174,10 +219,16 @@ interface TestSourceImplementation<T> extends Source<T> {
     subscriptions: TestSourceSubscriptions;
 }
 
-export interface TestSource<T> extends TestSourceImplementation<T> {
+/**
+ * @public
+ */
+export interface TestSource<T> extends Source<T> {
     readonly subscriptions: TestSourceSubscriptions;
 }
 
+/**
+ * @public
+ */
 export function TestSource<T>(
     events: TestSourceEvent<T>[],
     testSchedule: TestSchedule,
@@ -202,11 +253,16 @@ interface SharedTestSourceImplementation<T>
     schedule: (subscription?: Disposable) => void;
 }
 
-export interface SharedTestSource<T> extends SharedTestSourceImplementation<T> {
-    readonly subscriptions: TestSourceSubscriptions;
+/**
+ * @public
+ */
+export interface SharedTestSource<T> extends TestSource<T> {
     readonly schedule: (subscription?: Disposable) => void;
 }
 
+/**
+ * @public
+ */
 export function SharedTestSource<T>(
     events: TestSourceEvent<T>[],
     testSchedule: TestSchedule,
@@ -233,6 +289,9 @@ export function SharedTestSource<T>(
     return base as SharedTestSource<T>;
 }
 
+/**
+ * @public
+ */
 export function watchSourceEvents<T>(
     source: Source<T>,
     testSchedule: TestSchedule,

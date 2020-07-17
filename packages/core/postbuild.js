@@ -1,25 +1,19 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const {
     getAbsolutePath,
-    readFile,
-    writeFile,
+    // readFile,
+    // writeFile,
     renameOutputModule,
 } = require('../../fileUtil');
+const fs = require('fs');
 
 renameOutputModule({
-    from: getAbsolutePath('dist', 'awaken.module.js'),
+    from: getAbsolutePath('dist', 'awakenCore.module.js'),
     toDir: getAbsolutePath('dist'),
-    toName: 'awaken.mjs',
+    toName: 'awakenCore.mjs',
 });
 
-(function () {
-    const filePath = getAbsolutePath('dist', 'index.d.ts');
-    const toRemove = ' binarySearchNextLargestIndex as _b,';
-    const source = readFile(filePath);
-
-    if (!source.includes(toRemove)) {
-        throw new Error(`index.d.ts does not contain ${toRemove}`);
-    }
-
-    writeFile(filePath, source.replace(toRemove, ''));
-})();
+fs.readdirSync(getAbsolutePath('src')).forEach((file) => {
+    fs.unlinkSync(getAbsolutePath('dist', file.replace('.ts', '.d.ts')));
+    fs.unlinkSync(getAbsolutePath('dist', file.replace('.ts', '.d.ts.map')));
+});

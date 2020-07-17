@@ -18,33 +18,64 @@ import {
     TimeProvider,
 } from './util';
 
+/**
+ * @public
+ */
 export type PushType = 0;
+/**
+ * @public
+ */
 export const PushType: PushType = 0;
+/**
+ * @public
+ */
 export type ThrowType = 1;
+/**
+ * @public
+ */
 export const ThrowType: ThrowType = 1;
+/**
+ * @public
+ */
 export type EndType = 2;
+/**
+ * @public
+ */
 export const EndType: EndType = 2;
+/**
+ * @public
+ */
 export type EventType = PushType | ThrowType | EndType;
 
+/**
+ * @public
+ */
 export interface Push<T> {
     readonly type: PushType;
     readonly value: T;
 }
 
+/**
+ * @public
+ */
 export interface Throw {
     readonly type: ThrowType;
     readonly error: unknown;
 }
 
+/**
+ * @public
+ */
 export interface End {
     readonly type: EndType;
 }
 
 /**
  * This is the base construct for distributing values/messages. All things
- * pushed and received to and from {@link Sink|Sinks} will be events. An event
- * is an object which consists of a `type` field, which determines the type of
- * the event. There are three types of events: {@link Push}, {@link Throw} and
+ * pushed and received to and from {@link (Sink:function)|Sinks} will be events.
+ * An event is an object which consists of a `type` field, which determines the
+ * type of the event. There are three types of events:
+ * {@link (Push:VALUE_ARG)}, {@link (Throw:function)} and
  * {@link End} events:
  *
  * - A Push event represents the "pushing" of a value to a sink, and has a
@@ -59,10 +90,11 @@ export interface End {
  *   will not take any more events.
  *
  * When determining an event's type, you should **always** use either
- * {@link PushType}, {@link ThrowType} or {@link EndType} directly instead of
- * their constant number values.
+ * {@link (PushType:variable)}, {@link (ThrowType:variable)} or
+ * {@link (EndType:variable)} directly instead of their constant number values.
  *
  * @example
+ * ```
  * const sink = Sink<number>(event => {
  *     console.log(event.type); // Either `PushType`, `ThrowType` or `EndType`.
  *     if (event.type === PushType) {
@@ -75,37 +107,52 @@ export interface End {
  * });
  * sink(Push(2)); // `${PushType}`, value: 2.
  * sink(Throw(new Error('...'))); // `${ThrowType}`, Error(...).
+ * ```
  *
- * @see {@link Push}
- * @see {@link Throw}
+ * @see {@link (Push:VALUE_ARG)}
+ * @see {@link (Throw:function)}
  * @see {@link End}
- * @see {@link PushType}
- * @see {@link ThrowType}
- * @see {@link EndType}
- * @see {@link Source}
- * @see {@link Sink}
+ * @see {@link (PushType:variable)}
+ * @see {@link (ThrowType:variable)}
+ * @see {@link (EndType:variable)}
+ * @see {@link (Source:function)}
+ * @see {@link (Sink:function)}
+ *
+ * @public
  */
 export type Event<T> = Push<T> | Throw | End;
 
 /**
- * A Push event represents the "pushing" of a value to a {@link Sink}, and has a
- * `value` field equal to the value the event is carrying.
+ * A Push event represents the "pushing" of a value to a
+ * {@link (Sink:function)}, and has a `value` field equal to the value the event
+ * is carrying.
  *
- * @param value The value to send.
+ * @param value - The value to send.
  * @returns The created Push event.
  *
  * @example
+ * ```
  * const event = Push([1, 2, 3]);
  * console.log(event.type); // `${PushType}`.
  * console.log(event.value); // [1, 2, 3].
+ * ```
  *
  * @see {@link Event}
- * @see {@link Throw}
+ * @see {@link (Throw:function)}
  * @see {@link End}
- * @see {@link Source}
- * @see {@link Sink}
+ * @see {@link (Source:function)}
+ * @see {@link (Sink:function)}
+ *
+ * {@label NO_ARGS}
+ *
+ * @public
  */
 export function Push<T>(): Push<undefined>;
+/**
+ * {@label VALUE_ARG}
+ *
+ * @public
+ */
 export function Push<T>(value: T): Push<T>;
 export function Push<T>(value?: T): Push<T | undefined> {
     return { type: PushType, value };
@@ -113,33 +160,38 @@ export function Push<T>(value?: T): Push<T | undefined> {
 
 /**
  * A Throw represents the "throwing" of an error, and has an `error` field equal
- * to the error the event is carrying. After a {@link Sink} receives an Error
- * event, it will be disposed and will not take any more events.
+ * to the error the event is carrying. After a {@link (Sink:function)} receives
+ * an Error event, it will be disposed and will not take any more events.
  *
- * @param error The error to be thrown.
+ * @param error - The error to be thrown.
  * @returns The created Throw event.
  *
  * @example
+ * ```
  * const event = Throw(new Error(...));
  * console.log(event.type); // `${ThrowType}`.
  * console.log(event.value); // Error(...).
+ * ```
  *
  * @see {@link Event}
- * @see {@link Push}
+ * @see {@link (Push:VALUE_ARG)}
  * @see {@link End}
- * @see {@link Source}
- * @see {@link Sink}
+ * @see {@link (Source:function)}
+ * @see {@link (Sink:function)}
+ *
+ * @public
  */
 export function Throw(error: unknown): Throw {
     return { type: ThrowType, error };
 }
 
 /**
- * An End event represents the "end" of a {@link Source}, and has no additional
- * properties. After a Sink receives an End event, it will be disposed and will
- * not take any more events.
+ * An End event represents the "end" of a {@link (Source:function)}, and has no
+ * additional properties. After a Sink receives an End event, it will be
+ * disposed and will not take any more events.
  *
  * @example
+ * ```
  * function onEvent(event: Event<unknown>): void {
  *     console.log(event.type);
  * };
@@ -147,34 +199,41 @@ export function Throw(error: unknown): Throw {
  * sink(End); // This disposes the sink, then calls `onEvent` above.
  * // Logs:
  * // `${EndType}`
+ * ```
  *
  * @see {@link Event}
- * @see {@link Push}
- * @see {@link Throw}
- * @see {@link Source}
- * @see {@link Sink}
+ * @see {@link (Push:VALUE_ARG)}
+ * @see {@link (Throw:function)}
+ * @see {@link (Source:function)}
+ * @see {@link (Sink:function)}
+ *
+ * @public
  */
 export const End: End = { type: EndType };
 
+/**
+ * @public
+ */
 export interface Sink<T> extends Disposable {
     [$$Sink]: undefined;
     (event: Event<T>): void;
 }
 
 /**
- * A Sink is what a {@link Source} subscribes to. All events emitted by the
- * source will be passed to the sink that has been given to the source.
+ * A Sink is what a {@link (Source:function)} subscribes to. All events emitted
+ * by the source will be passed to the sink that has been given to the source.
  *
  * The shape of a Sink is a function which takes an {@link Event} and
  * distributes it to the `onEvent` function as described below. Sinks also
- * implement the {@link Disposable} construct, and has all of the methods of the
- * Disposable type, and can be treated as a Disposable. This is important as the
- * way to stop a sink (and also unsubscribe the sources subscribed to the sink)
- * is to dispose the sink itself. This also means that the way to cleanup or
- * cancel some process when a Sink stops taking values (for example, when
- * creating a custom Source), is to add a child to the Sink (as done on a
- * disposable), which will then be called when the Sink is disposed. An example
- * of this cancellation ability is say, cancelling a http request.
+ * implement the {@link (Disposable:function)} construct, and has all of the
+ * methods of the Disposable type, and can be treated as a Disposable. This is
+ * important as the way to stop a sink (and also unsubscribe the sources
+ * subscribed to the sink) is to dispose the sink itself. This also means that
+ * the way to cleanup or cancel some process when a Sink stops taking values
+ * (for example, when creating a custom Source), is to add a child to the Sink
+ * (as done on a disposable), which will then be called when the Sink is
+ * disposed. An example of this cancellation ability is say, cancelling a http
+ * request.
  *
  * The sink constructor takes an `onEvent` function, which is called every time
  * an event is received. When a sink is disposed, it will stop taking values and
@@ -185,10 +244,11 @@ export interface Sink<T> extends Disposable {
  * an event, then the sink will immediately be disposed and the error will be
  * thrown asynchronously in a `setTimeout` with delay zero.
  *
- * @param onEvent The callback for when an event is received.
+ * @param onEvent - The callback for when an event is received.
  * @returns The created Sink.
  *
  * @example
+ * ```
  * const sink = Sink<number>(event => {
  *     if (event.type === PushType) {
  *         console.log(event.value);
@@ -203,8 +263,10 @@ export interface Sink<T> extends Disposable {
  * // 1
  * // 2
  * // ended
+ * ```
  *
  * @example
+ * ```
  * const sink = Sink<number>(event => {
  *     console.log(event);
  * });
@@ -216,8 +278,10 @@ export interface Sink<T> extends Disposable {
  * // Logs:
  * // { type: PushType, value: 1 }
  * // { type: ThrowType, error: Error }
+ * ```
  *
  * @example
+ * ```
  * const sink = Sink<number>(event => {
  *     if (event.type === PushType && event.value === 5) {
  *         // This means that the Sink will stop receiving values, and all
@@ -248,8 +312,10 @@ export interface Sink<T> extends Disposable {
  * // { type: PushType, value: 5 }
  * // Note: The End event is ignored here, as the sink was disposed upon
  * // receiving the Push(5) event.
+ * ```
  *
  * @example
+ * ```
  * function onEvent(event: Event<unknown>): void {
  *     console.log(event);
  *     if (event.type === PushType && event.value === 2) {
@@ -272,8 +338,10 @@ export interface Sink<T> extends Disposable {
  * // { type: PushType, value: 0 }
  * // { type: PushType, value: 1 }
  * // { type: PushType, value: 2 }
+ * ```
  *
  * @example
+ * ```
  * import { Request, startRequest, cancelRequest } from './my-api.ts';
  *
  * const sink = Sink(() => {});
@@ -302,8 +370,10 @@ export interface Sink<T> extends Disposable {
  *     sink(Push(result));
  *     sink(End)
  * }, sink);
+ * ```
  *
  * @example
+ * ```
  * // In this example the source emits values 0..49.
  * const source = range(50);
  * const sink = Sink(event => {
@@ -318,12 +388,15 @@ export interface Sink<T> extends Disposable {
  * // Push(1)
  * // Push(2)
  * // Push(3)
+ * ```
  *
- * @see {@link Disposable}
+ * @see {@link (Disposable:function)}
  * @see {@link Event}
- * @see {@link Source}
- * @see {@link Subject}
+ * @see {@link (Source:function)}
+ * @see {@link (Subject:function)}
  * @see {@link asyncReportError}
+ *
+ * @public
  */
 export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
     const disposable = Disposable();
@@ -359,10 +432,11 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
 
 /**
  * Determines whether the given value is a Sink.
- * @param value The value to check.
+ * @param value - The value to check.
  * @returns Whether the value is a Sink.
  *
  * @example
+ * ```
  * isSink(Sink(() => {})); // true.
  * isSink(Source(() => {})) // false.
  * isSink(Subject()); // true.
@@ -370,14 +444,17 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
  * isSink({}); // false.
  * isSink(() => {}); // false.
  * isSink(null); // false.
+ * ```
  *
- * @see {@link Sink}
- * @see {@link Source}
- * @see {@link Subject}
- * @see {@link Disposable}
+ * @see {@link (Sink:function)}
+ * @see {@link (Source:function)}
+ * @see {@link (Subject:function)}
+ * @see {@link (Disposable:function)}
  * @see {@link isDisposable}
  * @see {@link isSource}
  * @see {@link isSubject}
+ *
+ * @public
  */
 export function isSink(value: unknown): value is Sink<unknown> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -390,11 +467,11 @@ export interface Source<T> {
 }
 
 /**
- * A Source is a function which can be subscribed to with a {@link Sink}. This
- * construct is the basis of all reactive programming done with this library.
- * Sources are by default essentially a lazy push-style stream/observable which
- * will produce new values every subscription. The "lazy" part can be thought of
- * as follows:
+ * A Source is a function which can be subscribed to with a
+ * {@link (Sink:function)}. This construct is the basis of all reactive
+ * programming done with this library. Sources are by default essentially a lazy
+ * push-style stream/observable which will produce new values every
+ * subscription. The "lazy" part can be thought of as follows:
  *
  * ```ts
  * function mySource(): void {
@@ -458,12 +535,13 @@ export interface Source<T> {
  * }
  * ```
  *
- * @param produce This will be called with the given sink each subscription.
+ * @param produce - This will be called with the given sink each subscription.
  *     When the sink is disposed this function should stop trying to emit
  *     values, and should stop/cleanup any ongoing side processes
  * @returns The created Source.
  *
  * @example
+ * ```
  * // Creating a Source which synchronously produces values 0..50
  * const source = Source(sink => {
  *     // Note: It is guaranteed (at the start of execution of this function
@@ -490,8 +568,10 @@ export interface Source<T> {
  * // ...
  * // Push(50)
  * // End
+ * ```
  *
  * @example
+ * ```
  * // Creating a Factory function which creates a Source that emits all the
  * // values in the provided array at construction.
  * function fromArray<T>(array: ArrayLike<T>): Source<T> {
@@ -512,8 +592,10 @@ export interface Source<T> {
  * // Push(1)
  * // Push(2)
  * // End
+ * ```
  *
  * @example
+ * ```
  * // Creating a Source that maps an external api into a reactive one.
  * import { MyExternalSubscriptionToken, myExternalApi } from './myExternalApi';
  * const source = Source(sink => {
@@ -537,12 +619,15 @@ export interface Source<T> {
  *         sink(Throw(error));
  *     }
  * });
+ * ```
  *
- * @see {@link Disposable}
+ * @see {@link (Disposable:function)}
  * @see {@link Event}
- * @see {@link Sink}
- * @see {@link Subject}
+ * @see {@link (Sink:function)}
+ * @see {@link (Subject:function)}
  * @see {@link asyncReportError}
+ *
+ * @public
  */
 export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
     function safeSource(sink: Sink<T>): void {
@@ -580,10 +665,11 @@ export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
 
 /**
  * Determines whether the given value is a Source.
- * @param value The value to check.
+ * @param value - The value to check.
  * @returns Whether the value is a Source.
  *
  * @example
+ * ```
  * isSource(Sink(() => {})); // false.
  * isSource(Source(() => {})); // true.
  * isSource(Subject()); // true.
@@ -591,14 +677,17 @@ export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
  * isSource({}); // false.
  * isSource(() => {}); // false.
  * isSource(null); // false.
+ * ```
  *
- * @see {@link Sink}
- * @see {@link Source}
- * @see {@link Subject}
- * @see {@link Disposable}
+ * @see {@link (Sink:function)}
+ * @see {@link (Source:function)}
+ * @see {@link (Subject:function)}
+ * @see {@link (Disposable:function)}
  * @see {@link isDisposable}
  * @see {@link isSink}
  * @see {@link isSubject}
+ *
+ * @public
  */
 export function isSource(value: unknown): value is Sink<unknown> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -611,10 +700,11 @@ export function isSource(value: unknown): value is Sink<unknown> {
  * useful, for example, at the end of pipe calls in order to subscribe to the
  * transformed source.
  *
- * @param sink The sink to be given to the received source.
+ * @param sink - The sink to be given to the received source.
  * @returns The higher order function which takes a source to subscribe to.
  *
  * @example
+ * ```
  * import { DogPictures, myGetDogPictures } from './myApi.ts';
  * import { MyRequestTimeoutError } from './myRequestTimeoutError.ts';
  * import { myReportError } from './myReportError.ts'
@@ -635,9 +725,12 @@ export function isSource(value: unknown): value is Sink<unknown> {
  *     retry(3),
  *     subscribe(sink)
  * );
+ * ```
  *
- * @see {@link Source}
- * @see {@link Sink}
+ * @see {@link (Source:function)}
+ * @see {@link (Sink:function)}
+ *
+ * @public
  */
 export function subscribe<T>(
     sink = Sink<T>(noop),
@@ -656,8 +749,34 @@ function pushArrayItemsToSink<T>(array: ArrayLike<T>, sink: Sink<T>): void {
 /**
  * Creates a Source from the given array/array-like. The values of the array
  * will be synchronously emitted by the created source upon each subscription.
- * @param array The array/array-like to iterate over.
+ *
+ * @param array - The array/array-like to iterate over.
  * @returns The created source.
+ *
+ * @example
+ * ```
+ * pipe(fromArray([1, 2, 3, 4]), subscribe(Sink(console.log)));
+ * // Logs:
+ * // Push(1), Push(2), Push(3), Push(4)
+ * // End
+ * ```
+ *
+ * @example
+ * ```
+ * pipe(
+ *     fromArray({ length: 5, 0: 'foo', 3: 'bar' }),
+ *     subscribe(Sink(console.log))
+ * )
+ * // Logs:
+ * // Push('foo'), Push(undefined), Push(undefined), Push('bar'),
+ * // Push(undefined)
+ * // End
+ * ```
+ *
+ * @see {@link fromArrayScheduled}
+ * @see {@link of}
+ *
+ * @public
  */
 export function fromArray<T>(array: ArrayLike<T>): Source<T> {
     return Source((sink) => {
@@ -666,6 +785,9 @@ export function fromArray<T>(array: ArrayLike<T>): Source<T> {
     });
 }
 
+/**
+ * @public
+ */
 export function fromArrayScheduled<T>(
     array: ArrayLike<T>,
     schedule: ScheduleFunction,
@@ -696,10 +818,40 @@ export function fromArrayScheduled<T>(
     });
 }
 
+/**
+ * Creates a Source from the given values.. The values will be synchronously
+ * emitted by the created source upon each subscription.
+ *
+ * @param values - The values to iterate over.
+ * @returns The created source.
+ *
+ * @example
+ * ```
+ * pipe(of(1, 2, 3, 4), subscribe(Sink(console.log)));
+ * // Logs:
+ * // Push(1), Push(2), Push(3), Push(4)
+ * // End
+ * ```
+ *
+ * @example
+ * ```
+ * pipe(of(), subscribe(Sink(console.log)));
+ * // Logs:
+ * // End
+ * ```
+ *
+ * @see {@link fromArray}
+ * @see {@link ofScheduled}
+ *
+ * @public
+ */
 export function of<T>(...items: T[]): Source<T> {
     return fromArray(items);
 }
 
+/**
+ * @public
+ */
 export function ofScheduled<T>(
     schedule: ScheduleFunction,
     ...items: T[]
@@ -707,7 +859,13 @@ export function ofScheduled<T>(
     return fromArrayScheduled(items, schedule);
 }
 
+/**
+ * @public
+ */
 export function ofEvent(event: Throw | End): Source<never>;
+/**
+ * @public
+ */
 export function ofEvent<T>(event: Event<T>): Source<T>;
 export function ofEvent<T>(event: Event<T>): Source<T> {
     return Source((sink) => {
@@ -716,10 +874,16 @@ export function ofEvent<T>(event: Event<T>): Source<T> {
     });
 }
 
+/**
+ * @public
+ */
 export function ofEventScheduled<T>(
     event: Throw | End,
     schedule: ScheduleFunction,
 ): Source<never>;
+/**
+ * @public
+ */
 export function ofEventScheduled<T>(
     event: Event<T>,
     schedule: ScheduleFunction,
@@ -736,10 +900,16 @@ export function ofEventScheduled<T>(
     });
 }
 
+/**
+ * @public
+ */
 export function throwError(getError: () => unknown): Source<never> {
     return lazy(() => ofEvent(Throw(getError())));
 }
 
+/**
+ * @public
+ */
 export function throwErrorScheduled(
     getError: () => unknown,
     schedule: ScheduleFunction,
@@ -747,18 +917,33 @@ export function throwErrorScheduled(
     return lazy(() => ofEventScheduled(Throw(getError()), schedule));
 }
 
+/**
+ * @public
+ */
 export const empty = ofEvent(End);
 
+/**
+ * @public
+ */
 export function emptyScheduled(schedule: ScheduleFunction): Source<never> {
     return ofEventScheduled(End, schedule);
 }
 
+/**
+ * @public
+ */
 export function timer(durationMs: number): Source<never> {
     return emptyScheduled(ScheduleTimeout(durationMs));
 }
 
+/**
+ * @public
+ */
 export const never = Source(noop);
 
+/**
+ * @public
+ */
 export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
     return Source((sink) => {
         let sinkDisposalError: { __error: unknown } | undefined;
@@ -822,12 +1007,18 @@ async function distributeAsyncIterable<T>(
     sink(End);
 }
 
+/**
+ * @public
+ */
 export function fromAsyncIterable<T>(iterable: AsyncIterable<T>): Source<T> {
     return Source((sink) => {
         void distributeAsyncIterable(iterable, sink);
     });
 }
 
+/**
+ * @public
+ */
 export function fromPromise<T>(promise: PromiseLike<T>): Source<T> {
     return Source((sink) => {
         promise
@@ -844,6 +1035,9 @@ export function fromPromise<T>(promise: PromiseLike<T>): Source<T> {
     });
 }
 
+/**
+ * @public
+ */
 export function fromScheduleFunction<T extends unknown[]>(
     schedule: ScheduleFunction<T>,
 ): Source<T> {
@@ -862,6 +1056,9 @@ export function fromScheduleFunction<T extends unknown[]>(
     });
 }
 
+/**
+ * @public
+ */
 export function fromReactiveValue<T extends unknown[], Signal>(
     addCallback: (handler: (...args: T) => void) => Signal,
     removeCallback: (
@@ -890,6 +1087,9 @@ export function fromReactiveValue<T extends unknown[], Signal>(
     });
 }
 
+/**
+ * @public
+ */
 export function fromSingularReactiveValue<T, Signal>(
     addCallback: (handler: (value: T) => void) => Signal,
     removeCallback: (
@@ -902,17 +1102,26 @@ export function fromSingularReactiveValue<T, Signal>(
 
 const replaceWithValueIndex = map((_, idx: number) => idx);
 
+/**
+ * @public
+ */
 export function interval(delayMs: number): Source<number> {
     return replaceWithValueIndex(
         fromScheduleFunction(ScheduleInterval(delayMs)),
     );
 }
 
+/**
+ * @public
+ */
 export const animationFrames: Source<number> = pipe(
     fromScheduleFunction(scheduleAnimationFrame),
     pluck<[number], 0>(0),
 );
 
+/**
+ * @public
+ */
 export function lazy<T>(createSource: () => Source<T>): Source<T> {
     return Source((sink) => {
         let source: Source<T>;
@@ -926,6 +1135,9 @@ export function lazy<T>(createSource: () => Source<T>): Source<T> {
     });
 }
 
+/**
+ * @public
+ */
 export function iif<T>(
     condition: () => unknown,
     createSourceIfTrue: () => Source<T>,
@@ -936,6 +1148,9 @@ export function iif<T>(
     });
 }
 
+/**
+ * @public
+ */
 export function range(count: number, start = 0): Source<number> {
     return Source((sink) => {
         for (let i = 0; sink.active && i < count; i++) {
@@ -945,6 +1160,9 @@ export function range(count: number, start = 0): Source<number> {
     });
 }
 
+/**
+ * @public
+ */
 export function isEqual<T, U>(
     sourceA: Source<T>,
     sourceB: Source<U>,
@@ -1043,10 +1261,16 @@ export function isEqual<T, U>(
     });
 }
 
+/**
+ * @public
+ */
 export function flatSources<T>(...sources: Source<T>[]): Source<T> {
     return flat(fromArray(sources));
 }
 
+/**
+ * @public
+ */
 export function mergeSourcesConcurrent<T>(
     max: number,
     ...sources: Source<T>[]
@@ -1054,10 +1278,16 @@ export function mergeSourcesConcurrent<T>(
     return mergeConcurrent(max)(fromArray(sources));
 }
 
+/**
+ * @public
+ */
 export function mergeSources<T>(...sources: Source<T>[]): Source<T> {
     return merge(fromArray(sources));
 }
 
+/**
+ * @public
+ */
 export function concatSources<T>(...sources: Source<T>[]): Source<T> {
     return concat(fromArray(sources));
 }
@@ -1068,6 +1298,9 @@ const noValue: unique symbol = {} as any;
 
 type WrapValuesInSource<T> = { [K in keyof T]: Source<T[K]> };
 
+/**
+ * @public
+ */
 export function combineSources<T extends unknown[]>(
     ...sources: WrapValuesInSource<T>
 ): Source<T> {
@@ -1098,6 +1331,9 @@ export function combineSources<T extends unknown[]>(
           });
 }
 
+/**
+ * @public
+ */
 export function all<T extends unknown[]>(
     sources: WrapValuesInSource<T>,
 ): Source<T> {
@@ -1111,6 +1347,9 @@ export function all<T extends unknown[]>(
     );
 }
 
+/**
+ * @public
+ */
 export function raceSources<T>(...sources: Source<T>[]): Source<T> {
     return sources.length === 0
         ? empty
@@ -1136,6 +1375,9 @@ export function raceSources<T>(...sources: Source<T>[]): Source<T> {
           });
 }
 
+/**
+ * @public
+ */
 export function zipSources<T extends unknown[]>(
     ...sources: WrapValuesInSource<T>
 ): Source<T> {
@@ -1209,10 +1451,16 @@ export function zipSources<T extends unknown[]>(
           });
 }
 
+/**
+ * @public
+ */
 export interface Operator<T, U> {
     (source: Source<T>): Source<U>;
 }
 
+/**
+ * @public
+ */
 export interface IdentityOperator {
     <T>(source: Source<T>): Source<T>;
 }
@@ -1223,6 +1471,9 @@ type Unshift<T extends unknown[], U> = ((head: U, ...tail: T) => void) extends (
     ? A
     : never;
 
+/**
+ * @public
+ */
 export function combineWith<T extends unknown[]>(
     ...sources: WrapValuesInSource<T>
 ): <U>(source: Source<U>) => Source<Unshift<T, U>> {
@@ -1230,12 +1481,18 @@ export function combineWith<T extends unknown[]>(
         combineSources(source, ...sources) as Source<Unshift<T, U>>;
 }
 
+/**
+ * @public
+ */
 export function raceWith<T>(
     ...sources: Source<T>[]
 ): <U>(source: Source<U>) => Source<T | U> {
     return <U>(source: Source<U>) => raceSources<T | U>(source, ...sources);
 }
 
+/**
+ * @public
+ */
 export function zipWith<T extends unknown[]>(
     ...sources: WrapValuesInSource<T>
 ): <U>(source: Source<U>) => Source<Unshift<T, U>> {
@@ -1247,6 +1504,9 @@ function _pluckValue<T>(event: { value: T }): T {
     return event.value;
 }
 
+/**
+ * @public
+ */
 export function withLatestFromLazy<T extends unknown[]>(
     getSources: () => WrapValuesInSource<T>,
 ): <U>(source: Source<U>) => Source<Unshift<T, U>> {
@@ -1258,6 +1518,9 @@ export function withLatestFromLazy<T extends unknown[]>(
         );
 }
 
+/**
+ * @public
+ */
 export function withLatestFrom<T extends unknown[]>(
     ...sources: WrapValuesInSource<T>
 ): <U>(source: Source<U>) => Source<Unshift<T, U>> {
@@ -1315,13 +1578,19 @@ export function withLatestFrom<T extends unknown[]>(
 /**
  * Calls the given transform function for each Push event of the given source
  * and passes through the result.
- * @param transform A function which accepts a value and an index. The map
+ *
+ * @param transform - A function which accepts a value and an index. The map
  *     method calls the transform function one time for each Push event of the
  *     given source and passes through the result.
+ *
+ * @public
  */
 export function map<U>(
     transform: <T>(value: T, index: number) => U,
 ): <T>(source: Source<T>) => Source<U>;
+/**
+ * @public
+ */
 export function map<T, U>(
     transform: (value: T, index: number) => U,
 ): Operator<T, U>;
@@ -1354,12 +1623,18 @@ export function map<T, U>(
 
 /**
  * Replaces the value of each received Push event with the given value.
- * @param value The value to push.
+ *
+ * @param value - The value to push.
+ *
+ * @public
  */
 export function mapTo<U>(value: U): <T>(source: Source<T>) => Source<U> {
     return map(() => value);
 }
 
+/**
+ * @public
+ */
 export function mapEvents<T, U>(
     transform: (event: Event<T>, index: number) => Event<U> | undefined | null,
 ): Operator<T, U> {
@@ -1388,9 +1663,15 @@ export function mapEvents<T, U>(
         });
 }
 
+/**
+ * @public
+ */
 export function mapPushEvents<T>(
     transform: (pushEvents: Push<T>, index: number) => Throw | End,
 ): Operator<T, never>;
+/**
+ * @public
+ */
 export function mapPushEvents<T, U>(
     transform: (
         pushEvent: Push<T>,
@@ -1408,16 +1689,25 @@ export function mapPushEvents<T, U>(
     );
 }
 
+/**
+ * @public
+ */
 export const wrapInPushEvents: <T>(
     source: Source<T>,
 ) => Source<Event<T>> = mapEvents(<T>(event: Event<T>) => Push(event));
 
+/**
+ * @public
+ */
 export const unwrapFromWrappedPushEvents: <T>(
     source: Source<Event<T>>,
 ) => Source<T> = mapPushEvents(
     <T>(pushEvent: Push<Event<T>>) => pushEvent.value,
 );
 
+/**
+ * @public
+ */
 export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
     return map((value: T) => value[key]);
 }
@@ -1426,17 +1716,26 @@ export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
  * Calls the predicate function for each Push event of the given source, only
  * passing through events whose value meet the condition specified by the
  * predicate function.
- * @param predicate A function that accepts a value and an index. The filter
+ *
+ * @param predicate - A function that accepts a value and an index. The filter
  *     method calls this function one time for each Push event of the given
  *     source. If and only if the function returns a truthy value, then the
  *     event will pass through.
+ *
+ * @public
  */
 export function filter<T>(
     predicate: (value: T, index: number) => false,
 ): Operator<T, never>;
+/**
+ * @public
+ */
 export function filter<T, S extends T>(
     predicate: (value: T, index: number) => value is S,
 ): Operator<T, S>;
+/**
+ * @public
+ */
 export function filter<T>(
     predicate: (value: T, index: number) => unknown,
 ): Operator<T, T>;
@@ -1468,14 +1767,23 @@ export function filter<T>(
         });
 }
 
+/**
+ * @public
+ */
 export interface WithIndex<T> {
     value: T;
     index: number;
 }
 
+/**
+ * @public
+ */
 export function findWithIndex<T, S extends T>(
     predicate: (value: T, index: number) => value is S,
 ): Operator<T, WithIndex<S>>;
+/**
+ * @public
+ */
 export function findWithIndex<T>(
     predicate: (value: T, index: number) => unknown,
 ): Operator<T, WithIndex<T>>;
@@ -1497,9 +1805,15 @@ export function findWithIndex<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function find<T, S extends T>(
     predicate: (value: T, index: number) => value is S,
 ): Operator<T, S>;
+/**
+ * @public
+ */
 export function find<T>(
     predicate: (value: T, index: number) => unknown,
 ): Operator<T, T>;
@@ -1509,12 +1823,18 @@ export function find<T>(
     return flow(filter(predicate), first);
 }
 
+/**
+ * @public
+ */
 export function findIndex<T>(
     predicate: (value: T, index: number) => unknown,
 ): Operator<T, number> {
     return flow(findWithIndex(predicate), pluck('index'));
 }
 
+/**
+ * @public
+ */
 export function at(index: number): IdentityOperator {
     return flow(
         filter((_, idx) => idx === index),
@@ -1522,6 +1842,9 @@ export function at(index: number): IdentityOperator {
     );
 }
 
+/**
+ * @public
+ */
 export function every<T>(
     predicate: (value: T, index: number) => unknown,
 ): Operator<T, boolean> {
@@ -1531,12 +1854,18 @@ export function every<T>(
     );
 }
 
+/**
+ * @public
+ */
 export function some<T>(
     predicate: (value: T, index: number) => unknown,
 ): Operator<T, boolean> {
     return flow(filter(predicate), first, mapTo(true), defaultIfEmptyTo(false));
 }
 
+/**
+ * @public
+ */
 export function finalize(callback: () => void): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
@@ -1545,9 +1874,15 @@ export function finalize(callback: () => void): IdentityOperator {
         });
 }
 
+/**
+ * @public
+ */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const ignorePushEvents = filter(<T>(_: T) => false);
 
+/**
+ * @public
+ */
 export function withPrevious<T>(source: Source<T>): Source<[T, T]> {
     return lazy(() => {
         let previousPush: Push<T> | undefined;
@@ -1570,12 +1905,15 @@ export function withPrevious<T>(source: Source<T>): Source<[T, T]> {
  * source. The return value of the transform function is the accumulated result,
  * and is provided as an argument in the next call to the transform function.
  * The accumulated will be emitted after each Push event.
- * @param transform A function that transforms the previousAccumulatedResult
+ *
+ * @param transform - A function that transforms the previousAccumulatedResult
  *     (last value returned by this function), the currentValue of the emitted
  *     Push event and the currentIndex, and returns an accumulated result.
- * @param initialValue This is used as the initial value to start the
+ * @param initialValue - This is used as the initial value to start the
  *     accumulation. The first call to the transform function provides this
  *     as the previousAccumulatedResult.
+ *
+ * @public
  */
 export function scan<T, R, I>(
     transform: (
@@ -1621,12 +1959,15 @@ export function scan<T, R, I>(
  * and is provided as an argument in the next call to the transform function.
  * The accumulated result will be emitted as a Push event once the given source
  * ends.
- * @param transform A function that transforms the previousAccumulatedResult
+ *
+ * @param transform - A function that transforms the previousAccumulatedResult
  *     (last value returned by this function), the currentValue of the emitted
  *     Push event and the currentIndex, and returns an accumulated result.
- * @param initialValue This is used as the initial value to start the
+ * @param initialValue - This is used as the initial value to start the
  *     accumulation. The first call to the transform function provides this
  *     as the previousAccumulatedResult.
+ *
+ * @public
  */
 export function reduce<T, R, I>(
     transform: (
@@ -1643,6 +1984,9 @@ function _unwrap<T>(box: [T]): T {
     return box[0];
 }
 
+/**
+ * @public
+ */
 export function maxCompare<T>(
     compare: (
         currentValue: T,
@@ -1664,8 +2008,14 @@ function compareNumbers(a: number, b: number): number {
     return a > b ? 1 : -1;
 }
 
+/**
+ * @public
+ */
 export const max: Operator<number, number> = maxCompare(compareNumbers);
 
+/**
+ * @public
+ */
 export function minCompare<T>(
     compare: (
         currentValue: T,
@@ -1678,8 +2028,14 @@ export function minCompare<T>(
     );
 }
 
+/**
+ * @public
+ */
 export const min: Operator<number, number> = minCompare(compareNumbers);
 
+/**
+ * @public
+ */
 export function isEqualTo<T, U>(
     otherSource: Source<U>,
     areValuesEqual: (a: T, b: U, index: number) => unknown,
@@ -1687,6 +2043,9 @@ export function isEqualTo<T, U>(
     return (source) => isEqual(source, otherSource, areValuesEqual);
 }
 
+/**
+ * @public
+ */
 export function flat<T>(source: Source<Source<T>>): Source<T> {
     return Source((sink) => {
         let hasReceivedSource = false;
@@ -1793,15 +2152,28 @@ function _createMergeMapOperator(
         });
 }
 
+/**
+ * @public
+ */
 export const mergeMap = _createMergeMapOperator(false);
+
+/**
+ * @public
+ */
 export const expandMap = _createMergeMapOperator(true);
 
+/**
+ * @public
+ */
 export function mergeConcurrent(
     maxConcurrent: number,
 ): <T>(source: Source<Source<T>>) => Source<T> {
     return mergeMap(identity, maxConcurrent);
 }
 
+/**
+ * @public
+ */
 export const merge = mergeConcurrent(Infinity);
 
 function _createSwitchOperator(
@@ -1850,15 +2222,28 @@ function _createSwitchOperator(
         });
 }
 
+/**
+ * @public
+ */
 export const switchEach = _createSwitchOperator(true);
+
+/**
+ * @public
+ */
 export const concatDrop = _createSwitchOperator(false);
 
+/**
+ * @public
+ */
 export function flatWith<T>(
     ...sources: Source<T>[]
 ): <U>(source: Source<U>) => Source<T | U> {
     return <U>(source: Source<U>) => flatSources<T | U>(source, ...sources);
 }
 
+/**
+ * @public
+ */
 export function mergeWithConcurrent<T>(
     max: number,
     ...sources: Source<T>[]
@@ -1867,50 +2252,77 @@ export function mergeWithConcurrent<T>(
         mergeSourcesConcurrent<T | U>(max, source, ...sources);
 }
 
+/**
+ * @public
+ */
 export function mergeWith<T>(
     ...sources: Source<T>[]
 ): <U>(source: Source<U>) => Source<T | U> {
     return <U>(source: Source<U>) => mergeSources<T | U>(source, ...sources);
 }
 
+/**
+ * @public
+ */
 export function startWithSources<T>(
     ...sources: Source<T>[]
 ): <U>(source: Source<U>) => Source<T | U> {
     return <U>(source: Source<U>) => concatSources<T | U>(...sources, source);
 }
 
+/**
+ * @public
+ */
 export function concatWith<T>(
     ...sources: Source<T>[]
 ): <U>(source: Source<U>) => Source<T | U> {
     return <U>(source: Source<U>) => concatSources<T | U>(source, ...sources);
 }
 
+/**
+ * @public
+ */
 export function flatMap<T, U>(
     transform: (value: T, index: number) => Source<U>,
 ): Operator<T, U> {
     return flow(map(transform), flat);
 }
 
+/**
+ * @public
+ */
 export function concatMap<T, U>(
     transform: (value: T, index: number) => Source<U>,
 ): Operator<T, U> {
     return mergeMap(transform, 1);
 }
 
+/**
+ * @public
+ */
 export const concat = mergeConcurrent(1);
 
+/**
+ * @public
+ */
 export function switchMap<T, U>(
     transform: (value: T, index: number) => Source<U>,
 ): Operator<T, U> {
     return flow(map(transform), switchEach);
 }
 
+/**
+ * @public
+ */
 export function concatDropMap<T, U>(
     transform: (value: T, index: number) => Source<U>,
 ): Operator<T, U> {
     return flow(map(transform), concatDrop);
 }
 
+/**
+ * @public
+ */
 export function startWith<T>(
     ...values: T[]
 ): <U>(source: Source<U>) => Source<T | U> {
@@ -1921,6 +2333,9 @@ export function startWith<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function endWith<T>(
     ...values: T[]
 ): <U>(source: Source<U>) => Source<T | U> {
@@ -2015,6 +2430,23 @@ export const {
     __spyPush: spyPushBefore,
     __spyThrow: spyThrowBefore,
     __spyEnd: spyEndBefore,
+}: {
+    /**
+     * @public
+     */
+    __spy: <T>(onEvent: (event: Event<T>) => void) => Operator<T, T>;
+    /**
+     * @public
+     */
+    __spyPush: <T>(onPush: (value: T, index: number) => void) => Operator<T, T>;
+    /**
+     * @public
+     */
+    __spyThrow: (onThrow: (error: unknown) => void) => IdentityOperator;
+    /**
+     * @public
+     */
+    __spyEnd: (onEnd: () => void) => IdentityOperator;
 } = _createSpyOperators(false);
 
 export const {
@@ -2022,8 +2454,28 @@ export const {
     __spyPush: spyPushAfter,
     __spyThrow: spyThrowAfter,
     __spyEnd: spyEndAfter,
+}: {
+    /**
+     * @public
+     */
+    __spy: <T>(onEvent: (event: Event<T>) => void) => Operator<T, T>;
+    /**
+     * @public
+     */
+    __spyPush: <T>(onPush: (value: T, index: number) => void) => Operator<T, T>;
+    /**
+     * @public
+     */
+    __spyThrow: (onThrow: (error: unknown) => void) => IdentityOperator;
+    /**
+     * @public
+     */
+    __spyEnd: (onEnd: () => void) => IdentityOperator;
 } = _createSpyOperators(true);
 
+/**
+ * @public
+ */
 export function isEmpty(source: Source<unknown>): Source<boolean> {
     return Source((sink) => {
         const sourceSink = Sink((event) => {
@@ -2040,6 +2492,9 @@ export function isEmpty(source: Source<unknown>): Source<boolean> {
     });
 }
 
+/**
+ * @public
+ */
 export function defaultIfEmpty<T>(
     getDefaultValue: () => T,
 ): <U>(source: Source<U>) => Source<T | U> {
@@ -2068,19 +2523,31 @@ export function defaultIfEmpty<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function defaultIfEmptyTo<T>(
     value: T,
 ): <U>(source: Source<U>) => Source<T | U> {
     return defaultIfEmpty(() => value);
 }
 
+/**
+ * @public
+ */
 export function throwIfEmpty(getError: () => unknown): IdentityOperator {
     return defaultIfEmpty(() => {
         throw getError();
     });
 }
 
+/**
+ * @public
+ */
 export function distinct(): IdentityOperator;
+/**
+ * @public
+ */
 export function distinct<T, K>(
     getKey: (value: T, index: number) => K,
 ): Operator<T, T>;
@@ -2135,16 +2602,28 @@ export function distinct<T, K>(
         });
 }
 
+/**
+ * @public
+ */
 export function distinctFromLast(): IdentityOperator;
+/**
+ * @public
+ */
 export function distinctFromLast<T>(
     isDifferent: (keyA: T, keyB: T, currentIndex: number) => unknown,
 ): Operator<T, T>;
+/**
+ * @public
+ */
 export function distinctFromLast<T, K>(
     isDifferent:
         | ((keyA: K, keyB: K, currentIndex: number) => unknown)
         | undefined,
     getKey: (value: T) => K,
 ): Operator<T, T>;
+/**
+ * @public
+ */
 export function distinctFromLast<T, K>(
     isDifferent: (keyA: K, keyB: K, currentIndex: number) => unknown = (
         a: K,
@@ -2179,6 +2658,9 @@ export function distinctFromLast<T, K>(
         });
 }
 
+/**
+ * @public
+ */
 export function groupBy<T, K>(
     getKey: (value: T, index: number) => K,
     Subject_ = Subject,
@@ -2249,16 +2731,25 @@ interface GroupSourceBase<T> extends Source<T> {
     remove(): void;
 }
 
+/**
+ * @public
+ */
 export interface ActiveGroupSource<T, K> extends GroupSourceBase<T> {
     removed: false;
     key: K;
 }
 
+/**
+ * @public
+ */
 export interface RemovedGroupSource<T> extends GroupSourceBase<T> {
     removed: true;
     key: null;
 }
 
+/**
+ * @public
+ */
 export type GroupSource<T, K> = ActiveGroupSource<T, K> | RemovedGroupSource<T>;
 
 function GroupSource<T, K>(
@@ -2313,6 +2804,9 @@ function toEmpty(): Source<never> {
     return empty;
 }
 
+/**
+ * @public
+ */
 export function take(amount: number): IdentityOperator {
     if (amount < 1) {
         return toEmpty;
@@ -2340,19 +2834,28 @@ export function take(amount: number): IdentityOperator {
         });
 }
 
+/**
+ * @public
+ */
 export const first = take(1);
 
 /**
  * Calls the shouldContinue function for each Push event of the given source.
  * The returned source will emit an End event instead of the received Push event
  * when the given shouldContinue function returns a falsy value.
- * @param shouldContinue A function that accepts a value and an index. The
+ *
+ * @param shouldContinue - A function that accepts a value and an index. The
  *     takeWhile method calls this function one time for each Push event of the
  *     given source.
+ *
+ * @public
  */
 export function takeWhile<T, S extends T>(
     shouldContinue: (value: T, index: number) => value is S,
 ): Operator<T, S>;
+/**
+ * @public
+ */
 export function takeWhile<T>(
     shouldContinue: (value: T, index: number) => unknown,
 ): Operator<T, T>;
@@ -2388,7 +2891,10 @@ export function takeWhile<T>(
 /**
  * Ignores all received Push events. When the source emits an End event, the
  * last N=amount received Push event will be emitted along with the End event.
- * @param amount The amount of events to keep and distribute at the end.
+ *
+ * @param amount - The amount of events to keep and distribute at the end.
+ *
+ * @public
  */
 export function takeLast(amount: number): IdentityOperator {
     const amount_ = Math.floor(amount);
@@ -2426,13 +2932,22 @@ export function takeLast(amount: number): IdentityOperator {
         });
 }
 
+/**
+ * @public
+ */
 export const last = takeLast(1);
 
+/**
+ * @public
+ */
 export const count: <T>(source: Source<T>) => Source<number> = flow(
     replaceWithValueIndex,
     last,
 );
 
+/**
+ * @public
+ */
 export function takeUntil(stopSource: Source<unknown>): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
@@ -2446,6 +2961,9 @@ export function takeUntil(stopSource: Source<unknown>): IdentityOperator {
         });
 }
 
+/**
+ * @public
+ */
 export function skip(amount: number): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
@@ -2463,6 +2981,9 @@ export function skip(amount: number): IdentityOperator {
         });
 }
 
+/**
+ * @public
+ */
 export function skipWhile<T>(
     shouldContinueSkipping: (value: T, index: number) => unknown,
 ): Operator<T, T> {
@@ -2492,6 +3013,9 @@ export function skipWhile<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function skipLast(amount: number): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
@@ -2522,6 +3046,9 @@ export function skipLast(amount: number): IdentityOperator {
         });
 }
 
+/**
+ * @public
+ */
 export function skipUntil(stopSource: Source<unknown>): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
@@ -2582,11 +3109,29 @@ function _createRepeatOperator(
     };
 }
 
+/**
+ * @public
+ */
 export const repeat = _createRepeatOperator(EndType);
+
+/**
+ * @public
+ */
 export const retry = _createRepeatOperator(ThrowType);
+
+/**
+ * @public
+ */
 export const loop = repeat(Infinity);
+
+/**
+ * @public
+ */
 export const retryAlways = retry(Infinity);
 
+/**
+ * @public
+ */
 export function repeatWhen<T>(
     getRepeatSource: (sourceEvents: Source<Event<T>>) => Source<unknown>,
 ): Operator<T, T> {
@@ -2649,6 +3194,9 @@ export function repeatWhen<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function timeout<T>(
     timeoutSource: Source<unknown>,
     replacementSource: Source<T>,
@@ -2665,6 +3213,9 @@ export function timeout<T>(
         );
 }
 
+/**
+ * @public
+ */
 export function timeoutMs<T>(
     ms: number,
     replacementSource: Source<T>,
@@ -2672,6 +3223,9 @@ export function timeoutMs<T>(
     return timeout(timer(ms), replacementSource);
 }
 
+/**
+ * @public
+ */
 export function catchError<T>(
     getNewSource: (error: unknown) => Source<T>,
 ): Operator<T, T> {
@@ -2700,6 +3254,9 @@ export function catchError<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function windowEvery(
     boundariesSource: Source<unknown>,
 ): <T>(source: Source<T>) => Source<Source<T>> {
@@ -2735,10 +3292,16 @@ export function windowEvery(
         });
 }
 
+/**
+ * @public
+ */
 export function windowControlled(
     getWindowOpeningsSource: <T>(sharedSource: Source<T>) => Source<unknown>,
     getWindowClosingSource: <T>(currentWindow: Source<T>) => Source<unknown>,
 ): <T>(source: Source<T>) => Source<Source<T>>;
+/**
+ * @public
+ */
 export function windowControlled<T>(
     getWindowOpeningsSource: (sharedSource: Source<T>) => Source<unknown>,
     getWindowClosingSource: (currentWindow: Source<T>) => Source<unknown>,
@@ -2809,9 +3372,15 @@ export function windowControlled<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function windowEach(
     getWindowClosingSource: <T>(currentWindow: Source<T>) => Source<unknown>,
 ): <T>(source: Source<T>) => Source<Source<T>>;
+/**
+ * @public
+ */
 export function windowEach<T>(
     getWindowClosingSource: (currentWindow: Source<T>) => Source<unknown>,
 ): (source: Source<T>) => Source<Source<T>>;
@@ -2836,6 +3405,9 @@ export function windowEach<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function windowCount(
     maxWindowLength: number,
     createEvery?: number,
@@ -2853,6 +3425,9 @@ export function windowCount(
     return windowEach(getWindowClosingSource);
 }
 
+/**
+ * @public
+ */
 export function windowTime(
     maxWindowDuration?: number | null,
     creationInterval?: number | null,
@@ -2872,6 +3447,9 @@ export function windowTime(
     );
 }
 
+/**
+ * @public
+ */
 export function collect<T>(source: Source<T>): Source<T[]> {
     return Source((sink) => {
         const items: T[] = [];
@@ -2892,21 +3470,36 @@ export function collect<T>(source: Source<T>): Source<T[]> {
     });
 }
 
+/**
+ * @public
+ */
 export type DebounceTrailingRestart = 'restart';
+/**
+ * @public
+ */
 export const DebounceTrailingRestart: DebounceTrailingRestart = 'restart';
 
+/**
+ * @public
+ */
 export interface DebounceConfig {
     leading?: boolean | null;
     trailing?: boolean | DebounceTrailingRestart | null;
     emitPendingOnEnd?: boolean | null;
 }
 
+/**
+ * @public
+ */
 export const defaultDebounceConfig: DebounceConfig = {
     leading: false,
     trailing: true,
     emitPendingOnEnd: true,
 };
 
+/**
+ * @public
+ */
 export type InitialDurationInfo =
     | [
           /* durationSource */ Source<unknown>,
@@ -2917,6 +3510,9 @@ export type InitialDurationInfo =
           /* maxDurationSource */ Source<unknown>,
       ];
 
+/**
+ * @public
+ */
 export function debounce<T>(
     getDurationSource: (value: T, index: number) => Source<unknown>,
     getInitialDurationRange?:
@@ -2924,6 +3520,9 @@ export function debounce<T>(
         | null,
     config?: DebounceConfig | null,
 ): Operator<T, T>;
+/**
+ * @public
+ */
 export function debounce<T>(
     getDurationSource: undefined | null,
     getInitialDurationRange: (
@@ -3100,11 +3699,17 @@ export function debounce<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function debounceMs(
     durationMs: number,
     maxDurationMs?: number | null,
     config?: DebounceConfig | null,
 ): IdentityOperator;
+/**
+ * @public
+ */
 export function debounceMs(
     durationMs: null | undefined,
     maxDurationMs: number,
@@ -3133,22 +3738,34 @@ export function debounceMs(
     return debounce(null, () => [null, maxDuration!], config);
 }
 
+/**
+ * @public
+ */
 export interface ThrottleConfig {
     leading?: boolean | null;
     trailing?: boolean | null;
     emitPendingOnEnd?: boolean | null;
 }
 
+/**
+ * @public
+ */
 export const defaultThrottleConfig: ThrottleConfig = {
     leading: true,
     trailing: true,
     emitPendingOnEnd: true,
 };
 
+/**
+ * @public
+ */
 export function throttle(
     getDurationSource: () => Source<unknown>,
     config?: ThrottleConfig | null,
 ): IdentityOperator;
+/**
+ * @public
+ */
 export function throttle<T>(
     getDurationSource: (value: T, index: number) => Source<unknown>,
     config?: ThrottleConfig | null,
@@ -3183,6 +3800,9 @@ export function throttle<T>(
     );
 }
 
+/**
+ * @public
+ */
 export function throttleMs(
     durationMs: number,
     config?: ThrottleConfig | null,
@@ -3191,9 +3811,18 @@ export function throttleMs(
     return throttle(() => durationSource, config);
 }
 
+/**
+ * @public
+ */
 export function delay<T>(
     getDelaySource: (value: T, index: number) => Source<unknown>,
 ): Operator<T, T>;
+/**
+ * @public
+ */
+export function delay(
+    getDelaySource: <T>(value: T, index: number) => Source<unknown>,
+): IdentityOperator;
 export function delay<T>(
     getDelaySource: (value: T, index: number) => Source<unknown>,
 ): Operator<T, T> {
@@ -3247,11 +3876,17 @@ export function delay<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function delayMs(ms: number): IdentityOperator {
     const delaySource = timer(ms);
     return delay(() => delaySource);
 }
 
+/**
+ * @public
+ */
 export function sample(scheduleSource: Source<unknown>): IdentityOperator {
     return <T>(source: Source<T>) =>
         Source<T>((sink) => {
@@ -3282,21 +3917,33 @@ export function sample(scheduleSource: Source<unknown>): IdentityOperator {
         });
 }
 
+/**
+ * @public
+ */
 export function sampleMs(ms: number): IdentityOperator {
     return sample(interval(ms));
 }
 
+/**
+ * @public
+ */
 export interface WithTime<T> {
     value: T;
     time: number;
 }
 
+/**
+ * @public
+ */
 export function withTime<T>(
     provideTime: TimeProvider,
 ): Operator<T, WithTime<T>> {
     return map((value: T) => ({ value, time: provideTime() }));
 }
 
+/**
+ * @public
+ */
 export interface TimeInterval<T> {
     value: T;
     time: number;
@@ -3306,6 +3953,9 @@ export interface TimeInterval<T> {
     timeDifference: number;
 }
 
+/**
+ * @public
+ */
 export function withTimeInterval<T>(
     provideTime: TimeProvider,
 ): Operator<T, TimeInterval<T>> {
@@ -3337,6 +3987,9 @@ export function withTimeInterval<T>(
         });
 }
 
+/**
+ * @public
+ */
 export function schedulePushEvents(
     schedule: ScheduleFunction,
 ): IdentityOperator {
@@ -3344,6 +3997,9 @@ export function schedulePushEvents(
     return delay(() => delaySource);
 }
 
+/**
+ * @public
+ */
 export function scheduleSubscription(
     schedule: ScheduleFunction,
 ): IdentityOperator {
@@ -3351,13 +4007,22 @@ export function scheduleSubscription(
         concatSources(emptyScheduled(schedule), source);
 }
 
+/**
+ * @public
+ */
 export interface ControllableSource<T> extends Source<T> {
     produce(): void;
 }
 
+/**
+ * @public
+ */
 export function shareControlled<T>(
     Subject_: () => Subject<T>,
 ): (source: Source<T>) => ControllableSource<T>;
+/**
+ * @public
+ */
 export function shareControlled(
     Subject_?: typeof Subject,
 ): <T>(source: Source<T>) => ControllableSource<T>;
@@ -3387,7 +4052,13 @@ export function shareControlled(
     };
 }
 
+/**
+ * @public
+ */
 export function share<T>(Subject_: () => Subject<T>): Operator<T, T>;
+/**
+ * @public
+ */
 export function share(Subject_?: typeof Subject): IdentityOperator;
 export function share(Subject_ = Subject): IdentityOperator {
     return <T>(source: Source<T>): Source<T> => {
@@ -3420,7 +4091,13 @@ export function share(Subject_ = Subject): IdentityOperator {
     };
 }
 
+/**
+ * @public
+ */
 export function shareOnce<T>(Subject_: () => Subject<T>): Operator<T, T>;
+/**
+ * @public
+ */
 export function shareOnce(Subject_?: typeof Subject): IdentityOperator;
 export function shareOnce(Subject_ = Subject): IdentityOperator {
     return <T>(source: Source<T>): Source<T> => {
@@ -3432,7 +4109,13 @@ export function shareOnce(Subject_ = Subject): IdentityOperator {
     };
 }
 
+/**
+ * @public
+ */
 export function sharePersist<T>(Subject_: () => Subject<T>): Operator<T, T>;
+/**
+ * @public
+ */
 export function sharePersist(Subject_?: typeof Subject): IdentityOperator;
 export function sharePersist(Subject_ = Subject): IdentityOperator {
     return <T>(source: Source<T>): Source<T> => {
@@ -3453,10 +4136,16 @@ export function sharePersist(Subject_ = Subject): IdentityOperator {
     };
 }
 
+/**
+ * @public
+ */
 export function shareTransform<T, U>(
     Subject_: () => Subject<T>,
     transform: (shared: Source<T>) => Source<U>,
 ): Operator<T, U>;
+/**
+ * @public
+ */
 export function shareTransform<U>(
     Subject_: typeof Subject,
     transform: <T>(source: Source<T>) => Source<U>,
