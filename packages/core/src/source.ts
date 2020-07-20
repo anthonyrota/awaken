@@ -19,35 +19,43 @@ import {
 } from './util';
 
 /**
+ * {@awakenBaseGroup event}
  * @public
  */
 export type PushType = 0;
 /**
+ * {@awakenBaseGroup event}
  * @public
  */
 export const PushType: PushType = 0;
 /**
+ * {@awakenBaseGroup event}
  * @public
  */
 export type ThrowType = 1;
 /**
+ * {@awakenBaseGroup event}
  * @public
  */
 export const ThrowType: ThrowType = 1;
 /**
+ * {@awakenBaseGroup event}
  * @public
  */
 export type EndType = 2;
 /**
+ * {@awakenBaseGroup event}
  * @public
  */
 export const EndType: EndType = 2;
 /**
+ * {@awakenBaseGroup event}
  * @public
  */
 export type EventType = PushType | ThrowType | EndType;
 
 /**
+ * {@awakenBaseGroup event}
  * @public
  */
 export interface Push<T> {
@@ -56,6 +64,7 @@ export interface Push<T> {
 }
 
 /**
+ * {@awakenBaseGroup event}
  * @public
  */
 export interface Throw {
@@ -64,6 +73,7 @@ export interface Throw {
 }
 
 /**
+ * {@awakenBaseGroup event}
  * @public
  */
 export interface End {
@@ -72,10 +82,10 @@ export interface End {
 
 /**
  * This is the base construct for distributing values/messages. All things
- * pushed and received to and from {@link (Sink:function)|Sinks} will be events.
+ * pushed and received to and from {@link Sink|Sinks} will be events.
  * An event is an object which consists of a `type` field, which determines the
  * type of the event. There are three types of events:
- * {@link (Push:VALUE_ARG)}, {@link (Throw:function)} and
+ * {@link Push}, {@link Throw} and
  * {@link End} events:
  *
  * - A Push event represents the "pushing" of a value to a sink, and has a
@@ -90,8 +100,8 @@ export interface End {
  *   will not take any more events.
  *
  * When determining an event's type, you should **always** use either
- * {@link (PushType:variable)}, {@link (ThrowType:variable)} or
- * {@link (EndType:variable)} directly instead of their constant number values.
+ * {@link PushType}, {@link ThrowType} or
+ * {@link EndType} directly instead of their constant number values.
  *
  * @example
  * ```
@@ -109,22 +119,23 @@ export interface End {
  * sink(Throw(new Error('...'))); // `${ThrowType}`, Error(...).
  * ```
  *
- * @see {@link (Push:VALUE_ARG)}
- * @see {@link (Throw:function)}
+ * @see {@link Push}
+ * @see {@link Throw}
  * @see {@link End}
- * @see {@link (PushType:variable)}
- * @see {@link (ThrowType:variable)}
- * @see {@link (EndType:variable)}
- * @see {@link (Source:function)}
- * @see {@link (Sink:function)}
+ * @see {@link PushType}
+ * @see {@link ThrowType}
+ * @see {@link EndType}
+ * @see {@link Source}
+ * @see {@link Sink}
  *
+ * {@awakenBaseGroup event}
  * @public
  */
 export type Event<T> = Push<T> | Throw | End;
 
 /**
  * A Push event represents the "pushing" of a value to a
- * {@link (Sink:function)}, and has a `value` field equal to the value the event
+ * {@link Sink}, and has a `value` field equal to the value the event
  * is carrying.
  *
  * @param value - The value to send.
@@ -138,19 +149,16 @@ export type Event<T> = Push<T> | Throw | End;
  * ```
  *
  * @see {@link Event}
- * @see {@link (Throw:function)}
+ * @see {@link Throw}
  * @see {@link End}
- * @see {@link (Source:function)}
- * @see {@link (Sink:function)}
+ * @see {@link Source}
+ * @see {@link Sink}
  *
- * {@label NO_ARGS}
- *
+ * {@awakenBaseGroup event}
  * @public
  */
 export function Push<T>(): Push<undefined>;
 /**
- * {@label VALUE_ARG}
- *
  * @public
  */
 export function Push<T>(value: T): Push<T>;
@@ -160,7 +168,7 @@ export function Push<T>(value?: T): Push<T | undefined> {
 
 /**
  * A Throw represents the "throwing" of an error, and has an `error` field equal
- * to the error the event is carrying. After a {@link (Sink:function)} receives
+ * to the error the event is carrying. After a {@link Sink} receives
  * an Error event, it will be disposed and will not take any more events.
  *
  * @param error - The error to be thrown.
@@ -174,11 +182,12 @@ export function Push<T>(value?: T): Push<T | undefined> {
  * ```
  *
  * @see {@link Event}
- * @see {@link (Push:VALUE_ARG)}
+ * @see {@link Push}
  * @see {@link End}
- * @see {@link (Source:function)}
- * @see {@link (Sink:function)}
+ * @see {@link Source}
+ * @see {@link Sink}
  *
+ * {@awakenBaseGroup event}
  * @public
  */
 export function Throw(error: unknown): Throw {
@@ -186,7 +195,7 @@ export function Throw(error: unknown): Throw {
 }
 
 /**
- * An End event represents the "end" of a {@link (Source:function)}, and has no
+ * An End event represents the "end" of a {@link Source}, and has no
  * additional properties. After a Sink receives an End event, it will be
  * disposed and will not take any more events.
  *
@@ -202,16 +211,18 @@ export function Throw(error: unknown): Throw {
  * ```
  *
  * @see {@link Event}
- * @see {@link (Push:VALUE_ARG)}
- * @see {@link (Throw:function)}
- * @see {@link (Source:function)}
- * @see {@link (Sink:function)}
+ * @see {@link Push}
+ * @see {@link Throw}
+ * @see {@link Source}
+ * @see {@link Sink}
  *
+ * {@awakenBaseGroup event}
  * @public
  */
 export const End: End = { type: EndType };
 
 /**
+ * {@awakenBaseGroup sink}
  * @public
  */
 export interface Sink<T> extends Disposable {
@@ -220,12 +231,12 @@ export interface Sink<T> extends Disposable {
 }
 
 /**
- * A Sink is what a {@link (Source:function)} subscribes to. All events emitted
+ * A Sink is what a {@link Source} subscribes to. All events emitted
  * by the source will be passed to the sink that has been given to the source.
  *
  * The shape of a Sink is a function which takes an {@link Event} and
  * distributes it to the `onEvent` function as described below. Sinks also
- * implement the {@link (Disposable:function)} construct, and has all of the
+ * implement the {@link Disposable} construct, and has all of the
  * methods of the Disposable type, and can be treated as a Disposable. This is
  * important as the way to stop a sink (and also unsubscribe the sources
  * subscribed to the sink) is to dispose the sink itself. This also means that
@@ -390,12 +401,13 @@ export interface Sink<T> extends Disposable {
  * // Push(3)
  * ```
  *
- * @see {@link (Disposable:function)}
+ * @see {@link Disposable}
  * @see {@link Event}
- * @see {@link (Source:function)}
- * @see {@link (Subject:function)}
+ * @see {@link Source}
+ * @see {@link Subject}
  * @see {@link asyncReportError}
  *
+ * {@awakenBaseGroup sink}
  * @public
  */
 export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
@@ -446,14 +458,15 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
  * isSink(null); // false.
  * ```
  *
- * @see {@link (Sink:function)}
- * @see {@link (Source:function)}
- * @see {@link (Subject:function)}
- * @see {@link (Disposable:function)}
+ * @see {@link Sink}
+ * @see {@link Source}
+ * @see {@link Subject}
+ * @see {@link Disposable}
  * @see {@link isDisposable}
  * @see {@link isSource}
  * @see {@link isSubject}
  *
+ * {@awakenBaseGroup sink}
  * @public
  */
 export function isSink(value: unknown): value is Sink<unknown> {
@@ -461,6 +474,10 @@ export function isSink(value: unknown): value is Sink<unknown> {
     return value != null && $$Sink in (value as any);
 }
 
+/**
+ * {@awakenBaseGroup source}
+ * @public
+ */
 export interface Source<T> {
     [$$Source]: undefined;
     (sink: Sink<T>): void;
@@ -468,7 +485,7 @@ export interface Source<T> {
 
 /**
  * A Source is a function which can be subscribed to with a
- * {@link (Sink:function)}. This construct is the basis of all reactive
+ * {@link Sink}. This construct is the basis of all reactive
  * programming done with this library. Sources are by default essentially a lazy
  * push-style stream/observable which will produce new values every
  * subscription. The "lazy" part can be thought of as follows:
@@ -621,12 +638,13 @@ export interface Source<T> {
  * });
  * ```
  *
- * @see {@link (Disposable:function)}
+ * @see {@link Disposable}
  * @see {@link Event}
- * @see {@link (Sink:function)}
- * @see {@link (Subject:function)}
+ * @see {@link Sink}
+ * @see {@link Subject}
  * @see {@link asyncReportError}
  *
+ * {@awakenBaseGroup source}
  * @public
  */
 export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
@@ -679,14 +697,15 @@ export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
  * isSource(null); // false.
  * ```
  *
- * @see {@link (Sink:function)}
- * @see {@link (Source:function)}
- * @see {@link (Subject:function)}
- * @see {@link (Disposable:function)}
+ * @see {@link Sink}
+ * @see {@link Source}
+ * @see {@link Subject}
+ * @see {@link Disposable}
  * @see {@link isDisposable}
  * @see {@link isSink}
  * @see {@link isSubject}
  *
+ * {@awakenBaseGroup source}
  * @public
  */
 export function isSource(value: unknown): value is Sink<unknown> {
@@ -727,9 +746,10 @@ export function isSource(value: unknown): value is Sink<unknown> {
  * );
  * ```
  *
- * @see {@link (Source:function)}
- * @see {@link (Sink:function)}
+ * @see {@link Source}
+ * @see {@link Sink}
  *
+ * {@awakenBaseGroup source}
  * @public
  */
 export function subscribe<T>(
@@ -776,6 +796,7 @@ function pushArrayItemsToSink<T>(array: ArrayLike<T>, sink: Sink<T>): void {
  * @see {@link fromArrayScheduled}
  * @see {@link of}
  *
+ * {@awakenGroup source}
  * @public
  */
 export function fromArray<T>(array: ArrayLike<T>): Source<T> {
@@ -786,6 +807,7 @@ export function fromArray<T>(array: ArrayLike<T>): Source<T> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function fromArrayScheduled<T>(
@@ -843,6 +865,7 @@ export function fromArrayScheduled<T>(
  * @see {@link fromArray}
  * @see {@link ofScheduled}
  *
+ * {@awakenGroup source}
  * @public
  */
 export function of<T>(...items: T[]): Source<T> {
@@ -850,6 +873,7 @@ export function of<T>(...items: T[]): Source<T> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function ofScheduled<T>(
@@ -860,10 +884,12 @@ export function ofScheduled<T>(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function ofEvent(event: Throw | End): Source<never>;
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function ofEvent<T>(event: Event<T>): Source<T>;
@@ -875,6 +901,7 @@ export function ofEvent<T>(event: Event<T>): Source<T> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function ofEventScheduled<T>(
@@ -882,6 +909,7 @@ export function ofEventScheduled<T>(
     schedule: ScheduleFunction,
 ): Source<never>;
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function ofEventScheduled<T>(
@@ -901,6 +929,7 @@ export function ofEventScheduled<T>(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function throwError(getError: () => unknown): Source<never> {
@@ -908,6 +937,7 @@ export function throwError(getError: () => unknown): Source<never> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function throwErrorScheduled(
@@ -918,11 +948,13 @@ export function throwErrorScheduled(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export const empty = ofEvent(End);
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function emptyScheduled(schedule: ScheduleFunction): Source<never> {
@@ -930,6 +962,7 @@ export function emptyScheduled(schedule: ScheduleFunction): Source<never> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function timer(durationMs: number): Source<never> {
@@ -937,11 +970,13 @@ export function timer(durationMs: number): Source<never> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export const never = Source(noop);
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
@@ -1008,6 +1043,7 @@ async function distributeAsyncIterable<T>(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function fromAsyncIterable<T>(iterable: AsyncIterable<T>): Source<T> {
@@ -1017,6 +1053,7 @@ export function fromAsyncIterable<T>(iterable: AsyncIterable<T>): Source<T> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function fromPromise<T>(promise: PromiseLike<T>): Source<T> {
@@ -1036,6 +1073,7 @@ export function fromPromise<T>(promise: PromiseLike<T>): Source<T> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function fromScheduleFunction<T extends unknown[]>(
@@ -1057,6 +1095,7 @@ export function fromScheduleFunction<T extends unknown[]>(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function fromReactiveValue<T extends unknown[], Signal>(
@@ -1088,6 +1127,7 @@ export function fromReactiveValue<T extends unknown[], Signal>(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function fromSingularReactiveValue<T, Signal>(
@@ -1103,6 +1143,7 @@ export function fromSingularReactiveValue<T, Signal>(
 const replaceWithValueIndex = map((_, idx: number) => idx);
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function interval(delayMs: number): Source<number> {
@@ -1112,6 +1153,7 @@ export function interval(delayMs: number): Source<number> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export const animationFrames: Source<number> = pipe(
@@ -1120,6 +1162,7 @@ export const animationFrames: Source<number> = pipe(
 );
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function lazy<T>(createSource: () => Source<T>): Source<T> {
@@ -1136,6 +1179,7 @@ export function lazy<T>(createSource: () => Source<T>): Source<T> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function iif<T>(
@@ -1149,6 +1193,7 @@ export function iif<T>(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function range(count: number, start = 0): Source<number> {
@@ -1161,6 +1206,7 @@ export function range(count: number, start = 0): Source<number> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function isEqual<T, U>(
@@ -1262,6 +1308,7 @@ export function isEqual<T, U>(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function flatSources<T>(...sources: Source<T>[]): Source<T> {
@@ -1269,6 +1316,7 @@ export function flatSources<T>(...sources: Source<T>[]): Source<T> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function mergeSourcesConcurrent<T>(
@@ -1279,6 +1327,7 @@ export function mergeSourcesConcurrent<T>(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function mergeSources<T>(...sources: Source<T>[]): Source<T> {
@@ -1286,6 +1335,7 @@ export function mergeSources<T>(...sources: Source<T>[]): Source<T> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function concatSources<T>(...sources: Source<T>[]): Source<T> {
@@ -1299,6 +1349,7 @@ const noValue: unique symbol = {} as any;
 type WrapValuesInSource<T> = { [K in keyof T]: Source<T[K]> };
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function combineSources<T extends unknown[]>(
@@ -1332,6 +1383,7 @@ export function combineSources<T extends unknown[]>(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function all<T extends unknown[]>(
@@ -1348,6 +1400,7 @@ export function all<T extends unknown[]>(
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function raceSources<T>(...sources: Source<T>[]): Source<T> {
@@ -1376,6 +1429,7 @@ export function raceSources<T>(...sources: Source<T>[]): Source<T> {
 }
 
 /**
+ * {@awakenGroup source}
  * @public
  */
 export function zipSources<T extends unknown[]>(
@@ -1452,6 +1506,7 @@ export function zipSources<T extends unknown[]>(
 }
 
 /**
+ * {@awakenBaseGroup operator}
  * @public
  */
 export interface Operator<T, U> {
@@ -1459,6 +1514,7 @@ export interface Operator<T, U> {
 }
 
 /**
+ * {@awakenBaseGroup operator}
  * @public
  */
 export interface IdentityOperator {
@@ -1472,6 +1528,7 @@ type Unshift<T extends unknown[], U> = ((head: U, ...tail: T) => void) extends (
     : never;
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function combineWith<T extends unknown[]>(
@@ -1482,6 +1539,7 @@ export function combineWith<T extends unknown[]>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function raceWith<T>(
@@ -1491,6 +1549,7 @@ export function raceWith<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function zipWith<T extends unknown[]>(
@@ -1505,6 +1564,7 @@ function _pluckValue<T>(event: { value: T }): T {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function withLatestFromLazy<T extends unknown[]>(
@@ -1519,6 +1579,7 @@ export function withLatestFromLazy<T extends unknown[]>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function withLatestFrom<T extends unknown[]>(
@@ -1583,6 +1644,7 @@ export function withLatestFrom<T extends unknown[]>(
  *     method calls the transform function one time for each Push event of the
  *     given source and passes through the result.
  *
+ * {@awakenGroup operator}
  * @public
  */
 export function map<U>(
@@ -1626,6 +1688,7 @@ export function map<T, U>(
  *
  * @param value - The value to push.
  *
+ * {@awakenGroup operator}
  * @public
  */
 export function mapTo<U>(value: U): <T>(source: Source<T>) => Source<U> {
@@ -1633,6 +1696,7 @@ export function mapTo<U>(value: U): <T>(source: Source<T>) => Source<U> {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function mapEvents<T, U>(
@@ -1664,6 +1728,7 @@ export function mapEvents<T, U>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function mapPushEvents<T>(
@@ -1690,6 +1755,7 @@ export function mapPushEvents<T, U>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const wrapInPushEvents: <T>(
@@ -1697,6 +1763,7 @@ export const wrapInPushEvents: <T>(
 ) => Source<Event<T>> = mapEvents(<T>(event: Event<T>) => Push(event));
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const unwrapFromWrappedPushEvents: <T>(
@@ -1706,6 +1773,7 @@ export const unwrapFromWrappedPushEvents: <T>(
 );
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
@@ -1722,6 +1790,7 @@ export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
  *     source. If and only if the function returns a truthy value, then the
  *     event will pass through.
  *
+ * {@awakenGroup operator}
  * @public
  */
 export function filter<T>(
@@ -1768,6 +1837,7 @@ export function filter<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export interface WithIndex<T> {
@@ -1776,12 +1846,14 @@ export interface WithIndex<T> {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function findWithIndex<T, S extends T>(
     predicate: (value: T, index: number) => value is S,
 ): Operator<T, WithIndex<S>>;
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function findWithIndex<T>(
@@ -1806,6 +1878,7 @@ export function findWithIndex<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function find<T, S extends T>(
@@ -1824,6 +1897,7 @@ export function find<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function findIndex<T>(
@@ -1833,6 +1907,7 @@ export function findIndex<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function at(index: number): IdentityOperator {
@@ -1843,6 +1918,7 @@ export function at(index: number): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function every<T>(
@@ -1855,6 +1931,7 @@ export function every<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function some<T>(
@@ -1864,6 +1941,7 @@ export function some<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function finalize(callback: () => void): IdentityOperator {
@@ -1875,12 +1953,14 @@ export function finalize(callback: () => void): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const ignorePushEvents = filter(<T>(_: T) => false);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function withPrevious<T>(source: Source<T>): Source<[T, T]> {
@@ -1913,6 +1993,7 @@ export function withPrevious<T>(source: Source<T>): Source<[T, T]> {
  *     accumulation. The first call to the transform function provides this
  *     as the previousAccumulatedResult.
  *
+ * {@awakenGroup operator}
  * @public
  */
 export function scan<T, R, I>(
@@ -1967,6 +2048,7 @@ export function scan<T, R, I>(
  *     accumulation. The first call to the transform function provides this
  *     as the previousAccumulatedResult.
  *
+ * {@awakenGroup operator}
  * @public
  */
 export function reduce<T, R, I>(
@@ -1985,6 +2067,7 @@ function _unwrap<T>(box: [T]): T {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function maxCompare<T>(
@@ -2009,11 +2092,13 @@ function compareNumbers(a: number, b: number): number {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const max: Operator<number, number> = maxCompare(compareNumbers);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function minCompare<T>(
@@ -2029,11 +2114,13 @@ export function minCompare<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const min: Operator<number, number> = minCompare(compareNumbers);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function isEqualTo<T, U>(
@@ -2044,6 +2131,7 @@ export function isEqualTo<T, U>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function flat<T>(source: Source<Source<T>>): Source<T> {
@@ -2153,16 +2241,19 @@ function _createMergeMapOperator(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const mergeMap = _createMergeMapOperator(false);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const expandMap = _createMergeMapOperator(true);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function mergeConcurrent(
@@ -2172,6 +2263,7 @@ export function mergeConcurrent(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const merge = mergeConcurrent(Infinity);
@@ -2223,16 +2315,19 @@ function _createSwitchOperator(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const switchEach = _createSwitchOperator(true);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const concatDrop = _createSwitchOperator(false);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function flatWith<T>(
@@ -2242,6 +2337,7 @@ export function flatWith<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function mergeWithConcurrent<T>(
@@ -2253,6 +2349,7 @@ export function mergeWithConcurrent<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function mergeWith<T>(
@@ -2262,6 +2359,7 @@ export function mergeWith<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function startWithSources<T>(
@@ -2271,6 +2369,7 @@ export function startWithSources<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function concatWith<T>(
@@ -2280,6 +2379,7 @@ export function concatWith<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function flatMap<T, U>(
@@ -2289,6 +2389,7 @@ export function flatMap<T, U>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function concatMap<T, U>(
@@ -2298,11 +2399,13 @@ export function concatMap<T, U>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const concat = mergeConcurrent(1);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function switchMap<T, U>(
@@ -2312,6 +2415,7 @@ export function switchMap<T, U>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function concatDropMap<T, U>(
@@ -2321,6 +2425,7 @@ export function concatDropMap<T, U>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function startWith<T>(
@@ -2334,6 +2439,7 @@ export function startWith<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function endWith<T>(
@@ -2425,55 +2531,59 @@ function _createSpyOperators(spyAfter: boolean): SpyOperators {
     };
 }
 
-export const {
-    __spy: spyBefore,
-    __spyPush: spyPushBefore,
-    __spyThrow: spyThrowBefore,
-    __spyEnd: spyEndBefore,
-}: {
-    /**
-     * @public
-     */
-    __spy: <T>(onEvent: (event: Event<T>) => void) => Operator<T, T>;
-    /**
-     * @public
-     */
-    __spyPush: <T>(onPush: (value: T, index: number) => void) => Operator<T, T>;
-    /**
-     * @public
-     */
-    __spyThrow: (onThrow: (error: unknown) => void) => IdentityOperator;
-    /**
-     * @public
-     */
-    __spyEnd: (onEnd: () => void) => IdentityOperator;
-} = _createSpyOperators(false);
-
-export const {
-    __spy: spyAfter,
-    __spyPush: spyPushAfter,
-    __spyThrow: spyThrowAfter,
-    __spyEnd: spyEndAfter,
-}: {
-    /**
-     * @public
-     */
-    __spy: <T>(onEvent: (event: Event<T>) => void) => Operator<T, T>;
-    /**
-     * @public
-     */
-    __spyPush: <T>(onPush: (value: T, index: number) => void) => Operator<T, T>;
-    /**
-     * @public
-     */
-    __spyThrow: (onThrow: (error: unknown) => void) => IdentityOperator;
-    /**
-     * @public
-     */
-    __spyEnd: (onEnd: () => void) => IdentityOperator;
-} = _createSpyOperators(true);
+const spyBeforeOperators = _createSpyOperators(false);
+const spyAfterOperators = _createSpyOperators(true);
 
 /**
+ * {@awakenGroup operator}
+ * @public
+ */
+export const spyBefore = spyBeforeOperators.__spy;
+
+/**
+ * {@awakenGroup operator}
+ * @public
+ */
+export const spyPushBefore = spyBeforeOperators.__spyPush;
+
+/**
+ * {@awakenGroup operator}
+ * @public
+ */
+export const spyThrowBefore = spyBeforeOperators.__spyThrow;
+
+/**
+ * {@awakenGroup operator}
+ * @public
+ */
+export const spyEndBefore = spyBeforeOperators.__spyEnd;
+
+/**
+ * {@awakenGroup operator}
+ * @public
+ */
+export const spyAfter = spyAfterOperators.__spy;
+
+/**
+ * {@awakenGroup operator}
+ * @public
+ */
+export const spyPushAfter = spyAfterOperators.__spyPush;
+
+/**
+ * {@awakenGroup operator}
+ * @public
+ */
+export const spyThrowAfter = spyAfterOperators.__spyThrow;
+
+/**
+ * {@awakenGroup operator}
+ * @public
+ */
+export const spyEndAfter = spyAfterOperators.__spyEnd;
+
+/**
+ * {@awakenGroup operator}
  * @public
  */
 export function isEmpty(source: Source<unknown>): Source<boolean> {
@@ -2493,6 +2603,7 @@ export function isEmpty(source: Source<unknown>): Source<boolean> {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function defaultIfEmpty<T>(
@@ -2524,6 +2635,7 @@ export function defaultIfEmpty<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function defaultIfEmptyTo<T>(
@@ -2533,6 +2645,7 @@ export function defaultIfEmptyTo<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function throwIfEmpty(getError: () => unknown): IdentityOperator {
@@ -2542,6 +2655,7 @@ export function throwIfEmpty(getError: () => unknown): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function distinct(): IdentityOperator;
@@ -2603,6 +2717,7 @@ export function distinct<T, K>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function distinctFromLast(): IdentityOperator;
@@ -2659,6 +2774,7 @@ export function distinctFromLast<T, K>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function groupBy<T, K>(
@@ -2732,6 +2848,7 @@ interface GroupSourceBase<T> extends Source<T> {
 }
 
 /**
+ * {@awakenGroup operator/groupBy}
  * @public
  */
 export interface ActiveGroupSource<T, K> extends GroupSourceBase<T> {
@@ -2740,6 +2857,7 @@ export interface ActiveGroupSource<T, K> extends GroupSourceBase<T> {
 }
 
 /**
+ * {@awakenGroup operator/groupBy}
  * @public
  */
 export interface RemovedGroupSource<T> extends GroupSourceBase<T> {
@@ -2748,6 +2866,7 @@ export interface RemovedGroupSource<T> extends GroupSourceBase<T> {
 }
 
 /**
+ * {@awakenGroup operator/groupBy}
  * @public
  */
 export type GroupSource<T, K> = ActiveGroupSource<T, K> | RemovedGroupSource<T>;
@@ -2805,6 +2924,7 @@ function toEmpty(): Source<never> {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function take(amount: number): IdentityOperator {
@@ -2835,6 +2955,7 @@ export function take(amount: number): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const first = take(1);
@@ -2848,6 +2969,7 @@ export const first = take(1);
  *     takeWhile method calls this function one time for each Push event of the
  *     given source.
  *
+ * {@awakenGroup operator}
  * @public
  */
 export function takeWhile<T, S extends T>(
@@ -2894,6 +3016,7 @@ export function takeWhile<T>(
  *
  * @param amount - The amount of events to keep and distribute at the end.
  *
+ * {@awakenGroup operator}
  * @public
  */
 export function takeLast(amount: number): IdentityOperator {
@@ -2933,11 +3056,13 @@ export function takeLast(amount: number): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const last = takeLast(1);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const count: <T>(source: Source<T>) => Source<number> = flow(
@@ -2946,6 +3071,7 @@ export const count: <T>(source: Source<T>) => Source<number> = flow(
 );
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function takeUntil(stopSource: Source<unknown>): IdentityOperator {
@@ -2962,6 +3088,7 @@ export function takeUntil(stopSource: Source<unknown>): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function skip(amount: number): IdentityOperator {
@@ -2982,6 +3109,7 @@ export function skip(amount: number): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function skipWhile<T>(
@@ -3014,6 +3142,7 @@ export function skipWhile<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function skipLast(amount: number): IdentityOperator {
@@ -3047,6 +3176,7 @@ export function skipLast(amount: number): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function skipUntil(stopSource: Source<unknown>): IdentityOperator {
@@ -3110,26 +3240,31 @@ function _createRepeatOperator(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const repeat = _createRepeatOperator(EndType);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const retry = _createRepeatOperator(ThrowType);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const loop = repeat(Infinity);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export const retryAlways = retry(Infinity);
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function repeatWhen<T>(
@@ -3195,6 +3330,7 @@ export function repeatWhen<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function timeout<T>(
@@ -3214,6 +3350,7 @@ export function timeout<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function timeoutMs<T>(
@@ -3224,6 +3361,7 @@ export function timeoutMs<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function catchError<T>(
@@ -3255,6 +3393,7 @@ export function catchError<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function windowEvery(
@@ -3293,6 +3432,7 @@ export function windowEvery(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function windowControlled(
@@ -3373,6 +3513,7 @@ export function windowControlled<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function windowEach(
@@ -3406,6 +3547,7 @@ export function windowEach<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function windowCount(
@@ -3426,6 +3568,7 @@ export function windowCount(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function windowTime(
@@ -3448,6 +3591,7 @@ export function windowTime(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function collect<T>(source: Source<T>): Source<T[]> {
@@ -3471,6 +3615,7 @@ export function collect<T>(source: Source<T>): Source<T[]> {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export type DebounceTrailingRestart = 'restart';
@@ -3480,6 +3625,7 @@ export type DebounceTrailingRestart = 'restart';
 export const DebounceTrailingRestart: DebounceTrailingRestart = 'restart';
 
 /**
+ * {@awakenGroup operator/debounce}
  * @public
  */
 export interface DebounceConfig {
@@ -3489,6 +3635,7 @@ export interface DebounceConfig {
 }
 
 /**
+ * {@awakenGroup operator/debounce}
  * @public
  */
 export const defaultDebounceConfig: DebounceConfig = {
@@ -3498,6 +3645,7 @@ export const defaultDebounceConfig: DebounceConfig = {
 };
 
 /**
+ * {@awakenGroup operator/debounce}
  * @public
  */
 export type InitialDurationInfo =
@@ -3511,6 +3659,7 @@ export type InitialDurationInfo =
       ];
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function debounce<T>(
@@ -3700,6 +3849,7 @@ export function debounce<T>(
 }
 
 /**
+ * {@awakenGroup operator/debounce}
  * @public
  */
 export function debounceMs(
@@ -3739,6 +3889,7 @@ export function debounceMs(
 }
 
 /**
+ * {@awakenGroup operator/throttle}
  * @public
  */
 export interface ThrottleConfig {
@@ -3748,6 +3899,7 @@ export interface ThrottleConfig {
 }
 
 /**
+ * {@awakenGroup operator/throttle}
  * @public
  */
 export const defaultThrottleConfig: ThrottleConfig = {
@@ -3757,6 +3909,7 @@ export const defaultThrottleConfig: ThrottleConfig = {
 };
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function throttle(
@@ -3801,6 +3954,7 @@ export function throttle<T>(
 }
 
 /**
+ * {@awakenGroup operator/throttle}
  * @public
  */
 export function throttleMs(
@@ -3812,6 +3966,7 @@ export function throttleMs(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function delay<T>(
@@ -3877,6 +4032,7 @@ export function delay<T>(
 }
 
 /**
+ * {@awakenGroup operator/delay}
  * @public
  */
 export function delayMs(ms: number): IdentityOperator {
@@ -3885,6 +4041,7 @@ export function delayMs(ms: number): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function sample(scheduleSource: Source<unknown>): IdentityOperator {
@@ -3918,6 +4075,7 @@ export function sample(scheduleSource: Source<unknown>): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator/sample}
  * @public
  */
 export function sampleMs(ms: number): IdentityOperator {
@@ -3925,6 +4083,7 @@ export function sampleMs(ms: number): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator/withTime}
  * @public
  */
 export interface WithTime<T> {
@@ -3933,6 +4092,7 @@ export interface WithTime<T> {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function withTime<T>(
@@ -3942,6 +4102,7 @@ export function withTime<T>(
 }
 
 /**
+ * {@awakenGroup operator/withTimeInterval}
  * @public
  */
 export interface TimeInterval<T> {
@@ -3954,6 +4115,7 @@ export interface TimeInterval<T> {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function withTimeInterval<T>(
@@ -3988,6 +4150,7 @@ export function withTimeInterval<T>(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function schedulePushEvents(
@@ -3998,6 +4161,7 @@ export function schedulePushEvents(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function scheduleSubscription(
@@ -4008,6 +4172,7 @@ export function scheduleSubscription(
 }
 
 /**
+ * {@awakenGroup operator/shareControlled}
  * @public
  */
 export interface ControllableSource<T> extends Source<T> {
@@ -4015,6 +4180,7 @@ export interface ControllableSource<T> extends Source<T> {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function shareControlled<T>(
@@ -4053,6 +4219,7 @@ export function shareControlled(
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function share<T>(Subject_: () => Subject<T>): Operator<T, T>;
@@ -4092,6 +4259,7 @@ export function share(Subject_ = Subject): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function shareOnce<T>(Subject_: () => Subject<T>): Operator<T, T>;
@@ -4110,6 +4278,7 @@ export function shareOnce(Subject_ = Subject): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function sharePersist<T>(Subject_: () => Subject<T>): Operator<T, T>;
@@ -4137,6 +4306,7 @@ export function sharePersist(Subject_ = Subject): IdentityOperator {
 }
 
 /**
+ * {@awakenGroup operator}
  * @public
  */
 export function shareTransform<T, U>(

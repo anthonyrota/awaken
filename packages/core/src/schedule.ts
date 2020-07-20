@@ -8,6 +8,7 @@ import {
 } from './util';
 
 /**
+ * {@awakenBaseGroup schedule}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,6 +23,7 @@ interface ScheduleQueuedCallback<T extends any[]> {
 }
 
 /**
+ * {@awakenGroup schedule}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -171,6 +173,7 @@ export function ScheduleQueued<T extends any[] = []>(
 }
 
 /**
+ * {@awakenGroup schedule}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -198,6 +201,7 @@ export function ScheduleQueuedDiscrete<T extends any[] = []>(
 }
 
 /**
+ * {@awakenGroup schedule}
  * @public
  */
 export const scheduleSync: ScheduleFunction = (callback, subscription) => {
@@ -218,6 +222,7 @@ function ScheduleSyncQueuedInner(
 }
 
 /**
+ * {@awakenGroup schedule}
  * @public
  */
 export function ScheduleSyncQueued(): ScheduleFunction {
@@ -225,6 +230,7 @@ export function ScheduleSyncQueued(): ScheduleFunction {
 }
 
 /**
+ * {@awakenGroup schedule}
  * @public
  */
 export type ScheduleAnimationFrameFunction = ScheduleFunction<
@@ -232,12 +238,14 @@ export type ScheduleAnimationFrameFunction = ScheduleFunction<
 >;
 
 /**
+ * {@awakenGroup schedule}
  * @public
  */
 // eslint-disable-next-line max-len
 export const scheduleAnimationFrame: ScheduleAnimationFrameFunction = requestAnimationFrame;
 
 /**
+ * {@awakenGroup schedule}
  * @public
  */
 export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
@@ -245,6 +253,7 @@ export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
 }
 
 /**
+ * {@awakenGroup schedule}
  * @public
  */
 export function ScheduleTimeout(delayMs: number): ScheduleFunction {
@@ -254,6 +263,7 @@ export function ScheduleTimeout(delayMs: number): ScheduleFunction {
 }
 
 /**
+ * {@awakenGroup schedule}
  * @public
  */
 export function ScheduleTimeoutQueued(delayMs: number): ScheduleFunction {
@@ -261,6 +271,7 @@ export function ScheduleTimeoutQueued(delayMs: number): ScheduleFunction {
 }
 
 /**
+ * {@awakenGroup schedule}
  * @public
  */
 export function ScheduleInterval(delayMs: number): ScheduleFunction {

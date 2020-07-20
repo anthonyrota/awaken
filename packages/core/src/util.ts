@@ -14,6 +14,7 @@ function _call<T>(x: T, f: (x: T) => T): T {
  * @returns The result of accumulatively calling the given value against all of
  *     the functions given left-to-right.
  *
+ * {@awakenBaseGroup operator}
  * @public
  */
 export function pipe<T>(x: T): T;
@@ -66,6 +67,7 @@ export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T {
  *     accumulatively calling the value against all of the functions given
  *     left-to-right.
  *
+ * {@awakenBaseGroup operator}
  * @public
  */
 export function flow(): <T>(x: T) => T;
@@ -111,8 +113,6 @@ export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T {
  *
  * @param array - The array to remove the value from.
  * @param item - The value to remove from the array.
- *
- * @public
  */
 export function removeOnce<T>(array: T[], item: T): void {
     const index = array.indexOf(item);
@@ -130,6 +130,7 @@ declare function cancelAnimationFrame(id: number): void;
  * @param callback - The callback to schedule.
  * @param subscription - If this is disposed then the request will be cancelled.
  *
+ * {@awakenBaseGroup util}
  * @public
  */
 function requestAnimationFrameImplementation(
@@ -161,6 +162,7 @@ export { requestAnimationFrameImplementation as requestAnimationFrame };
  * @param subscription - If this is disposed then the request will be cancelled.
  * @param args - The arguments to send to the callback.
  *
+ * {@awakenBaseGroup util}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -201,6 +203,7 @@ export { setTimeoutImplementation as setTimeout };
  * @param subscription - If this is disposed then the request will be cancelled.
  * @param args - The arguments to send to the callback.
  *
+ * {@awakenBaseGroup util}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -238,6 +241,7 @@ export { setIntervalImplementation as setInterval };
  *
  * @param error - The error to report.
  *
+ * {@awakenBaseGroup util}
  * @public
  */
 export function asyncReportError(error: unknown): void {
@@ -246,30 +250,21 @@ export function asyncReportError(error: unknown): void {
     }, 0);
 }
 
-/**
- * @public
- */
 export function forEach<T>(array: T[], callback: (value: T) => void): void {
     for (let i = 0; i < array.length; i++) {
         callback(array[i]);
     }
 }
 
-/**
- * @public
- */
 export function identity<T>(value: T): T {
     return value;
 }
 
-/**
- * @public
- */
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export function noop(): void {}
 
 /**
- * @public
+ * @internal
  */
 export function _binarySearchNextLargestIndex<T>(
     items: T[],
@@ -310,6 +305,7 @@ export function _binarySearchNextLargestIndex<T>(
 }
 
 /**
+ * {@awakenBaseGroup util}
  * @public
  */
 export interface TimeProvider {
@@ -317,7 +313,7 @@ export interface TimeProvider {
 }
 
 /**
- * @public
+ * {@awakenBaseGroup util}
  */
 export interface FrameRequestCallback {
     (time: number): void;

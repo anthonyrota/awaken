@@ -71,7 +71,10 @@ function renameOutputModule({ from, toDir, toName, transformSourceMap }) {
 
 module.exports = {
     getAbsolutePath,
+    copyFile,
     readFile,
     writeFile,
+    readJSON,
+    writeJSON,
     renameOutputModule,
 };
