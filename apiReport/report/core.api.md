@@ -28,7 +28,7 @@ export function asyncReportError(error: unknown): void;
 // @public (undocumented)
 export function at(index: number): IdentityOperator;
 
-// @public (undocumented)
+// @internal (undocumented)
 export function _b<T>(items: T[], getValue: (item: T) => number, value: number, offset?: number): number;
 
 // @public (undocumented)
@@ -133,14 +133,16 @@ export function delayMs(ms: number): IdentityOperator;
 // @public (undocumented)
 export function Disposable(onDispose?: () => void): Disposable;
 
-// Warning: (ae-forgotten-export) The symbol "DisposableBase" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export interface Disposable extends DisposableBase<Disposable> {
+export interface Disposable {
     // Warning: (ae-forgotten-export) The symbol "DisposableImplementationIdentifier" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     [$$Disposable]: DisposableImplementationIdentifier;
+    readonly active: boolean;
+    add(child: Disposable): void;
+    dispose(): void;
+    remove(child: Disposable): void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "DisposalErrorImplementation" needs to be exported by the entry point index.d.ts

@@ -9,9 +9,6 @@ export {
     setTimeout,
     setInterval,
     asyncReportError,
-    /**
-     * @internal
-     */
     _binarySearchNextLargestIndex as _b,
     TimeProvider,
 } from './util';

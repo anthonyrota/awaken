@@ -2,27 +2,42 @@ import { createCustomError, joinErrors } from './errorBase';
 import { $$Disposable } from './symbols';
 import { removeOnce, forEach } from './util';
 
-interface DisposableBase<Self> {
-    readonly active: boolean;
-    add(child: Self): void;
-    remove(child: Self): void;
-    dispose(): void;
-}
-
 const enum DisposableImplementationIdentifier {
     RealDisposable,
     FakeDisposable,
 }
 
 /**
+ * {@awakenBaseGroup disposable}
  * @public
  */
-export interface Disposable extends DisposableBase<Disposable> {
+export interface Disposable {
+    /**
+     * Some comment.
+     */
+    readonly active: boolean;
+    /**
+     * Some other documentation comment.
+     * @param child The Disposable to add.
+     */
+    add(child: Disposable): void;
+    /**
+     * Remove
+     * @param child Child
+     */
+    remove(child: Disposable): void;
+    /**
+     * Disposes the Disposable
+     */
+    dispose(): void;
     [$$Disposable]: DisposableImplementationIdentifier;
 }
 
-interface DisposableImplementationBase
-    extends DisposableBase<DisposableImplementationBase> {
+interface DisposableImplementationBase {
+    readonly active: boolean;
+    add(child: DisposableImplementation): void;
+    remove(child: DisposableImplementation): void;
+    dispose(): void;
     __children_: () => DisposableImplementationBase[] | null;
     __prepareForDisposal: () => void;
 }
@@ -193,6 +208,7 @@ const activeGetter = Object.getOwnPropertyDescriptor(
  *     unnecessary but here it is useful as the returned value will have the
  *     type `T & Disposable`
  *
+ * {@awakenBaseGroup disposable}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -260,6 +276,7 @@ interface DisposalErrorImplementation extends Error {
 }
 
 /**
+ * {@awakenBaseGroup disposable}
  * @public
  */
 export interface DisposalError extends DisposalErrorImplementation {
@@ -270,6 +287,7 @@ export interface DisposalError extends DisposalErrorImplementation {
 }
 
 /**
+ * {@awakenBaseGroup disposable}
  * @public
  */
 export interface DisposalErrorConstructor {
@@ -280,6 +298,7 @@ export interface DisposalErrorConstructor {
 /**
  * Thrown when at least one error is caught during the disposal of a disposable.
  *
+ * {@awakenBaseGroup disposable}
  * @public
  */
 export const DisposalError: DisposalErrorConstructor = createCustomError(
@@ -313,6 +332,7 @@ function flattenDisposalErrors(errors: unknown[]): unknown[] {
 }
 
 /**
+ * {@awakenBaseGroup disposable}
  * @public
  */
 export function Disposable(onDispose?: () => void): Disposable {
@@ -337,14 +357,15 @@ export function Disposable(onDispose?: () => void): Disposable {
  * isDisposable(null); // false.
  * ```
  *
- * @see {@link (Sink:function)}
- * @see {@link (Source:function)}
- * @see {@link (Subject:function)}
- * @see {@link (Disposable:function)}
+ * @see {@link Sink}
+ * @see {@link Source}
+ * @see {@link Subject}
+ * @see {@link Disposable}
  * @see {@link isSink}
  * @see {@link isSource}
  * @see {@link isSubject}
  *
+ * {@awakenBaseGroup disposable}
  * @public
  */
 export function isDisposable(value: unknown): value is Disposable {
@@ -365,6 +386,7 @@ export function isDisposable(value: unknown): value is Disposable {
 }
 
 /**
+ * {@awakenBaseGroup disposable}
  * @public
  */
 export const DISPOSED: Disposable = Disposable();

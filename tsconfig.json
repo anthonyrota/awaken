@@ -42,6 +42,7 @@
         "./jest.config.js",
         "./jest.config.build.js",
         "./postbuildUtil.js",
-        "./prettier.config.js"
+        "./prettier.config.js",
+        "./generateDocs.ts"
     ]
 }
