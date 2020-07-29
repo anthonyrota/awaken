@@ -5,23 +5,15 @@
         "@commitlint/cli": "9.1.1",
         "@commitlint/config-conventional": "9.1.1",
         "@microsoft/api-extractor": "7.9.2",
-<<<<<<< HEAD
-        "@microsoft/tsdoc": "0.12.20",
+        "@microsoft/api-extractor-model": "7.8.12",
+        "@microsoft/tsdoc": "0.12.19",
         "@types/jest": "26.0.5",
         "@types/node": "14.0.24",
         "@types/rimraf": "3.0.0",
         "@typescript-eslint/eslint-plugin": "3.7.0",
         "@typescript-eslint/parser": "3.7.0",
-=======
-        "@microsoft/api-extractor-model": "^7.8.12",
-        "@microsoft/tsdoc": "^0.12.19",
-        "@types/jest": "^26.0.5",
-        "@types/node": "14.0.23",
-        "@types/rimraf": "3.0.0",
-        "@typescript-eslint/eslint-plugin": "3.6.1",
-        "@typescript-eslint/parser": "3.6.1",
-        "colors": "^1.4.0",
->>>>>>> 102a14e... docs: test api gen script
+        "@types/fs-extra": "9.0.1",
+        "colors": "1.4.0",
         "commitizen": "4.1.2",
         "cspell": "4.0.63",
         "cz-conventional-changelog": "3.2.0",
@@ -30,8 +22,8 @@
         "eslint-import-resolver-typescript": "2.0.0",
         "eslint-plugin-import": "2.22.0",
         "eslint-plugin-jest": "23.18.0",
-        "fs-extra": "^9.0.1",
-        "glob": "^7.1.6",
+        "fs-extra": "9.0.1",
+        "glob": "7.1.6",
         "husky": "4.2.5",
         "jest": "26.1.0",
         "jest-each": "26.1.0",
@@ -56,8 +48,5 @@
         "test:build": "npm run test && npm run build && jest --runInBand --config ./jest.config.build.js",
         "lint": "eslint . && prettier --list-different . && cspell '**/*.{ts,js,md}' && tsc --noEmit",
         "cz": "git-cz"
-    },
-    "dependencies": {
-        "@types/fs-extra": "^9.0.1"
     }
 }
