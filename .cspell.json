@@ -6,7 +6,8 @@
         "**/node_modules/**",
         "**/dist/**",
         "**/**/CHANGELOG.md",
-        "**/**/CONTRIBUTORS.md"
+        "**/**/CONTRIBUTORS.md",
+        "docs/api/**"
     ],
     "dictionaries": [
         "typescript",
