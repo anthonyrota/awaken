@@ -6,7 +6,8 @@
         "**/node_modules/**",
         "**/dist/**",
         "**/**/CHANGELOG.md",
-        "**/**/CONTRIBUTORS.md"
+        "**/**/CONTRIBUTORS.md",
+        "docs/api/**"
     ],
     "dictionaries": [
         "typescript",
@@ -18,6 +19,6 @@
         "filetypes"
     ],
     "ignoreRegExpList": [],
-    "words": ["callbags", "commitlint", "tsdoc"],
+    "words": ["callbags", "commitlint", "tsdoc", "aedoc"],
     "overrides": []
 }
