@@ -254,7 +254,7 @@ namespace MarkdownRenderUtil {
                 }
                 if (
                     !result.resolvedApiItem &&
-                    // Idek.
+                    // I don't even know.
                     ['Subject', 'Event'].includes(token.text)
                 ) {
                     writeLinkToApiItem(
