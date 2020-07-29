@@ -14,23 +14,23 @@ function getTypescriptConfig(): ts.CompilerOptions {
         throw new Error('Could not find valid "tsconfig.json".');
     }
 
-    const compilerOptionsConvertionResult = ts.convertCompilerOptionsFromJson(
+    const compilerOptionsConversionResult = ts.convertCompilerOptionsFromJson(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         readJSON(configPath).compilerOptions,
         '.',
     );
 
-    if (compilerOptionsConvertionResult.errors.length) {
+    if (compilerOptionsConversionResult.errors.length) {
         console.log(
             colors.red(
                 `The following errors we're received when attempting to read the tsconfig file at ${configPath}`,
             ),
         );
-        compilerOptionsConvertionResult.errors.forEach(logDiagnostic);
+        compilerOptionsConversionResult.errors.forEach(logDiagnostic);
         exit();
     }
 
-    return compilerOptionsConvertionResult.options;
+    return compilerOptionsConversionResult.options;
 }
 
 export function createProgram(sourceFilePaths: string[]): ts.Program {
