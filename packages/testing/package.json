@@ -49,7 +49,7 @@
     ],
     "scripts": {
         "build": "microbundle build --raw --tsconfig ./tsconfig.build.json && api-extractor run --local --verbose && node ./postbuild.js",
-        "clean": "rimraf dist && node ../../clearMicrobundleCache.js",
+        "clean": "rimraf dist && node ../../script/clearMicrobundleCache.js",
         "clean:prebuild": "rimraf dist"
     },
     "dependencies": {

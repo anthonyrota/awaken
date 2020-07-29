@@ -8,7 +8,7 @@ const enum DisposableImplementationIdentifier {
 }
 
 /**
- * {@awakenBaseGroup disposable}
+ * {@coreApiPath disposable}
  * @public
  */
 export interface Disposable {
@@ -208,7 +208,7 @@ const activeGetter = Object.getOwnPropertyDescriptor(
  *     unnecessary but here it is useful as the returned value will have the
  *     type `T & Disposable`
  *
- * {@awakenBaseGroup disposable}
+ * {@coreApiPath disposable}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -276,7 +276,7 @@ interface DisposalErrorImplementation extends Error {
 }
 
 /**
- * {@awakenBaseGroup disposable}
+ * {@coreApiPath disposable}
  * @public
  */
 export interface DisposalError extends DisposalErrorImplementation {
@@ -287,7 +287,7 @@ export interface DisposalError extends DisposalErrorImplementation {
 }
 
 /**
- * {@awakenBaseGroup disposable}
+ * {@coreApiPath disposable}
  * @public
  */
 export interface DisposalErrorConstructor {
@@ -298,7 +298,7 @@ export interface DisposalErrorConstructor {
 /**
  * Thrown when at least one error is caught during the disposal of a disposable.
  *
- * {@awakenBaseGroup disposable}
+ * {@coreApiPath disposable}
  * @public
  */
 export const DisposalError: DisposalErrorConstructor = createCustomError(
@@ -332,7 +332,7 @@ function flattenDisposalErrors(errors: unknown[]): unknown[] {
 }
 
 /**
- * {@awakenBaseGroup disposable}
+ * {@coreApiPath disposable}
  * @public
  */
 export function Disposable(onDispose?: () => void): Disposable {
@@ -365,7 +365,7 @@ export function Disposable(onDispose?: () => void): Disposable {
  * @see {@link isSource}
  * @see {@link isSubject}
  *
- * {@awakenBaseGroup disposable}
+ * {@coreApiPath disposable}
  * @public
  */
 export function isDisposable(value: unknown): value is Disposable {
@@ -386,7 +386,7 @@ export function isDisposable(value: unknown): value is Disposable {
 }
 
 /**
- * {@awakenBaseGroup disposable}
+ * {@coreApiPath disposable}
  * @public
  */
 export const DISPOSED: Disposable = Disposable();

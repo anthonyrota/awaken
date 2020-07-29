@@ -4,7 +4,7 @@ const {
     // readFile,
     // writeFile,
     renameOutputModule,
-} = require('../../fileUtil');
+} = require('../../script/util/fileUtil');
 const fs = require('fs');
 
 renameOutputModule({

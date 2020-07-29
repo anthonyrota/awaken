@@ -8,7 +8,7 @@ import {
 } from './util';
 
 /**
- * {@awakenBaseGroup schedule}
+ * {@coreApiPath schedule}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +23,7 @@ interface ScheduleQueuedCallback<T extends any[]> {
 }
 
 /**
- * {@awakenGroup schedule}
+ * {@coreApiPath schedule/<name>}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -173,7 +173,7 @@ export function ScheduleQueued<T extends any[] = []>(
 }
 
 /**
- * {@awakenGroup schedule}
+ * {@coreApiPath schedule/<name>}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -201,7 +201,7 @@ export function ScheduleQueuedDiscrete<T extends any[] = []>(
 }
 
 /**
- * {@awakenGroup schedule}
+ * {@coreApiPath schedule/<name>}
  * @public
  */
 export const scheduleSync: ScheduleFunction = (callback, subscription) => {
@@ -222,7 +222,7 @@ function ScheduleSyncQueuedInner(
 }
 
 /**
- * {@awakenGroup schedule}
+ * {@coreApiPath schedule/<name>}
  * @public
  */
 export function ScheduleSyncQueued(): ScheduleFunction {
@@ -230,7 +230,7 @@ export function ScheduleSyncQueued(): ScheduleFunction {
 }
 
 /**
- * {@awakenGroup schedule}
+ * {@coreApiPath schedule/<name>}
  * @public
  */
 export type ScheduleAnimationFrameFunction = ScheduleFunction<
@@ -238,14 +238,14 @@ export type ScheduleAnimationFrameFunction = ScheduleFunction<
 >;
 
 /**
- * {@awakenGroup schedule}
+ * {@coreApiPath schedule/<name>}
  * @public
  */
 // eslint-disable-next-line max-len
 export const scheduleAnimationFrame: ScheduleAnimationFrameFunction = requestAnimationFrame;
 
 /**
- * {@awakenGroup schedule}
+ * {@coreApiPath schedule/<name>}
  * @public
  */
 export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
@@ -253,7 +253,7 @@ export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
 }
 
 /**
- * {@awakenGroup schedule}
+ * {@coreApiPath schedule/<name>}
  * @public
  */
 export function ScheduleTimeout(delayMs: number): ScheduleFunction {
@@ -263,7 +263,7 @@ export function ScheduleTimeout(delayMs: number): ScheduleFunction {
 }
 
 /**
- * {@awakenGroup schedule}
+ * {@coreApiPath schedule/<name>}
  * @public
  */
 export function ScheduleTimeoutQueued(delayMs: number): ScheduleFunction {
@@ -271,7 +271,7 @@ export function ScheduleTimeoutQueued(delayMs: number): ScheduleFunction {
 }
 
 /**
- * {@awakenGroup schedule}
+ * {@coreApiPath schedule/<name>}
  * @public
  */
 export function ScheduleInterval(delayMs: number): ScheduleFunction {

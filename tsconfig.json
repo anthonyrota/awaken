@@ -37,12 +37,9 @@
         "packages/testing/src/**/*",
         "packages/testing/test/**/*",
         "packages/testing/postbuild.js",
-        "./clearMicrobundleCache.js",
-        "./fileUtil.js",
-        "./jest.config.js",
-        "./jest.config.build.js",
-        "./postbuildUtil.js",
-        "./prettier.config.js",
-        "./generateDocs.ts"
+        "script/**/*",
+        "jest.config.js",
+        "jest.config.build.js",
+        "prettier.config.js"
     ]
 }

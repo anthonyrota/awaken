@@ -25,7 +25,7 @@ interface TestScheduleImplementation {
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export interface TestSchedule {
@@ -50,7 +50,7 @@ function getActionExecutionFrame(action: TestScheduleAction): number {
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export function TestSchedule(): TestSchedule {
@@ -131,7 +131,7 @@ export function TestSchedule(): TestSchedule {
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export interface TestSubscriptionInfo {
@@ -140,7 +140,7 @@ export interface TestSubscriptionInfo {
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export function TestSubscriptionInfo(
@@ -171,7 +171,7 @@ function watchSubscriptionInfo(
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export type TestSourceSubscriptions = ReadonlyArray<
@@ -179,7 +179,7 @@ export type TestSourceSubscriptions = ReadonlyArray<
 >;
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export type TestSourceEvent<T> = Event<T> & {
@@ -187,7 +187,7 @@ export type TestSourceEvent<T> = Event<T> & {
 };
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export function P<T>(
@@ -200,7 +200,7 @@ export function P<T>(
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export function T(
@@ -213,7 +213,7 @@ export function T(
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export function E(
@@ -229,7 +229,7 @@ interface TestSourceImplementation<T> extends Source<T> {
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export interface TestSource<T> extends Source<T> {
@@ -237,7 +237,7 @@ export interface TestSource<T> extends Source<T> {
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export function TestSource<T>(
@@ -265,7 +265,7 @@ interface SharedTestSourceImplementation<T>
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export interface SharedTestSource<T> extends TestSource<T> {
@@ -273,7 +273,7 @@ export interface SharedTestSource<T> extends TestSource<T> {
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export function SharedTestSource<T>(
@@ -303,7 +303,7 @@ export function SharedTestSource<T>(
 }
 
 /**
- * {@awakenBaseGroup testing}
+ * {@coreApiPath testing}
  * @public
  */
 export function watchSourceEvents<T>(

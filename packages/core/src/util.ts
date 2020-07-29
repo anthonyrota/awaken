@@ -14,7 +14,7 @@ function _call<T>(x: T, f: (x: T) => T): T {
  * @returns The result of accumulatively calling the given value against all of
  *     the functions given left-to-right.
  *
- * {@awakenBaseGroup operator}
+ * {@coreApiPath operator}
  * @public
  */
 export function pipe<T>(x: T): T;
@@ -67,7 +67,7 @@ export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T {
  *     accumulatively calling the value against all of the functions given
  *     left-to-right.
  *
- * {@awakenBaseGroup operator}
+ * {@coreApiPath operator}
  * @public
  */
 export function flow(): <T>(x: T) => T;
@@ -130,7 +130,7 @@ declare function cancelAnimationFrame(id: number): void;
  * @param callback - The callback to schedule.
  * @param subscription - If this is disposed then the request will be cancelled.
  *
- * {@awakenBaseGroup util}
+ * {@coreApiPath util}
  * @public
  */
 function requestAnimationFrameImplementation(
@@ -162,7 +162,7 @@ export { requestAnimationFrameImplementation as requestAnimationFrame };
  * @param subscription - If this is disposed then the request will be cancelled.
  * @param args - The arguments to send to the callback.
  *
- * {@awakenBaseGroup util}
+ * {@coreApiPath util}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -203,7 +203,7 @@ export { setTimeoutImplementation as setTimeout };
  * @param subscription - If this is disposed then the request will be cancelled.
  * @param args - The arguments to send to the callback.
  *
- * {@awakenBaseGroup util}
+ * {@coreApiPath util}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -241,7 +241,7 @@ export { setIntervalImplementation as setInterval };
  *
  * @param error - The error to report.
  *
- * {@awakenBaseGroup util}
+ * {@coreApiPath util}
  * @public
  */
 export function asyncReportError(error: unknown): void {
@@ -305,7 +305,7 @@ export function _binarySearchNextLargestIndex<T>(
 }
 
 /**
- * {@awakenBaseGroup util}
+ * {@coreApiPath util}
  * @public
  */
 export interface TimeProvider {
@@ -313,7 +313,7 @@ export interface TimeProvider {
 }
 
 /**
- * {@awakenBaseGroup util}
+ * {@coreApiPath util}
  */
 export interface FrameRequestCallback {
     (time: number): void;

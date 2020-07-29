@@ -19,43 +19,43 @@ import {
 } from './util';
 
 /**
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export type PushType = 0;
 /**
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export const PushType: PushType = 0;
 /**
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export type ThrowType = 1;
 /**
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export const ThrowType: ThrowType = 1;
 /**
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export type EndType = 2;
 /**
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export const EndType: EndType = 2;
 /**
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export type EventType = PushType | ThrowType | EndType;
 
 /**
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export interface Push<T> {
@@ -64,7 +64,7 @@ export interface Push<T> {
 }
 
 /**
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export interface Throw {
@@ -73,7 +73,7 @@ export interface Throw {
 }
 
 /**
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export interface End {
@@ -128,7 +128,7 @@ export interface End {
  * @see {@link Source}
  * @see {@link Sink}
  *
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export type Event<T> = Push<T> | Throw | End;
@@ -154,7 +154,7 @@ export type Event<T> = Push<T> | Throw | End;
  * @see {@link Source}
  * @see {@link Sink}
  *
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export function Push<T>(): Push<undefined>;
@@ -187,7 +187,7 @@ export function Push<T>(value?: T): Push<T | undefined> {
  * @see {@link Source}
  * @see {@link Sink}
  *
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export function Throw(error: unknown): Throw {
@@ -216,13 +216,13 @@ export function Throw(error: unknown): Throw {
  * @see {@link Source}
  * @see {@link Sink}
  *
- * {@awakenBaseGroup event}
+ * {@coreApiPath event}
  * @public
  */
 export const End: End = { type: EndType };
 
 /**
- * {@awakenBaseGroup sink}
+ * {@coreApiPath sink}
  * @public
  */
 export interface Sink<T> extends Disposable {
@@ -407,7 +407,7 @@ export interface Sink<T> extends Disposable {
  * @see {@link Subject}
  * @see {@link asyncReportError}
  *
- * {@awakenBaseGroup sink}
+ * {@coreApiPath sink}
  * @public
  */
 export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
@@ -466,7 +466,7 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
  * @see {@link isSource}
  * @see {@link isSubject}
  *
- * {@awakenBaseGroup sink}
+ * {@coreApiPath sink}
  * @public
  */
 export function isSink(value: unknown): value is Sink<unknown> {
@@ -475,7 +475,7 @@ export function isSink(value: unknown): value is Sink<unknown> {
 }
 
 /**
- * {@awakenBaseGroup source}
+ * {@coreApiPath source}
  * @public
  */
 export interface Source<T> {
@@ -644,7 +644,7 @@ export interface Source<T> {
  * @see {@link Subject}
  * @see {@link asyncReportError}
  *
- * {@awakenBaseGroup source}
+ * {@coreApiPath source}
  * @public
  */
 export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
@@ -705,7 +705,7 @@ export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
  * @see {@link isSink}
  * @see {@link isSubject}
  *
- * {@awakenBaseGroup source}
+ * {@coreApiPath source}
  * @public
  */
 export function isSource(value: unknown): value is Sink<unknown> {
@@ -749,7 +749,7 @@ export function isSource(value: unknown): value is Sink<unknown> {
  * @see {@link Source}
  * @see {@link Sink}
  *
- * {@awakenBaseGroup source}
+ * {@coreApiPath source}
  * @public
  */
 export function subscribe<T>(
@@ -796,7 +796,7 @@ function pushArrayItemsToSink<T>(array: ArrayLike<T>, sink: Sink<T>): void {
  * @see {@link fromArrayScheduled}
  * @see {@link of}
  *
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function fromArray<T>(array: ArrayLike<T>): Source<T> {
@@ -807,7 +807,7 @@ export function fromArray<T>(array: ArrayLike<T>): Source<T> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function fromArrayScheduled<T>(
@@ -865,7 +865,7 @@ export function fromArrayScheduled<T>(
  * @see {@link fromArray}
  * @see {@link ofScheduled}
  *
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function of<T>(...items: T[]): Source<T> {
@@ -873,7 +873,7 @@ export function of<T>(...items: T[]): Source<T> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function ofScheduled<T>(
@@ -884,12 +884,12 @@ export function ofScheduled<T>(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function ofEvent(event: Throw | End): Source<never>;
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function ofEvent<T>(event: Event<T>): Source<T>;
@@ -901,7 +901,7 @@ export function ofEvent<T>(event: Event<T>): Source<T> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function ofEventScheduled<T>(
@@ -909,7 +909,7 @@ export function ofEventScheduled<T>(
     schedule: ScheduleFunction,
 ): Source<never>;
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function ofEventScheduled<T>(
@@ -929,7 +929,7 @@ export function ofEventScheduled<T>(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function throwError(getError: () => unknown): Source<never> {
@@ -937,7 +937,7 @@ export function throwError(getError: () => unknown): Source<never> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function throwErrorScheduled(
@@ -948,13 +948,13 @@ export function throwErrorScheduled(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export const empty = ofEvent(End);
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function emptyScheduled(schedule: ScheduleFunction): Source<never> {
@@ -962,7 +962,7 @@ export function emptyScheduled(schedule: ScheduleFunction): Source<never> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function timer(durationMs: number): Source<never> {
@@ -970,13 +970,13 @@ export function timer(durationMs: number): Source<never> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export const never = Source(noop);
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function fromIterable<T>(iterable: Iterable<T>): Source<T> {
@@ -1043,7 +1043,7 @@ async function distributeAsyncIterable<T>(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function fromAsyncIterable<T>(iterable: AsyncIterable<T>): Source<T> {
@@ -1053,7 +1053,7 @@ export function fromAsyncIterable<T>(iterable: AsyncIterable<T>): Source<T> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function fromPromise<T>(promise: PromiseLike<T>): Source<T> {
@@ -1073,7 +1073,7 @@ export function fromPromise<T>(promise: PromiseLike<T>): Source<T> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function fromScheduleFunction<T extends unknown[]>(
@@ -1095,7 +1095,7 @@ export function fromScheduleFunction<T extends unknown[]>(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function fromReactiveValue<T extends unknown[], Signal>(
@@ -1127,7 +1127,7 @@ export function fromReactiveValue<T extends unknown[], Signal>(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function fromSingularReactiveValue<T, Signal>(
@@ -1143,7 +1143,7 @@ export function fromSingularReactiveValue<T, Signal>(
 const replaceWithValueIndex = map((_, idx: number) => idx);
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function interval(delayMs: number): Source<number> {
@@ -1153,7 +1153,7 @@ export function interval(delayMs: number): Source<number> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export const animationFrames: Source<number> = pipe(
@@ -1162,7 +1162,7 @@ export const animationFrames: Source<number> = pipe(
 );
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function lazy<T>(createSource: () => Source<T>): Source<T> {
@@ -1179,7 +1179,7 @@ export function lazy<T>(createSource: () => Source<T>): Source<T> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function iif<T>(
@@ -1193,7 +1193,7 @@ export function iif<T>(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function range(count: number, start = 0): Source<number> {
@@ -1206,7 +1206,7 @@ export function range(count: number, start = 0): Source<number> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function isEqual<T, U>(
@@ -1308,7 +1308,7 @@ export function isEqual<T, U>(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function flatSources<T>(...sources: Source<T>[]): Source<T> {
@@ -1316,7 +1316,7 @@ export function flatSources<T>(...sources: Source<T>[]): Source<T> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function mergeSourcesConcurrent<T>(
@@ -1327,7 +1327,7 @@ export function mergeSourcesConcurrent<T>(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function mergeSources<T>(...sources: Source<T>[]): Source<T> {
@@ -1335,7 +1335,7 @@ export function mergeSources<T>(...sources: Source<T>[]): Source<T> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function concatSources<T>(...sources: Source<T>[]): Source<T> {
@@ -1349,7 +1349,7 @@ const noValue: unique symbol = {} as any;
 type WrapValuesInSource<T> = { [K in keyof T]: Source<T[K]> };
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function combineSources<T extends unknown[]>(
@@ -1383,7 +1383,7 @@ export function combineSources<T extends unknown[]>(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function all<T extends unknown[]>(
@@ -1400,7 +1400,7 @@ export function all<T extends unknown[]>(
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function raceSources<T>(...sources: Source<T>[]): Source<T> {
@@ -1429,7 +1429,7 @@ export function raceSources<T>(...sources: Source<T>[]): Source<T> {
 }
 
 /**
- * {@awakenGroup source}
+ * {@coreApiPath source/<name>}
  * @public
  */
 export function zipSources<T extends unknown[]>(
@@ -1506,7 +1506,7 @@ export function zipSources<T extends unknown[]>(
 }
 
 /**
- * {@awakenBaseGroup operator}
+ * {@coreApiPath operator}
  * @public
  */
 export interface Operator<T, U> {
@@ -1514,7 +1514,7 @@ export interface Operator<T, U> {
 }
 
 /**
- * {@awakenBaseGroup operator}
+ * {@coreApiPath operator}
  * @public
  */
 export interface IdentityOperator {
@@ -1528,7 +1528,7 @@ type Unshift<T extends unknown[], U> = ((head: U, ...tail: T) => void) extends (
     : never;
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function combineWith<T extends unknown[]>(
@@ -1539,7 +1539,7 @@ export function combineWith<T extends unknown[]>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function raceWith<T>(
@@ -1549,7 +1549,7 @@ export function raceWith<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function zipWith<T extends unknown[]>(
@@ -1564,7 +1564,7 @@ function _pluckValue<T>(event: { value: T }): T {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function withLatestFromLazy<T extends unknown[]>(
@@ -1579,7 +1579,7 @@ export function withLatestFromLazy<T extends unknown[]>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function withLatestFrom<T extends unknown[]>(
@@ -1644,7 +1644,7 @@ export function withLatestFrom<T extends unknown[]>(
  *     method calls the transform function one time for each Push event of the
  *     given source and passes through the result.
  *
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function map<U>(
@@ -1688,7 +1688,7 @@ export function map<T, U>(
  *
  * @param value - The value to push.
  *
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function mapTo<U>(value: U): <T>(source: Source<T>) => Source<U> {
@@ -1696,7 +1696,7 @@ export function mapTo<U>(value: U): <T>(source: Source<T>) => Source<U> {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function mapEvents<T, U>(
@@ -1728,7 +1728,7 @@ export function mapEvents<T, U>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function mapPushEvents<T>(
@@ -1755,7 +1755,7 @@ export function mapPushEvents<T, U>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const wrapInPushEvents: <T>(
@@ -1763,7 +1763,7 @@ export const wrapInPushEvents: <T>(
 ) => Source<Event<T>> = mapEvents(<T>(event: Event<T>) => Push(event));
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const unwrapFromWrappedPushEvents: <T>(
@@ -1773,7 +1773,7 @@ export const unwrapFromWrappedPushEvents: <T>(
 );
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
@@ -1790,7 +1790,7 @@ export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]> {
  *     source. If and only if the function returns a truthy value, then the
  *     event will pass through.
  *
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function filter<T>(
@@ -1837,7 +1837,7 @@ export function filter<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export interface WithIndex<T> {
@@ -1846,14 +1846,14 @@ export interface WithIndex<T> {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function findWithIndex<T, S extends T>(
     predicate: (value: T, index: number) => value is S,
 ): Operator<T, WithIndex<S>>;
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function findWithIndex<T>(
@@ -1878,7 +1878,7 @@ export function findWithIndex<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function find<T, S extends T>(
@@ -1897,7 +1897,7 @@ export function find<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function findIndex<T>(
@@ -1907,7 +1907,7 @@ export function findIndex<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function at(index: number): IdentityOperator {
@@ -1918,7 +1918,7 @@ export function at(index: number): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function every<T>(
@@ -1931,7 +1931,7 @@ export function every<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function some<T>(
@@ -1941,7 +1941,7 @@ export function some<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function finalize(callback: () => void): IdentityOperator {
@@ -1953,14 +1953,14 @@ export function finalize(callback: () => void): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const ignorePushEvents = filter(<T>(_: T) => false);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function withPrevious<T>(source: Source<T>): Source<[T, T]> {
@@ -1993,7 +1993,7 @@ export function withPrevious<T>(source: Source<T>): Source<[T, T]> {
  *     accumulation. The first call to the transform function provides this
  *     as the previousAccumulatedResult.
  *
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function scan<T, R, I>(
@@ -2048,7 +2048,7 @@ export function scan<T, R, I>(
  *     accumulation. The first call to the transform function provides this
  *     as the previousAccumulatedResult.
  *
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function reduce<T, R, I>(
@@ -2067,7 +2067,7 @@ function _unwrap<T>(box: [T]): T {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function maxCompare<T>(
@@ -2092,13 +2092,13 @@ function compareNumbers(a: number, b: number): number {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const max: Operator<number, number> = maxCompare(compareNumbers);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function minCompare<T>(
@@ -2114,13 +2114,13 @@ export function minCompare<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const min: Operator<number, number> = minCompare(compareNumbers);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function isEqualTo<T, U>(
@@ -2131,7 +2131,7 @@ export function isEqualTo<T, U>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function flat<T>(source: Source<Source<T>>): Source<T> {
@@ -2241,19 +2241,19 @@ function _createMergeMapOperator(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const mergeMap = _createMergeMapOperator(false);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const expandMap = _createMergeMapOperator(true);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function mergeConcurrent(
@@ -2263,7 +2263,7 @@ export function mergeConcurrent(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const merge = mergeConcurrent(Infinity);
@@ -2315,19 +2315,19 @@ function _createSwitchOperator(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const switchEach = _createSwitchOperator(true);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const concatDrop = _createSwitchOperator(false);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function flatWith<T>(
@@ -2337,7 +2337,7 @@ export function flatWith<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function mergeWithConcurrent<T>(
@@ -2349,7 +2349,7 @@ export function mergeWithConcurrent<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function mergeWith<T>(
@@ -2359,7 +2359,7 @@ export function mergeWith<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function startWithSources<T>(
@@ -2369,7 +2369,7 @@ export function startWithSources<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function concatWith<T>(
@@ -2379,7 +2379,7 @@ export function concatWith<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function flatMap<T, U>(
@@ -2389,7 +2389,7 @@ export function flatMap<T, U>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function concatMap<T, U>(
@@ -2399,13 +2399,13 @@ export function concatMap<T, U>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const concat = mergeConcurrent(1);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function switchMap<T, U>(
@@ -2415,7 +2415,7 @@ export function switchMap<T, U>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function concatDropMap<T, U>(
@@ -2425,7 +2425,7 @@ export function concatDropMap<T, U>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function startWith<T>(
@@ -2439,7 +2439,7 @@ export function startWith<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function endWith<T>(
@@ -2535,55 +2535,55 @@ const spyBeforeOperators = _createSpyOperators(false);
 const spyAfterOperators = _createSpyOperators(true);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const spyBefore = spyBeforeOperators.__spy;
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const spyPushBefore = spyBeforeOperators.__spyPush;
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const spyThrowBefore = spyBeforeOperators.__spyThrow;
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const spyEndBefore = spyBeforeOperators.__spyEnd;
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const spyAfter = spyAfterOperators.__spy;
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const spyPushAfter = spyAfterOperators.__spyPush;
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const spyThrowAfter = spyAfterOperators.__spyThrow;
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const spyEndAfter = spyAfterOperators.__spyEnd;
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function isEmpty(source: Source<unknown>): Source<boolean> {
@@ -2603,7 +2603,7 @@ export function isEmpty(source: Source<unknown>): Source<boolean> {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function defaultIfEmpty<T>(
@@ -2635,7 +2635,7 @@ export function defaultIfEmpty<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function defaultIfEmptyTo<T>(
@@ -2645,7 +2645,7 @@ export function defaultIfEmptyTo<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function throwIfEmpty(getError: () => unknown): IdentityOperator {
@@ -2655,7 +2655,7 @@ export function throwIfEmpty(getError: () => unknown): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function distinct(): IdentityOperator;
@@ -2717,7 +2717,7 @@ export function distinct<T, K>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function distinctFromLast(): IdentityOperator;
@@ -2774,7 +2774,7 @@ export function distinctFromLast<T, K>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function groupBy<T, K>(
@@ -2848,7 +2848,7 @@ interface GroupSourceBase<T> extends Source<T> {
 }
 
 /**
- * {@awakenGroup operator/groupBy}
+ * {@coreApiPath operator/groupBy}
  * @public
  */
 export interface ActiveGroupSource<T, K> extends GroupSourceBase<T> {
@@ -2857,7 +2857,7 @@ export interface ActiveGroupSource<T, K> extends GroupSourceBase<T> {
 }
 
 /**
- * {@awakenGroup operator/groupBy}
+ * {@coreApiPath operator/groupBy}
  * @public
  */
 export interface RemovedGroupSource<T> extends GroupSourceBase<T> {
@@ -2866,7 +2866,7 @@ export interface RemovedGroupSource<T> extends GroupSourceBase<T> {
 }
 
 /**
- * {@awakenGroup operator/groupBy}
+ * {@coreApiPath operator/groupBy}
  * @public
  */
 export type GroupSource<T, K> = ActiveGroupSource<T, K> | RemovedGroupSource<T>;
@@ -2924,7 +2924,7 @@ function toEmpty(): Source<never> {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function take(amount: number): IdentityOperator {
@@ -2955,7 +2955,7 @@ export function take(amount: number): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const first = take(1);
@@ -2969,7 +2969,7 @@ export const first = take(1);
  *     takeWhile method calls this function one time for each Push event of the
  *     given source.
  *
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function takeWhile<T, S extends T>(
@@ -3016,7 +3016,7 @@ export function takeWhile<T>(
  *
  * @param amount - The amount of events to keep and distribute at the end.
  *
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function takeLast(amount: number): IdentityOperator {
@@ -3056,13 +3056,13 @@ export function takeLast(amount: number): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const last = takeLast(1);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const count: <T>(source: Source<T>) => Source<number> = flow(
@@ -3071,7 +3071,7 @@ export const count: <T>(source: Source<T>) => Source<number> = flow(
 );
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function takeUntil(stopSource: Source<unknown>): IdentityOperator {
@@ -3088,7 +3088,7 @@ export function takeUntil(stopSource: Source<unknown>): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function skip(amount: number): IdentityOperator {
@@ -3109,7 +3109,7 @@ export function skip(amount: number): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function skipWhile<T>(
@@ -3142,7 +3142,7 @@ export function skipWhile<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function skipLast(amount: number): IdentityOperator {
@@ -3176,7 +3176,7 @@ export function skipLast(amount: number): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function skipUntil(stopSource: Source<unknown>): IdentityOperator {
@@ -3240,31 +3240,31 @@ function _createRepeatOperator(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const repeat = _createRepeatOperator(EndType);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const retry = _createRepeatOperator(ThrowType);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const loop = repeat(Infinity);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export const retryAlways = retry(Infinity);
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function repeatWhen<T>(
@@ -3330,7 +3330,7 @@ export function repeatWhen<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function timeout<T>(
@@ -3350,7 +3350,7 @@ export function timeout<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function timeoutMs<T>(
@@ -3361,7 +3361,7 @@ export function timeoutMs<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function catchError<T>(
@@ -3393,7 +3393,7 @@ export function catchError<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function windowEvery(
@@ -3432,7 +3432,7 @@ export function windowEvery(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function windowControlled(
@@ -3513,7 +3513,7 @@ export function windowControlled<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function windowEach(
@@ -3547,7 +3547,7 @@ export function windowEach<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function windowCount(
@@ -3568,7 +3568,7 @@ export function windowCount(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function windowTime(
@@ -3591,7 +3591,7 @@ export function windowTime(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function collect<T>(source: Source<T>): Source<T[]> {
@@ -3615,7 +3615,7 @@ export function collect<T>(source: Source<T>): Source<T[]> {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/debounce}
  * @public
  */
 export type DebounceTrailingRestart = 'restart';
@@ -3625,7 +3625,7 @@ export type DebounceTrailingRestart = 'restart';
 export const DebounceTrailingRestart: DebounceTrailingRestart = 'restart';
 
 /**
- * {@awakenGroup operator/debounce}
+ * {@coreApiPath operator/debounce}
  * @public
  */
 export interface DebounceConfig {
@@ -3635,7 +3635,7 @@ export interface DebounceConfig {
 }
 
 /**
- * {@awakenGroup operator/debounce}
+ * {@coreApiPath operator/debounce}
  * @public
  */
 export const defaultDebounceConfig: DebounceConfig = {
@@ -3645,7 +3645,7 @@ export const defaultDebounceConfig: DebounceConfig = {
 };
 
 /**
- * {@awakenGroup operator/debounce}
+ * {@coreApiPath operator/debounce}
  * @public
  */
 export type InitialDurationInfo =
@@ -3659,7 +3659,7 @@ export type InitialDurationInfo =
       ];
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function debounce<T>(
@@ -3849,7 +3849,7 @@ export function debounce<T>(
 }
 
 /**
- * {@awakenGroup operator/debounce}
+ * {@coreApiPath operator/debounce}
  * @public
  */
 export function debounceMs(
@@ -3889,7 +3889,7 @@ export function debounceMs(
 }
 
 /**
- * {@awakenGroup operator/throttle}
+ * {@coreApiPath operator/throttle}
  * @public
  */
 export interface ThrottleConfig {
@@ -3899,7 +3899,7 @@ export interface ThrottleConfig {
 }
 
 /**
- * {@awakenGroup operator/throttle}
+ * {@coreApiPath operator/throttle}
  * @public
  */
 export const defaultThrottleConfig: ThrottleConfig = {
@@ -3909,7 +3909,7 @@ export const defaultThrottleConfig: ThrottleConfig = {
 };
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function throttle(
@@ -3954,7 +3954,7 @@ export function throttle<T>(
 }
 
 /**
- * {@awakenGroup operator/throttle}
+ * {@coreApiPath operator/throttle}
  * @public
  */
 export function throttleMs(
@@ -3966,7 +3966,7 @@ export function throttleMs(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function delay<T>(
@@ -4032,7 +4032,7 @@ export function delay<T>(
 }
 
 /**
- * {@awakenGroup operator/delay}
+ * {@coreApiPath operator/delay}
  * @public
  */
 export function delayMs(ms: number): IdentityOperator {
@@ -4041,7 +4041,7 @@ export function delayMs(ms: number): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function sample(scheduleSource: Source<unknown>): IdentityOperator {
@@ -4075,7 +4075,7 @@ export function sample(scheduleSource: Source<unknown>): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator/sample}
+ * {@coreApiPath operator/sample}
  * @public
  */
 export function sampleMs(ms: number): IdentityOperator {
@@ -4083,7 +4083,7 @@ export function sampleMs(ms: number): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator/withTime}
+ * {@coreApiPath operator/withTime}
  * @public
  */
 export interface WithTime<T> {
@@ -4092,7 +4092,7 @@ export interface WithTime<T> {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function withTime<T>(
@@ -4102,7 +4102,7 @@ export function withTime<T>(
 }
 
 /**
- * {@awakenGroup operator/withTimeInterval}
+ * {@coreApiPath operator/withTimeInterval}
  * @public
  */
 export interface TimeInterval<T> {
@@ -4115,7 +4115,7 @@ export interface TimeInterval<T> {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function withTimeInterval<T>(
@@ -4150,7 +4150,7 @@ export function withTimeInterval<T>(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function schedulePushEvents(
@@ -4161,7 +4161,7 @@ export function schedulePushEvents(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function scheduleSubscription(
@@ -4172,7 +4172,7 @@ export function scheduleSubscription(
 }
 
 /**
- * {@awakenGroup operator/shareControlled}
+ * {@coreApiPath operator/shareControlled}
  * @public
  */
 export interface ControllableSource<T> extends Source<T> {
@@ -4180,7 +4180,7 @@ export interface ControllableSource<T> extends Source<T> {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function shareControlled<T>(
@@ -4219,7 +4219,7 @@ export function shareControlled(
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function share<T>(Subject_: () => Subject<T>): Operator<T, T>;
@@ -4259,7 +4259,7 @@ export function share(Subject_ = Subject): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function shareOnce<T>(Subject_: () => Subject<T>): Operator<T, T>;
@@ -4278,7 +4278,7 @@ export function shareOnce(Subject_ = Subject): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function sharePersist<T>(Subject_: () => Subject<T>): Operator<T, T>;
@@ -4306,7 +4306,7 @@ export function sharePersist(Subject_ = Subject): IdentityOperator {
 }
 
 /**
- * {@awakenGroup operator}
+ * {@coreApiPath operator/<name>}
  * @public
  */
 export function shareTransform<T, U>(

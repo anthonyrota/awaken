@@ -35,7 +35,10 @@
         "@typescript-eslint/no-use-before-define": "off",
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/explicit-module-boundary-types": "off",
-        // For some reason this is really buggy and doesn't pick up aliases.
-        "import/no-unresolved": "off"
+        // For some reason these are really buggy and doesn't pick up stuff.
+        // <start buggy>
+        "import/no-unresolved": "off",
+        // <end buggy>
+        "import/namespace": "off"
     }
 }

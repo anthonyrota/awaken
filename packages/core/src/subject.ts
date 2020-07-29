@@ -23,7 +23,7 @@ import {
 } from './util';
 
 /**
- * {@awakenBaseGroup subject}
+ * {@coreApiPath subject}
  * @public
  */
 export interface NonMarkedSubject<T> extends Disposable {
@@ -31,13 +31,13 @@ export interface NonMarkedSubject<T> extends Disposable {
 }
 
 /**
- * {@awakenBaseGroup subject}
+ * {@coreApiPath subject}
  * @public
  */
 export interface Subject<T> extends Source<T>, Sink<T>, NonMarkedSubject<T> {}
 
 /**
- * {@awakenBaseGroup subject}
+ * {@coreApiPath subject}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -73,7 +73,7 @@ export function markAsSubject<T>(
  * @see {@link isSink}
  * @see {@link isSource}
  *
- * {@awakenBaseGroup subject}
+ * {@coreApiPath subject}
  * @public
  */
 export function isSubject(value: unknown): value is Subject<unknown> {
@@ -93,7 +93,7 @@ interface SubjectBasePrivateActiveState<T> {
 }
 
 /**
- * {@awakenGroup subject}
+ * {@coreApiPath subject/<name>}
  * @public
  */
 export function SubjectBase<T>(): Subject<T> {
@@ -288,7 +288,7 @@ interface SubjectDistributionSinkDisposalErrorImplementation extends Error {
 }
 
 /**
- * {@awakenBaseGroup subject}
+ * {@coreApiPath subject}
  * @public
  */
 export interface SubjectDistributionSinkDisposalError
@@ -300,7 +300,7 @@ export interface SubjectDistributionSinkDisposalError
 }
 
 /**
- * {@awakenBaseGroup subject}
+ * {@coreApiPath subject}
  * @public
  */
 export interface SubjectDistributionSinkDisposalErrorConstructor {
@@ -312,7 +312,7 @@ export interface SubjectDistributionSinkDisposalErrorConstructor {
  * Thrown when at least least one error is caught during the checking of whether
  * a subscribed sink is active or not.
  *
- * {@awakenBaseGroup subject}
+ * {@coreApiPath subject}
  * @public
  */
 // eslint-disable-next-line max-len
@@ -333,7 +333,7 @@ export const SubjectDistributionSinkDisposalError: SubjectDistributionSinkDispos
 );
 
 /**
- * {@awakenBaseGroup subject}
+ * {@coreApiPath subject}
  * @public
  */
 export function Subject<T>(): Subject<T> {
@@ -364,7 +364,7 @@ export function Subject<T>(): Subject<T> {
 }
 
 /**
- * {@awakenGroup subject}
+ * {@coreApiPath subject/<name>}
  * @public
  */
 export interface CurrentValueSubject<T> extends Subject<T> {
@@ -372,7 +372,7 @@ export interface CurrentValueSubject<T> extends Subject<T> {
 }
 
 /**
- * {@awakenGroup subject}
+ * {@coreApiPath subject/<name>}
  * @public
  */
 export function CurrentValueSubject<T>(initialValue: T): Subject<T> {
@@ -399,7 +399,7 @@ export function CurrentValueSubject<T>(initialValue: T): Subject<T> {
 }
 
 /**
- * {@awakenGroup subject/ReplaySubjectTimeoutConfig}
+ * {@coreApiPath subject/ReplaySubjectTimeoutConfig}
  * @public
  */
 export interface ReplaySubjectTimeoutConfig {
@@ -408,7 +408,7 @@ export interface ReplaySubjectTimeoutConfig {
 }
 
 /**
- * {@awakenGroup subject}
+ * {@coreApiPath subject/<name>}
  * @public
  */
 export function ReplaySubject<T>(
@@ -529,7 +529,7 @@ export function ReplaySubject<T>(
 }
 
 /**
- * {@awakenGroup subject}
+ * {@coreApiPath subject/<name>}
  * @public
  */
 export function FinalValueSubject<T>(): Subject<T> {

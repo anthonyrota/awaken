@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { getAbsolutePath, renameOutputModule } = require('../../fileUtil');
+const {
+    getAbsolutePath,
+    renameOutputModule,
+} = require('../../script/util/fileUtil');
 const rimraf = require('rimraf');
 
 renameOutputModule({
