@@ -347,7 +347,7 @@ export function Disposable(onDispose?: () => void): Disposable {
  * @returns Whether the value is a Disposable.
  *
  * @example
- * ```
+ * ```ts
  * isDisposable(Sink(() => {})); // true.
  * isDisposable(Source(() => {})) // false.
  * isDisposable(Subject()); // true.

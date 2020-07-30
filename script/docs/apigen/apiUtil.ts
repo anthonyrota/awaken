@@ -1,10 +1,18 @@
+/* eslint-disable max-len */
+/**
+ * Thanks to the api-documenter team for some ideas used in this script:
+ * https://github.com/microsoft/rushstack/blob/master/apps/api-documenter/src/markdown/MarkdownEmitter.ts
+ * The api-documenter project is licensed under MIT, and it's license can be found at <rootDir>/vendor/licenses/@microsoft/api-documenter/LICENSE
+ */
+/* eslint-enable max-len */
+
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as colors from 'colors';
 import * as tsdoc from '@microsoft/tsdoc';
 import * as aeModel from '@microsoft/api-extractor-model';
 import { SourceExportMappings } from './sourceExportMappings';
-import { StringBuilder } from './util';
+import { StringBuilder, IndentedWriter } from './util';
 
 interface Context {
     sourceExportMappings: SourceExportMappings;
@@ -100,6 +108,13 @@ function getBlocksOfTag(
 }
 
 function extractCoreApiPath(apiItem: aeModel.ApiItem): string | void {
+    const package_ = apiItem.getAssociatedPackage();
+    if (!package_) {
+        throw new UnsupportedApiItemError(
+            apiItem,
+            'No associated package found.',
+        );
+    }
     const docComment = getDocComment(apiItem);
     const coreApiPathTagValue = getCustomInlineTagValue(
         docComment,
@@ -110,7 +125,7 @@ function extractCoreApiPath(apiItem: aeModel.ApiItem): string | void {
         const name = getApiItemName(apiItem);
         const parsedValue = coreApiPathTagValue.replace(/<name>/g, name);
 
-        return parsedValue;
+        return `${package_.name}/${parsedValue}`;
     }
 }
 
@@ -143,22 +158,227 @@ interface ExportImplementation<T extends aeModel.ApiItem> {
 /* eslint-disable no-inner-declarations */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace MarkdownRenderUtil {
-    function unwrapText(text: string): string {
-        return text.replace(/[\n\r]+/g, ' ');
+    function escapeMarkdown(text: string): string {
+        return text
+            .replace(/\\/g, '\\\\') // first replace the escape character
+            .replace(/[*#[\]_|`~]/g, (x) => '\\' + x) // then escape any special characters
+            .replace(/---/g, '\\-\\-\\-') // hyphens only if it's 3 or more
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
     }
 
-    export function escapeMarkdown(text: string): string {
-        return (
-            text
-                // // Markdown.
-                // .replace(/[*_{}()#+\-.!]/g, '\\$&')
-                // HTML.
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;')
+    interface EmitMarkdownContext {
+        context: Context;
+        writer: IndentedWriter;
+        apiItem: aeModel.ApiItem;
+    }
+
+    export function writeApiItemDocNode(
+        output: StringBuilder,
+        apiItem: aeModel.ApiItem,
+        docNode: tsdoc.DocNode,
+        context: Context,
+    ): void {
+        const writer: IndentedWriter = new IndentedWriter(output);
+        const emitContext = { context, writer, apiItem };
+
+        writeNode(docNode, emitContext);
+        writer.ensureNewLine();
+    }
+
+    function writeNode(
+        docNode: tsdoc.DocNode,
+        context: EmitMarkdownContext,
+    ): void {
+        const writer: IndentedWriter = context.writer;
+
+        switch (docNode.kind) {
+            case tsdoc.DocNodeKind.PlainText: {
+                const docPlainText = docNode as tsdoc.DocPlainText;
+                writePlainText(docPlainText.text, context);
+                break;
+            }
+            case tsdoc.DocNodeKind.HtmlStartTag:
+            case tsdoc.DocNodeKind.HtmlEndTag: {
+                const docHtmlTag = docNode as
+                    | tsdoc.DocHtmlStartTag
+                    | tsdoc.DocHtmlEndTag;
+                // write the HTML element verbatim into the output
+                writer.write(docHtmlTag.emitAsHtml());
+                break;
+            }
+            case tsdoc.DocNodeKind.CodeSpan: {
+                const docCodeSpan = docNode as tsdoc.DocCodeSpan;
+                writer.write('`');
+                writer.write(docCodeSpan.code);
+                writer.write('`');
+                break;
+            }
+            case tsdoc.DocNodeKind.LinkTag: {
+                const docLinkTag = docNode as tsdoc.DocLinkTag;
+                if (docLinkTag.codeDestination) {
+                    writeLinkTagWithCodeDestination(docLinkTag, context);
+                } else if (docLinkTag.urlDestination) {
+                    writeLinkTagWithUrlDestination(docLinkTag, context);
+                } else if (docLinkTag.linkText) {
+                    writePlainText(docLinkTag.linkText, context);
+                }
+                break;
+            }
+            case tsdoc.DocNodeKind.Paragraph: {
+                const docParagraph = docNode as tsdoc.DocParagraph;
+                writeNodes(
+                    tsdoc.DocNodeTransforms.trimSpacesInParagraph(docParagraph)
+                        .nodes,
+                    context,
+                );
+                writer.ensureNewLine();
+                writer.writeLine();
+                break;
+            }
+            case tsdoc.DocNodeKind.FencedCode: {
+                const docFencedCode = docNode as tsdoc.DocFencedCode;
+                writer.ensureNewLine();
+                writer.write('```');
+                writer.write(docFencedCode.language);
+                writer.writeLine();
+                writer.write(docFencedCode.code.replace(/[\n\r]+$/, ''));
+                writer.writeLine();
+                writer.writeLine('```');
+                break;
+            }
+            case tsdoc.DocNodeKind.Section: {
+                const docSection = docNode as tsdoc.DocSection;
+                writeNodes(docSection.nodes, context);
+                break;
+            }
+            case tsdoc.DocNodeKind.SoftBreak: {
+                if (!/^\s?$/.test(writer.peekLastCharacter())) {
+                    writer.write(' ');
+                }
+                break;
+            }
+            case tsdoc.DocNodeKind.EscapedText: {
+                const docEscapedText = docNode as tsdoc.DocEscapedText;
+                writePlainText(docEscapedText.decodedText, context);
+                break;
+            }
+            case tsdoc.DocNodeKind.ErrorText: {
+                const docErrorText = docNode as tsdoc.DocErrorText;
+                writePlainText(docErrorText.text, context);
+                break;
+            }
+            case tsdoc.DocNodeKind.InlineTag: {
+                break;
+            }
+            case tsdoc.DocNodeKind.BlockTag: {
+                const tagNode = docNode as tsdoc.DocBlockTag;
+                console.warn('Unsupported block tag: ' + tagNode.tagName);
+                break;
+            }
+            default:
+                throw new Error(
+                    'Unsupported DocNodeKind kind: ' + docNode.kind,
+                );
+        }
+    }
+
+    function writeLinkTagWithCodeDestination(
+        docLinkTag: tsdoc.DocLinkTag,
+        context: EmitMarkdownContext,
+    ): void {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const codeDestination = docLinkTag.codeDestination!;
+        const childNodes = codeDestination.getChildNodes();
+        if (childNodes.length !== 1) {
+            throw new Error('No.');
+        }
+        const childNode = childNodes[0] as tsdoc.DocMemberReference;
+        if (childNode.kind !== tsdoc.DocNodeKind.MemberReference) {
+            throw new Error('No.');
+        }
+        const identifier = childNode.memberIdentifier?.identifier;
+        if (!identifier) {
+            throw new Error('No.');
+        }
+        writeLinkToApiItem(
+            (context.writer as unknown) as StringBuilder,
+            getApiItemName(context.apiItem),
+            identifier,
+            context.context,
+            docLinkTag.linkText,
         );
+    }
+
+    function writeLinkTagWithUrlDestination(
+        docLinkTag: tsdoc.DocLinkTag,
+        context: EmitMarkdownContext,
+    ): void {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const urlDestination = docLinkTag.urlDestination!;
+        const linkText: string =
+            docLinkTag.linkText !== undefined
+                ? docLinkTag.linkText
+                : urlDestination;
+
+        const encodedLinkText: string = escapeMarkdown(
+            linkText.replace(/\s+/g, ' '),
+        );
+
+        context.writer.write('[');
+        context.writer.write(encodedLinkText);
+        context.writer.write(`](${urlDestination})`);
+    }
+
+    function writePlainText(text: string, context: EmitMarkdownContext): void {
+        const writer: IndentedWriter = context.writer;
+
+        // split out the [ leading whitespace, content, trailing whitespace ]
+        // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
+        const parts: string[] = text.match(/^(\s*)(.*?)(\s*)$/) || [];
+
+        writer.write(parts[1]); // write leading whitespace
+
+        const middle: string = parts[2];
+
+        if (middle !== '') {
+            switch (writer.peekLastCharacter()) {
+                case '':
+                case '\n':
+                case ' ':
+                case '[':
+                case '>':
+                    // okay to put a symbol
+                    break;
+                default:
+                    // This is no problem:
+                    //     "**one** *two* **three**"
+                    // But this is trouble:
+                    //     "**one***two***three**"
+                    // The most general solution:
+                    //     "**one**<!-- -->*two*<!-- -->**three**"
+                    writer.write('<!-- -->');
+                    break;
+            }
+
+            writer.write(escapeMarkdown(middle));
+        }
+
+        writer.write(parts[3]); // write trailing whitespace
+    }
+
+    function writeNodes(
+        docNodes: ReadonlyArray<tsdoc.DocNode>,
+        context: EmitMarkdownContext,
+    ): void {
+        for (const docNode of docNodes) {
+            writeNode(docNode, context);
+        }
+    }
+
+    function unwrapText(text: string): string {
+        return text.replace(/[\n\r]+/g, ' ');
     }
 
     function getRelativePath(from: string, to: string): string {
@@ -190,6 +410,7 @@ namespace MarkdownRenderUtil {
         currentApiItemName: string,
         apiItemName: string,
         context: Context,
+        linkText = apiItemName,
     ): void {
         const currentApiItemPath = context.memberNameToApiPathMap.get(
             currentApiItemName,
@@ -199,15 +420,77 @@ namespace MarkdownRenderUtil {
             throw new Error('No more coding today.');
         }
         const relativePath = getRelativePath(currentApiItemPath, apiItemPath);
+        const titleHash = `#${apiItemName
+            .toLowerCase()
+            .replace(/ /g, '')
+            .replace(/[^a-zA-Z0-9\-_]/, '')}`;
 
         if (relativePath) {
-            output.write(`<a href="${relativePath}.md">${apiItemName}</a>`);
-        } else {
             output.write(
-                `<a href="#${apiItemName
-                    .toLowerCase()
-                    .replace(/ /g, '-')}">${apiItemName}</a>`,
+                `<a href="${relativePath}.md${titleHash}">${linkText}</a>`,
             );
+        } else {
+            output.write(`<a href="${titleHash}">${linkText}</a>`);
+        }
+    }
+
+    export function writeSummary(
+        output: StringBuilder,
+        apiItem: aeModel.ApiItem,
+        context: Context,
+    ): void {
+        const summarySection = getDocComment(apiItem).summarySection;
+        writeApiItemDocNode(output, apiItem, summarySection, context);
+    }
+
+    export function writeExamples(
+        output: StringBuilder,
+        apiItem: aeModel.ApiItem,
+        context: Context,
+    ): void {
+        const customBlocks = extractCustomBlocks(apiItem);
+        for (const exampleBlock of customBlocks.exampleBlocks) {
+            output.writeLine('### Example');
+            for (const block of exampleBlock.getChildNodes()) {
+                if (block.kind === tsdoc.DocNodeKind.Section) {
+                    writeApiItemDocNode(output, apiItem, block, context);
+                }
+            }
+        }
+    }
+
+    export function writeSignature(
+        output: StringBuilder,
+        apiItem:
+            | aeModel.ApiFunction
+            | aeModel.ApiInterface
+            | aeModel.ApiVariable
+            | aeModel.ApiTypeAlias,
+        context: Context,
+    ): void {
+        output.writeLine('### Signature');
+        output.writeLine();
+        writeExcerptTokens(output, apiItem, apiItem.excerpt, context);
+    }
+
+    export function writeSeeBlocks(
+        output: StringBuilder,
+        apiItem: aeModel.ApiItem,
+        context: Context,
+    ): void {
+        const customBlocks = extractCustomBlocks(apiItem);
+        let first = true;
+        for (const seeBlock of customBlocks.seeBlocks) {
+            if (first) {
+                first = false;
+                output.writeLine('### See Also');
+                output.writeLine();
+            }
+            for (const block of seeBlock.getChildNodes()) {
+                if (block.kind === tsdoc.DocNodeKind.Section) {
+                    writeApiItemDocNode(output, apiItem, block, context);
+                }
+            }
         }
     }
 
@@ -228,7 +511,7 @@ namespace MarkdownRenderUtil {
         for (const token of excerpt.spannedTokens) {
             let tokenText = unwrapText(token.text);
             if (token === excerpt.spannedTokens[0]) {
-                tokenText = tokenText.replace(/^export declare /, '');
+                tokenText = tokenText.replace(/^export (declare )?/, '');
             }
 
             if (
@@ -327,12 +610,12 @@ class ExportFunctionImplementation
         });
 
         for (const fn of this._overloads) {
-            MarkdownRenderUtil.writeExcerptTokens(
-                output,
-                fn,
-                fn.excerpt,
-                this._context,
-            );
+            MarkdownRenderUtil.writeSummary(output, fn, this._context);
+            MarkdownRenderUtil.writeExamples(output, fn, this._context);
+            MarkdownRenderUtil.writeSignature(output, fn, this._context);
+            output.writeLine();
+            output.writeLine();
+            MarkdownRenderUtil.writeSeeBlocks(output, fn, this._context);
             output.writeLine();
         }
     }
@@ -377,12 +660,29 @@ class ExportInterfaceImplementation
             throw new Error('Not implemented.');
         }
 
-        MarkdownRenderUtil.writeExcerptTokens(
+        MarkdownRenderUtil.writeSummary(
             output,
             this._apiInterface,
-            this._apiInterface.excerpt,
             this._context,
         );
+        MarkdownRenderUtil.writeExamples(
+            output,
+            this._apiInterface,
+            this._context,
+        );
+        MarkdownRenderUtil.writeSignature(
+            output,
+            this._apiInterface,
+            this._context,
+        );
+        output.writeLine();
+        output.writeLine();
+        MarkdownRenderUtil.writeSeeBlocks(
+            output,
+            this._apiInterface,
+            this._context,
+        );
+        output.writeLine();
         output.writeLine();
     }
 }
@@ -412,12 +712,29 @@ class ExportTypeAliasImplementation
             throw new Error('Not implemented.');
         }
 
-        MarkdownRenderUtil.writeExcerptTokens(
+        MarkdownRenderUtil.writeSummary(
             output,
             this._apiTypeAlias,
-            this._apiTypeAlias.excerpt,
             this._context,
         );
+        MarkdownRenderUtil.writeExamples(
+            output,
+            this._apiTypeAlias,
+            this._context,
+        );
+        MarkdownRenderUtil.writeSignature(
+            output,
+            this._apiTypeAlias,
+            this._context,
+        );
+        output.writeLine();
+        output.writeLine();
+        MarkdownRenderUtil.writeSeeBlocks(
+            output,
+            this._apiTypeAlias,
+            this._context,
+        );
+        output.writeLine();
         output.writeLine();
     }
 }
@@ -447,12 +764,29 @@ class ExportVariableImplementation
             throw new Error('Not implemented.');
         }
 
-        MarkdownRenderUtil.writeExcerptTokens(
+        MarkdownRenderUtil.writeSummary(
             output,
             this._apiVariable,
-            this._apiVariable.excerpt,
             this._context,
         );
+        MarkdownRenderUtil.writeExamples(
+            output,
+            this._apiVariable,
+            this._context,
+        );
+        MarkdownRenderUtil.writeSignature(
+            output,
+            this._apiVariable,
+            this._context,
+        );
+        output.writeLine();
+        output.writeLine();
+        MarkdownRenderUtil.writeSeeBlocks(
+            output,
+            this._apiVariable,
+            this._context,
+        );
+        output.writeLine();
         output.writeLine();
     }
 }
@@ -715,8 +1049,8 @@ export class ApiPageMap {
 }
 
 class Folder {
-    files = new Map<string, string>();
-    folders = new Map<string, Folder>();
+    public files = new Map<string, string>();
+    public folders = new Map<string, Folder>();
 }
 
 class RenderedDirectoryMap {

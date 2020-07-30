@@ -104,7 +104,7 @@ export interface End {
  * {@link EndType} directly instead of their constant number values.
  *
  * @example
- * ```
+ * ```ts
  * const sink = Sink<number>(event => {
  *     console.log(event.type); // Either `PushType`, `ThrowType` or `EndType`.
  *     if (event.type === PushType) {
@@ -142,7 +142,7 @@ export type Event<T> = Push<T> | Throw | End;
  * @returns The created Push event.
  *
  * @example
- * ```
+ * ```ts
  * const event = Push([1, 2, 3]);
  * console.log(event.type); // `${PushType}`.
  * console.log(event.value); // [1, 2, 3].
@@ -175,7 +175,7 @@ export function Push<T>(value?: T): Push<T | undefined> {
  * @returns The created Throw event.
  *
  * @example
- * ```
+ * ```ts
  * const event = Throw(new Error(...));
  * console.log(event.type); // `${ThrowType}`.
  * console.log(event.value); // Error(...).
@@ -200,7 +200,7 @@ export function Throw(error: unknown): Throw {
  * disposed and will not take any more events.
  *
  * @example
- * ```
+ * ```ts
  * function onEvent(event: Event<unknown>): void {
  *     console.log(event.type);
  * };
@@ -259,7 +259,7 @@ export interface Sink<T> extends Disposable {
  * @returns The created Sink.
  *
  * @example
- * ```
+ * ```ts
  * const sink = Sink<number>(event => {
  *     if (event.type === PushType) {
  *         console.log(event.value);
@@ -277,7 +277,7 @@ export interface Sink<T> extends Disposable {
  * ```
  *
  * @example
- * ```
+ * ```ts
  * const sink = Sink<number>(event => {
  *     console.log(event);
  * });
@@ -292,7 +292,7 @@ export interface Sink<T> extends Disposable {
  * ```
  *
  * @example
- * ```
+ * ```ts
  * const sink = Sink<number>(event => {
  *     if (event.type === PushType && event.value === 5) {
  *         // This means that the Sink will stop receiving values, and all
@@ -326,7 +326,7 @@ export interface Sink<T> extends Disposable {
  * ```
  *
  * @example
- * ```
+ * ```ts
  * function onEvent(event: Event<unknown>): void {
  *     console.log(event);
  *     if (event.type === PushType && event.value === 2) {
@@ -352,7 +352,7 @@ export interface Sink<T> extends Disposable {
  * ```
  *
  * @example
- * ```
+ * ```ts
  * import { Request, startRequest, cancelRequest } from './my-api.ts';
  *
  * const sink = Sink(() => {});
@@ -384,7 +384,7 @@ export interface Sink<T> extends Disposable {
  * ```
  *
  * @example
- * ```
+ * ```ts
  * // In this example the source emits values 0..49.
  * const source = range(50);
  * const sink = Sink(event => {
@@ -448,7 +448,7 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
  * @returns Whether the value is a Sink.
  *
  * @example
- * ```
+ * ```ts
  * isSink(Sink(() => {})); // true.
  * isSink(Source(() => {})) // false.
  * isSink(Subject()); // true.
@@ -558,7 +558,7 @@ export interface Source<T> {
  * @returns The created Source.
  *
  * @example
- * ```
+ * ```ts
  * // Creating a Source which synchronously produces values 0..50
  * const source = Source(sink => {
  *     // Note: It is guaranteed (at the start of execution of this function
@@ -588,7 +588,7 @@ export interface Source<T> {
  * ```
  *
  * @example
- * ```
+ * ```ts
  * // Creating a Factory function which creates a Source that emits all the
  * // values in the provided array at construction.
  * function fromArray<T>(array: ArrayLike<T>): Source<T> {
@@ -612,7 +612,7 @@ export interface Source<T> {
  * ```
  *
  * @example
- * ```
+ * ```ts
  * // Creating a Source that maps an external api into a reactive one.
  * import { MyExternalSubscriptionToken, myExternalApi } from './myExternalApi';
  * const source = Source(sink => {
@@ -687,7 +687,7 @@ export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
  * @returns Whether the value is a Source.
  *
  * @example
- * ```
+ * ```ts
  * isSource(Sink(() => {})); // false.
  * isSource(Source(() => {})); // true.
  * isSource(Subject()); // true.
@@ -723,7 +723,7 @@ export function isSource(value: unknown): value is Sink<unknown> {
  * @returns The higher order function which takes a source to subscribe to.
  *
  * @example
- * ```
+ * ```ts
  * import { DogPictures, myGetDogPictures } from './myApi.ts';
  * import { MyRequestTimeoutError } from './myRequestTimeoutError.ts';
  * import { myReportError } from './myReportError.ts'
@@ -774,7 +774,7 @@ function pushArrayItemsToSink<T>(array: ArrayLike<T>, sink: Sink<T>): void {
  * @returns The created source.
  *
  * @example
- * ```
+ * ```ts
  * pipe(fromArray([1, 2, 3, 4]), subscribe(Sink(console.log)));
  * // Logs:
  * // Push(1), Push(2), Push(3), Push(4)
@@ -782,7 +782,7 @@ function pushArrayItemsToSink<T>(array: ArrayLike<T>, sink: Sink<T>): void {
  * ```
  *
  * @example
- * ```
+ * ```ts
  * pipe(
  *     fromArray({ length: 5, 0: 'foo', 3: 'bar' }),
  *     subscribe(Sink(console.log))
@@ -848,7 +848,7 @@ export function fromArrayScheduled<T>(
  * @returns The created source.
  *
  * @example
- * ```
+ * ```ts
  * pipe(of(1, 2, 3, 4), subscribe(Sink(console.log)));
  * // Logs:
  * // Push(1), Push(2), Push(3), Push(4)
@@ -856,7 +856,7 @@ export function fromArrayScheduled<T>(
  * ```
  *
  * @example
- * ```
+ * ```ts
  * pipe(of(), subscribe(Sink(console.log)));
  * // Logs:
  * // End

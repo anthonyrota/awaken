@@ -55,7 +55,7 @@ export function markAsSubject<T>(
  * @returns Whether the value is a Subject.
  *
  * @example
- * ```
+ * ```ts
  * isSubject(Sink(() => {})); // false.
  * isSubject(Source(() => {})) // false.
  * isSubject(Subject()); // true.
