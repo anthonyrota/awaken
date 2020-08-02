@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 /**
  * Thanks to the api-documenter team for some ideas used in this script:
+ *
  * https://github.com/microsoft/rushstack/blob/8b2edd9/apps/api-documenter/src/markdown/MarkdownEmitter.ts
  * https://github.com/microsoft/rushstack/blob/e7e9429/apps/api-documenter/src/nodes/DocTable.ts
  * https://github.com/microsoft/rushstack/blob/a30cdf5/apps/api-extractor-model/src/model/ApiModel.ts
