@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 /**
  * Thanks to the api-documenter team for some ideas used in this script:
- * https://github.com/microsoft/rushstack/blob/master/apps/api-documenter/src/utils/IndentedWriter.ts
+ * https://github.com/microsoft/rushstack/blob/e7e9429/apps/api-documenter/src/utils/IndentedWriter.ts
  * The api-documenter project is licensed under MIT, and it's license can be found at <rootDir>/vendor/licenses/@microsoft/api-documenter/LICENSE
  */
 /* eslint-enable max-len */
@@ -45,7 +45,7 @@ export function globAbsolute(pattern: string): string[] {
     return glob.sync(pattern).map(globResultToAbsolutePath);
 }
 
-export class StringBuilder {
+class StringBuilder {
     private __result = '';
 
     public write(text: string): void {
@@ -68,7 +68,7 @@ export class IndentedWriter {
      */
     public defaultIndentPrefix = '  ';
 
-    private readonly _builder: StringBuilder;
+    private readonly _builder = new StringBuilder();
 
     private _latestChunk: string | undefined;
     private _previousChunk: string | undefined;
@@ -77,9 +77,7 @@ export class IndentedWriter {
     private readonly _indentStack: string[];
     private _indentText: string;
 
-    public constructor(builder?: StringBuilder) {
-        this._builder = builder ?? new StringBuilder();
-
+    public constructor() {
         this._latestChunk = undefined;
         this._previousChunk = undefined;
         this._atStartOfLine = true;
@@ -150,7 +148,8 @@ export class IndentedWriter {
      * current line.
      */
     public ensureSkippedLine(): void {
-        if (this.peekLastCharacter() !== '\n') {
+        const lastCharacter = this.peekLastCharacter();
+        if (lastCharacter !== '\n' && lastCharacter !== '') {
             this._writeNewLine();
         }
 

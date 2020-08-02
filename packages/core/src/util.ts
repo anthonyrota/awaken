@@ -14,7 +14,6 @@ function _call<T>(x: T, f: (x: T) => T): T {
  * @returns The result of accumulatively calling the given value against all of
  *     the functions given left-to-right.
  *
- * {@coreApiPath operator}
  * @public
  */
 export function pipe<T>(x: T): T;
@@ -67,7 +66,6 @@ export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T {
  *     accumulatively calling the value against all of the functions given
  *     left-to-right.
  *
- * {@coreApiPath operator}
  * @public
  */
 export function flow(): <T>(x: T) => T;
@@ -121,20 +119,22 @@ export function removeOnce<T>(array: T[], item: T): void {
     }
 }
 
-declare function requestAnimationFrame(callback: FrameRequestCallback): number;
+declare function requestAnimationFrame(
+    callback: (time: number) => void,
+): number;
 declare function cancelAnimationFrame(id: number): void;
 
 /**
  * Disposable-based alternative to built-in `requestAnimationFrame`.
  *
- * @param callback - The callback to schedule.
+ * @param callback - The callback to schedule. This will be called with a `time`
+ *     parameter.
  * @param subscription - If this is disposed then the request will be cancelled.
  *
- * {@coreApiPath util}
  * @public
  */
 function requestAnimationFrameImplementation(
-    callback: FrameRequestCallback,
+    callback: (time: number) => void,
     subscription?: Disposable,
 ): void {
     if (subscription && !subscription.active) {
@@ -162,7 +162,6 @@ export { requestAnimationFrameImplementation as requestAnimationFrame };
  * @param subscription - If this is disposed then the request will be cancelled.
  * @param args - The arguments to send to the callback.
  *
- * {@coreApiPath util}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -203,7 +202,6 @@ export { setTimeoutImplementation as setTimeout };
  * @param subscription - If this is disposed then the request will be cancelled.
  * @param args - The arguments to send to the callback.
  *
- * {@coreApiPath util}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -241,7 +239,6 @@ export { setIntervalImplementation as setInterval };
  *
  * @param error - The error to report.
  *
- * {@coreApiPath util}
  * @public
  */
 export function asyncReportError(error: unknown): void {
@@ -305,16 +302,8 @@ export function _binarySearchNextLargestIndex<T>(
 }
 
 /**
- * {@coreApiPath util}
  * @public
  */
 export interface TimeProvider {
     (): number;
-}
-
-/**
- * {@coreApiPath util}
- */
-export interface FrameRequestCallback {
-    (time: number): void;
 }

@@ -23,7 +23,6 @@ import {
 } from './util';
 
 /**
- * {@coreApiPath subject}
  * @public
  */
 export interface NonMarkedSubject<T> extends Disposable {
@@ -31,13 +30,11 @@ export interface NonMarkedSubject<T> extends Disposable {
 }
 
 /**
- * {@coreApiPath subject}
  * @public
  */
 export interface Subject<T> extends Source<T>, Sink<T>, NonMarkedSubject<T> {}
 
 /**
- * {@coreApiPath subject}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -50,7 +47,7 @@ export function markAsSubject<T>(
 }
 
 /**
- * Determines whether the given value is a Subject.
+ * Determines whether the given value is a {@link Subject}.
  * @param value - The value to check.
  * @returns Whether the value is a Subject.
  *
@@ -65,15 +62,10 @@ export function markAsSubject<T>(
  * isSubject(null); // false.
  * ```
  *
- * @see {@link Sink}
- * @see {@link Source}
- * @see {@link Subject}
- * @see {@link Disposable}
  * @see {@link isDisposable}
  * @see {@link isSink}
  * @see {@link isSource}
  *
- * {@coreApiPath subject}
  * @public
  */
 export function isSubject(value: unknown): value is Subject<unknown> {
@@ -93,7 +85,6 @@ interface SubjectBasePrivateActiveState<T> {
 }
 
 /**
- * {@coreApiPath subject/<name>}
  * @public
  */
 export function SubjectBase<T>(): Subject<T> {
@@ -288,7 +279,6 @@ interface SubjectDistributionSinkDisposalErrorImplementation extends Error {
 }
 
 /**
- * {@coreApiPath subject}
  * @public
  */
 export interface SubjectDistributionSinkDisposalError
@@ -300,7 +290,6 @@ export interface SubjectDistributionSinkDisposalError
 }
 
 /**
- * {@coreApiPath subject}
  * @public
  */
 export interface SubjectDistributionSinkDisposalErrorConstructor {
@@ -312,7 +301,6 @@ export interface SubjectDistributionSinkDisposalErrorConstructor {
  * Thrown when at least least one error is caught during the checking of whether
  * a subscribed sink is active or not.
  *
- * {@coreApiPath subject}
  * @public
  */
 // eslint-disable-next-line max-len
@@ -333,7 +321,6 @@ export const SubjectDistributionSinkDisposalError: SubjectDistributionSinkDispos
 );
 
 /**
- * {@coreApiPath subject}
  * @public
  */
 export function Subject<T>(): Subject<T> {
@@ -364,7 +351,6 @@ export function Subject<T>(): Subject<T> {
 }
 
 /**
- * {@coreApiPath subject/<name>}
  * @public
  */
 export interface CurrentValueSubject<T> extends Subject<T> {
@@ -372,7 +358,6 @@ export interface CurrentValueSubject<T> extends Subject<T> {
 }
 
 /**
- * {@coreApiPath subject/<name>}
  * @public
  */
 export function CurrentValueSubject<T>(initialValue: T): Subject<T> {
@@ -399,7 +384,6 @@ export function CurrentValueSubject<T>(initialValue: T): Subject<T> {
 }
 
 /**
- * {@coreApiPath subject/ReplaySubjectTimeoutConfig}
  * @public
  */
 export interface ReplaySubjectTimeoutConfig {
@@ -408,7 +392,6 @@ export interface ReplaySubjectTimeoutConfig {
 }
 
 /**
- * {@coreApiPath subject/<name>}
  * @public
  */
 export function ReplaySubject<T>(
@@ -529,7 +512,6 @@ export function ReplaySubject<T>(
 }
 
 /**
- * {@coreApiPath subject/<name>}
  * @public
  */
 export function FinalValueSubject<T>(): Subject<T> {

@@ -8,7 +8,6 @@ const enum DisposableImplementationIdentifier {
 }
 
 /**
- * {@coreApiPath disposable}
  * @public
  */
 export interface Disposable {
@@ -28,6 +27,7 @@ export interface Disposable {
     remove(child: Disposable): void;
     /**
      * Disposes the Disposable
+     * @throws {@link DisposalError};
      */
     dispose(): void;
     [$$Disposable]: DisposableImplementationIdentifier;
@@ -208,7 +208,6 @@ const activeGetter = Object.getOwnPropertyDescriptor(
  *     unnecessary but here it is useful as the returned value will have the
  *     type `T & Disposable`
  *
- * {@coreApiPath disposable}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -276,7 +275,6 @@ interface DisposalErrorImplementation extends Error {
 }
 
 /**
- * {@coreApiPath disposable}
  * @public
  */
 export interface DisposalError extends DisposalErrorImplementation {
@@ -287,7 +285,6 @@ export interface DisposalError extends DisposalErrorImplementation {
 }
 
 /**
- * {@coreApiPath disposable}
  * @public
  */
 export interface DisposalErrorConstructor {
@@ -298,7 +295,6 @@ export interface DisposalErrorConstructor {
 /**
  * Thrown when at least one error is caught during the disposal of a disposable.
  *
- * {@coreApiPath disposable}
  * @public
  */
 export const DisposalError: DisposalErrorConstructor = createCustomError(
@@ -332,7 +328,6 @@ function flattenDisposalErrors(errors: unknown[]): unknown[] {
 }
 
 /**
- * {@coreApiPath disposable}
  * @public
  */
 export function Disposable(onDispose?: () => void): Disposable {
@@ -342,7 +337,7 @@ export function Disposable(onDispose?: () => void): Disposable {
 }
 
 /**
- * Determines whether the given value is a Disposable.
+ * Determines whether the given value is a {@link Disposable}.
  * @param value - The value to check.
  * @returns Whether the value is a Disposable.
  *
@@ -357,15 +352,10 @@ export function Disposable(onDispose?: () => void): Disposable {
  * isDisposable(null); // false.
  * ```
  *
- * @see {@link Sink}
- * @see {@link Source}
- * @see {@link Subject}
- * @see {@link Disposable}
  * @see {@link isSink}
  * @see {@link isSource}
  * @see {@link isSubject}
  *
- * {@coreApiPath disposable}
  * @public
  */
 export function isDisposable(value: unknown): value is Disposable {
@@ -386,7 +376,6 @@ export function isDisposable(value: unknown): value is Disposable {
 }
 
 /**
- * {@coreApiPath disposable}
  * @public
  */
 export const DISPOSED: Disposable = Disposable();

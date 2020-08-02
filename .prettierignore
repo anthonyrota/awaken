@@ -4,3 +4,4 @@ testing/dist
 *.md
 mangle.json
 extractor
+docs/api

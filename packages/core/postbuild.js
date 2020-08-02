@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const {
     getAbsolutePath,
-    // readFile,
-    // writeFile,
     renameOutputModule,
 } = require('../../script/util/fileUtil');
 const fs = require('fs');

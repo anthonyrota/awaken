@@ -243,6 +243,8 @@ export function find<T>(predicate: (value: T, index: number) => unknown): Operat
 // @public (undocumented)
 export function findIndex<T>(predicate: (value: T, index: number) => unknown): Operator<T, number>;
 
+// Warning: (ae-forgotten-export) The symbol "WithIndex" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
 export function findWithIndex<T, S extends T>(predicate: (value: T, index: number) => value is S): Operator<T, WithIndex<S>>;
 
@@ -568,10 +570,8 @@ export interface ReplaySubjectTimeoutConfig {
     provideTime?: TimeProvider | null;
 }
 
-// Warning: (ae-forgotten-export) The symbol "FrameRequestCallback" needs to be exported by the entry point index.d.ts
-//
 // @public
-function requestAnimationFrame_2(callback: FrameRequestCallback_2, subscription?: Disposable): void;
+function requestAnimationFrame_2(callback: (time: number) => void, subscription?: Disposable): void;
 
 export { requestAnimationFrame_2 as requestAnimationFrame }
 
@@ -590,11 +590,10 @@ export function sampleMs(ms: number): IdentityOperator;
 // @public
 export function scan<T, R, I>(transform: (previousAccumulatedResult: R | I, currentValue: T, currentIndex: number) => R, initialValue: I): Operator<T, R>;
 
+// Warning: (ae-forgotten-export) The symbol "ScheduleAnimationFrameFunction" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
 export const scheduleAnimationFrame: ScheduleAnimationFrameFunction;
-
-// @public (undocumented)
-export type ScheduleAnimationFrameFunction = ScheduleFunction<Parameters<FrameRequestCallback_2>>;
 
 // @public (undocumented)
 export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;
@@ -890,14 +889,6 @@ export function windowEvery(boundariesSource: Source<unknown>): <T>(source: Sour
 
 // @public (undocumented)
 export function windowTime(maxWindowDuration?: number | null, creationInterval?: number | null, maxWindowLength?: number): <T>(source: Source<T>) => Source<Source<T>>;
-
-// @public (undocumented)
-export interface WithIndex<T> {
-    // (undocumented)
-    index: number;
-    // (undocumented)
-    value: T;
-}
 
 // @public (undocumented)
 export function withLatestFrom<T extends unknown[]>(...sources: WrapValuesInSource<T>): <U>(source: Source<U>) => Source<Unshift<T, U>>;

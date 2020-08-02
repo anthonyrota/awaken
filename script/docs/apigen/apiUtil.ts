@@ -1,8 +1,12 @@
 /* eslint-disable max-len */
 /**
  * Thanks to the api-documenter team for some ideas used in this script:
- * https://github.com/microsoft/rushstack/blob/master/apps/api-documenter/src/markdown/MarkdownEmitter.ts
+ * https://github.com/microsoft/rushstack/blob/8b2edd9/apps/api-documenter/src/markdown/MarkdownEmitter.ts
+ * https://github.com/microsoft/rushstack/blob/e7e9429/apps/api-documenter/src/nodes/DocTable.ts
+ * https://github.com/microsoft/rushstack/blob/a30cdf5/apps/api-extractor-model/src/model/ApiModel.ts
+ *
  * The api-documenter project is licensed under MIT, and it's license can be found at <rootDir>/vendor/licenses/@microsoft/api-documenter/LICENSE
+ * The api-extractor-model project is licensed under MIT, and it's license can be found at <rootDir>/vendor/licenses/@microsoft/api-extractor-model/LICENSE
  */
 /* eslint-enable max-len */
 
@@ -10,68 +14,39 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as colors from 'colors';
 import * as tsdoc from '@microsoft/tsdoc';
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import * as aeModel from '@microsoft/api-extractor-model';
+import * as yaml from 'yaml';
+import {
+    TableOfContentsInlineReference,
+    TableOfContentsNestedReference,
+    TableOfContentsMainReference,
+    TableOfContents,
+    PageMetadata,
+} from '../pageMetadata';
 import { SourceExportMappings } from './sourceExportMappings';
-import { StringBuilder, IndentedWriter } from './util';
+import { IndentedWriter } from './util';
+import {
+    APIPageData,
+    getMainPathOfApiItemName,
+    assertMappedApiItemNames,
+    forEachPage,
+} from './paths';
 
 interface Context {
     sourceExportMappings: SourceExportMappings;
     apiModel: aeModel.ApiModel;
-    memberNameToApiPathMap: Map<string, string>;
+    apiItemsByMemberName: Map<string, aeModel.ApiItem[]>;
+    apiItemsByCanonicalReference?: Map<string, aeModel.ApiItem>;
 }
-
-function getApiItemName(apiItem: aeModel.ApiItem): string {
-    const match = /^(.+)_\d+$/.exec(apiItem.displayName);
-    if (match) {
-        return match[1];
-    }
-    return apiItem.displayName;
-}
-
-const coreApiPathTag = new tsdoc.TSDocTagDefinition({
-    tagName: '@coreApiPath',
-    syntaxKind: tsdoc.TSDocTagSyntaxKind.InlineTag,
-});
 
 const seeTag = new tsdoc.TSDocTagDefinition({
     tagName: '@see',
     syntaxKind: tsdoc.TSDocTagSyntaxKind.BlockTag,
 });
 
-aeModel.AedocDefinitions.tsdocConfiguration.addTagDefinitions([
-    coreApiPathTag,
-    seeTag,
-]);
-
-function getCustomInlineTagValue(
-    node: tsdoc.DocNode,
-    inlineTag: tsdoc.TSDocTagDefinition,
-): string | undefined {
-    let tagContent: string | undefined;
-
-    function walkNode(node: tsdoc.DocNode): true | void {
-        if (node.kind === tsdoc.DocNodeKind.InlineTag) {
-            const inlineNode = node as tsdoc.DocInlineTag;
-            if (
-                inlineNode.tagNameWithUpperCase ===
-                inlineTag.tagNameWithUpperCase
-            ) {
-                tagContent = inlineNode.tagContent;
-                return true;
-            }
-        }
-
-        for (const child of node.getChildNodes()) {
-            if (walkNode(child)) {
-                return true;
-            }
-        }
-    }
-
-    walkNode(node);
-
-    return tagContent;
-}
+const globalTSDocConfiguration = aeModel.AedocDefinitions.tsdocConfiguration;
+globalTSDocConfiguration.addTagDefinition(seeTag);
 
 class UnsupportedApiItemError extends Error {
     constructor(apiItem: aeModel.ApiItem, reason: string) {
@@ -107,28 +82,6 @@ function getBlocksOfTag(
     );
 }
 
-function extractCoreApiPath(apiItem: aeModel.ApiItem): string | void {
-    const package_ = apiItem.getAssociatedPackage();
-    if (!package_) {
-        throw new UnsupportedApiItemError(
-            apiItem,
-            'No associated package found.',
-        );
-    }
-    const docComment = getDocComment(apiItem);
-    const coreApiPathTagValue = getCustomInlineTagValue(
-        docComment,
-        coreApiPathTag,
-    );
-
-    if (coreApiPathTagValue) {
-        const name = getApiItemName(apiItem);
-        const parsedValue = coreApiPathTagValue.replace(/<name>/g, name);
-
-        return `${package_.name}/${parsedValue}`;
-    }
-}
-
 interface ExtractedCustomBlocks {
     exampleBlocks: tsdoc.DocBlock[];
     seeBlocks: tsdoc.DocBlock[];
@@ -147,51 +100,57 @@ function extractCustomBlocks(apiItem: aeModel.ApiItem): ExtractedCustomBlocks {
         seeBlocks,
     };
 }
-extractCustomBlocks;
 
-interface ExportImplementation<T extends aeModel.ApiItem> {
-    addImplementation(apiItem: T): void;
-    hasImplementation(): boolean;
-    writeAsMarkdown(output: StringBuilder): void;
+function getApiItemName(
+    apiItem: import('@microsoft/api-extractor-model').ApiItem,
+): string {
+    const match = /^(.+)_\d+$/.exec(apiItem.displayName);
+    if (match) {
+        return match[1];
+    }
+    return apiItem.displayName;
 }
+
+class MarkdownOutput extends IndentedWriter {}
 
 /* eslint-disable no-inner-declarations */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace MarkdownRenderUtil {
-    function escapeMarkdown(text: string): string {
+    function escapeHTML(text: string): string {
         return text
-            .replace(/\\/g, '\\\\') // first replace the escape character
-            .replace(/[*#[\]_|`~]/g, (x) => '\\' + x) // then escape any special characters
-            .replace(/---/g, '\\-\\-\\-') // hyphens only if it's 3 or more
             .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
     }
 
-    interface EmitMarkdownContext {
-        context: Context;
-        writer: IndentedWriter;
-        apiItem: aeModel.ApiItem;
+    function escapeMarkdown(text: string): string {
+        // For now leave markdown in there.
+        return escapeHTML(text);
     }
 
-    export function writeApiItemDocNode(
-        output: StringBuilder,
+    interface EmitMarkdownContext {
+        context: Context;
+        output: MarkdownOutput;
+        apiItem: aeModel.ApiItem;
+        writeSingleLine: boolean;
+    }
+
+    function writeApiItemDocNode(
+        output: MarkdownOutput,
         apiItem: aeModel.ApiItem,
         docNode: tsdoc.DocNode,
         context: Context,
+        writeSingleLine = false,
     ): void {
-        const writer: IndentedWriter = new IndentedWriter(output);
-        const emitContext = { context, writer, apiItem };
-
-        writeNode(docNode, emitContext);
-        writer.ensureNewLine();
+        writeNode(docNode, { context, output, apiItem, writeSingleLine });
     }
 
     function writeNode(
         docNode: tsdoc.DocNode,
         context: EmitMarkdownContext,
     ): void {
-        const writer: IndentedWriter = context.writer;
+        const output = context.output;
 
         switch (docNode.kind) {
             case tsdoc.DocNodeKind.PlainText: {
@@ -204,15 +163,31 @@ namespace MarkdownRenderUtil {
                 const docHtmlTag = docNode as
                     | tsdoc.DocHtmlStartTag
                     | tsdoc.DocHtmlEndTag;
-                // write the HTML element verbatim into the output
-                writer.write(docHtmlTag.emitAsHtml());
+                // Write the HTML element verbatim into the output.
+                output.write(docHtmlTag.emitAsHtml());
                 break;
             }
             case tsdoc.DocNodeKind.CodeSpan: {
                 const docCodeSpan = docNode as tsdoc.DocCodeSpan;
-                writer.write('`');
-                writer.write(docCodeSpan.code);
-                writer.write('`');
+                if (context.writeSingleLine) {
+                    output.write('<code>');
+                } else {
+                    output.write('`');
+                }
+                if (context.writeSingleLine) {
+                    const code = escapeHTML(
+                        docCodeSpan.code.replace(/\|/g, '&#124;'),
+                    );
+                    const parts: string[] = code.split(/\r?\n/g);
+                    output.write(parts.join('</code><br/><code>'));
+                } else {
+                    output.write(docCodeSpan.code);
+                }
+                if (context.writeSingleLine) {
+                    output.write('</code>');
+                } else {
+                    output.write('`');
+                }
                 break;
             }
             case tsdoc.DocNodeKind.LinkTag: {
@@ -228,24 +203,34 @@ namespace MarkdownRenderUtil {
             }
             case tsdoc.DocNodeKind.Paragraph: {
                 const docParagraph = docNode as tsdoc.DocParagraph;
-                writeNodes(
-                    tsdoc.DocNodeTransforms.trimSpacesInParagraph(docParagraph)
-                        .nodes,
-                    context,
+                // eslint-disable-next-line max-len
+                const trimmedParagraph = tsdoc.DocNodeTransforms.trimSpacesInParagraph(
+                    docParagraph,
                 );
-                writer.ensureNewLine();
-                writer.writeLine();
+                if (context.writeSingleLine) {
+                    output.write('<p>');
+                    writeNodes(trimmedParagraph.nodes, context);
+                    output.write('</p>');
+                } else {
+                    output.ensureSkippedLine();
+                    writeNodes(trimmedParagraph.nodes, context);
+                }
                 break;
             }
             case tsdoc.DocNodeKind.FencedCode: {
+                if (context.writeSingleLine) {
+                    throw new Error(
+                        'Cannot have FencedCode when option writeSingleLine is true.',
+                    );
+                }
                 const docFencedCode = docNode as tsdoc.DocFencedCode;
-                writer.ensureNewLine();
-                writer.write('```');
-                writer.write(docFencedCode.language);
-                writer.writeLine();
-                writer.write(docFencedCode.code.replace(/[\n\r]+$/, ''));
-                writer.writeLine();
-                writer.writeLine('```');
+                output.ensureSkippedLine();
+                output.write('```');
+                output.write(docFencedCode.language);
+                output.writeLine();
+                output.write(docFencedCode.code.replace(/[\n\r]+$/, ''));
+                output.writeLine();
+                output.writeLine('```');
                 break;
             }
             case tsdoc.DocNodeKind.Section: {
@@ -254,8 +239,8 @@ namespace MarkdownRenderUtil {
                 break;
             }
             case tsdoc.DocNodeKind.SoftBreak: {
-                if (!/^\s?$/.test(writer.peekLastCharacter())) {
-                    writer.write(' ');
+                if (!/^\s?$/.test(output.peekLastCharacter())) {
+                    output.write(' ');
                 }
                 break;
             }
@@ -274,7 +259,12 @@ namespace MarkdownRenderUtil {
             }
             case tsdoc.DocNodeKind.BlockTag: {
                 const tagNode = docNode as tsdoc.DocBlockTag;
-                console.warn('Unsupported block tag: ' + tagNode.tagName);
+                if (
+                    tagNode.tagName !== '@see' &&
+                    tagNode.tagName !== '@example'
+                ) {
+                    console.warn('Unsupported block tag: ' + tagNode.tagName);
+                }
                 break;
             }
             default:
@@ -302,11 +292,10 @@ namespace MarkdownRenderUtil {
         if (!identifier) {
             throw new Error('No.');
         }
-        writeLinkToApiItem(
-            (context.writer as unknown) as StringBuilder,
+        writeLinkToApiItemName(
+            (context.output as unknown) as MarkdownOutput,
             getApiItemName(context.apiItem),
             identifier,
-            context.context,
             docLinkTag.linkText,
         );
     }
@@ -326,30 +315,30 @@ namespace MarkdownRenderUtil {
             linkText.replace(/\s+/g, ' '),
         );
 
-        context.writer.write('[');
-        context.writer.write(encodedLinkText);
-        context.writer.write(`](${urlDestination})`);
+        context.output.write('[');
+        context.output.write(encodedLinkText);
+        context.output.write(`](${urlDestination})`);
     }
 
     function writePlainText(text: string, context: EmitMarkdownContext): void {
-        const writer: IndentedWriter = context.writer;
+        const output = context.output;
 
-        // split out the [ leading whitespace, content, trailing whitespace ]
+        // Split out the [ leading whitespace, content, trailing whitespace ].
         // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
         const parts: string[] = text.match(/^(\s*)(.*?)(\s*)$/) || [];
 
-        writer.write(parts[1]); // write leading whitespace
+        output.write(parts[1]); // Write leading whitespace.
 
         const middle: string = parts[2];
 
         if (middle !== '') {
-            switch (writer.peekLastCharacter()) {
+            switch (output.peekLastCharacter()) {
                 case '':
                 case '\n':
                 case ' ':
                 case '[':
                 case '>':
-                    // okay to put a symbol
+                    // Okay to put a symbol.
                     break;
                 default:
                     // This is no problem:
@@ -357,15 +346,15 @@ namespace MarkdownRenderUtil {
                     // But this is trouble:
                     //     "**one***two***three**"
                     // The most general solution:
-                    //     "**one**<!-- -->*two*<!-- -->**three**"
-                    writer.write('<!-- -->');
+                    //     "**one**<!---->*two*<!---->**three**"
+                    output.write('<!---->');
                     break;
             }
 
-            writer.write(escapeMarkdown(middle));
+            output.write(escapeMarkdown(middle));
         }
 
-        writer.write(parts[3]); // write trailing whitespace
+        output.write(parts[3]); // Write trailing whitespace.
     }
 
     function writeNodes(
@@ -378,7 +367,7 @@ namespace MarkdownRenderUtil {
     }
 
     function unwrapText(text: string): string {
-        return text.replace(/[\n\r]+/g, ' ');
+        return text.replace(/[\n\r]+ */g, ' ');
     }
 
     function getRelativePath(from: string, to: string): string {
@@ -405,37 +394,73 @@ namespace MarkdownRenderUtil {
             : start + (start.endsWith('/') ? '' : '/') + name;
     }
 
-    export function writeLinkToApiItem(
-        output: StringBuilder,
+    function getLinkToApiItemName(
         currentApiItemName: string,
         apiItemName: string,
-        context: Context,
-        linkText = apiItemName,
-    ): void {
-        const currentApiItemPath = context.memberNameToApiPathMap.get(
-            currentApiItemName,
-        );
-        const apiItemPath = context.memberNameToApiPathMap.get(apiItemName);
+    ): string {
+        const currentApiItemPath = getMainPathOfApiItemName(currentApiItemName);
+        const apiItemPath = getMainPathOfApiItemName(apiItemName);
         if (!currentApiItemPath || !apiItemPath) {
             throw new Error('No more coding today.');
         }
         const relativePath = getRelativePath(currentApiItemPath, apiItemPath);
-        const titleHash = `#${apiItemName
-            .toLowerCase()
-            .replace(/ /g, '')
-            .replace(/[^a-zA-Z0-9\-_]/, '')}`;
+        const titleHash = apiItemName.toLowerCase();
 
-        if (relativePath) {
-            output.write(
-                `<a href="${relativePath}.md${titleHash}">${linkText}</a>`,
-            );
-        } else {
-            output.write(`<a href="${titleHash}">${linkText}</a>`);
+        return relativePath
+            ? `${relativePath}.md#${titleHash}`
+            : `#${titleHash}`;
+    }
+
+    function getLinkToApiItem(
+        currentApiItemName: string,
+        apiItem: aeModel.ApiItem,
+        context: Context,
+    ): string {
+        const currentApiItemPath = getMainPathOfApiItemName(currentApiItemName);
+        const apiItemPath = getMainPathOfApiItemName(getApiItemName(apiItem));
+        if (!currentApiItemPath || !apiItemPath) {
+            throw new Error('No more coding today.');
         }
+        const relativePath = getRelativePath(currentApiItemPath, apiItemPath);
+        const titleHash = getApiItemAnchorName(apiItem, context);
+
+        return relativePath
+            ? `${relativePath}.md#${titleHash}`
+            : `#${titleHash}`;
+    }
+
+    function writeLinkToApiItemName(
+        output: MarkdownOutput,
+        currentApiItemName: string,
+        apiItemName: string,
+        linkText = apiItemName,
+    ): void {
+        const destination = getLinkToApiItemName(
+            currentApiItemName,
+            apiItemName,
+        );
+
+        output.write(`<a href="${destination}">${linkText}</a>`);
+    }
+
+    function writeLinkToApiItem(
+        output: MarkdownOutput,
+        currentApiItemName: string,
+        apiItem: aeModel.ApiItem,
+        context: Context,
+        linkText = getApiItemName(apiItem),
+    ) {
+        const destination = getLinkToApiItem(
+            currentApiItemName,
+            apiItem,
+            context,
+        );
+
+        output.write(`<a href="${destination}">${linkText}</a>`);
     }
 
     export function writeSummary(
-        output: StringBuilder,
+        output: MarkdownOutput,
         apiItem: aeModel.ApiItem,
         context: Context,
     ): void {
@@ -444,23 +469,79 @@ namespace MarkdownRenderUtil {
     }
 
     export function writeExamples(
-        output: StringBuilder,
+        output: MarkdownOutput,
         apiItem: aeModel.ApiItem,
         context: Context,
     ): void {
         const customBlocks = extractCustomBlocks(apiItem);
         for (const exampleBlock of customBlocks.exampleBlocks) {
-            output.writeLine('### Example');
+            output.ensureSkippedLine();
+            output.write('#### Example');
             for (const block of exampleBlock.getChildNodes()) {
-                if (block.kind === tsdoc.DocNodeKind.Section) {
-                    writeApiItemDocNode(output, apiItem, block, context);
-                }
+                writeApiItemDocNode(output, apiItem, block, context);
             }
         }
     }
 
+    function areMultipleKindsInApiItemList(
+        apiItems: aeModel.ApiItem[],
+    ): boolean {
+        const kind = apiItems[0].kind;
+        return apiItems.some((apiItem_) => apiItem_.kind !== kind);
+    }
+
+    function hasMultipleKinds(
+        apiItem: aeModel.ApiItem,
+        context: Context,
+    ): boolean {
+        return areMultipleKindsInApiItemList(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            context.apiItemsByMemberName.get(getApiItemName(apiItem))!,
+        );
+    }
+
+    export function getMultiKindApiItemAnchorNameFromNameAndKind(
+        name: string,
+        kind: string,
+    ): string {
+        return `${name}-${kind}`.toLowerCase().replace(/ /g, '');
+    }
+
+    function getMultiKindApiItemAnchorName(apiItem: aeModel.ApiItem): string {
+        return getMultiKindApiItemAnchorNameFromNameAndKind(
+            getApiItemName(apiItem),
+            apiItem.kind,
+        );
+    }
+
+    function getApiItemAnchorName(
+        apiItem: aeModel.ApiItem,
+        context: Context,
+    ): string {
+        if (hasMultipleKinds(apiItem, context)) {
+            return getMultiKindApiItemAnchorName(apiItem);
+        }
+        return getApiItemName(apiItem).toLowerCase();
+    }
+
+    export function writeApiItemAnchor(
+        output: MarkdownOutput,
+        apiItem: aeModel.ApiItem,
+        context: Context,
+        textKind: string,
+    ): void {
+        if (hasMultipleKinds(apiItem, context)) {
+            output.ensureSkippedLine();
+            output.writeLine(
+                `<a name="${getMultiKindApiItemAnchorName(apiItem)}"></a>`,
+            );
+            output.writeLine();
+            output.write(`### \`${getApiItemName(apiItem)} - ${textKind}\``);
+        }
+    }
+
     export function writeSignature(
-        output: StringBuilder,
+        output: MarkdownOutput,
         apiItem:
             | aeModel.ApiFunction
             | aeModel.ApiInterface
@@ -468,34 +549,508 @@ namespace MarkdownRenderUtil {
             | aeModel.ApiTypeAlias,
         context: Context,
     ): void {
-        output.writeLine('### Signature');
-        output.writeLine();
-        writeExcerptTokens(output, apiItem, apiItem.excerpt, context);
+        output.ensureSkippedLine();
+        output.writeLine('#### Signature');
+        writeApiItemExcerpt(output, apiItem, apiItem.excerpt, context);
     }
 
     export function writeSeeBlocks(
-        output: StringBuilder,
+        output: MarkdownOutput,
         apiItem: aeModel.ApiItem,
         context: Context,
     ): void {
         const customBlocks = extractCustomBlocks(apiItem);
-        let first = true;
+        let hasReachedSeeBlock = false;
         for (const seeBlock of customBlocks.seeBlocks) {
-            if (first) {
-                first = false;
-                output.writeLine('### See Also');
-                output.writeLine();
+            if (!hasReachedSeeBlock) {
+                hasReachedSeeBlock = true;
+                output.ensureSkippedLine();
+                output.write('#### See Also');
+                output.increaseIndent('* ');
             }
             for (const block of seeBlock.getChildNodes()) {
-                if (block.kind === tsdoc.DocNodeKind.Section) {
-                    writeApiItemDocNode(output, apiItem, block, context);
+                output.ensureNewLine();
+                writeApiItemDocNode(output, apiItem, block, context, true);
+            }
+        }
+        if (hasReachedSeeBlock) {
+            output.decreaseIndent();
+        }
+    }
+
+    class TableCell {
+        readonly content = new tsdoc.DocSection({
+            configuration: globalTSDocConfiguration,
+        });
+
+        public appendNode(docNode: tsdoc.DocNode): this {
+            this.content.appendNode(docNode);
+            return this;
+        }
+
+        public appendNodes(docNodes: readonly tsdoc.DocNode[]): this {
+            for (const node of docNodes) {
+                this.content.appendNode(node);
+            }
+            return this;
+        }
+    }
+
+    class TableRow {
+        public readonly cells: TableCell[] = [];
+
+        public addCell(cell: TableCell): this {
+            this.cells.push(cell);
+            return this;
+        }
+
+        public createAndAddCell(): TableCell {
+            const newCell: TableCell = new TableCell();
+            this.addCell(newCell);
+            return newCell;
+        }
+
+        public addPlainTextCell(cellContent: string): TableCell {
+            const cell: TableCell = this.createAndAddCell();
+            cell.content.appendNodeInParagraph(
+                new tsdoc.DocPlainText({
+                    configuration: globalTSDocConfiguration,
+                    text: cellContent,
+                }),
+            );
+            return cell;
+        }
+    }
+
+    export type TableParameters =
+        | {
+              headerCells?: readonly TableCell[];
+              headerTitles?: undefined;
+          }
+        | {
+              headerCells?: undefined;
+              headerTitles?: readonly string[];
+          };
+
+    export class Table {
+        public readonly header = new TableRow();
+        public readonly rows: TableRow[] = [];
+
+        public constructor(parameters?: TableParameters) {
+            if (parameters) {
+                if (parameters.headerTitles) {
+                    for (const cellText of parameters.headerTitles) {
+                        this.header.addPlainTextCell(cellText);
+                    }
+                } else if (parameters.headerCells) {
+                    for (const cell of parameters.headerCells) {
+                        this.header.addCell(cell);
+                    }
+                }
+            }
+        }
+
+        public addRow(row: TableRow): this {
+            this.rows.push(row);
+            return this;
+        }
+
+        public createAndAddRow(): TableRow {
+            const row = new TableRow();
+            this.addRow(row);
+            return row;
+        }
+
+        public writeAsMarkdown(
+            output: MarkdownOutput,
+            apiItem: aeModel.ApiItem,
+            context: Context,
+        ): void {
+            output.ensureSkippedLine();
+
+            // Markdown table rows can have inconsistent cell counts. Size the
+            // Table based on the longest row.
+            let columnCount = 0;
+            if (this.header) {
+                columnCount = this.header.cells.length;
+            }
+            for (const row of this.rows) {
+                if (row.cells.length > columnCount) {
+                    columnCount = row.cells.length;
+                }
+            }
+
+            // Write the table header (which is required by Markdown).
+            output.write('|');
+            for (let i = 0; i < columnCount; ++i) {
+                output.write(' ');
+                if (this.header) {
+                    const cell = this.header.cells[i];
+                    if (cell) {
+                        writeApiItemDocNode(
+                            output,
+                            apiItem,
+                            cell.content,
+                            context,
+                            true,
+                        );
+                    }
+                }
+                output.write(' |');
+            }
+            output.writeLine();
+
+            // Write the divider.
+            output.write('|');
+            for (let i = 0; i < columnCount; ++i) {
+                output.write(' --- |');
+            }
+
+            for (const row of this.rows) {
+                output.ensureNewLine();
+                output.write('|');
+                for (const cell of row.cells) {
+                    output.write(' ');
+                    writeApiItemDocNode(
+                        output,
+                        apiItem,
+                        cell.content,
+                        context,
+                        true,
+                    );
+                    output.write(' |');
                 }
             }
         }
     }
 
-    export function writeExcerptTokens(
-        output: StringBuilder,
+    function appendExcerptWithHyperlinks(
+        container: tsdoc.DocNodeContainer,
+        excerpt: aeModel.Excerpt,
+        apiItem: aeModel.ApiItem,
+        context: Context,
+    ): void {
+        container.appendNode(
+            new tsdoc.DocHtmlStartTag({
+                configuration: globalTSDocConfiguration,
+                name: 'code',
+            }),
+        );
+
+        for (const token of excerpt.spannedTokens) {
+            const tokenText = unwrapText(token.text);
+            const reference = getExcerptTokenReference(
+                token,
+                tokenText,
+                excerpt.text,
+                context,
+            );
+
+            if (reference) {
+                container.appendNode(
+                    new tsdoc.DocLinkTag({
+                        configuration: globalTSDocConfiguration,
+                        tagName: '@link',
+                        linkText: tokenText,
+                        urlDestination: getLinkToApiItem(
+                            getApiItemName(apiItem),
+                            reference,
+                            context,
+                        ),
+                    }),
+                );
+            } else {
+                container.appendNode(
+                    new tsdoc.DocPlainText({
+                        configuration: globalTSDocConfiguration,
+                        text: tokenText,
+                    }),
+                );
+            }
+        }
+
+        container.appendNode(
+            new tsdoc.DocHtmlEndTag({
+                configuration: globalTSDocConfiguration,
+                name: 'code',
+            }),
+        );
+    }
+
+    function createParagraphForTypeExcerpt(
+        excerpt: aeModel.Excerpt,
+        apiItem: aeModel.ApiItem,
+        context: Context,
+    ): tsdoc.DocParagraph {
+        const paragraph = new tsdoc.DocParagraph({
+            configuration: globalTSDocConfiguration,
+        });
+
+        if (!excerpt.text.trim()) {
+            paragraph.appendNode(
+                new tsdoc.DocPlainText({
+                    configuration: globalTSDocConfiguration,
+                    text: '(not declared)',
+                }),
+            );
+        } else {
+            appendExcerptWithHyperlinks(paragraph, excerpt, apiItem, context);
+        }
+
+        return paragraph;
+    }
+
+    export function writeParameters(
+        output: MarkdownOutput,
+        apiItem: aeModel.ApiFunction,
+        context: Context,
+    ): void {
+        const parametersTable = new Table({
+            headerTitles: ['Parameter', 'Type', 'Description'],
+        });
+
+        if (apiItem.parameters.some((param) => param.tsdocParamBlock)) {
+            for (const apiParameter of apiItem.parameters) {
+                const parameterRow = new TableRow()
+                    .addCell(
+                        new TableCell().appendNode(
+                            new tsdoc.DocParagraph(
+                                { configuration: globalTSDocConfiguration },
+                                [
+                                    new tsdoc.DocPlainText({
+                                        configuration: globalTSDocConfiguration,
+                                        text: `\`${apiParameter.name}\``,
+                                    }),
+                                ],
+                            ),
+                        ),
+                    )
+                    .addCell(
+                        new TableCell().appendNode(
+                            createParagraphForTypeExcerpt(
+                                apiParameter.parameterTypeExcerpt,
+                                apiItem,
+                                context,
+                            ),
+                        ),
+                    );
+
+                if (apiParameter.tsdocParamBlock) {
+                    parameterRow.addCell(
+                        new TableCell().appendNodes(
+                            apiParameter.tsdocParamBlock.content.nodes,
+                        ),
+                    );
+                }
+
+                parametersTable.addRow(parameterRow);
+            }
+        }
+
+        if (parametersTable.rows.length > 0) {
+            output.ensureSkippedLine();
+            output.write('#### Parameters');
+            parametersTable.writeAsMarkdown(output, apiItem, context);
+        }
+
+        const docComment = getDocComment(apiItem);
+        if (
+            aeModel.ApiReturnTypeMixin.isBaseClassOf(apiItem) &&
+            docComment.returnsBlock
+        ) {
+            const returnsRow = new TableRow().addCell(
+                new TableCell().appendNode(
+                    createParagraphForTypeExcerpt(
+                        apiItem.returnTypeExcerpt,
+                        apiItem,
+                        context,
+                    ),
+                ),
+            );
+
+            returnsRow.addCell(
+                new TableCell().appendNodes(
+                    docComment.returnsBlock.content.nodes,
+                ),
+            );
+
+            output.ensureSkippedLine();
+            output.write('#### Returns');
+            new Table({
+                headerTitles: ['Type', 'Description'],
+            })
+                .addRow(returnsRow)
+                .writeAsMarkdown(output, apiItem, context);
+        }
+    }
+
+    // This is needed because api-extractor-model ships with its own tsdoc
+    // version in its node_modules folder, so the instanceof check doesn't work.
+    // Therefore we have to re-implement it here.
+    function resolveDeclarationReference(
+        declarationReference:
+            | tsdoc.DocDeclarationReference
+            | DeclarationReference,
+        contextApiItem: aeModel.ApiItem | undefined,
+        context: Context,
+    ): aeModel.IResolveDeclarationReferenceResult {
+        if (declarationReference instanceof DeclarationReference) {
+            // Build the lookup on demand
+            if (!context.apiItemsByCanonicalReference) {
+                context.apiItemsByCanonicalReference = new Map<
+                    string,
+                    aeModel.ApiItem
+                >();
+
+                for (const apiPackage of context.apiModel.packages) {
+                    initApiItemsRecursive(apiPackage, context);
+                }
+            }
+
+            const result: aeModel.IResolveDeclarationReferenceResult = {
+                resolvedApiItem: undefined,
+                errorMessage: undefined,
+            };
+
+            const apiItem:
+                | aeModel.ApiItem
+                | undefined = context.apiItemsByCanonicalReference.get(
+                declarationReference.toString(),
+            );
+
+            if (!apiItem) {
+                result.errorMessage = `${declarationReference.toString()} can not be located`;
+            } else {
+                result.resolvedApiItem = apiItem;
+            }
+
+            return result;
+        }
+
+        return context.apiModel.resolveDeclarationReference(
+            declarationReference,
+            contextApiItem,
+        );
+    }
+
+    function initApiItemsRecursive(
+        apiItem: aeModel.ApiItem,
+        context: Context,
+    ): void {
+        if (apiItem.canonicalReference && !apiItem.canonicalReference.isEmpty) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            context.apiItemsByCanonicalReference!.set(
+                apiItem.canonicalReference.toString(),
+                apiItem,
+            );
+        }
+
+        // Recurse container members
+        if (aeModel.ApiItemContainerMixin.isBaseClassOf(apiItem)) {
+            for (const apiMember of apiItem.members) {
+                initApiItemsRecursive(apiMember, context);
+            }
+        }
+    }
+
+    function getExcerptTokenReference(
+        token: aeModel.ExcerptToken,
+        debugTokenText: string,
+        debugExcerptText: string,
+        context: Context,
+    ): aeModel.ApiItem | null {
+        if (
+            token.kind !== aeModel.ExcerptTokenKind.Reference ||
+            !token.canonicalReference ||
+            // Local reference.
+            token.canonicalReference.toString().includes('!~') ||
+            // Non-module reference.
+            token.canonicalReference.toString().startsWith('!')
+        ) {
+            return null;
+        }
+        let canonicalReference = token.canonicalReference;
+        if (canonicalReference.toString().endsWith(':function')) {
+            // Requires (overloadIndex) at the end if a function.
+            canonicalReference = canonicalReference.withOverloadIndex(1);
+        }
+        if (canonicalReference.toString().includes('!Event')) {
+            // Event type shadows the global type so api-extractor replaces it
+            // with Event_2, but doesn't bother changing the references to
+            // the updated name.
+            canonicalReference = DeclarationReference.parse(
+                canonicalReference.toString().replace('!Event', '!Event_2'),
+            );
+        }
+        let result = resolveDeclarationReference(
+            canonicalReference,
+            undefined,
+            context,
+        );
+        if (!result.resolvedApiItem) {
+            // Hack: for some reason the generated api model links not to
+            // the imported package but under it's own package. Therefore go
+            // through each package and test if the import actually comes
+            // from there.
+            // This code is terrible but I can't be bothered.
+            const packages = context.apiModel.packages;
+            let containedPackage: aeModel.ApiPackage | undefined;
+            for (const package_ of packages) {
+                if (
+                    canonicalReference
+                        .toString()
+                        .startsWith(package_.canonicalReference.toString())
+                ) {
+                    containedPackage = package_;
+                }
+            }
+            if (containedPackage) {
+                const canonicalReferenceWithoutStart = canonicalReference
+                    .toString()
+                    .slice(
+                        containedPackage.canonicalReference.toString().length,
+                    );
+                for (const package_ of packages) {
+                    if (package_ === containedPackage) {
+                        continue;
+                    }
+                    const newReference = DeclarationReference.parse(
+                        package_.canonicalReference.toString() +
+                            canonicalReferenceWithoutStart,
+                    );
+                    result = resolveDeclarationReference(
+                        newReference,
+                        undefined,
+                        context,
+                    );
+                    if (result.resolvedApiItem) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (result.errorMessage) {
+            console.log(
+                `Error resolving excerpt token ${colors.underline.bold(
+                    debugTokenText,
+                )} reference: ${colors.red(
+                    result.errorMessage,
+                )}. The original signature is ${colors.underline.bold(
+                    unwrapText(debugExcerptText),
+                )}`,
+            );
+        }
+
+        if (result.resolvedApiItem) {
+            return result.resolvedApiItem;
+        }
+
+        return null;
+    }
+
+    function writeApiItemExcerpt(
+        output: MarkdownOutput,
         apiItem: aeModel.ApiItem,
         excerpt: aeModel.Excerpt,
         context: Context,
@@ -513,61 +1068,40 @@ namespace MarkdownRenderUtil {
             if (token === excerpt.spannedTokens[0]) {
                 tokenText = tokenText.replace(/^export (declare )?/, '');
             }
-
-            if (
-                token.kind === aeModel.ExcerptTokenKind.Reference &&
-                token.canonicalReference &&
-                // Idk why this is a thing.
-                !token.canonicalReference.toString().endsWith('!~value')
-            ) {
-                const result = context.apiModel.resolveDeclarationReference(
-                    token.canonicalReference,
-                    undefined,
+            const reference = getExcerptTokenReference(
+                token,
+                tokenText,
+                excerpt.text,
+                context,
+            );
+            if (reference !== null) {
+                writeLinkToApiItem(
+                    output,
+                    getApiItemName(apiItem),
+                    reference,
+                    context,
                 );
-                if (result.errorMessage) {
-                    console.log(
-                        `Error resolving excerpt token ${colors.underline.bold(
-                            tokenText,
-                        )} reference: ${colors.red(
-                            result.errorMessage,
-                        )}. The original signature is ${colors.underline.bold(
-                            unwrapText(excerpt.text),
-                        )}`,
-                    );
-                }
-                if (
-                    !result.resolvedApiItem &&
-                    // I don't even know.
-                    ['Subject', 'Event'].includes(token.text)
-                ) {
-                    writeLinkToApiItem(
-                        output,
-                        getApiItemName(apiItem),
-                        token.text,
-                        context,
-                    );
-                    continue;
-                }
-                if (result.resolvedApiItem) {
-                    writeLinkToApiItem(
-                        output,
-                        getApiItemName(apiItem),
-                        getApiItemName(result.resolvedApiItem),
-                        context,
-                    );
-                    continue;
-                }
+            } else {
+                output.write(escapeHTML(tokenText));
             }
-
-            output.write(escapeMarkdown(tokenText));
         }
         output.write('</pre>');
     }
 }
 /* eslint-enable no-inner-declarations */
 
+interface ExportImplementation<T extends aeModel.ApiItem> {
+    readonly actualKind: aeModel.ApiItemKind;
+    readonly simplifiedKind: string;
+    addImplementation(apiItem: T): void;
+    hasImplementation(): boolean;
+    writeAsMarkdown(output: MarkdownOutput): void;
+}
+
 class ExportFunctionImplementation
     implements ExportImplementation<aeModel.ApiFunction> {
+    public readonly actualKind = aeModel.ApiItemKind.Function;
+    public readonly simplifiedKind = 'Function';
     private _displayName?: string;
     private _overloads: aeModel.ApiFunction[] = [];
 
@@ -590,7 +1124,7 @@ class ExportFunctionImplementation
         return this._displayName !== undefined;
     }
 
-    public writeAsMarkdown(output: StringBuilder): void {
+    public writeAsMarkdown(output: MarkdownOutput): void {
         if (this._displayName === undefined) {
             throw new Error('Not implemented.');
         }
@@ -609,14 +1143,21 @@ class ExportFunctionImplementation
             }
         });
 
+        const context = this._context;
+
+        MarkdownRenderUtil.writeApiItemAnchor(
+            output,
+            this._overloads[0],
+            context,
+            this.simplifiedKind,
+        );
+
         for (const fn of this._overloads) {
-            MarkdownRenderUtil.writeSummary(output, fn, this._context);
-            MarkdownRenderUtil.writeExamples(output, fn, this._context);
-            MarkdownRenderUtil.writeSignature(output, fn, this._context);
-            output.writeLine();
-            output.writeLine();
-            MarkdownRenderUtil.writeSeeBlocks(output, fn, this._context);
-            output.writeLine();
+            MarkdownRenderUtil.writeSignature(output, fn, context);
+            MarkdownRenderUtil.writeSummary(output, fn, context);
+            MarkdownRenderUtil.writeParameters(output, fn, context);
+            MarkdownRenderUtil.writeExamples(output, fn, context);
+            MarkdownRenderUtil.writeSeeBlocks(output, fn, context);
         }
     }
 
@@ -637,6 +1178,8 @@ class ExportFunctionImplementation
 
 class ExportInterfaceImplementation
     implements ExportImplementation<aeModel.ApiInterface> {
+    public readonly actualKind = aeModel.ApiItemKind.Interface;
+    public readonly simplifiedKind = 'Interface';
     private _apiInterface?: aeModel.ApiInterface;
 
     constructor(private _context: Context) {}
@@ -655,40 +1198,32 @@ class ExportInterfaceImplementation
         return !!this._apiInterface;
     }
 
-    public writeAsMarkdown(output: StringBuilder): void {
-        if (!this._apiInterface) {
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        const interface_ = this._apiInterface;
+
+        if (!interface_) {
             throw new Error('Not implemented.');
         }
 
-        MarkdownRenderUtil.writeSummary(
+        const context = this._context;
+
+        MarkdownRenderUtil.writeApiItemAnchor(
             output,
-            this._apiInterface,
-            this._context,
+            interface_,
+            context,
+            this.simplifiedKind,
         );
-        MarkdownRenderUtil.writeExamples(
-            output,
-            this._apiInterface,
-            this._context,
-        );
-        MarkdownRenderUtil.writeSignature(
-            output,
-            this._apiInterface,
-            this._context,
-        );
-        output.writeLine();
-        output.writeLine();
-        MarkdownRenderUtil.writeSeeBlocks(
-            output,
-            this._apiInterface,
-            this._context,
-        );
-        output.writeLine();
-        output.writeLine();
+        MarkdownRenderUtil.writeSignature(output, interface_, context);
+        MarkdownRenderUtil.writeSummary(output, interface_, context);
+        MarkdownRenderUtil.writeExamples(output, interface_, context);
+        MarkdownRenderUtil.writeSeeBlocks(output, interface_, context);
     }
 }
 
 class ExportTypeAliasImplementation
     implements ExportImplementation<aeModel.ApiTypeAlias> {
+    public readonly actualKind = aeModel.ApiItemKind.TypeAlias;
+    public readonly simplifiedKind = 'Type Alias';
     private _apiTypeAlias?: aeModel.ApiTypeAlias;
 
     constructor(private _context: Context) {}
@@ -707,40 +1242,32 @@ class ExportTypeAliasImplementation
         return !!this._apiTypeAlias;
     }
 
-    public writeAsMarkdown(output: StringBuilder): void {
-        if (!this._apiTypeAlias) {
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        const typeAlias = this._apiTypeAlias;
+
+        if (!typeAlias) {
             throw new Error('Not implemented.');
         }
 
-        MarkdownRenderUtil.writeSummary(
+        const context = this._context;
+
+        MarkdownRenderUtil.writeApiItemAnchor(
             output,
-            this._apiTypeAlias,
-            this._context,
+            typeAlias,
+            context,
+            this.simplifiedKind,
         );
-        MarkdownRenderUtil.writeExamples(
-            output,
-            this._apiTypeAlias,
-            this._context,
-        );
-        MarkdownRenderUtil.writeSignature(
-            output,
-            this._apiTypeAlias,
-            this._context,
-        );
-        output.writeLine();
-        output.writeLine();
-        MarkdownRenderUtil.writeSeeBlocks(
-            output,
-            this._apiTypeAlias,
-            this._context,
-        );
-        output.writeLine();
-        output.writeLine();
+        MarkdownRenderUtil.writeSignature(output, typeAlias, context);
+        MarkdownRenderUtil.writeSummary(output, typeAlias, context);
+        MarkdownRenderUtil.writeExamples(output, typeAlias, context);
+        MarkdownRenderUtil.writeSeeBlocks(output, typeAlias, context);
     }
 }
 
 class ExportVariableImplementation
     implements ExportImplementation<aeModel.ApiVariable> {
+    public readonly actualKind = aeModel.ApiItemKind.Variable;
+    public readonly simplifiedKind = 'Variable';
     private _apiVariable?: aeModel.ApiVariable;
 
     constructor(private _context: Context) {}
@@ -759,35 +1286,25 @@ class ExportVariableImplementation
         return !!this._apiVariable;
     }
 
-    public writeAsMarkdown(output: StringBuilder): void {
-        if (!this._apiVariable) {
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        const variable = this._apiVariable;
+
+        if (!variable) {
             throw new Error('Not implemented.');
         }
 
-        MarkdownRenderUtil.writeSummary(
+        const context = this._context;
+
+        MarkdownRenderUtil.writeApiItemAnchor(
             output,
-            this._apiVariable,
-            this._context,
+            variable,
+            context,
+            'Variable',
         );
-        MarkdownRenderUtil.writeExamples(
-            output,
-            this._apiVariable,
-            this._context,
-        );
-        MarkdownRenderUtil.writeSignature(
-            output,
-            this._apiVariable,
-            this._context,
-        );
-        output.writeLine();
-        output.writeLine();
-        MarkdownRenderUtil.writeSeeBlocks(
-            output,
-            this._apiVariable,
-            this._context,
-        );
-        output.writeLine();
-        output.writeLine();
+        MarkdownRenderUtil.writeSignature(output, variable, context);
+        MarkdownRenderUtil.writeSummary(output, variable, context);
+        MarkdownRenderUtil.writeExamples(output, variable, context);
+        MarkdownRenderUtil.writeSeeBlocks(output, variable, context);
     }
 }
 
@@ -839,7 +1356,30 @@ class ExportImplementationGroup {
         impl.addImplementation(apiItem);
     }
 
-    public writeAsMarkdown(output: StringBuilder): void {
+    public hasMultipleImplementations(): boolean {
+        let num = 0;
+        for (const [, impl] of this._implementations) {
+            if (impl.hasImplementation()) {
+                if (num === 1) {
+                    return true;
+                }
+                num++;
+            }
+        }
+        return false;
+    }
+
+    public *getImplementations(): IterableIterator<
+        ExportImplementation<aeModel.ApiItem>
+    > {
+        for (const impl of this._implementations.values()) {
+            if (impl.hasImplementation()) {
+                yield impl;
+            }
+        }
+    }
+
+    public writeAsMarkdown(output: MarkdownOutput): void {
         if (
             this._displayName === undefined ||
             Array.from(this._implementations).every(
@@ -848,16 +1388,10 @@ class ExportImplementationGroup {
         ) {
             throw new Error('No implementations.');
         }
-        output.writeLine(`## \`${this._displayName}\``);
-        output.writeLine();
-        let passedFirstImpl = false;
+        output.ensureSkippedLine();
+        output.write(`## \`${this._displayName}\``);
         for (const [, impl] of this._implementations) {
             if (impl.hasImplementation()) {
-                if (passedFirstImpl) {
-                    output.writeLine();
-                } else {
-                    passedFirstImpl = true;
-                }
                 impl.writeAsMarkdown(output);
             }
         }
@@ -873,57 +1407,110 @@ function getReleaseTag(apiItem: aeModel.ApiItem): aeModel.ReleaseTag {
 }
 
 class ApiPage {
-    private _exportImplementationGroups = new Map<
-        string,
-        ExportImplementationGroup
-    >();
+    private _nameToImplGroup = new Map<string, ExportImplementationGroup>();
 
-    constructor(private _context: Context) {}
-
-    public addApiItem(apiItem: aeModel.ApiItem): void {
-        if (getReleaseTag(apiItem) !== aeModel.ReleaseTag.Public) {
-            throw new UnsupportedApiItemError(
-                apiItem,
-                'Non public Api Items are not supported.',
-            );
+    constructor(private _context: Context, private _pageData: APIPageData) {
+        for (const item of _pageData.items) {
+            this._addApiItemName(item.main);
+            if (item.nested) {
+                for (const name of item.nested) {
+                    this._addApiItemName(name);
+                }
+            }
         }
+    }
 
-        const apiItemName = getApiItemName(apiItem);
+    private _addApiItemName(name: string): void {
+        const implGroup = new ExportImplementationGroup(this._context);
+        this._nameToImplGroup.set(name, implGroup);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        for (const apiItem of this._context.apiItemsByMemberName.get(name)!) {
+            if (getReleaseTag(apiItem) !== aeModel.ReleaseTag.Public) {
+                throw new UnsupportedApiItemError(
+                    apiItem,
+                    'Non public api items are not supported.',
+                );
+            }
 
-        let exportImplementationGroup = this._exportImplementationGroups.get(
-            apiItemName,
-        );
-
-        if (!exportImplementationGroup) {
-            exportImplementationGroup = new ExportImplementationGroup(
-                this._context,
-            );
-            this._exportImplementationGroups.set(
-                apiItemName,
-                exportImplementationGroup,
-            );
+            implGroup.addImplementation(apiItem);
         }
+    }
 
-        exportImplementationGroup.addImplementation(apiItem);
+    private _getApiItemNameInlineReferences(
+        name: string,
+    ): TableOfContentsInlineReference[] | undefined {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const implGroup = this._nameToImplGroup.get(name)!;
+        if (!implGroup.hasMultipleImplementations()) {
+            return;
+        }
+        const references: TableOfContentsInlineReference[] = [];
+        for (const impl of implGroup.getImplementations()) {
+            references.push({
+                text: impl.simplifiedKind,
+                // eslint-disable-next-line max-len
+                url_hash_text: MarkdownRenderUtil.getMultiKindApiItemAnchorNameFromNameAndKind(
+                    name,
+                    impl.actualKind,
+                ),
+            });
+        }
+        return references;
     }
 
     public renderAsMarkdown(): string {
-        const output = new StringBuilder();
+        const output = new MarkdownOutput();
 
-        output.writeLine(
+        const tableOfContents: TableOfContents = [];
+        for (const item of this._pageData.items) {
+            const reference: TableOfContentsMainReference = {
+                text: item.main,
+                url_hash_text: item.main.toLowerCase(),
+            };
+            const inlineReferences = this._getApiItemNameInlineReferences(
+                item.main,
+            );
+            if (inlineReferences) {
+                reference.inline_references = inlineReferences;
+            }
+            if (item.nested) {
+                reference.nested_references = [];
+                for (const name of item.nested) {
+                    const nestedReference: TableOfContentsNestedReference = {
+                        text: name,
+                        url_hash_text: name.toLowerCase(),
+                    };
+                    // eslint-disable-next-line max-len
+                    const inlineReferences = this._getApiItemNameInlineReferences(
+                        name,
+                    );
+                    if (inlineReferences) {
+                        nestedReference.inline_references = inlineReferences;
+                    }
+                    reference.nested_references.push(nestedReference);
+                }
+            }
+            tableOfContents.push(reference);
+        }
+
+        const pageMetadata: PageMetadata = {
+            title: this._pageData.title,
+            table_of_contents: tableOfContents,
+        };
+
+        output.writeLine('---');
+        output.write(yaml.stringify(pageMetadata, { indent: 2 }));
+        output.writeLine('---');
+        output.writeLine();
+        output.write(
             '<!-- Do not edit this file. It is automatically generated by a build script. -->',
         );
-        output.writeLine();
 
-        let isNotFirst = false;
-        for (const [, implGroup] of this._exportImplementationGroups) {
-            if (isNotFirst) {
-                output.writeLine();
-            } else {
-                isNotFirst = true;
-            }
+        for (const [, implGroup] of this._nameToImplGroup) {
             implGroup.writeAsMarkdown(output);
         }
+
+        output.ensureNewLine();
 
         return output.toString();
     }
@@ -937,12 +1524,13 @@ export class ApiPageMap {
         apiModel: aeModel.ApiModel,
         sourceExportMappings: SourceExportMappings,
     ) {
+        const apiItemsByMemberName = new Map<string, aeModel.ApiItem[]>();
+
         this._context = {
             sourceExportMappings,
             apiModel,
-            memberNameToApiPathMap: new Map<string, string>(),
+            apiItemsByMemberName,
         };
-        const previousPackageNames = new Set<string>();
 
         for (const package_ of apiModel.members) {
             if (package_.kind !== aeModel.ApiItemKind.Package) {
@@ -954,95 +1542,48 @@ export class ApiPageMap {
 
             const members = (package_ as aeModel.ApiPackage).entryPoints[0]
                 .members;
-            const packageNames = new Set<string>();
+            const apiItemsByMemberName_ = new Map<string, aeModel.ApiItem[]>();
 
             for (const apiItem of members) {
                 const memberName = getApiItemName(apiItem);
 
-                if (previousPackageNames.has(memberName)) {
-                    throw new Error(
+                if (apiItemsByMemberName.has(memberName)) {
+                    throw new UnsupportedApiItemError(
+                        apiItem,
                         `Duplicate api item name ${memberName} between packages.`,
                     );
                 }
-                packageNames.add(memberName);
 
-                const apiPath = extractCoreApiPath(apiItem);
-
-                if (!apiPath) {
-                    continue;
+                let apiItems = apiItemsByMemberName_.get(memberName);
+                if (!apiItems) {
+                    apiItems = [];
+                    apiItemsByMemberName_.set(memberName, apiItems);
                 }
-
-                if (this._context.memberNameToApiPathMap.has(apiPath)) {
-                    throw new UnsupportedApiItemError(
-                        apiItem,
-                        'Only one item of export name can have @coreApiPath tag.',
-                    );
-                }
-
-                this._context.memberNameToApiPathMap.set(memberName, apiPath);
+                apiItems.push(apiItem);
             }
 
-            for (const packageName of packageNames) {
-                previousPackageNames.add(packageName);
+            for (const [k, v] of apiItemsByMemberName_) {
+                apiItemsByMemberName.set(k, v);
             }
         }
 
-        if (
-            previousPackageNames.size !==
-            this._context.memberNameToApiPathMap.size
-        ) {
-            throw new Error(
-                `Some api items don't have api path tags. previousPackageNames.size ${previousPackageNames.size}, memberNameToApiPathMap.size ${this._context.memberNameToApiPathMap.size}`,
-            );
-        }
+        assertMappedApiItemNames(apiItemsByMemberName.keys());
 
-        for (const package_ of apiModel.members as aeModel.ApiPackage[]) {
-            const members = package_.entryPoints[0].members;
-
-            for (const apiItem of members) {
-                const memberName = getApiItemName(apiItem);
-                const apiPath = this._context.memberNameToApiPathMap.get(
-                    memberName,
-                );
-
-                if (!apiPath) {
-                    throw new UnsupportedApiItemError(
-                        apiItem,
-                        'No @coreApiPath found.',
-                    );
-                }
-
-                this._getPage(apiPath).addApiItem(apiItem);
-            }
-        }
-    }
-
-    private _getPage(path: string): ApiPage {
-        let page = this._pathToPage.get(path);
-        if (!page) {
-            page = new ApiPage(this._context);
-            this._pathToPage.set(path, page);
-        }
-        return page;
-    }
-
-    private _forEachPage(
-        callback: (path: string, page: ApiPage) => void,
-    ): void {
-        for (const [path, page] of this._pathToPage) {
-            callback(path, page);
-        }
+        forEachPage((pathName, pageData) => {
+            const page = new ApiPage(this._context, pageData);
+            this._pathToPage.set(pathName, page);
+        });
     }
 
     public renderAsMarkdownToDirectoryMap(): RenderedDirectoryMap {
         const renderedDirectoryMap = new RenderedDirectoryMap();
 
-        this._forEachPage((path, page) => {
+        for (const [path, page] of this._pathToPage) {
             renderedDirectoryMap.addContentAtPath(
                 path + '.md',
                 page.renderAsMarkdown(),
             );
-        });
+        }
 
         return renderedDirectoryMap;
     }
@@ -1083,14 +1624,14 @@ class RenderedDirectoryMap {
         folder.files.set(fileName, content);
     }
 
-    public writeToDirectory(dirName: string): Promise<void> {
+    public writeToDirectory(dirName: string): Promise<unknown> {
         return this._writeFolderToPath(dirName, this._rootFolder);
     }
 
     private async _writeFolderToPath(
         dirName: string,
         folder: Folder,
-    ): Promise<void> {
+    ): Promise<unknown> {
         await fs.ensureDir(dirName);
 
         const promises: Promise<unknown>[] = [];
@@ -1114,6 +1655,6 @@ class RenderedDirectoryMap {
             );
         }
 
-        await Promise.all(promises);
+        return Promise.all(promises);
     }
 }

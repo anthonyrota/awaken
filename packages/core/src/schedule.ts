@@ -4,11 +4,9 @@ import {
     setTimeout,
     setInterval,
     removeOnce,
-    FrameRequestCallback,
 } from './util';
 
 /**
- * {@coreApiPath schedule}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +21,6 @@ interface ScheduleQueuedCallback<T extends any[]> {
 }
 
 /**
- * {@coreApiPath schedule/<name>}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -173,7 +170,6 @@ export function ScheduleQueued<T extends any[] = []>(
 }
 
 /**
- * {@coreApiPath schedule/<name>}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -201,7 +197,6 @@ export function ScheduleQueuedDiscrete<T extends any[] = []>(
 }
 
 /**
- * {@coreApiPath schedule/<name>}
  * @public
  */
 export const scheduleSync: ScheduleFunction = (callback, subscription) => {
@@ -222,30 +217,21 @@ function ScheduleSyncQueuedInner(
 }
 
 /**
- * {@coreApiPath schedule/<name>}
  * @public
  */
 export function ScheduleSyncQueued(): ScheduleFunction {
     return ScheduleQueued(ScheduleSyncQueuedInner);
 }
 
-/**
- * {@coreApiPath schedule/<name>}
- * @public
- */
-export type ScheduleAnimationFrameFunction = ScheduleFunction<
-    Parameters<FrameRequestCallback>
->;
+type ScheduleAnimationFrameFunction = ScheduleFunction<[number]>;
 
 /**
- * {@coreApiPath schedule/<name>}
  * @public
  */
 // eslint-disable-next-line max-len
 export const scheduleAnimationFrame: ScheduleAnimationFrameFunction = requestAnimationFrame;
 
 /**
- * {@coreApiPath schedule/<name>}
  * @public
  */
 export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
@@ -253,7 +239,6 @@ export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
 }
 
 /**
- * {@coreApiPath schedule/<name>}
  * @public
  */
 export function ScheduleTimeout(delayMs: number): ScheduleFunction {
@@ -263,7 +248,6 @@ export function ScheduleTimeout(delayMs: number): ScheduleFunction {
 }
 
 /**
- * {@coreApiPath schedule/<name>}
  * @public
  */
 export function ScheduleTimeoutQueued(delayMs: number): ScheduleFunction {
@@ -271,7 +255,6 @@ export function ScheduleTimeoutQueued(delayMs: number): ScheduleFunction {
 }
 
 /**
- * {@coreApiPath schedule/<name>}
  * @public
  */
 export function ScheduleInterval(delayMs: number): ScheduleFunction {
