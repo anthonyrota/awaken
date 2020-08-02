@@ -202,7 +202,7 @@ describe('DisposalError', () => {
         expect(new DisposalError([])).toBeInstanceOf(DisposalError);
     });
 
-    it("should throw a DisposalError when disposing a disposable it's primary teardown function throws", () => {
+    it('should throw a DisposalError when disposing a disposable and its primary teardown function throws', () => {
         expect.hasAssertions();
 
         const disposable = Disposable(throw_('foo'));

@@ -57,7 +57,7 @@ class RealDisposableImplementation implements DisposableImplementationBase {
             return false;
         }
         // If a disposable is determined to not be active, it should be ensured
-        // that it's dispose method was called.
+        // that its dispose method was called.
         if (this.__markedForDisposal) {
             this.dispose();
             return false;

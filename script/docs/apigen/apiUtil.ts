@@ -6,8 +6,8 @@
  * https://github.com/microsoft/rushstack/blob/e7e9429/apps/api-documenter/src/nodes/DocTable.ts
  * https://github.com/microsoft/rushstack/blob/a30cdf5/apps/api-extractor-model/src/model/ApiModel.ts
  *
- * The api-documenter project is licensed under MIT, and it's license can be found at <rootDir>/vendor/licenses/@microsoft/api-documenter/LICENSE
- * The api-extractor-model project is licensed under MIT, and it's license can be found at <rootDir>/vendor/licenses/@microsoft/api-extractor-model/LICENSE
+ * The api-documenter project is licensed under MIT, and its license can be found at <rootDir>/vendor/licenses/@microsoft/api-documenter/LICENSE
+ * The api-extractor-model project is licensed under MIT, and its license can be found at <rootDir>/vendor/licenses/@microsoft/api-extractor-model/LICENSE
  */
 /* eslint-enable max-len */
 
@@ -990,7 +990,7 @@ namespace MarkdownRenderUtil {
         );
         if (!result.resolvedApiItem) {
             // Hack: for some reason the generated api model links not to
-            // the imported package but under it's own package. Therefore go
+            // the imported package but under its own package. Therefore go
             // through each package and test if the import actually comes
             // from there.
             // This code is terrible but I can't be bothered.
