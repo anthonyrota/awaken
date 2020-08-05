@@ -5,7 +5,7 @@
         "@commitlint/cli": "9.1.1",
         "@commitlint/config-conventional": "9.1.1",
         "@microsoft/api-extractor": "7.9.2",
-        "@microsoft/api-extractor-model": "7.8.12",
+        "@microsoft/api-extractor-model": "7.8.13",
         "@microsoft/tsdoc": "0.12.19",
         "@types/fs-extra": "9.0.1",
         "@types/jest": "26.0.8",
