@@ -1,3 +1,13 @@
+/* eslint-disable max-len */
+/**
+ * Thanks to the api-documenter team for some ideas used in this script:
+ *
+ * https://github.com/microsoft/rushstack/blob/e7e9429/apps/api-documenter/src/nodes/DocTable.ts
+ *
+ * The api-documenter project is licensed under MIT, and its license can be found at <rootDir>/vendor/licenses/@microsoft/api-documenter/LICENSE
+ */
+/* eslint-enable max-len */
+
 import * as yaml from 'yaml';
 import { IndentedWriter } from './util';
 import { PageMetadata } from '../pageMetadata';
