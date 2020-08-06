@@ -17,16 +17,14 @@ import * as colors from 'colors';
 import * as tsdoc from '@microsoft/tsdoc';
 import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import * as aeModel from '@microsoft/api-extractor-model';
-import * as yaml from 'yaml';
 import {
     TableOfContentsInlineReference,
     TableOfContentsNestedReference,
     TableOfContentsMainReference,
     TableOfContents,
-    PageMetadata,
 } from '../pageMetadata';
+import * as output from './output';
 import { SourceExportMappings } from './sourceExportMappings';
-import { IndentedWriter } from './util';
 import {
     APIPageData,
     getMainPathOfApiItemName,
@@ -46,8 +44,7 @@ const seeTag = new tsdoc.TSDocTagDefinition({
     syntaxKind: tsdoc.TSDocTagSyntaxKind.BlockTag,
 });
 
-const globalTSDocConfiguration = aeModel.AedocDefinitions.tsdocConfiguration;
-globalTSDocConfiguration.addTagDefinition(seeTag);
+aeModel.AedocDefinitions.tsdocConfiguration.addTagDefinition(seeTag);
 
 class UnsupportedApiItemError extends Error {
     constructor(apiItem: aeModel.ApiItem, reason: string) {
@@ -112,83 +109,124 @@ function getApiItemName(
     return apiItem.displayName;
 }
 
-class MarkdownOutput extends IndentedWriter {}
+function escapeHtml(text: string): string {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
 
+/**
+ * @todo abstract into Output class with toJSON and toMarkdownDirectoryMap
+ * methods
+ **/
 /* eslint-disable no-inner-declarations */
 // eslint-disable-next-line @typescript-eslint/no-namespace
-namespace MarkdownRenderUtil {
-    function escapeHTML(text: string): string {
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/"/g, '&quot;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-    }
-
-    function escapeMarkdown(text: string): string {
-        // For now leave markdown in there.
-        return escapeHTML(text);
-    }
-
-    interface EmitMarkdownContext {
+namespace extractor {
+    interface TSDocNodeWriteContext {
         context: Context;
-        output: MarkdownOutput;
+        container: output.Container;
+        nodeIter: TSDocNodeIter;
+        htmlTagStack: output.HtmlElement[];
         apiItem: aeModel.ApiItem;
-        writeSingleLine: boolean;
+    }
+
+    interface TSDocNodeIter {
+        next(): tsdoc.DocNode | undefined;
+        forEach(cb: (node: tsdoc.DocNode) => void): void;
+    }
+
+    function TSDocNodeIter(nodes: readonly tsdoc.DocNode[]): TSDocNodeIter {
+        let idx = 0;
+        const iter = {
+            next(): tsdoc.DocNode | undefined {
+                return nodes[idx++];
+            },
+            forEach(cb: (node: tsdoc.DocNode) => void): void {
+                let node: tsdoc.DocNode | undefined;
+                while ((node = iter.next())) {
+                    cb(node);
+                }
+            },
+        };
+        return iter;
     }
 
     function writeApiItemDocNode(
-        output: MarkdownOutput,
+        container: output.Container,
         apiItem: aeModel.ApiItem,
         docNode: tsdoc.DocNode,
         context: Context,
-        writeSingleLine = false,
     ): void {
-        writeNode(docNode, { context, output, apiItem, writeSingleLine });
+        const nodeIter = TSDocNodeIter([docNode]);
+        nodeIter.next();
+        writeNode(docNode, {
+            context,
+            container,
+            nodeIter,
+            htmlTagStack: [],
+            apiItem,
+        });
     }
 
     function writeNode(
         docNode: tsdoc.DocNode,
-        context: EmitMarkdownContext,
+        context: TSDocNodeWriteContext,
     ): void {
-        const output = context.output;
+        const { container } = context;
 
         switch (docNode.kind) {
             case tsdoc.DocNodeKind.PlainText: {
                 const docPlainText = docNode as tsdoc.DocPlainText;
-                writePlainText(docPlainText.text, context);
+                container.addChild(new output.Text(docPlainText.text));
                 break;
             }
-            case tsdoc.DocNodeKind.HtmlStartTag:
-            case tsdoc.DocNodeKind.HtmlEndTag: {
-                const docHtmlTag = docNode as
-                    | tsdoc.DocHtmlStartTag
-                    | tsdoc.DocHtmlEndTag;
-                // Write the HTML element verbatim into the output.
-                output.write(docHtmlTag.emitAsHtml());
+            case tsdoc.DocNodeKind.HtmlStartTag: {
+                const docStartTag = docNode as tsdoc.DocHtmlStartTag;
+                const oldContainer = container;
+                const htmlElement = new output.HtmlElement(docStartTag.name);
+                oldContainer.addChild(htmlElement);
+                context.container = htmlElement;
+                context.htmlTagStack.push(htmlElement);
+                let node: tsdoc.DocNode | undefined;
+                let didFindEndTag = false;
+                while ((node = context.nodeIter.next())) {
+                    if (node.kind === tsdoc.DocNodeKind.HtmlEndTag) {
+                        const docEndTag = node as tsdoc.DocHtmlEndTag;
+                        if (
+                            context.htmlTagStack[
+                                context.htmlTagStack.length - 1
+                            ] !== htmlElement
+                        ) {
+                            throw new Error('Unclosed tag.');
+                        }
+                        if (docEndTag.kind !== htmlElement.tagName) {
+                            throw new Error(
+                                'End html tag name not equal to start tag name.',
+                            );
+                        }
+                        context.container = oldContainer;
+                        didFindEndTag = true;
+                        break;
+                    }
+                    writeNode(docNode, context);
+                }
+                if (!didFindEndTag) {
+                    throw new Error('Did not find corresponding end tag.');
+                }
                 break;
+            }
+            case tsdoc.DocNodeKind.HtmlEndTag: {
+                throw new Error('Unexpected end tag.');
             }
             case tsdoc.DocNodeKind.CodeSpan: {
                 const docCodeSpan = docNode as tsdoc.DocCodeSpan;
-                if (context.writeSingleLine) {
-                    output.write('<code>');
-                } else {
-                    output.write('`');
-                }
-                if (context.writeSingleLine) {
-                    const code = escapeHTML(
-                        docCodeSpan.code.replace(/\|/g, '&#124;'),
-                    );
-                    const parts: string[] = code.split(/\r?\n/g);
-                    output.write(parts.join('</code><br/><code>'));
-                } else {
-                    output.write(docCodeSpan.code);
-                }
-                if (context.writeSingleLine) {
-                    output.write('</code>');
-                } else {
-                    output.write('`');
-                }
+                container.addChild(
+                    new output.CodeSpan().addChild(
+                        new output.Text(docCodeSpan.code),
+                    ),
+                );
                 break;
             }
             case tsdoc.DocNodeKind.LinkTag: {
@@ -198,7 +236,7 @@ namespace MarkdownRenderUtil {
                 } else if (docLinkTag.urlDestination) {
                     writeLinkTagWithUrlDestination(docLinkTag, context);
                 } else if (docLinkTag.linkText) {
-                    writePlainText(docLinkTag.linkText, context);
+                    container.addChild(new output.Text(docLinkTag.linkText));
                 }
                 break;
             }
@@ -208,51 +246,57 @@ namespace MarkdownRenderUtil {
                 const trimmedParagraph = tsdoc.DocNodeTransforms.trimSpacesInParagraph(
                     docParagraph,
                 );
-                if (context.writeSingleLine) {
-                    output.write('<p>');
-                    writeNodes(trimmedParagraph.nodes, context);
-                    output.write('</p>');
-                } else {
-                    output.ensureSkippedLine();
-                    writeNodes(trimmedParagraph.nodes, context);
+                const oldContainer = container;
+                const paragraph = new output.Paragraph();
+                oldContainer.addChild(paragraph);
+                context.container = paragraph;
+                for (const node of trimmedParagraph.nodes) {
+                    writeNode(node, context);
                 }
+                context.container = oldContainer;
                 break;
             }
             case tsdoc.DocNodeKind.FencedCode: {
-                if (context.writeSingleLine) {
-                    throw new Error(
-                        'Cannot have FencedCode when option writeSingleLine is true.',
-                    );
-                }
                 const docFencedCode = docNode as tsdoc.DocFencedCode;
-                output.ensureSkippedLine();
-                output.write('```');
-                output.write(docFencedCode.language);
-                output.writeLine();
-                output.write(docFencedCode.code.replace(/[\n\r]+$/, ''));
-                output.writeLine();
-                output.writeLine('```');
+                container.addChild(
+                    new output.CodeBlock(
+                        docFencedCode.language,
+                        docFencedCode.code,
+                    ),
+                );
                 break;
             }
             case tsdoc.DocNodeKind.Section: {
                 const docSection = docNode as tsdoc.DocSection;
-                writeNodes(docSection.nodes, context);
+                for (const node of docSection.nodes) {
+                    writeNode(node, context);
+                }
                 break;
             }
             case tsdoc.DocNodeKind.SoftBreak: {
-                if (!/^\s?$/.test(output.peekLastCharacter())) {
-                    output.write(' ');
+                const children = container.getChildren();
+                const lastChild = children[children.length - 1];
+                if (lastChild && lastChild instanceof output.Text) {
+                    if (
+                        !/^\s?$/.test(
+                            lastChild.text[lastChild.text.length - 1] || '',
+                        )
+                    ) {
+                        lastChild.append(' ');
+                    }
+                } else {
+                    container.addChild(new output.Text(' '));
                 }
                 break;
             }
             case tsdoc.DocNodeKind.EscapedText: {
                 const docEscapedText = docNode as tsdoc.DocEscapedText;
-                writePlainText(docEscapedText.decodedText, context);
+                container.addChild(new output.Text(docEscapedText.decodedText));
                 break;
             }
             case tsdoc.DocNodeKind.ErrorText: {
                 const docErrorText = docNode as tsdoc.DocErrorText;
-                writePlainText(docErrorText.text, context);
+                container.addChild(new output.Text(docErrorText.text));
                 break;
             }
             case tsdoc.DocNodeKind.InlineTag: {
@@ -277,7 +321,7 @@ namespace MarkdownRenderUtil {
 
     function writeLinkTagWithCodeDestination(
         docLinkTag: tsdoc.DocLinkTag,
-        context: EmitMarkdownContext,
+        context: TSDocNodeWriteContext,
     ): void {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const codeDestination = docLinkTag.codeDestination!;
@@ -293,8 +337,10 @@ namespace MarkdownRenderUtil {
         if (!identifier) {
             throw new Error('No.');
         }
+        const codeSpan = new output.HtmlElement('code');
+        context.container.addChild(codeSpan);
         writeLinkToApiItemName(
-            (context.output as unknown) as MarkdownOutput,
+            codeSpan,
             getApiItemName(context.apiItem),
             identifier,
             docLinkTag.linkText,
@@ -303,7 +349,7 @@ namespace MarkdownRenderUtil {
 
     function writeLinkTagWithUrlDestination(
         docLinkTag: tsdoc.DocLinkTag,
-        context: EmitMarkdownContext,
+        context: TSDocNodeWriteContext,
     ): void {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const urlDestination = docLinkTag.urlDestination!;
@@ -312,63 +358,13 @@ namespace MarkdownRenderUtil {
                 ? docLinkTag.linkText
                 : urlDestination;
 
-        const encodedLinkText: string = escapeMarkdown(
+        const encodedLinkText: string = escapeHtml(
             linkText.replace(/\s+/g, ' '),
         );
 
-        context.output.write('[');
-        context.output.write(encodedLinkText);
-        context.output.write(`](${urlDestination})`);
-    }
-
-    function writePlainText(text: string, context: EmitMarkdownContext): void {
-        const output = context.output;
-
-        // Split out the [ leading whitespace, content, trailing whitespace ].
-        // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-        const parts: string[] = text.match(/^(\s*)(.*?)(\s*)$/) || [];
-
-        output.write(parts[1]); // Write leading whitespace.
-
-        const middle: string = parts[2];
-
-        if (middle !== '') {
-            switch (output.peekLastCharacter()) {
-                case '':
-                case '\n':
-                case ' ':
-                case '[':
-                case '>':
-                    // Okay to put a symbol.
-                    break;
-                default:
-                    // This is no problem:
-                    //     "**one** *two* **three**"
-                    // But this is trouble:
-                    //     "**one***two***three**"
-                    // The most general solution:
-                    //     "**one**<!---->*two*<!---->**three**"
-                    output.write('<!---->');
-                    break;
-            }
-
-            output.write(escapeMarkdown(middle));
-        }
-
-        output.write(parts[3]); // Write trailing whitespace.
-    }
-
-    function writeNodes(
-        docNodes: ReadonlyArray<tsdoc.DocNode>,
-        context: EmitMarkdownContext,
-    ): void {
-        for (const docNode of docNodes) {
-            writeNode(docNode, context);
-        }
-    }
-
-    function unwrapText(text: string): string {
-        return text.replace(/[\n\r]+ */g, ' ');
+        context.container.addChild(
+            new output.Link(urlDestination, encodedLinkText),
+        );
     }
 
     function getRelativePath(from: string, to: string): string {
@@ -431,7 +427,7 @@ namespace MarkdownRenderUtil {
     }
 
     function writeLinkToApiItemName(
-        output: MarkdownOutput,
+        container: output.Container,
         currentApiItemName: string,
         apiItemName: string,
         linkText = apiItemName,
@@ -441,11 +437,11 @@ namespace MarkdownRenderUtil {
             apiItemName,
         );
 
-        output.write(`<a href="${destination}">${linkText}</a>`);
+        container.addChild(new output.Link(destination, linkText));
     }
 
     function writeLinkToApiItem(
-        output: MarkdownOutput,
+        container: output.Container,
         currentApiItemName: string,
         apiItem: aeModel.ApiItem,
         context: Context,
@@ -457,11 +453,11 @@ namespace MarkdownRenderUtil {
             context,
         );
 
-        output.write(`<a href="${destination}">${linkText}</a>`);
+        container.addChild(new output.Link(destination, linkText));
     }
 
     export function writeSummary(
-        output: MarkdownOutput,
+        output: output.Container,
         apiItem: aeModel.ApiItem,
         context: Context,
     ): void {
@@ -470,16 +466,17 @@ namespace MarkdownRenderUtil {
     }
 
     export function writeExamples(
-        output: MarkdownOutput,
+        container: output.Container,
         apiItem: aeModel.ApiItem,
         context: Context,
     ): void {
         const customBlocks = extractCustomBlocks(apiItem);
         for (const exampleBlock of customBlocks.exampleBlocks) {
-            output.ensureSkippedLine();
-            output.write('#### Example');
+            container.addChild(
+                new output.Title().addChild(new output.Text('Example')),
+            );
             for (const block of exampleBlock.getChildNodes()) {
-                writeApiItemDocNode(output, apiItem, block, context);
+                writeApiItemDocNode(container, apiItem, block, context);
             }
         }
     }
@@ -526,23 +523,28 @@ namespace MarkdownRenderUtil {
     }
 
     export function writeApiItemAnchor(
-        output: MarkdownOutput,
+        container: output.Container,
         apiItem: aeModel.ApiItem,
         context: Context,
         textKind: string,
     ): void {
         if (hasMultipleKinds(apiItem, context)) {
-            output.ensureSkippedLine();
-            output.writeLine(
-                `<a name="${getMultiKindApiItemAnchorName(apiItem)}"></a>`,
+            container.addChild(
+                new output.Subheading(
+                    getMultiKindApiItemAnchorName(apiItem),
+                ).addChild(
+                    new output.CodeSpan().addChild(
+                        new output.Text(
+                            `${getApiItemName(apiItem)} - ${textKind}`,
+                        ),
+                    ),
+                ),
             );
-            output.writeLine();
-            output.write(`### \`${getApiItemName(apiItem)} - ${textKind}\``);
         }
     }
 
     export function writeSignature(
-        output: MarkdownOutput,
+        container: output.Container,
         apiItem:
             | aeModel.ApiFunction
             | aeModel.ApiInterface
@@ -550,308 +552,133 @@ namespace MarkdownRenderUtil {
             | aeModel.ApiTypeAlias,
         context: Context,
     ): void {
-        output.ensureSkippedLine();
-        output.writeLine('#### Signature');
-        writeApiItemExcerpt(output, apiItem, apiItem.excerpt, context);
+        container.addChild(
+            new output.Title().addChild(new output.Text('Signature')),
+        );
+        writeApiItemExcerpt(container, apiItem, apiItem.excerpt, context);
     }
 
     export function writeSeeBlocks(
-        output: MarkdownOutput,
+        container: output.Container,
         apiItem: aeModel.ApiItem,
         context: Context,
     ): void {
         const customBlocks = extractCustomBlocks(apiItem);
-        let hasReachedSeeBlock = false;
+        const list = new output.List();
         for (const seeBlock of customBlocks.seeBlocks) {
-            if (!hasReachedSeeBlock) {
-                hasReachedSeeBlock = true;
-                output.ensureSkippedLine();
-                output.write('#### See Also');
-                output.increaseIndent('* ');
-            }
+            const listItem = new output.Container();
+            list.addChild(listItem);
             for (const block of seeBlock.getChildNodes()) {
-                output.ensureNewLine();
-                writeApiItemDocNode(output, apiItem, block, context, true);
+                writeApiItemDocNode(listItem, apiItem, block, context);
             }
         }
-        if (hasReachedSeeBlock) {
-            output.decreaseIndent();
-        }
-    }
-
-    class TableCell {
-        readonly content = new tsdoc.DocSection({
-            configuration: globalTSDocConfiguration,
-        });
-
-        public appendNode(docNode: tsdoc.DocNode): this {
-            this.content.appendNode(docNode);
-            return this;
-        }
-
-        public appendNodes(docNodes: readonly tsdoc.DocNode[]): this {
-            for (const node of docNodes) {
-                this.content.appendNode(node);
-            }
-            return this;
-        }
-    }
-
-    class TableRow {
-        public readonly cells: TableCell[] = [];
-
-        public addCell(cell: TableCell): this {
-            this.cells.push(cell);
-            return this;
-        }
-
-        public createAndAddCell(): TableCell {
-            const newCell: TableCell = new TableCell();
-            this.addCell(newCell);
-            return newCell;
-        }
-
-        public addPlainTextCell(cellContent: string): TableCell {
-            const cell: TableCell = this.createAndAddCell();
-            cell.content.appendNodeInParagraph(
-                new tsdoc.DocPlainText({
-                    configuration: globalTSDocConfiguration,
-                    text: cellContent,
-                }),
+        if (list.getChildCount() > 0) {
+            container.addChild(
+                new output.Title().addChild(new output.Text('See Also')),
             );
-            return cell;
-        }
-    }
-
-    export type TableParameters =
-        | {
-              headerCells?: readonly TableCell[];
-              headerTitles?: undefined;
-          }
-        | {
-              headerCells?: undefined;
-              headerTitles?: readonly string[];
-          };
-
-    export class Table {
-        public readonly header = new TableRow();
-        public readonly rows: TableRow[] = [];
-
-        public constructor(parameters?: TableParameters) {
-            if (parameters) {
-                if (parameters.headerTitles) {
-                    for (const cellText of parameters.headerTitles) {
-                        this.header.addPlainTextCell(cellText);
-                    }
-                } else if (parameters.headerCells) {
-                    for (const cell of parameters.headerCells) {
-                        this.header.addCell(cell);
-                    }
-                }
-            }
-        }
-
-        public addRow(row: TableRow): this {
-            this.rows.push(row);
-            return this;
-        }
-
-        public createAndAddRow(): TableRow {
-            const row = new TableRow();
-            this.addRow(row);
-            return row;
-        }
-
-        public writeAsMarkdown(
-            output: MarkdownOutput,
-            apiItem: aeModel.ApiItem,
-            context: Context,
-        ): void {
-            output.ensureSkippedLine();
-
-            // Markdown table rows can have inconsistent cell counts. Size the
-            // Table based on the longest row.
-            let columnCount = 0;
-            if (this.header) {
-                columnCount = this.header.cells.length;
-            }
-            for (const row of this.rows) {
-                if (row.cells.length > columnCount) {
-                    columnCount = row.cells.length;
-                }
-            }
-
-            // Write the table header (which is required by Markdown).
-            output.write('|');
-            for (let i = 0; i < columnCount; ++i) {
-                output.write(' ');
-                if (this.header) {
-                    const cell = this.header.cells[i];
-                    if (cell) {
-                        writeApiItemDocNode(
-                            output,
-                            apiItem,
-                            cell.content,
-                            context,
-                            true,
-                        );
-                    }
-                }
-                output.write(' |');
-            }
-            output.writeLine();
-
-            // Write the divider.
-            output.write('|');
-            for (let i = 0; i < columnCount; ++i) {
-                output.write(' --- |');
-            }
-
-            for (const row of this.rows) {
-                output.ensureNewLine();
-                output.write('|');
-                for (const cell of row.cells) {
-                    output.write(' ');
-                    writeApiItemDocNode(
-                        output,
-                        apiItem,
-                        cell.content,
-                        context,
-                        true,
-                    );
-                    output.write(' |');
-                }
-            }
+            container.addChild(list);
         }
     }
 
     function appendExcerptWithHyperlinks(
-        container: tsdoc.DocNodeContainer,
+        container: output.Container,
         excerpt: aeModel.Excerpt,
         apiItem: aeModel.ApiItem,
         context: Context,
     ): void {
-        container.appendNode(
-            new tsdoc.DocHtmlStartTag({
-                configuration: globalTSDocConfiguration,
-                name: 'code',
-            }),
-        );
+        const codeBlock = new output.RichCodeBlock('ts');
+        container.addChild(codeBlock);
 
-        for (const token of excerpt.spannedTokens) {
-            const tokenText = unwrapText(token.text);
-            const reference = getExcerptTokenReference(
+        const spannedTokens = excerpt.spannedTokens.slice();
+        let token: aeModel.ExcerptToken | undefined;
+        while ((token = spannedTokens.shift())) {
+            const tokenText = token.text;
+            const result = getExcerptTokenReference(
                 token,
                 tokenText,
                 excerpt.text,
                 context,
             );
 
-            if (reference) {
-                container.appendNode(
-                    new tsdoc.DocLinkTag({
-                        configuration: globalTSDocConfiguration,
-                        tagName: '@link',
-                        linkText: tokenText,
-                        urlDestination: getLinkToApiItem(
+            if (result === null) {
+                codeBlock.addChild(new output.Text(escapeHtml(tokenText)));
+            } else if (
+                result.type === FoundExcerptTokenReferenceResultType.Export
+            ) {
+                codeBlock.addChild(
+                    new output.Link(
+                        getLinkToApiItem(
                             getApiItemName(apiItem),
-                            reference,
+                            result.apiItem,
                             context,
                         ),
-                    }),
+                        escapeHtml(tokenText),
+                    ),
                 );
             } else {
-                container.appendNode(
-                    new tsdoc.DocPlainText({
-                        configuration: globalTSDocConfiguration,
-                        text: tokenText,
-                    }),
-                );
+                spannedTokens.unshift(...result.tokens);
             }
         }
-
-        container.appendNode(
-            new tsdoc.DocHtmlEndTag({
-                configuration: globalTSDocConfiguration,
-                name: 'code',
-            }),
-        );
     }
 
-    function createParagraphForTypeExcerpt(
+    function createNodeForTypeExcerpt(
         excerpt: aeModel.Excerpt,
         apiItem: aeModel.ApiItem,
         context: Context,
-    ): tsdoc.DocParagraph {
-        const paragraph = new tsdoc.DocParagraph({
-            configuration: globalTSDocConfiguration,
-        });
-
+    ): output.Serializable {
         if (!excerpt.text.trim()) {
-            paragraph.appendNode(
-                new tsdoc.DocPlainText({
-                    configuration: globalTSDocConfiguration,
-                    text: '(not declared)',
-                }),
-            );
-        } else {
-            appendExcerptWithHyperlinks(paragraph, excerpt, apiItem, context);
+            return new output.Text('(not declared)');
         }
 
-        return paragraph;
+        const container = new output.Container();
+
+        appendExcerptWithHyperlinks(container, excerpt, apiItem, context);
+
+        return container;
     }
 
     export function writeParameters(
-        output: MarkdownOutput,
+        container: output.Container,
         apiItem: aeModel.ApiFunction,
         context: Context,
     ): void {
-        const parametersTable = new Table({
-            headerTitles: ['Parameter', 'Type', 'Description'],
-        });
+        const parametersTable = new output.Table(
+            new output.TableRow()
+                .addChild(new output.Text('Parameter'))
+                .addChild(new output.Text('Type'))
+                .addChild(new output.Text('Description')),
+        );
 
         if (apiItem.parameters.some((param) => param.tsdocParamBlock)) {
             for (const apiParameter of apiItem.parameters) {
-                const parameterRow = new TableRow()
-                    .addCell(
-                        new TableCell().appendNode(
-                            new tsdoc.DocParagraph(
-                                { configuration: globalTSDocConfiguration },
-                                [
-                                    new tsdoc.DocPlainText({
-                                        configuration: globalTSDocConfiguration,
-                                        text: `\`${apiParameter.name}\``,
-                                    }),
-                                ],
-                            ),
-                        ),
-                    )
-                    .addCell(
-                        new TableCell().appendNode(
-                            createParagraphForTypeExcerpt(
-                                apiParameter.parameterTypeExcerpt,
-                                apiItem,
-                                context,
-                            ),
+                const parameterRow = new output.TableRow()
+                    .addChild(new output.Text(apiParameter.name))
+                    .addChild(
+                        createNodeForTypeExcerpt(
+                            apiParameter.parameterTypeExcerpt,
+                            apiItem,
+                            context,
                         ),
                     );
 
+                const cell = new output.Container();
+                parameterRow.addChild(cell);
                 if (apiParameter.tsdocParamBlock) {
-                    parameterRow.addCell(
-                        new TableCell().appendNodes(
-                            apiParameter.tsdocParamBlock.content.nodes,
-                        ),
-                    );
+                    for (const node of apiParameter.tsdocParamBlock.content
+                        .nodes) {
+                        writeApiItemDocNode(cell, apiItem, node, context);
+                    }
                 }
 
-                parametersTable.addRow(parameterRow);
+                parametersTable.addChild(parameterRow);
             }
         }
 
-        if (parametersTable.rows.length > 0) {
-            output.ensureSkippedLine();
-            output.write('#### Parameters');
-            parametersTable.writeAsMarkdown(output, apiItem, context);
+        if (parametersTable.getChildCount() > 0) {
+            container.addChild(
+                new output.Title().addChild(new output.Text('Parameters')),
+            );
+            container.addChild(parametersTable);
         }
 
         const docComment = getDocComment(apiItem);
@@ -859,29 +686,30 @@ namespace MarkdownRenderUtil {
             aeModel.ApiReturnTypeMixin.isBaseClassOf(apiItem) &&
             docComment.returnsBlock
         ) {
-            const returnsRow = new TableRow().addCell(
-                new TableCell().appendNode(
-                    createParagraphForTypeExcerpt(
-                        apiItem.returnTypeExcerpt,
-                        apiItem,
-                        context,
-                    ),
+            const returnsRow = new output.TableRow().addChild(
+                createNodeForTypeExcerpt(
+                    apiItem.returnTypeExcerpt,
+                    apiItem,
+                    context,
                 ),
             );
 
-            returnsRow.addCell(
-                new TableCell().appendNodes(
-                    docComment.returnsBlock.content.nodes,
-                ),
-            );
+            const cell = new output.Container();
+            returnsRow.addChild(cell);
+            for (const node of docComment.returnsBlock.content.nodes) {
+                writeApiItemDocNode(cell, apiItem, node, context);
+            }
 
-            output.ensureSkippedLine();
-            output.write('#### Returns');
-            new Table({
-                headerTitles: ['Type', 'Description'],
-            })
-                .addRow(returnsRow)
-                .writeAsMarkdown(output, apiItem, context);
+            container.addChild(
+                new output.Title().addChild(new output.Text('Returns')),
+            );
+            container.addChild(
+                new output.Table(
+                    new output.TableRow()
+                        .addChild(new output.Text('Type'))
+                        .addChild(new output.Text('Description')),
+                ).addChild(returnsRow),
+            );
         }
     }
 
@@ -954,22 +782,53 @@ namespace MarkdownRenderUtil {
         }
     }
 
+    const enum FoundExcerptTokenReferenceResultType {
+        Export,
+        LocalSignatureTokens,
+    }
+
+    interface FoundApiItemReference {
+        type: FoundExcerptTokenReferenceResultType.Export;
+        apiItem: aeModel.ApiItem;
+    }
+
+    interface FoundLocalSignatureReference {
+        type: FoundExcerptTokenReferenceResultType.LocalSignatureTokens;
+        tokens: aeModel.ExcerptToken[];
+    }
+
+    function findLocalReferenceTokens(
+        canonicalReference: DeclarationReference,
+        context: Context,
+    ): FoundLocalSignatureReference {
+        context;
+        console.log(canonicalReference.toString());
+        return (null as unknown) as FoundLocalSignatureReference;
+    }
+
     function getExcerptTokenReference(
         token: aeModel.ExcerptToken,
         debugTokenText: string,
         debugExcerptText: string,
         context: Context,
-    ): aeModel.ApiItem | null {
+    ): FoundApiItemReference | FoundLocalSignatureReference | null {
         if (
             token.kind !== aeModel.ExcerptTokenKind.Reference ||
             !token.canonicalReference ||
-            // Local reference.
-            token.canonicalReference.toString().includes('!~') ||
             // Non-module reference.
             token.canonicalReference.toString().startsWith('!')
         ) {
             return null;
         }
+        if (token.canonicalReference.toString().includes('!~')) {
+            if (token.canonicalReference.toString().endsWith('!~value')) {
+                // I don't know why this is a thing.
+                return null;
+            }
+            // Local reference.
+            return findLocalReferenceTokens(token.canonicalReference, context);
+        }
+        // Should be a exported reference now.
         let canonicalReference = token.canonicalReference;
         if (canonicalReference.toString().endsWith(':function')) {
             // Requires (overloadIndex) at the end if a function.
@@ -1038,20 +897,23 @@ namespace MarkdownRenderUtil {
                 )} reference: ${colors.red(
                     result.errorMessage,
                 )}. The original signature is ${colors.underline.bold(
-                    unwrapText(debugExcerptText),
+                    debugExcerptText,
                 )}`,
             );
         }
 
         if (result.resolvedApiItem) {
-            return result.resolvedApiItem;
+            return {
+                type: FoundExcerptTokenReferenceResultType.Export,
+                apiItem: result.resolvedApiItem,
+            };
         }
 
         return null;
     }
 
     function writeApiItemExcerpt(
-        output: MarkdownOutput,
+        container: output.Container,
         apiItem: aeModel.ApiItem,
         excerpt: aeModel.Excerpt,
         context: Context,
@@ -1060,33 +922,42 @@ namespace MarkdownRenderUtil {
             throw new Error(`Received excerpt with no declaration.`);
         }
 
-        output.write('<pre>');
+        const codeBlock = new output.RichCodeBlock('ts');
+        container.addChild(codeBlock);
+
         if (apiItem.kind === aeModel.ApiItemKind.Variable) {
-            output.write('var ');
+            codeBlock.addChild(new output.Text('var '));
         }
-        for (const token of excerpt.spannedTokens) {
-            let tokenText = unwrapText(token.text);
+
+        const spannedTokens = excerpt.spannedTokens.slice();
+        let token: aeModel.ExcerptToken | undefined;
+        while ((token = spannedTokens.shift())) {
+            let tokenText = token.text;
             if (token === excerpt.spannedTokens[0]) {
                 tokenText = tokenText.replace(/^export (declare )?/, '');
             }
-            const reference = getExcerptTokenReference(
+            const result = getExcerptTokenReference(
                 token,
                 tokenText,
                 excerpt.text,
                 context,
             );
-            if (reference !== null) {
+            if (result === null) {
+                codeBlock.addChild(new output.Text(escapeHtml(tokenText)));
+            } else if (
+                result.type === FoundExcerptTokenReferenceResultType.Export
+            ) {
                 writeLinkToApiItem(
-                    output,
+                    codeBlock,
                     getApiItemName(apiItem),
-                    reference,
+                    result.apiItem,
                     context,
                 );
             } else {
-                output.write(escapeHTML(tokenText));
+                // Local signature reference.
+                spannedTokens.unshift(...result.tokens);
             }
         }
-        output.write('</pre>');
     }
 }
 /* eslint-enable no-inner-declarations */
@@ -1096,7 +967,7 @@ interface ExportImplementation<T extends aeModel.ApiItem> {
     readonly simplifiedKind: string;
     addImplementation(apiItem: T): void;
     hasImplementation(): boolean;
-    writeAsMarkdown(output: MarkdownOutput): void;
+    writeAsMarkdown(output: output.Container): void;
 }
 
 class ExportFunctionImplementation
@@ -1125,7 +996,7 @@ class ExportFunctionImplementation
         return this._displayName !== undefined;
     }
 
-    public writeAsMarkdown(output: MarkdownOutput): void {
+    public writeAsMarkdown(output: output.Container): void {
         if (this._displayName === undefined) {
             throw new Error('Not implemented.');
         }
@@ -1146,7 +1017,7 @@ class ExportFunctionImplementation
 
         const context = this._context;
 
-        MarkdownRenderUtil.writeApiItemAnchor(
+        extractor.writeApiItemAnchor(
             output,
             this._overloads[0],
             context,
@@ -1154,11 +1025,11 @@ class ExportFunctionImplementation
         );
 
         for (const fn of this._overloads) {
-            MarkdownRenderUtil.writeSignature(output, fn, context);
-            MarkdownRenderUtil.writeSummary(output, fn, context);
-            MarkdownRenderUtil.writeParameters(output, fn, context);
-            MarkdownRenderUtil.writeExamples(output, fn, context);
-            MarkdownRenderUtil.writeSeeBlocks(output, fn, context);
+            extractor.writeSignature(output, fn, context);
+            extractor.writeSummary(output, fn, context);
+            extractor.writeParameters(output, fn, context);
+            extractor.writeExamples(output, fn, context);
+            extractor.writeSeeBlocks(output, fn, context);
         }
     }
 
@@ -1199,7 +1070,7 @@ class ExportInterfaceImplementation
         return !!this._apiInterface;
     }
 
-    public writeAsMarkdown(output: MarkdownOutput): void {
+    public writeAsMarkdown(output: output.Container): void {
         const interface_ = this._apiInterface;
 
         if (!interface_) {
@@ -1208,16 +1079,16 @@ class ExportInterfaceImplementation
 
         const context = this._context;
 
-        MarkdownRenderUtil.writeApiItemAnchor(
+        extractor.writeApiItemAnchor(
             output,
             interface_,
             context,
             this.simplifiedKind,
         );
-        MarkdownRenderUtil.writeSignature(output, interface_, context);
-        MarkdownRenderUtil.writeSummary(output, interface_, context);
-        MarkdownRenderUtil.writeExamples(output, interface_, context);
-        MarkdownRenderUtil.writeSeeBlocks(output, interface_, context);
+        extractor.writeSignature(output, interface_, context);
+        extractor.writeSummary(output, interface_, context);
+        extractor.writeExamples(output, interface_, context);
+        extractor.writeSeeBlocks(output, interface_, context);
     }
 }
 
@@ -1243,7 +1114,7 @@ class ExportTypeAliasImplementation
         return !!this._apiTypeAlias;
     }
 
-    public writeAsMarkdown(output: MarkdownOutput): void {
+    public writeAsMarkdown(output: output.Container): void {
         const typeAlias = this._apiTypeAlias;
 
         if (!typeAlias) {
@@ -1252,16 +1123,16 @@ class ExportTypeAliasImplementation
 
         const context = this._context;
 
-        MarkdownRenderUtil.writeApiItemAnchor(
+        extractor.writeApiItemAnchor(
             output,
             typeAlias,
             context,
             this.simplifiedKind,
         );
-        MarkdownRenderUtil.writeSignature(output, typeAlias, context);
-        MarkdownRenderUtil.writeSummary(output, typeAlias, context);
-        MarkdownRenderUtil.writeExamples(output, typeAlias, context);
-        MarkdownRenderUtil.writeSeeBlocks(output, typeAlias, context);
+        extractor.writeSignature(output, typeAlias, context);
+        extractor.writeSummary(output, typeAlias, context);
+        extractor.writeExamples(output, typeAlias, context);
+        extractor.writeSeeBlocks(output, typeAlias, context);
     }
 }
 
@@ -1287,7 +1158,7 @@ class ExportVariableImplementation
         return !!this._apiVariable;
     }
 
-    public writeAsMarkdown(output: MarkdownOutput): void {
+    public writeAsMarkdown(output: output.Container): void {
         const variable = this._apiVariable;
 
         if (!variable) {
@@ -1296,16 +1167,11 @@ class ExportVariableImplementation
 
         const context = this._context;
 
-        MarkdownRenderUtil.writeApiItemAnchor(
-            output,
-            variable,
-            context,
-            'Variable',
-        );
-        MarkdownRenderUtil.writeSignature(output, variable, context);
-        MarkdownRenderUtil.writeSummary(output, variable, context);
-        MarkdownRenderUtil.writeExamples(output, variable, context);
-        MarkdownRenderUtil.writeSeeBlocks(output, variable, context);
+        extractor.writeApiItemAnchor(output, variable, context, 'Variable');
+        extractor.writeSignature(output, variable, context);
+        extractor.writeSummary(output, variable, context);
+        extractor.writeExamples(output, variable, context);
+        extractor.writeSeeBlocks(output, variable, context);
     }
 }
 
@@ -1380,7 +1246,7 @@ class ExportImplementationGroup {
         }
     }
 
-    public writeAsMarkdown(output: MarkdownOutput): void {
+    public writeAsMarkdown(container: output.Container): void {
         if (
             this._displayName === undefined ||
             Array.from(this._implementations).every(
@@ -1389,11 +1255,16 @@ class ExportImplementationGroup {
         ) {
             throw new Error('No implementations.');
         }
-        output.ensureSkippedLine();
-        output.write(`## \`${this._displayName}\``);
+        container.addChild(
+            new output.Heading().addChild(
+                new output.CodeSpan().addChild(
+                    new output.Text(this._displayName),
+                ),
+            ),
+        );
         for (const [, impl] of this._implementations) {
             if (impl.hasImplementation()) {
-                impl.writeAsMarkdown(output);
+                impl.writeAsMarkdown(container);
             }
         }
     }
@@ -1450,7 +1321,7 @@ class ApiPage {
             references.push({
                 text: impl.simplifiedKind,
                 // eslint-disable-next-line max-len
-                url_hash_text: MarkdownRenderUtil.getMultiKindApiItemAnchorNameFromNameAndKind(
+                url_hash_text: extractor.getMultiKindApiItemAnchorNameFromNameAndKind(
                     name,
                     impl.actualKind,
                 ),
@@ -1460,8 +1331,6 @@ class ApiPage {
     }
 
     public renderAsMarkdown(): string {
-        const output = new MarkdownOutput();
-
         const tableOfContents: TableOfContents = [];
         for (const item of this._pageData.items) {
             const reference: TableOfContentsMainReference = {
@@ -1494,26 +1363,18 @@ class ApiPage {
             tableOfContents.push(reference);
         }
 
-        const pageMetadata: PageMetadata = {
+        const page = new output.Page({
             title: this._pageData.title,
             table_of_contents: tableOfContents,
-        };
-
-        output.writeLine('---');
-        output.write(yaml.stringify(pageMetadata, { indent: 2 }));
-        output.writeLine('---');
-        output.writeLine();
-        output.write(
-            '<!-- Do not edit this file. It is automatically generated by a build script. -->',
-        );
+        });
 
         for (const [, implGroup] of this._nameToImplGroup) {
-            implGroup.writeAsMarkdown(output);
+            implGroup.writeAsMarkdown(page);
         }
 
-        output.ensureNewLine();
-
-        return output.toString();
+        const mdOutput = new output.MarkdownOutput();
+        page.writeAsMarkdown(mdOutput);
+        return mdOutput.toString();
     }
 }
 

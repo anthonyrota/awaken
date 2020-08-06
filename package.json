@@ -41,7 +41,7 @@
     },
     "scripts": {
         "build": "lerna run clean:prebuild && lerna run build",
-        "build:docs": "npx ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
+        "build:docs": "npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
         "clean": "npm run clean:coverage && lerna run clean",
         "clean:coverage": "rimraf coverage",
         "test": "npm run clean:coverage && jest --runInBand --coverage --watchAll=false",

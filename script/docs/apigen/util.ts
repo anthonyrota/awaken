@@ -251,7 +251,7 @@ export class IndentedWriter {
         this._atStartOfLine = true;
     }
 
-    private _write(s: string): void {
+    protected _write(s: string): void {
         this._previousChunk = this._latestChunk;
         this._latestChunk = s;
         this._builder.write(s);
