@@ -109,9 +109,6 @@ export class Container<T extends Serializable = Serializable>
     }
 
     public getLastNestedChild(): Serializable | void {
-        if (this._children.length === 0) {
-            return;
-        }
         for (let i = this._children.length - 1; i >= 0; i--) {
             const child = this._children[i];
             if (child instanceof Container) {
