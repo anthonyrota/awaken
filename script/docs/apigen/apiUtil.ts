@@ -308,7 +308,7 @@ class ExportImplementationGroup {
         container.addChild(
             new output.Heading().addChild(
                 new output.CodeSpan().addChild(
-                    new output.Text(this._displayName),
+                    new output.PlainText(this._displayName),
                 ),
             ),
         );

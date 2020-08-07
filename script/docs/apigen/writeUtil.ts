@@ -95,14 +95,6 @@ export function getApiItemName(
     return apiItem.displayName;
 }
 
-function escapeHtml(text: string): string {
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
-
 interface TSDocNodeWriteContext {
     context: Context;
     container: output.Container;
@@ -158,7 +150,7 @@ function writeNode(
     switch (docNode.kind) {
         case tsdoc.DocNodeKind.PlainText: {
             const docPlainText = docNode as tsdoc.DocPlainText;
-            container.addChild(new output.Text(docPlainText.text));
+            container.addChild(new output.MarkdownText(docPlainText.text));
             break;
         }
         case tsdoc.DocNodeKind.HtmlStartTag: {
@@ -203,7 +195,7 @@ function writeNode(
             const docCodeSpan = docNode as tsdoc.DocCodeSpan;
             container.addChild(
                 new output.CodeSpan().addChild(
-                    new output.Text(docCodeSpan.code),
+                    new output.PlainText(docCodeSpan.code),
                 ),
             );
             break;
@@ -215,7 +207,7 @@ function writeNode(
             } else if (docLinkTag.urlDestination) {
                 writeLinkTagWithUrlDestination(docLinkTag, context);
             } else if (docLinkTag.linkText) {
-                container.addChild(new output.Text(docLinkTag.linkText));
+                container.addChild(new output.PlainText(docLinkTag.linkText));
             }
             break;
         }
@@ -253,29 +245,26 @@ function writeNode(
             break;
         }
         case tsdoc.DocNodeKind.SoftBreak: {
-            const children = container.getChildren();
-            const lastChild = children[children.length - 1];
+            const lastChild = container.getLastNestedChild();
             if (lastChild && lastChild instanceof output.Text) {
-                if (
-                    !/^\s?$/.test(
-                        lastChild.text[lastChild.text.length - 1] || '',
-                    )
-                ) {
+                if (lastChild.text && !/\s$/.test(lastChild.text)) {
                     lastChild.append(' ');
                 }
             } else {
-                container.addChild(new output.Text(' '));
+                container.addChild(new output.PlainText(' '));
             }
             break;
         }
         case tsdoc.DocNodeKind.EscapedText: {
             const docEscapedText = docNode as tsdoc.DocEscapedText;
-            container.addChild(new output.Text(docEscapedText.decodedText));
+            container.addChild(
+                new output.PlainText(docEscapedText.decodedText),
+            );
             break;
         }
         case tsdoc.DocNodeKind.ErrorText: {
             const docErrorText = docNode as tsdoc.DocErrorText;
-            container.addChild(new output.Text(docErrorText.text));
+            container.addChild(new output.PlainText(docErrorText.text));
             break;
         }
         case tsdoc.DocNodeKind.InlineTag: {
@@ -313,11 +302,18 @@ function writeLinkTagWithCodeDestination(
     }
     const codeSpan = new output.HtmlElement('code');
     context.container.addChild(codeSpan);
-    writeLinkToApiItemName(
-        codeSpan,
+    const destination = getLinkToApiItemName(
         getApiItemName(context.apiItem),
         identifier,
-        docLinkTag.linkText,
+    );
+    codeSpan.addChild(
+        new output.Link(destination).addChild(
+            new output.PlainText(
+                docLinkTag.linkText !== undefined
+                    ? docLinkTag.linkText
+                    : identifier,
+            ),
+        ),
     );
 }
 
@@ -327,15 +323,15 @@ function writeLinkTagWithUrlDestination(
 ): void {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const urlDestination = docLinkTag.urlDestination!;
-    const linkText: string =
+    const linkText =
         docLinkTag.linkText !== undefined
             ? docLinkTag.linkText
             : urlDestination;
 
-    const encodedLinkText: string = escapeHtml(linkText.replace(/\s+/g, ' '));
-
     context.container.addChild(
-        new output.Link(urlDestination, encodedLinkText),
+        new output.Link(urlDestination).addChild(
+            new output.PlainText(linkText.replace(/\s+/g, ' ')),
+        ),
     );
 }
 
@@ -394,29 +390,6 @@ function getLinkToApiItem(
     return relativePath ? `${relativePath}.md#${titleHash}` : `#${titleHash}`;
 }
 
-function writeLinkToApiItemName(
-    container: output.Container,
-    currentApiItemName: string,
-    apiItemName: string,
-    linkText = apiItemName,
-): void {
-    const destination = getLinkToApiItemName(currentApiItemName, apiItemName);
-
-    container.addChild(new output.Link(destination, linkText));
-}
-
-function writeLinkToApiItem(
-    container: output.Container,
-    currentApiItemName: string,
-    apiItem: aeModel.ApiItem,
-    context: Context,
-    linkText = getApiItemName(apiItem),
-) {
-    const destination = getLinkToApiItem(currentApiItemName, apiItem, context);
-
-    container.addChild(new output.Link(destination, linkText));
-}
-
 export function writeSummary(
     output: output.Container,
     apiItem: aeModel.ApiItem,
@@ -434,7 +407,7 @@ export function writeExamples(
     const customBlocks = extractCustomBlocks(apiItem);
     for (const exampleBlock of customBlocks.exampleBlocks) {
         container.addChild(
-            new output.Title().addChild(new output.Text('Example')),
+            new output.Title().addChild(new output.PlainText('Example')),
         );
         for (const block of exampleBlock.getChildNodes()) {
             writeApiItemDocNode(container, apiItem, block, context);
@@ -490,7 +463,9 @@ export function writeApiItemAnchor(
                 getMultiKindApiItemAnchorName(apiItem),
             ).addChild(
                 new output.CodeSpan().addChild(
-                    new output.Text(`${getApiItemName(apiItem)} - ${textKind}`),
+                    new output.PlainText(
+                        `${getApiItemName(apiItem)} - ${textKind}`,
+                    ),
                 ),
             ),
         );
@@ -507,7 +482,7 @@ export function writeSignature(
     context: Context,
 ): void {
     container.addChild(
-        new output.Title().addChild(new output.Text('Signature')),
+        new output.Title().addChild(new output.PlainText('Signature')),
     );
     writeApiItemExcerpt(container, apiItem, apiItem.excerpt, context);
 }
@@ -528,7 +503,7 @@ export function writeSeeBlocks(
     }
     if (list.getChildCount() > 0) {
         container.addChild(
-            new output.Title().addChild(new output.Text('See Also')),
+            new output.Title().addChild(new output.PlainText('See Also')),
         );
         container.addChild(list);
     }
@@ -555,7 +530,7 @@ function appendExcerptWithHyperlinks(
         );
 
         if (result === null) {
-            codeBlock.addChild(new output.Text(escapeHtml(tokenText)));
+            codeBlock.addChild(new output.PlainText(tokenText));
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
@@ -566,8 +541,7 @@ function appendExcerptWithHyperlinks(
                         result.apiItem,
                         context,
                     ),
-                    escapeHtml(tokenText),
-                ),
+                ).addChild(new output.PlainText(tokenText)),
             );
         } else {
             spannedTokens.unshift(...result.tokens);
@@ -581,7 +555,7 @@ function createNodeForTypeExcerpt(
     context: Context,
 ): output.Serializable {
     if (!excerpt.text.trim()) {
-        return new output.Text('(not declared)');
+        return new output.PlainText('(not declared)');
     }
 
     const container = new output.Container();
@@ -598,15 +572,15 @@ export function writeParameters(
 ): void {
     const parametersTable = new output.Table(
         new output.TableRow()
-            .addChild(new output.Text('Parameter'))
-            .addChild(new output.Text('Type'))
-            .addChild(new output.Text('Description')),
+            .addChild(new output.PlainText('Parameter'))
+            .addChild(new output.PlainText('Type'))
+            .addChild(new output.PlainText('Description')),
     );
 
     if (apiItem.parameters.some((param) => param.tsdocParamBlock)) {
         for (const apiParameter of apiItem.parameters) {
             const parameterRow = new output.TableRow()
-                .addChild(new output.Text(apiParameter.name))
+                .addChild(new output.PlainText(apiParameter.name))
                 .addChild(
                     createNodeForTypeExcerpt(
                         apiParameter.parameterTypeExcerpt,
@@ -629,7 +603,7 @@ export function writeParameters(
 
     if (parametersTable.getChildCount() > 0) {
         container.addChild(
-            new output.Title().addChild(new output.Text('Parameters')),
+            new output.Title().addChild(new output.PlainText('Parameters')),
         );
         container.addChild(parametersTable);
     }
@@ -654,13 +628,13 @@ export function writeParameters(
         }
 
         container.addChild(
-            new output.Title().addChild(new output.Text('Returns')),
+            new output.Title().addChild(new output.PlainText('Returns')),
         );
         container.addChild(
             new output.Table(
                 new output.TableRow()
-                    .addChild(new output.Text('Type'))
-                    .addChild(new output.Text('Description')),
+                    .addChild(new output.PlainText('Type'))
+                    .addChild(new output.PlainText('Description')),
             ).addChild(returnsRow),
         );
     }
@@ -875,7 +849,7 @@ function writeApiItemExcerpt(
     container.addChild(codeBlock);
 
     if (apiItem.kind === aeModel.ApiItemKind.Variable) {
-        codeBlock.addChild(new output.Text('var '));
+        codeBlock.addChild(new output.PlainText('var '));
     }
 
     const spannedTokens = excerpt.spannedTokens.slice();
@@ -892,15 +866,19 @@ function writeApiItemExcerpt(
             context,
         );
         if (result === null) {
-            codeBlock.addChild(new output.Text(escapeHtml(tokenText)));
+            codeBlock.addChild(new output.PlainText(tokenText));
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
-            writeLinkToApiItem(
-                codeBlock,
+            const destination = getLinkToApiItem(
                 getApiItemName(apiItem),
                 result.apiItem,
                 context,
+            );
+            codeBlock.addChild(
+                new output.Link(destination).addChild(
+                    new output.PlainText(tokenText),
+                ),
             );
         } else {
             // Local signature reference.

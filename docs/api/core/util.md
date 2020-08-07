@@ -132,7 +132,7 @@ Disposable-based alternative to built-in `setTimeout`.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| callback | <code>\(\.\.\.args: T\) =&gt; void</code> | <p>The callback to schedule.</p> |
+| callback | <code>\(...args: T\) =&gt; void</code> | <p>The callback to schedule.</p> |
 | delayMs | <code>number</code> | <p>The amount of delay.</p> |
 | subscription | <code>[Disposable](_index.md#disposable-interface)</code> | <p>If this is disposed then the request will be cancelled.</p> |
 | args | <code>T</code> | <p>The arguments to send to the callback.</p> |
@@ -149,7 +149,7 @@ Disposable-based alternative to built-in `setInterval`.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| callback | <code>\(\.\.\.args: T\) =&gt; void</code> | <p>The callback to schedule.</p> |
+| callback | <code>\(...args: T\) =&gt; void</code> | <p>The callback to schedule.</p> |
 | delayMs | <code>number</code> | <p>The amount of delay.</p> |
 | subscription | <code>[Disposable](_index.md#disposable-interface)</code> | <p>If this is disposed then the request will be cancelled.</p> |
 | args | <code>T</code> | <p>The arguments to send to the callback.</p> |

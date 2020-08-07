@@ -17,6 +17,7 @@ export class MarkdownOutput extends IndentedWriter {
     private _inTable = false;
     private _writeSingleLine = false;
     private _inBlockHtmlTag = false;
+    private _inMarkdownCode = false;
 
     public withInTable(write: () => void): void {
         const before = this._inTable;
@@ -46,6 +47,13 @@ export class MarkdownOutput extends IndentedWriter {
         this._inBlockHtmlTag = before;
     }
 
+    public withInMarkdownCode(write: () => void): void {
+        const before = this._inMarkdownCode;
+        this._inMarkdownCode = true;
+        write();
+        this._inMarkdownCode = before;
+    }
+
     public get constrainedToSingleLine(): boolean {
         return this._writeSingleLine || this._inTable;
     }
@@ -60,6 +68,10 @@ export class MarkdownOutput extends IndentedWriter {
 
     public get inBlockHtmlTag(): boolean {
         return this._inBlockHtmlTag;
+    }
+
+    public get inMarkdownCode(): boolean {
+        return this._inMarkdownCode;
     }
 
     protected _write(str: string): void {
@@ -96,6 +108,25 @@ export class Container<T extends Serializable = Serializable>
         return this._children.length;
     }
 
+    public getLastNestedChild(): Serializable | void {
+        if (this._children.length === 0) {
+            return;
+        }
+        for (let i = this._children.length - 1; i >= 0; i--) {
+            const child = this._children[i];
+            if (child instanceof Container) {
+                if (child._children.length !== 0) {
+                    const last = child.getLastNestedChild();
+                    if (last) {
+                        return last;
+                    }
+                }
+            } else {
+                return child;
+            }
+        }
+    }
+
     public writeAsMarkdown(output: MarkdownOutput): void {
         for (const child of this._children) {
             child.writeAsMarkdown(output);
@@ -103,12 +134,24 @@ export class Container<T extends Serializable = Serializable>
     }
 }
 
-function escapeTable(text: string): string {
-    return text.replace(/\|/g, '&#124;');
+function escapeHtml(text: string): string {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function escapeTable(text: string, replaceNewLines: boolean): string {
+    const escaped = text.replace(/\|/g, '&#124;');
+    if (replaceNewLines) {
+        return escaped.replace(/\r?\n/g, '<br/>');
+    }
+    return escaped;
 }
 
 function escapeMarkdown(text: string): string {
-    return text.replace(/\\/, '\\\\').replace(/[*_{}()#+\-.!|]/g, '\\$&');
+    return text.replace(/\\/, '\\\\').replace(/[*#/()[\]<>_]/g, '\\$&');
 }
 
 export class Text {
@@ -117,19 +160,53 @@ export class Text {
     public append(text: string) {
         this.text += text;
     }
+}
 
+export class PlainText extends Text implements Serializable {
     public writeAsMarkdown(output: MarkdownOutput): void {
         let { text } = this;
 
-        if (output.inTable) {
-            text = escapeTable(text);
+        if (!output.inMarkdownCode) {
+            text = escapeHtml(text);
+
+            if (output.inTable) {
+                text = escapeTable(text, !output.inSingleLineCodeBlock);
+            }
+
+            if (!output.inBlockHtmlTag) {
+                text = escapeMarkdown(text);
+            }
+
+            if (output.inSingleLineCodeBlock) {
+                text = text.split(/\r?\n/g).join('</code><br/><code>');
+            } else if (output.inBlockHtmlTag && !output.inTable) {
+                const before = text;
+                text = text.replace(/(\r?\n){2}/, '<br><br>');
+                if (output.constrainedToSingleLine && before !== text) {
+                    throw new Error(
+                        "Can't have multiline text when constrained to single line.",
+                    );
+                }
+            }
         }
 
-        if (output.inSingleLineCodeBlock && output.constrainedToSingleLine) {
-            // This might break stuff like multiline html tags.
-            text = escapeMarkdown(text)
-                .split(/\r?\n/g)
-                .join('</code><br/><code>');
+        output.write(text);
+    }
+}
+
+export class MarkdownText extends Text implements Serializable {
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        // todo: parse
+        let { text } = this;
+
+        if (!output.inMarkdownCode) {
+            if (output.inTable) {
+                text = escapeTable(text, !output.inSingleLineCodeBlock);
+            }
+
+            if (output.inSingleLineCodeBlock) {
+                text = text.split(/\r?\n/g).join('</code><br/><code>');
+            }
         }
 
         output.write(text);
@@ -166,8 +243,10 @@ export class HtmlBlockElement extends HtmlElement implements Serializable {
 export class CodeSpan extends Container implements Serializable {
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.write('`');
-        output.withInSingleLine(() => {
-            super.writeAsMarkdown(output);
+        output.withInMarkdownCode(() => {
+            output.withInSingleLine(() => {
+                super.writeAsMarkdown(output);
+            });
         });
         output.write('`');
     }
@@ -180,19 +259,21 @@ export class CodeBlock extends Container implements Serializable {
 
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (output.constrainedToSingleLine) {
-            output.write('<code>');
             output.withInSingleLineCodeBlock(() => {
-                new Text(this._code).writeAsMarkdown(output);
+                new HtmlElement('code')
+                    .addChildren(...this._children)
+                    .writeAsMarkdown(output);
             });
-            output.write('</code>');
             return;
         }
 
         output.ensureSkippedLine();
-        output.write('```');
-        output.writeLine(this._langauge);
-        output.write(this._code);
-        output.ensureNewLine();
+        output.withInMarkdownCode(() => {
+            output.write('```');
+            output.writeLine(this._langauge);
+            output.write(this._code);
+            output.ensureNewLine();
+        });
         output.write('```');
     }
 }
@@ -205,11 +286,11 @@ export class RichCodeBlock extends Container implements Serializable {
 
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (output.constrainedToSingleLine) {
-            output.write('<code>');
             output.withInSingleLineCodeBlock(() => {
-                super.writeAsMarkdown(output);
+                new HtmlElement('code')
+                    .addChildren(...this._children)
+                    .writeAsMarkdown(output);
             });
-            output.write('</code>');
             return;
         }
 
@@ -219,20 +300,22 @@ export class RichCodeBlock extends Container implements Serializable {
     }
 }
 
-export class Link implements Serializable {
-    constructor(private _destination: string, private _linkText: string) {}
+export class Link extends Container implements Serializable {
+    constructor(private _destination: string) {
+        super();
+    }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (output.inBlockHtmlTag && !output.inTable) {
             output.write('<a href="');
             output.write(this._destination);
             output.write('">');
-            output.write(this._linkText);
+            super.writeAsMarkdown(output);
             output.write('</a>');
             return;
         }
         output.write('[');
-        output.write(this._linkText);
+        super.writeAsMarkdown(output);
         output.write('](');
         output.write(this._destination);
         output.write(')');
