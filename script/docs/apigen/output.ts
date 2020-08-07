@@ -82,12 +82,11 @@ export class MarkdownOutput extends IndentedWriter {
     }
 }
 
-export interface Serializable {
+export interface Node {
     writeAsMarkdown(output: MarkdownOutput): void;
 }
 
-export class Container<T extends Serializable = Serializable>
-    implements Serializable {
+export class Container<T extends Node = Node> implements Node {
     protected _children: T[] = [];
 
     public addChild(child: T): this {
@@ -108,7 +107,7 @@ export class Container<T extends Serializable = Serializable>
         return this._children.length;
     }
 
-    public getLastNestedChild(): Serializable | void {
+    public getLastNestedChild(): Node | void {
         for (let i = this._children.length - 1; i >= 0; i--) {
             const child = this._children[i];
             if (child instanceof Container) {
@@ -159,7 +158,7 @@ export class Text {
     }
 }
 
-export class PlainText extends Text implements Serializable {
+export class PlainText extends Text implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         let { text } = this;
 
@@ -191,7 +190,7 @@ export class PlainText extends Text implements Serializable {
     }
 }
 
-export class MarkdownText extends Text implements Serializable {
+export class MarkdownText extends Text implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         // todo: parse
         let { text } = this;
@@ -210,7 +209,7 @@ export class MarkdownText extends Text implements Serializable {
     }
 }
 
-export class HtmlElement extends Container implements Serializable {
+export class HtmlElement extends Container implements Node {
     constructor(public tagName: string) {
         super();
     }
@@ -226,7 +225,7 @@ export class HtmlElement extends Container implements Serializable {
     }
 }
 
-export class HtmlBlockElement extends HtmlElement implements Serializable {
+export class HtmlBlockElement extends HtmlElement implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (!output.constrainedToSingleLine) {
             output.ensureSkippedLine();
@@ -237,7 +236,7 @@ export class HtmlBlockElement extends HtmlElement implements Serializable {
     }
 }
 
-export class CodeSpan extends Container implements Serializable {
+export class CodeSpan extends Container implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.write('`');
         output.withInMarkdownCode(() => {
@@ -249,8 +248,8 @@ export class CodeSpan extends Container implements Serializable {
     }
 }
 
-export class CodeBlock extends Container implements Serializable {
-    constructor(private _langauge: string, private _code: string) {
+export class CodeBlock extends Container implements Node {
+    constructor(private _language: string, private _code: string) {
         super();
     }
 
@@ -267,7 +266,7 @@ export class CodeBlock extends Container implements Serializable {
         output.ensureSkippedLine();
         output.withInMarkdownCode(() => {
             output.write('```');
-            output.writeLine(this._langauge);
+            output.writeLine(this._language);
             output.write(this._code);
             output.ensureNewLine();
         });
@@ -275,7 +274,7 @@ export class CodeBlock extends Container implements Serializable {
     }
 }
 
-export class RichCodeBlock extends Container implements Serializable {
+export class RichCodeBlock extends Container implements Node {
     constructor(private _language: string) {
         super();
         this._language;
@@ -297,7 +296,7 @@ export class RichCodeBlock extends Container implements Serializable {
     }
 }
 
-export class Link extends Container implements Serializable {
+export class Link extends Container implements Node {
     constructor(private _destination: string) {
         super();
     }
@@ -321,7 +320,7 @@ export class Link extends Container implements Serializable {
 
 // TODO: parse markdown and output (eg. diff in html block as in Link above).
 
-export class Paragraph extends Container implements Serializable {
+export class Paragraph extends Container implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (this._children.length === 0) {
             return;
@@ -337,7 +336,7 @@ export class Paragraph extends Container implements Serializable {
     }
 }
 
-export class Heading extends Container implements Serializable {
+export class Heading extends Container implements Node {
     constructor(private _alternateId?: string) {
         super();
     }
@@ -356,7 +355,7 @@ export class Heading extends Container implements Serializable {
     }
 }
 
-export class Subheading extends Container implements Serializable {
+export class Subheading extends Container implements Node {
     constructor(private _alternateId?: string) {
         super();
     }
@@ -375,7 +374,7 @@ export class Subheading extends Container implements Serializable {
     }
 }
 
-export class Title extends Container implements Serializable {
+export class Title extends Container implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.ensureSkippedLine();
         output.withInSingleLine(() => {
@@ -385,7 +384,7 @@ export class Title extends Container implements Serializable {
     }
 }
 
-export class List extends Container implements Serializable {
+export class List extends Container implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.ensureSkippedLine();
         for (const child of this._children) {
@@ -398,7 +397,7 @@ export class List extends Container implements Serializable {
     }
 }
 
-export class TableRow extends Container implements Serializable {
+export class TableRow extends Container implements Node {
     public writeAsMarkdown(
         output: MarkdownOutput,
         columnCount = this.getChildCount(),
@@ -418,7 +417,7 @@ export class TableRow extends Container implements Serializable {
     }
 }
 
-export class Table extends Container<TableRow> implements Serializable {
+export class Table extends Container<TableRow> implements Node {
     public constructor(private readonly _header: TableRow) {
         super();
     }
@@ -459,7 +458,7 @@ export class Table extends Container<TableRow> implements Serializable {
     }
 }
 
-export class Page extends Container implements Serializable {
+export class Page extends Container implements Node {
     constructor(private _metadata: PageMetadata) {
         super();
     }

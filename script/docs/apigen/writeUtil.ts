@@ -553,7 +553,7 @@ function createNodeForTypeExcerpt(
     excerpt: aeModel.Excerpt,
     apiItem: aeModel.ApiItem,
     context: Context,
-): output.Serializable {
+): output.Node {
     if (!excerpt.text.trim()) {
         return new output.PlainText('(not declared)');
     }

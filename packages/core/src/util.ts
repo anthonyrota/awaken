@@ -14,77 +14,77 @@ function _call<T>(x: T, f: (x: T) => T): T {
  * @returns The result of accumulatively calling the given value against all of
  *     the functions given left-to-right.
  *
- * {@xlabelDoc pipe}
+ * {@xLabelDoc pipe}
  */
 
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T>(x: T): T;
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T, R>(x: T, f1: (x: T) => R): R;
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T, A, R>(x: T, f1: (x: T) => A, f2: (x: A) => R): R;
 // prettier-ignore
 /* eslint-disable max-len */
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T, A, B, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => R): R;
 // prettier-ignore
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T, A, B, C, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => R): R;
 // prettier-ignore
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T, A, B, C, D, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => R): R;
 // prettier-ignore
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T, A, B, C, D, E, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => R): R;
 // prettier-ignore
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T, A, B, C, D, E, F, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => R): R;
 // prettier-ignore
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T, A, B, C, D, E, F, G, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => R): R;
 // prettier-ignore
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T, A, B, C, D, E, F, G, H, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R): R;
 // prettier-ignore
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pipe<T, A, B, C, D, E, F, G, H, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R, ...funcs: Array<(x: any) => any>): R;
 /* eslint-enable max-len */
 /**
- * {@xinlineDoc pipe}
+ * {@xInlineDoc pipe}
  * @public
  **/
 export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T;
@@ -104,77 +104,77 @@ export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T {
  *     accumulatively calling the value against all of the functions given
  *     left-to-right.
  *
- * {@xlabelDoc flow}
+ * {@xLabelDoc flow}
  */
 
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow(): <T>(x: T) => T;
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow<T, R>(f1: (x: T) => R): (x: T) => R;
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow<T, A, R>(f1: (x: T) => A, f2: (x: A) => R): (x: T) => R;
 // prettier-ignore
 /* eslint-disable max-len */
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow<T, A, B, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => R): (x: T) => R;
 // prettier-ignore
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow<T, A, B, C, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => R): (x: T) => R;
 // prettier-ignore
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow<T, A, B, C, D, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => R): (x: T) => R;
 // prettier-ignore
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow<T, A, B, C, D, E, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => R): (x: T) => R;
 // prettier-ignore
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow<T, A, B, C, D, E, F, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => R): (x: T) => R;
 // prettier-ignore
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow<T, A, B, C, D, E, F, G, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => R): (x: T) => R;
 // prettier-ignore
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow<T, A, B, C, D, E, F, G, H, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R): (x: T) => R;
 // prettier-ignore
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function flow<T, A, B, C, D, E, F, G, H, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R, ...funcs: Array<(x: any) => any>): (x: T) => R;
 /* eslint-enable max-len */
 /**
- * {@xinlineDoc flow}
+ * {@xInlineDoc flow}
  * @public
  */
 export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T;
