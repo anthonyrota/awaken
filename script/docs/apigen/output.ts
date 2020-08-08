@@ -9,6 +9,9 @@
 /* eslint-enable max-len */
 
 import * as yaml from 'yaml';
+import * as unist from 'unist';
+import * as unified from 'unified';
+import * as remarkParse from 'remark-parse';
 import { IndentedWriter } from './util';
 import { PageMetadata } from '../pageMetadata';
 
@@ -18,6 +21,7 @@ export class MarkdownOutput extends IndentedWriter {
     private _writeSingleLine = false;
     private _inBlockHtmlTag = false;
     private _inMarkdownCode = false;
+    private _inParagraph = false;
 
     public withInTable(write: () => void): void {
         const before = this._inTable;
@@ -54,6 +58,13 @@ export class MarkdownOutput extends IndentedWriter {
         this._inMarkdownCode = before;
     }
 
+    public withInParagraph(write: () => void): void {
+        const before = this._inParagraph;
+        this._inParagraph = true;
+        write();
+        this._inParagraph = before;
+    }
+
     public get constrainedToSingleLine(): boolean {
         return this._writeSingleLine || this._inTable;
     }
@@ -74,6 +85,10 @@ export class MarkdownOutput extends IndentedWriter {
         return this._inMarkdownCode;
     }
 
+    public get inParagraph(): boolean {
+        return this._inParagraph;
+    }
+
     protected _write(str: string): void {
         if (this.constrainedToSingleLine && /[\n\r]/.test(str)) {
             throw new Error('Newline when constrained to single line.');
@@ -88,6 +103,11 @@ export interface Node {
 
 export class Container<T extends Node = Node> implements Node {
     protected _children: T[] = [];
+
+    public setChildren(children: T[]): this {
+        this._children = children;
+        return this;
+    }
 
     public addChild(child: T): this {
         this._children.push(child);
@@ -138,27 +158,29 @@ function escapeHtml(text: string): string {
         .replace(/>/g, '&gt;');
 }
 
-function escapeTable(text: string, replaceNewLines: boolean): string {
-    const escaped = text.replace(/\|/g, '&#124;');
-    if (replaceNewLines) {
-        return escaped.replace(/\r?\n/g, '<br/>');
-    }
-    return escaped;
+const newlineRegexp = /\r?\n/g;
+
+function escapeTable(text: string): string {
+    return text.replace(/\|/g, '&#124;');
 }
 
 function escapeMarkdown(text: string): string {
     return text.replace(/\\/, '\\\\').replace(/[*#/()[\]<>_]/g, '\\$&');
 }
 
-export class Text {
+export class RawText implements Node {
     constructor(public text: string) {}
 
     public append(text: string) {
         this.text += text;
     }
+
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        output.write(this.text);
+    }
 }
 
-export class PlainText extends Text implements Node {
+export class PlainText extends RawText implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         let { text } = this;
 
@@ -166,7 +188,10 @@ export class PlainText extends Text implements Node {
             text = escapeHtml(text);
 
             if (output.inTable) {
-                text = escapeTable(text, !output.inSingleLineCodeBlock);
+                text = escapeTable(text);
+                if (!output.inSingleLineCodeBlock) {
+                    text = text.replace(newlineRegexp, '<br>');
+                }
             }
 
             if (!output.inBlockHtmlTag) {
@@ -174,7 +199,7 @@ export class PlainText extends Text implements Node {
             }
 
             if (output.inSingleLineCodeBlock) {
-                text = text.split(/\r?\n/g).join('</code><br/><code>');
+                text = text.split(newlineRegexp).join('</code><br><code>');
             } else if (output.inBlockHtmlTag && !output.inTable) {
                 const before = text;
                 text = text.replace(/(\r?\n){2}/, '<br><br>');
@@ -190,22 +215,290 @@ export class PlainText extends Text implements Node {
     }
 }
 
-export class MarkdownText extends Text implements Node {
-    public writeAsMarkdown(output: MarkdownOutput): void {
-        // todo: parse
-        let { text } = this;
+const remark = unified().use(remarkParse);
 
-        if (!output.inMarkdownCode) {
-            if (output.inTable) {
-                text = escapeTable(text, !output.inSingleLineCodeBlock);
+export function parseMarkdown(text: string): Container {
+    const rootNode = remark.parse(text);
+
+    // https://github.com/syntax-tree/mdast
+    function traverseNode(container: Container, node: unist.Node): void {
+        /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+        /* eslint-disable @typescript-eslint/no-unsafe-call */
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        switch (node.type) {
+            case 'root': {
+                traverseChildren(container, node as unist.Parent);
+                break;
             }
-
-            if (output.inSingleLineCodeBlock) {
-                text = text.split(/\r?\n/g).join('</code><br/><code>');
+            case 'paragraph': {
+                const paragraph = new Paragraph();
+                container.addChild(paragraph);
+                traverseChildren(paragraph, node as unist.Parent);
+                break;
+            }
+            case 'heading': {
+                const depth = (node as any).depth;
+                let heading: Container;
+                switch (depth) {
+                    case 2: {
+                        heading = new Heading();
+                        break;
+                    }
+                    case 3: {
+                        heading = new Subheading();
+                        break;
+                    }
+                    case 4: {
+                        heading = new Title();
+                        break;
+                    }
+                    default: {
+                        throw new Error('Unsupported heading depth.');
+                    }
+                }
+                container.addChild(heading);
+                traverseChildren(heading, node as unist.Parent);
+                break;
+            }
+            case 'thematicBreak': {
+                container.addChild(new HorizontalRule());
+                break;
+            }
+            case 'blockquote': {
+                const blockQuote = new BlockQuote();
+                container.addChild(blockQuote);
+                traverseChildren(blockQuote, node as unist.Parent);
+                break;
+            }
+            case 'listItem': {
+                throw new Error('Unexpected list item node.');
+            }
+            case 'list': {
+                if (
+                    (node as any).ordered !== false ||
+                    (node as any).start !== null
+                ) {
+                    throw new Error(
+                        `Unsupported list type. ${JSON.stringify(
+                            node,
+                            null,
+                            2,
+                        )}`,
+                    );
+                }
+                const list = new List();
+                container.addChild(list);
+                for (const listItem of (node as unist.Parent).children) {
+                    if (
+                        listItem.type !== 'list' &&
+                        listItem.type !== 'listItem'
+                    ) {
+                        throw new Error('Unsupported type in list');
+                    }
+                    if (listItem.type === 'list') {
+                        throw new Error('Nested lists are not supported');
+                    }
+                    if ((listItem as any).checked !== null) {
+                        throw new Error(
+                            `Unsupported list item type. ${JSON.stringify(
+                                node,
+                                null,
+                                2,
+                            )}`,
+                        );
+                    }
+                    const container = new Container();
+                    list.addChild(container);
+                    traverseChildren(container, listItem as unist.Parent);
+                }
+                break;
+            }
+            case 'table': {
+                if ((node as any).align.some((item) => item !== null)) {
+                    throw new Error('Unsupported table align.');
+                }
+                const tableNode = node as unist.Parent;
+                if (tableNode.children.length === 0) {
+                    throw new Error('Table has no rows.');
+                }
+                const heading = parseTableRow(
+                    tableNode.children[0] as unist.Parent,
+                );
+                const table = new Table(heading);
+                for (let i = 1; i < tableNode.children.length; i++) {
+                    table.addChild(
+                        parseTableRow(tableNode.children[i] as unist.Parent),
+                    );
+                }
+                break;
+            }
+            case 'tableRow': {
+                throw new Error('Unexpected table row.');
+            }
+            case 'tableCell': {
+                throw new Error('Unexpected table cell.');
+            }
+            case 'html': {
+                // HTML tags should be stripped out into their own nodes by the
+                // TSDoc parser. HTML comments are used as metadata when parsing
+                // TSDoc nodes, therefore preserve them.
+                let value = (node as unist.Literal).value as string;
+                while (!/^\s*$/.test(value)) {
+                    value = value.trimLeft();
+                    if (!/^<!--/.test(value)) {
+                        throw new Error('HTML content must be a comment.');
+                    }
+                    const lastIndex = value.indexOf('-->');
+                    if (lastIndex === -1) {
+                        throw new Error('Unclosed HTML comment.');
+                    }
+                    container.addChild(
+                        new HtmlComment(value.slice(4, lastIndex)),
+                    );
+                    value = value.slice(lastIndex + 3);
+                }
+                break;
+            }
+            case 'code': {
+                if ((node as any).meta !== null) {
+                    throw new Error('Invalid code block.');
+                }
+                const codeBlock = new CodeBlock(
+                    (node as any).lang,
+                    (node as unist.Literal).value as string,
+                );
+                container.addChild(codeBlock);
+                break;
+            }
+            case 'definition': {
+                throw new Error('Markdown definitions are not supported.');
+            }
+            case 'footnoteDefinition': {
+                throw new Error('Footnote definitions are not supported.');
+            }
+            case 'text': {
+                container.addChild(
+                    new PlainText((node as unist.Literal).value as string),
+                );
+                break;
+            }
+            case 'emphasis': {
+                const italics = new Italics();
+                container.addChild(italics);
+                traverseChildren(italics, node as unist.Parent);
+                break;
+            }
+            case 'strong': {
+                const bold = new Bold();
+                container.addChild(bold);
+                traverseChildren(bold, node as unist.Parent);
+                break;
+            }
+            case 'delete': {
+                const strikethrough = new Strikethrough();
+                container.addChild(strikethrough);
+                traverseChildren(strikethrough, node as unist.Parent);
+                break;
+            }
+            case 'inlineCode': {
+                const inlineCode = new CodeSpan().addChild(
+                    new PlainText((node as unist.Literal).value as string),
+                );
+                container.addChild(inlineCode);
+                break;
+            }
+            case 'break': {
+                throw new Error(
+                    'Markdown breaks are not supported. Trailing spaces representing line breaks is unpleasant.',
+                );
+            }
+            case 'link': {
+                const link = new Link((node as any).url, (node as any).title);
+                container.addChild(link);
+                traverseChildren(link, node as unist.Parent);
+                break;
+            }
+            case 'image': {
+                const image = new Image(
+                    (node as any).url,
+                    (node as any).title,
+                    (node as any).alt,
+                );
+                container.addChild(image);
+                break;
+            }
+            case 'linkReference': {
+                throw new Error('Link references are not supported.');
+            }
+            case 'imageReference': {
+                throw new Error('Image references are not supported.');
+            }
+            case 'footnote': {
+                throw new Error('Footnotes are not supported.');
+            }
+            default: {
+                console.error(`Unknown node type ${node.type}`);
+                console.dir(node);
             }
         }
+        /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+        /* eslint-disable @typescript-eslint/no-unsafe-call */
+        /* eslint-enable @typescript-eslint/no-explicit-any */
+    }
 
-        output.write(text);
+    function parseTableRow(node: unist.Parent): TableRow {
+        const row = new TableRow();
+        // Loop over cells.
+        for (const childNode of node.children) {
+            const container = new Container();
+            row.addChild(container);
+            traverseChildren(container, childNode as unist.Parent);
+        }
+        return row;
+    }
+
+    function traverseChildren(
+        container: Container,
+        parent: unist.Parent,
+    ): void {
+        for (const node of parent.children) {
+            traverseNode(container, node);
+        }
+    }
+
+    const container = new Container();
+    traverseNode(container, rootNode);
+    return container;
+}
+
+export class HorizontalRule implements Node {
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        if (output.constrainedToSingleLine) {
+            output.write('<hr>');
+            return;
+        }
+        output.ensureNewLine();
+        output.write('---');
+    }
+}
+
+export class HtmlComment implements Node {
+    constructor(public comment: string) {}
+
+    public writeAsMarkdown(): void {
+        throw new Error(
+            'Attempted to write a HtmlComment node to output. HtmlComment nodes are only used for metadata when parsing TSDoc comments.',
+        );
+    }
+}
+
+export class BlockQuote extends Container implements Node {
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        output.increaseIndent('> ');
+        super.writeAsMarkdown(output);
+        output.decreaseIndent();
     }
 }
 
@@ -225,6 +518,24 @@ export class HtmlElement extends Container implements Node {
     }
 }
 
+export class Italics extends HtmlElement implements Node {
+    constructor() {
+        super('i');
+    }
+}
+
+export class Bold extends HtmlElement implements Node {
+    constructor() {
+        super('b');
+    }
+}
+
+export class Strikethrough extends HtmlElement implements Node {
+    constructor() {
+        super('s');
+    }
+}
+
 export class HtmlBlockElement extends HtmlElement implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (!output.constrainedToSingleLine) {
@@ -236,15 +547,15 @@ export class HtmlBlockElement extends HtmlElement implements Node {
     }
 }
 
-export class CodeSpan extends Container implements Node {
+export class CodeSpan extends HtmlElement implements Node {
+    constructor() {
+        super('code');
+    }
+
     public writeAsMarkdown(output: MarkdownOutput): void {
-        output.write('`');
-        output.withInMarkdownCode(() => {
-            output.withInSingleLine(() => {
-                super.writeAsMarkdown(output);
-            });
+        output.withInSingleLine(() => {
+            super.writeAsMarkdown(output);
         });
-        output.write('`');
     }
 }
 
@@ -297,42 +608,93 @@ export class RichCodeBlock extends Container implements Node {
 }
 
 export class Link extends Container implements Node {
-    constructor(private _destination: string) {
+    constructor(private _destination: string, private _title?: string) {
         super();
     }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
-        if (output.inBlockHtmlTag && !output.inTable) {
-            output.write('<a href="');
-            output.write(this._destination);
-            output.write('">');
+        output.withInSingleLine(() => {
+            if (output.inBlockHtmlTag && !output.inTable) {
+                output.write('<a href="');
+                output.write(this._destination);
+                if (this._title) {
+                    output.write('" title="');
+                    output.write(this._title);
+                }
+                output.write('">');
+                super.writeAsMarkdown(output);
+                output.write('</a>');
+                return;
+            }
+            output.write('[');
             super.writeAsMarkdown(output);
-            output.write('</a>');
-            return;
-        }
-        output.write('[');
-        super.writeAsMarkdown(output);
-        output.write('](');
-        output.write(this._destination);
-        output.write(')');
+            output.write('](');
+            output.write(this._destination);
+            if (this._title) {
+                output.write(' "');
+                output.write(this._title);
+                output.write('"');
+            }
+            output.write(')');
+        });
     }
 }
 
-// TODO: parse markdown and output (eg. diff in html block as in Link above).
+export class Image implements Node {
+    constructor(
+        private _src: string,
+        private _title?: string,
+        private _alt?: string,
+    ) {}
+
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        output.withInSingleLine(() => {
+            if (output.inBlockHtmlTag && !output.inTable) {
+                output.write('<img src="');
+                output.write(this._src);
+                if (this._title) {
+                    output.write('" title="');
+                    output.write(this._title);
+                }
+                if (this._alt) {
+                    output.write('" alt="');
+                    output.write(this._alt);
+                }
+                output.write('">');
+            }
+            output.write('![');
+            if (this._alt) output.write(this._alt);
+            output.write('](');
+            output.write(this._src);
+            if (this._title) {
+                output.write(' "');
+                output.write(this._title);
+                output.write('"');
+            }
+            output.write(')');
+        });
+    }
+}
 
 export class Paragraph extends Container implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (this._children.length === 0) {
             return;
         }
-        if (output.constrainedToSingleLine) {
-            new HtmlBlockElement('p')
-                .addChildren(...this._children)
-                .writeAsMarkdown(output);
+        if (output.inParagraph) {
+            super.writeAsMarkdown(output);
             return;
         }
-        output.ensureSkippedLine();
-        super.writeAsMarkdown(output);
+        output.withInParagraph(() => {
+            if (output.constrainedToSingleLine) {
+                new HtmlBlockElement('p')
+                    .addChildren(...this._children)
+                    .writeAsMarkdown(output);
+                return;
+            }
+            output.ensureSkippedLine();
+            super.writeAsMarkdown(output);
+        });
     }
 }
 
@@ -390,7 +752,7 @@ export class List extends Container implements Node {
         for (const child of this._children) {
             output.ensureNewLine();
             output.withInSingleLine(() => {
-                output.write('* ');
+                output.write('- ');
                 child.writeAsMarkdown(output);
             });
         }

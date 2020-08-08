@@ -1,3 +1,4 @@
+import * as ts from 'typescript';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as aeModel from '@microsoft/api-extractor-model';
@@ -9,7 +10,7 @@ import {
     TableOfContentsMainReference,
     TableOfContents,
 } from '../pageMetadata';
-import { SourceExportMappings } from './sourceExportMappings';
+import { SourceMetadata } from './sourceMetadata';
 import { APIPageData, assertMappedApiItemNames, forEachPage } from './paths';
 
 interface ExportImplementation<T extends aeModel.ApiItem> {
@@ -46,7 +47,7 @@ class ExportFunctionImplementation
         return this._displayName !== undefined;
     }
 
-    public writeAsMarkdown(output: output.Container): void {
+    public writeAsMarkdown(out: output.Container): void {
         if (this._displayName === undefined) {
             throw new Error('Not implemented.');
         }
@@ -68,34 +69,56 @@ class ExportFunctionImplementation
         const context = this._context;
 
         writeUtil.writeApiItemAnchor(
-            output,
+            out,
             this._overloads[0],
             context,
             this.simplifiedKind,
         );
+        writeUtil.writeBaseDoc(
+            out,
+            this._overloads[0],
+            context,
+            ts.SyntaxKind.FunctionDeclaration,
+        );
+
+        let didNotOnlyWriteSignature = true;
 
         for (const fn of this._overloads) {
-            writeUtil.writeSignature(output, fn, context);
-            writeUtil.writeSummary(output, fn, context);
-            writeUtil.writeParameters(output, fn, context);
-            writeUtil.writeExamples(output, fn, context);
-            writeUtil.writeSeeBlocks(output, fn, context);
+            const _didNotOnlyWriteSignature = didNotOnlyWriteSignature;
+            const container = new output.Container();
+            const didWriteSummary = writeUtil.writeSummary(
+                container,
+                fn,
+                context,
+            );
+            const didWriteParameters = writeUtil.writeParameters(
+                container,
+                fn,
+                context,
+            );
+            const didWriteExamples = writeUtil.writeExamples(
+                container,
+                fn,
+                context,
+            );
+            const didWriteSeeBlocks = writeUtil.writeSeeBlocks(
+                container,
+                fn,
+                context,
+            );
+            didNotOnlyWriteSignature =
+                didWriteSummary ||
+                didWriteParameters ||
+                didWriteExamples ||
+                didWriteSeeBlocks;
+            if (_didNotOnlyWriteSignature || didNotOnlyWriteSignature) {
+                writeUtil.writeSignature(out, fn, context);
+                out.addChildren(...container.getChildren());
+            } else {
+                writeUtil.writeSignatureExcerpt(out, fn, context);
+            }
         }
     }
-
-    // `
-    // [summary]
-    // [examples]
-    // ...
-    // [overloads]
-    // [overload 1]
-    // [signature]
-    // [description]
-    // [params]
-    // [returns]
-    // ...
-    // [see]
-    // `;
 }
 
 class ExportInterfaceImplementation
@@ -134,6 +157,12 @@ class ExportInterfaceImplementation
             interface_,
             context,
             this.simplifiedKind,
+        );
+        writeUtil.writeBaseDoc(
+            output,
+            interface_,
+            context,
+            ts.SyntaxKind.InterfaceDeclaration,
         );
         writeUtil.writeSignature(output, interface_, context);
         writeUtil.writeSummary(output, interface_, context);
@@ -179,6 +208,12 @@ class ExportTypeAliasImplementation
             context,
             this.simplifiedKind,
         );
+        writeUtil.writeBaseDoc(
+            output,
+            typeAlias,
+            context,
+            ts.SyntaxKind.TypeAliasDeclaration,
+        );
         writeUtil.writeSignature(output, typeAlias, context);
         writeUtil.writeSummary(output, typeAlias, context);
         writeUtil.writeExamples(output, typeAlias, context);
@@ -217,7 +252,18 @@ class ExportVariableImplementation
 
         const context = this._context;
 
-        writeUtil.writeApiItemAnchor(output, variable, context, 'Variable');
+        writeUtil.writeApiItemAnchor(
+            output,
+            variable,
+            context,
+            this.simplifiedKind,
+        );
+        writeUtil.writeBaseDoc(
+            output,
+            variable,
+            context,
+            ts.SyntaxKind.VariableDeclaration,
+        );
         writeUtil.writeSignature(output, variable, context);
         writeUtil.writeSummary(output, variable, context);
         writeUtil.writeExamples(output, variable, context);
@@ -435,14 +481,11 @@ export class ApiPageMap {
     private _pathToPage = new Map<string, ApiPage>();
     private _context: writeUtil.Context;
 
-    constructor(
-        apiModel: aeModel.ApiModel,
-        sourceExportMappings: SourceExportMappings,
-    ) {
+    constructor(apiModel: aeModel.ApiModel, sourceMetadata: SourceMetadata) {
         const apiItemsByMemberName = new Map<string, aeModel.ApiItem[]>();
 
         this._context = {
-            sourceExportMappings,
+            sourceMetadata,
             apiModel,
             apiItemsByMemberName,
         };

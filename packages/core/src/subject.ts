@@ -119,6 +119,19 @@ export function SubjectBase<T>(): Subject<T> {
     return markAsSubject(
         implDisposableMethods((eventOrSink: Event<T> | Sink<T>): void => {
             if (!disposable.active) {
+                if (
+                    typeof eventOrSink !== 'function' &&
+                    eventOrSink.type === ThrowType
+                ) {
+                    const { error } = eventOrSink;
+                    asyncReportError(
+                        `A Throw event was intercepted by a disposed Subject: ${
+                            // eslint-disable-next-line max-len
+                            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                            (error instanceof Error && error.stack) || error
+                        }`,
+                    );
+                }
                 return;
             }
 

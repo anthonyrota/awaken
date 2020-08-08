@@ -19,6 +19,13 @@
         "filetypes"
     ],
     "ignoreRegExpList": [],
-    "words": ["callbags", "commitlint", "tsdoc", "aedoc"],
+    "words": [
+        "callbags",
+        "commitlint",
+        "tsdoc",
+        "aedoc",
+        "unist",
+        "strikethrough"
+    ],
     "overrides": []
 }

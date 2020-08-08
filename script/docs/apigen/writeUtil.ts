@@ -16,10 +16,11 @@ import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationRefer
 import * as aeModel from '@microsoft/api-extractor-model';
 import * as output from './output';
 import { getMainPathOfApiItemName } from './paths';
-import { SourceExportMappings } from './sourceExportMappings';
+import { SourceMetadata } from './sourceMetadata';
+import * as ts from 'typescript';
 
 export interface Context {
-    sourceExportMappings: SourceExportMappings;
+    sourceMetadata: SourceMetadata;
     apiModel: aeModel.ApiModel;
     apiItemsByMemberName: Map<string, aeModel.ApiItem[]>;
     apiItemsByCanonicalReference?: Map<string, aeModel.ApiItem>;
@@ -66,23 +67,12 @@ function getBlocksOfTag(
     );
 }
 
-interface ExtractedCustomBlocks {
-    exampleBlocks: tsdoc.DocBlock[];
-    seeBlocks: tsdoc.DocBlock[];
+function getExampleBlocks(docComment: tsdoc.DocComment): tsdoc.DocBlock[] {
+    return getBlocksOfTag(docComment.customBlocks, tsdoc.StandardTags.example);
 }
 
-function extractCustomBlocks(apiItem: aeModel.ApiItem): ExtractedCustomBlocks {
-    const docComment = getDocComment(apiItem);
-    const exampleBlocks = getBlocksOfTag(
-        docComment.customBlocks,
-        tsdoc.StandardTags.example,
-    );
-    const seeBlocks = getBlocksOfTag(docComment.customBlocks, seeTag);
-
-    return {
-        exampleBlocks,
-        seeBlocks,
-    };
+function getSeeBlocks(docComment: tsdoc.DocComment): tsdoc.DocBlock[] {
+    return getBlocksOfTag(docComment.customBlocks, seeTag);
 }
 
 export function getApiItemName(
@@ -98,6 +88,7 @@ export function getApiItemName(
 interface TSDocNodeWriteContext {
     context: Context;
     container: output.Container;
+    embeddedNodeContext: EmbeddedNodeContext;
     nodeIter: TSDocNodeIter;
     htmlTagStack: output.HtmlElement[];
     apiItem: aeModel.ApiItem;
@@ -132,13 +123,93 @@ function writeApiItemDocNode(
 ): void {
     const nodeIter = TSDocNodeIter([docNode]);
     nodeIter.next();
-    writeNode(docNode, {
+    const container_ = new output.Container();
+    const embeddedNodeContext = new EmbeddedNodeContext();
+    const context_ = {
         context,
-        container,
+        container: container_,
         nodeIter,
         htmlTagStack: [],
+        embeddedNodeContext,
         apiItem,
-    });
+    };
+    writeNode(docNode, context_);
+    new EmbeddedNode(container_, embeddedNodeContext).substituteEmbeddedNodes();
+    container.addChild(container_);
+}
+
+class EmbeddedNodeContext {
+    private _n = 0;
+    private _idMap = new Map<number, EmbeddedNode>();
+
+    public generateMarker(node: EmbeddedNode): string {
+        const id = this._n++;
+        this._idMap.set(id, node);
+        return `<!--__EmbeddedNode__:${id}-->`;
+    }
+
+    public getNodeForId(id: number): EmbeddedNode {
+        const node = this._idMap.get(id);
+        if (!node) {
+            throw new Error('No node defined for given id.');
+        }
+        return node;
+    }
+}
+
+class EmbeddedNode implements output.Node {
+    private _marker: string;
+
+    constructor(
+        public node: output.Node,
+        protected _context: EmbeddedNodeContext,
+    ) {
+        if (node instanceof EmbeddedNode) {
+            throw new Error(
+                'EmbeddedNode node argument cannot be an EmbeddedNode.',
+            );
+        }
+        this._marker = _context.generateMarker(this);
+    }
+
+    public writeAsMarkdown(out: output.MarkdownOutput): void {
+        out.write(this._marker);
+    }
+
+    public substituteEmbeddedNodes(): void {
+        if (!(this.node instanceof output.Container)) {
+            return;
+        }
+
+        const out = new output.MarkdownOutput();
+        const container = new output.Container().addChildren(
+            ...this.node.getChildren(),
+        );
+        container.writeAsMarkdown(out);
+        const markdown = out.toString();
+        const markdownContainer = output.parseMarkdown(markdown);
+
+        this._substituteEmbeddedNodes(markdownContainer);
+        this.node.setChildren(markdownContainer.getChildren());
+    }
+
+    private _substituteEmbeddedNodes(node: output.Container): void {
+        const children = node.getChildren();
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i];
+            if (child instanceof output.Container) {
+                this._substituteEmbeddedNodes(child);
+            } else if (child instanceof output.HtmlComment) {
+                const match = /__EmbeddedNode__:(\d+)/g.exec(child.comment);
+                if (match) {
+                    const id = Number.parseInt(match[1]);
+                    const embedded = this._context.getNodeForId(id);
+                    embedded.substituteEmbeddedNodes();
+                    children[i] = embedded.node;
+                }
+            }
+        }
+    }
 }
 
 function writeNode(
@@ -150,14 +221,16 @@ function writeNode(
     switch (docNode.kind) {
         case tsdoc.DocNodeKind.PlainText: {
             const docPlainText = docNode as tsdoc.DocPlainText;
-            container.addChild(new output.MarkdownText(docPlainText.text));
+            container.addChild(new output.RawText(docPlainText.text));
             break;
         }
         case tsdoc.DocNodeKind.HtmlStartTag: {
             const docStartTag = docNode as tsdoc.DocHtmlStartTag;
             const oldContainer = container;
             const htmlElement = new output.HtmlElement(docStartTag.name);
-            oldContainer.addChild(htmlElement);
+            oldContainer.addChild(
+                new EmbeddedNode(htmlElement, context.embeddedNodeContext),
+            );
             context.container = htmlElement;
             context.htmlTagStack.push(htmlElement);
             let node: tsdoc.DocNode | undefined;
@@ -194,8 +267,11 @@ function writeNode(
         case tsdoc.DocNodeKind.CodeSpan: {
             const docCodeSpan = docNode as tsdoc.DocCodeSpan;
             container.addChild(
-                new output.CodeSpan().addChild(
-                    new output.PlainText(docCodeSpan.code),
+                new EmbeddedNode(
+                    new output.CodeSpan().addChild(
+                        new output.PlainText(docCodeSpan.code),
+                    ),
+                    context.embeddedNodeContext,
                 ),
             );
             break;
@@ -207,7 +283,12 @@ function writeNode(
             } else if (docLinkTag.urlDestination) {
                 writeLinkTagWithUrlDestination(docLinkTag, context);
             } else if (docLinkTag.linkText) {
-                container.addChild(new output.PlainText(docLinkTag.linkText));
+                container.addChild(
+                    new EmbeddedNode(
+                        new output.PlainText(docLinkTag.linkText),
+                        context.embeddedNodeContext,
+                    ),
+                );
             }
             break;
         }
@@ -219,7 +300,9 @@ function writeNode(
             );
             const oldContainer = container;
             const paragraph = new output.Paragraph();
-            oldContainer.addChild(paragraph);
+            oldContainer.addChild(
+                new EmbeddedNode(paragraph, context.embeddedNodeContext),
+            );
             context.container = paragraph;
             for (const node of trimmedParagraph.nodes) {
                 writeNode(node, context);
@@ -230,9 +313,12 @@ function writeNode(
         case tsdoc.DocNodeKind.FencedCode: {
             const docFencedCode = docNode as tsdoc.DocFencedCode;
             container.addChild(
-                new output.CodeBlock(
-                    docFencedCode.language,
-                    docFencedCode.code,
+                new EmbeddedNode(
+                    new output.CodeBlock(
+                        docFencedCode.language,
+                        docFencedCode.code,
+                    ),
+                    context.embeddedNodeContext,
                 ),
             );
             break;
@@ -246,25 +332,38 @@ function writeNode(
         }
         case tsdoc.DocNodeKind.SoftBreak: {
             const lastChild = container.getLastNestedChild();
-            if (lastChild && lastChild instanceof output.Text) {
+            if (lastChild && lastChild instanceof output.RawText) {
                 if (lastChild.text && !/\s$/.test(lastChild.text)) {
                     lastChild.append(' ');
                 }
             } else {
-                container.addChild(new output.PlainText(' '));
+                container.addChild(
+                    new EmbeddedNode(
+                        new output.PlainText(' '),
+                        context.embeddedNodeContext,
+                    ),
+                );
             }
             break;
         }
         case tsdoc.DocNodeKind.EscapedText: {
             const docEscapedText = docNode as tsdoc.DocEscapedText;
             container.addChild(
-                new output.PlainText(docEscapedText.decodedText),
+                new EmbeddedNode(
+                    new output.PlainText(docEscapedText.decodedText),
+                    context.embeddedNodeContext,
+                ),
             );
             break;
         }
         case tsdoc.DocNodeKind.ErrorText: {
             const docErrorText = docNode as tsdoc.DocErrorText;
-            container.addChild(new output.PlainText(docErrorText.text));
+            container.addChild(
+                new EmbeddedNode(
+                    new output.PlainText(docErrorText.text),
+                    context.embeddedNodeContext,
+                ),
+            );
             break;
         }
         case tsdoc.DocNodeKind.InlineTag: {
@@ -273,12 +372,12 @@ function writeNode(
         case tsdoc.DocNodeKind.BlockTag: {
             const tagNode = docNode as tsdoc.DocBlockTag;
             if (tagNode.tagName !== '@see' && tagNode.tagName !== '@example') {
-                console.warn('Unsupported block tag: ' + tagNode.tagName);
+                console.warn(`Unsupported block tag: ${tagNode.tagName}`);
             }
             break;
         }
         default:
-            throw new Error('Unsupported DocNodeKind kind: ' + docNode.kind);
+            throw new Error(`Unsupported DocNodeKind kind: ${docNode.kind}`);
     }
 }
 
@@ -301,7 +400,9 @@ function writeLinkTagWithCodeDestination(
         throw new Error('No.');
     }
     const codeSpan = new output.HtmlElement('code');
-    context.container.addChild(codeSpan);
+    context.container.addChild(
+        new EmbeddedNode(codeSpan, context.embeddedNodeContext),
+    );
     const destination = getLinkToApiItemName(
         getApiItemName(context.apiItem),
         identifier,
@@ -329,8 +430,11 @@ function writeLinkTagWithUrlDestination(
             : urlDestination;
 
     context.container.addChild(
-        new output.Link(urlDestination).addChild(
-            new output.PlainText(linkText.replace(/\s+/g, ' ')),
+        new EmbeddedNode(
+            new output.Link(urlDestination).addChild(
+                new output.PlainText(linkText.replace(/\s+/g, ' ')),
+            ),
+            context.embeddedNodeContext,
         ),
     );
 }
@@ -390,29 +494,59 @@ function getLinkToApiItem(
     return relativePath ? `${relativePath}.md#${titleHash}` : `#${titleHash}`;
 }
 
+function isDocSectionEmpty(docComment: tsdoc.DocSection): boolean {
+    if (docComment.nodes.length === 0) {
+        return true;
+    }
+    if (docComment.nodes.length > 1) {
+        return false;
+    }
+    const firstNode = docComment.nodes[0];
+    if (firstNode.kind !== tsdoc.DocNodeKind.Paragraph) {
+        return false;
+    }
+    const paragraphChildren = firstNode.getChildNodes();
+    if (paragraphChildren.length > 1) {
+        return false;
+    }
+    return (
+        paragraphChildren.length === 1 &&
+        paragraphChildren[0].kind === tsdoc.DocNodeKind.SoftBreak
+    );
+}
+
 export function writeSummary(
     output: output.Container,
     apiItem: aeModel.ApiItem,
     context: Context,
-): void {
-    const summarySection = getDocComment(apiItem).summarySection;
+    docComment = getDocComment(apiItem),
+): boolean {
+    const summarySection = docComment.summarySection;
+    const isEmpty = isDocSectionEmpty(summarySection);
+    if (isEmpty) {
+        return false;
+    }
     writeApiItemDocNode(output, apiItem, summarySection, context);
+    return true;
 }
 
 export function writeExamples(
     container: output.Container,
     apiItem: aeModel.ApiItem,
     context: Context,
-): void {
-    const customBlocks = extractCustomBlocks(apiItem);
-    for (const exampleBlock of customBlocks.exampleBlocks) {
+    docComment = getDocComment(apiItem),
+): boolean {
+    let didWrite = false;
+    for (const exampleBlock of getExampleBlocks(docComment)) {
         container.addChild(
             new output.Title().addChild(new output.PlainText('Example')),
         );
         for (const block of exampleBlock.getChildNodes()) {
             writeApiItemDocNode(container, apiItem, block, context);
         }
+        didWrite = true;
     }
+    return didWrite;
 }
 
 function areMultipleKindsInApiItemList(apiItems: aeModel.ApiItem[]): boolean {
@@ -472,6 +606,88 @@ export function writeApiItemAnchor(
     }
 }
 
+export function writeBaseDoc(
+    container: output.Container,
+    apiItem: aeModel.ApiItem,
+    context: Context,
+    kind: ts.SyntaxKind,
+): void {
+    // eslint-disable-next-line max-len
+    const exportNameMetadata = context.sourceMetadata.syntaxKindToExportNameMetadata.get(
+        kind,
+    );
+    if (!exportNameMetadata) {
+        throw new Error(`No export name metadata for kind ${kind}.`);
+    }
+
+    const baseDocComment = exportNameMetadata.exportNameToBaseDocComment.get(
+        getApiItemName(apiItem),
+    );
+    if (!baseDocComment) {
+        return;
+    }
+
+    const tsdocParser = new tsdoc.TSDocParser(
+        aeModel.AedocDefinitions.tsdocConfiguration,
+    );
+    const parserContext = tsdocParser.parseRange(baseDocComment.textRange);
+    const docComment = parserContext.docComment;
+
+    const errorMessages = parserContext.log.messages.filter(
+        (message) => !message.toString().includes('@see'),
+    );
+
+    if (errorMessages.length !== 0) {
+        console.log(colors.red('Errors parsing TSDoc comment.'));
+        console.log(
+            colors.red(
+                baseDocComment.textRange.buffer.slice(
+                    baseDocComment.textRange.pos,
+                    baseDocComment.textRange.end,
+                ),
+            ),
+        );
+        for (const message of errorMessages) {
+            console.log(colors.red(message.toString()));
+        }
+    }
+
+    writeSummary(container, apiItem, context, docComment);
+    writeReturnsBlockWithoutType(container, apiItem, context, docComment);
+    writeExamples(container, apiItem, context, docComment);
+    writeSeeBlocks(container, apiItem, context, docComment);
+}
+
+function writeReturnsBlockWithoutType(
+    container: output.Container,
+    apiItem: aeModel.ApiItem,
+    context: Context,
+    docComment: tsdoc.DocComment,
+): void {
+    if (!docComment.returnsBlock) {
+        return;
+    }
+
+    container.addChild(
+        new output.Title().addChild(new output.PlainText('Returns')),
+    );
+    for (const node of docComment.returnsBlock.content.nodes) {
+        writeApiItemDocNode(container, apiItem, node, context);
+    }
+}
+
+export function writeSignatureExcerpt(
+    container: output.Container,
+    apiItem:
+        | aeModel.ApiFunction
+        | aeModel.ApiInterface
+        | aeModel.ApiVariable
+        | aeModel.ApiTypeAlias,
+    context: Context,
+) {
+    writeApiItemExcerpt(container, apiItem, apiItem.excerpt, context);
+}
+
 export function writeSignature(
     container: output.Container,
     apiItem:
@@ -484,17 +700,17 @@ export function writeSignature(
     container.addChild(
         new output.Title().addChild(new output.PlainText('Signature')),
     );
-    writeApiItemExcerpt(container, apiItem, apiItem.excerpt, context);
+    writeSignatureExcerpt(container, apiItem, context);
 }
 
 export function writeSeeBlocks(
     container: output.Container,
     apiItem: aeModel.ApiItem,
     context: Context,
-): void {
-    const customBlocks = extractCustomBlocks(apiItem);
+    docComment = getDocComment(apiItem),
+): boolean {
     const list = new output.List();
-    for (const seeBlock of customBlocks.seeBlocks) {
+    for (const seeBlock of getSeeBlocks(docComment)) {
         const listItem = new output.Container();
         list.addChild(listItem);
         for (const block of seeBlock.getChildNodes()) {
@@ -506,7 +722,9 @@ export function writeSeeBlocks(
             new output.Title().addChild(new output.PlainText('See Also')),
         );
         container.addChild(list);
+        return true;
     }
+    return false;
 }
 
 function appendExcerptWithHyperlinks(
@@ -569,7 +787,8 @@ export function writeParameters(
     container: output.Container,
     apiItem: aeModel.ApiFunction,
     context: Context,
-): void {
+): boolean {
+    let didWrite = false;
     const parametersTable = new output.Table(
         new output.TableRow()
             .addChild(new output.PlainText('Parameter'))
@@ -606,6 +825,7 @@ export function writeParameters(
             new output.Title().addChild(new output.PlainText('Parameters')),
         );
         container.addChild(parametersTable);
+        didWrite = true;
     }
 
     const docComment = getDocComment(apiItem);
@@ -637,7 +857,10 @@ export function writeParameters(
                     .addChild(new output.PlainText('Description')),
             ).addChild(returnsRow),
         );
+        didWrite = true;
     }
+
+    return didWrite;
 }
 
 // This is needed because api-extractor-model ships with its own tsdoc

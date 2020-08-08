@@ -266,7 +266,7 @@ export function flatSources<T>(...sources: Source<T>[]): Source<T>;
 // @public (undocumented)
 export function flatWith<T>(...sources: Source<T>[]): <U>(source: Source<U>) => Source<T | U>;
 
-// @public
+// @public (undocumented)
 export function flow(): <T>(x: T) => T;
 
 // @public (undocumented)
@@ -474,7 +474,7 @@ export interface Operator<T, U> {
     (source: Source<T>): Source<U>;
 }
 
-// @public
+// @public (undocumented)
 export function pipe<T>(x: T): T;
 
 // @public (undocumented)
@@ -513,7 +513,7 @@ export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T;
 // @public (undocumented)
 export function pluck<T, K extends keyof T>(key: K): Operator<T, T[K]>;
 
-// @public
+// @public (undocumented)
 export function Push<T>(): Push<undefined>;
 
 // @public (undocumented)

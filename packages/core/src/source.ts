@@ -121,7 +121,6 @@ export type Event<T> = Push<T> | Throw | End;
  * {@link Sink}, and has a `value` field equal to the value the event
  * is carrying.
  *
- * @param value - The value to send.
  * @returns The created Push event.
  *
  * @example
@@ -132,11 +131,15 @@ export type Event<T> = Push<T> | Throw | End;
  * ```
  *
  * @see {@link Event}
- *
+ */
+
+/**
  * @public
  */
 export function Push<T>(): Push<undefined>;
 /**
+ * @param value The value to put in the returned event.
+ *
  * @public
  */
 export function Push<T>(value: T): Push<T>;
@@ -381,7 +384,7 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
         if (!disposable.active) {
             if (event.type === ThrowType) {
                 const { error } = event;
-                throw new Error(
+                asyncReportError(
                     `A Throw event was intercepted by a disposed Sink: ${
                         // eslint-disable-next-line max-len
                         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

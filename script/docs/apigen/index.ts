@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import { createProgram } from './createProgram';
-import { generateSourceExportMappings } from './sourceExportMappings';
+import { generateSourceMetadata } from './sourceMetadata';
 import { loadApiModel } from './loadApiModel';
 import { ApiPageMap } from './apiUtil';
 import { globAbsolute } from './util';
@@ -10,15 +10,12 @@ const sourceFilePaths = globAbsolute('packages/*/src/**');
 const program = createProgram(sourceFilePaths);
 
 const sourceExportFiles = globAbsolute('packages/*/src/index.ts');
-const sourceExportMappings = generateSourceExportMappings(
-    program,
-    sourceExportFiles,
-);
+const sourceMetadata = generateSourceMetadata(program, sourceExportFiles);
 
 const apiModelFiles = globAbsolute('apiExtractor/temp/*.api.json');
 const apiModel = loadApiModel(apiModelFiles);
 
-const pageMap = new ApiPageMap(apiModel, sourceExportMappings);
+const pageMap = new ApiPageMap(apiModel, sourceMetadata);
 const outDir = getAbsolutePath('docs', 'api');
 
 fs.removeSync(outDir);
@@ -26,6 +23,6 @@ pageMap
     .renderAsMarkdownToDirectoryMap()
     .writeToDirectory(outDir)
     .catch((error) => {
-        console.error('error writing');
+        console.error('error writing.');
         throw error;
     });
