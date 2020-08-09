@@ -490,9 +490,7 @@ class ApiPage {
             implGroup.writeAsMarkdown(page);
         }
 
-        const mdOutput = new output.MarkdownOutput();
-        page.writeAsMarkdown(mdOutput);
-        return mdOutput.toString();
+        return page.renderAsMarkdown();
     }
 }
 
@@ -623,8 +621,7 @@ export class ApiPageMap {
                 return;
             }
 
-            const out = new output.MarkdownOutput();
-            new output.Container()
+            const contents = new output.Container()
                 .addChild(new output.DoNotEditComment())
                 .addChild(new output.PageTitle().addChild(pageTitleTextNode))
                 .addChildren(
@@ -634,12 +631,11 @@ export class ApiPageMap {
                         new output.Heading().addChild(headingLink),
                         tableOfContents,
                     ]),
-                )
-                .writeAsMarkdown(out);
+                );
 
             renderedDirectoryMap.addContentAtPath(
                 `${packageName}/README.md`,
-                out.toString(),
+                contents.renderAsMarkdown(),
             );
         });
 
@@ -681,18 +677,19 @@ export class ApiPageMap {
             },
         );
 
-        const out = new output.MarkdownOutput();
-        new output.Container()
+        const contents = new output.Container()
             .addChild(new output.DoNotEditComment())
             .addChild(
                 new output.PageTitle().addChild(
                     new output.PlainText('Awaken API Reference'),
                 ),
             )
-            .addChildren(...packageSummaries)
-            .writeAsMarkdown(out);
+            .addChildren(...packageSummaries);
 
-        renderedDirectoryMap.addContentAtPath('README.md', out.toString());
+        renderedDirectoryMap.addContentAtPath(
+            'README.md',
+            contents.renderAsMarkdown(),
+        );
 
         return renderedDirectoryMap;
     }

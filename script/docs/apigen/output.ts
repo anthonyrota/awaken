@@ -134,11 +134,17 @@ export class MarkdownOutput extends IndentedWriter {
     }
 }
 
-export interface Node {
-    writeAsMarkdown(output: MarkdownOutput): void;
+export abstract class Node {
+    abstract writeAsMarkdown(output: MarkdownOutput): void;
+
+    public renderAsMarkdown(): string {
+        const output = new MarkdownOutput();
+        this.writeAsMarkdown(output);
+        return output.toString();
+    }
 }
 
-export class Container<T extends Node = Node> implements Node {
+export class Container<T extends Node = Node> extends Node {
     protected _children: T[] = [];
 
     public setChildren(children: T[]): this {
@@ -189,8 +195,10 @@ export class Container<T extends Node = Node> implements Node {
 
 const newlineRegexp = /\r?\n/g;
 
-export class RawText implements Node {
-    constructor(public text: string) {}
+export class RawText extends Node {
+    constructor(public text: string) {
+        super();
+    }
 
     public append(text: string) {
         this.text += text;
@@ -205,7 +213,7 @@ function escapeHashAtEnd(str: string): string {
     return `${str.slice(0, -1)}\\#`;
 }
 
-export class PlainText extends RawText implements Node {
+export class PlainText extends RawText {
     public writeAsMarkdown(output: MarkdownOutput): void {
         let { text } = this;
 
@@ -506,7 +514,7 @@ export function parseMarkdown(text: string): Container {
     return container;
 }
 
-export class HorizontalRule implements Node {
+export class HorizontalRule extends Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (output.constrainedToSingleLine) {
             output.write('<hr>');
@@ -517,8 +525,10 @@ export class HorizontalRule implements Node {
     }
 }
 
-export class HtmlComment implements Node {
-    constructor(public comment: string) {}
+export class HtmlComment extends Node {
+    constructor(public comment: string) {
+        super();
+    }
 
     public writeAsMarkdown(): void {
         throw new Error(
@@ -527,8 +537,10 @@ export class HtmlComment implements Node {
     }
 }
 
-export class PersistentHtmlComment implements Node {
-    constructor(private _comment: string) {}
+export class PersistentHtmlComment extends Node {
+    constructor(private _comment: string) {
+        super();
+    }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.write('<!--');
@@ -537,7 +549,7 @@ export class PersistentHtmlComment implements Node {
     }
 }
 
-export class BlockQuote extends Container implements Node {
+export class BlockQuote extends Container {
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.increaseIndent('> ');
         super.writeAsMarkdown(output);
@@ -545,7 +557,7 @@ export class BlockQuote extends Container implements Node {
     }
 }
 
-export class HtmlElement extends Container implements Node {
+export class HtmlElement extends Container {
     constructor(public tagName: string) {
         super();
     }
@@ -574,25 +586,25 @@ export class HtmlElement extends Container implements Node {
     }
 }
 
-export class Italics extends HtmlElement implements Node {
+export class Italics extends HtmlElement {
     constructor() {
         super('i');
     }
 }
 
-export class Bold extends HtmlElement implements Node {
+export class Bold extends HtmlElement {
     constructor() {
         super('b');
     }
 }
 
-export class Strikethrough extends HtmlElement implements Node {
+export class Strikethrough extends HtmlElement {
     constructor() {
         super('s');
     }
 }
 
-export class CodeSpan extends HtmlElement implements Node {
+export class CodeSpan extends HtmlElement {
     constructor() {
         super('code');
     }
@@ -604,7 +616,7 @@ export class CodeSpan extends HtmlElement implements Node {
     }
 }
 
-export class CodeBlock extends Container implements Node {
+export class CodeBlock extends Container {
     constructor(private _language: string, private _code: string) {
         super();
     }
@@ -631,7 +643,7 @@ export class CodeBlock extends Container implements Node {
     }
 }
 
-export class RichCodeBlock extends Container implements Node {
+export class RichCodeBlock extends Container {
     constructor(private _language: string) {
         super();
         this._language;
@@ -653,7 +665,7 @@ export class RichCodeBlock extends Container implements Node {
     }
 }
 
-export class Link extends Container implements Node {
+export class Link extends Container {
     constructor(private _destination: string, private _title?: string) {
         super();
     }
@@ -686,7 +698,7 @@ export class Link extends Container implements Node {
     }
 }
 
-export class LocalPageLink extends Container implements Node {
+export class LocalPageLink extends Container {
     constructor(private _destination: string, private _title?: string) {
         super();
     }
@@ -702,12 +714,14 @@ export class LocalPageLink extends Container implements Node {
     }
 }
 
-export class Image implements Node {
+export class Image extends Node {
     constructor(
         private _src: string,
         private _title?: string,
         private _alt?: string,
-    ) {}
+    ) {
+        super();
+    }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.withInSingleLine(() => {
@@ -738,7 +752,7 @@ export class Image implements Node {
     }
 }
 
-export class Paragraph extends Container implements Node {
+export class Paragraph extends Container {
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (this._children.length === 0) {
             return;
@@ -760,7 +774,7 @@ export class Paragraph extends Container implements Node {
     }
 }
 
-export class Heading extends Container implements Node {
+export class Heading extends Container {
     constructor(private _alternateId?: string) {
         super();
     }
@@ -779,7 +793,7 @@ export class Heading extends Container implements Node {
     }
 }
 
-export class Subheading extends Container implements Node {
+export class Subheading extends Container {
     constructor(private _alternateId?: string) {
         super();
     }
@@ -798,7 +812,7 @@ export class Subheading extends Container implements Node {
     }
 }
 
-export class Title extends HtmlElement implements Node {
+export class Title extends HtmlElement {
     constructor() {
         // At the time of writing Github styles regular text and h4 elements
         // with the same font size. Therefore rendering the titles and bold
@@ -815,7 +829,7 @@ export class Title extends HtmlElement implements Node {
     }
 }
 
-export class List extends Container implements Node {
+export class List extends Container {
     constructor(private _ordered?: boolean, private _start = 1) {
         super();
     }
@@ -843,7 +857,7 @@ export class List extends Container implements Node {
     }
 }
 
-export class TableRow extends Container implements Node {
+export class TableRow extends Container {
     public writeAsMarkdown(
         output: MarkdownOutput,
         columnCount = this.getChildCount(),
@@ -866,7 +880,7 @@ export class TableRow extends Container implements Node {
     }
 }
 
-export class Table extends Container<TableRow> implements Node {
+export class Table extends Container<TableRow> {
     public constructor(private readonly _header: TableRow) {
         super();
     }
@@ -907,14 +921,14 @@ export class Table extends Container<TableRow> implements Node {
     }
 }
 
-export class CollapsableSection extends HtmlElement implements Node {
+export class CollapsableSection extends HtmlElement {
     constructor(summaryNode: Node) {
         super('details');
         this.addChild(new HtmlElement('summary').addChild(summaryNode));
     }
 }
 
-export class PageTitle extends Container implements Node {
+export class PageTitle extends Container {
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.ensureNewParagraph();
         output.withInSingleLine(() => {
@@ -924,11 +938,13 @@ export class PageTitle extends Container implements Node {
     }
 }
 
-export class TableOfContentsList implements Node {
+export class TableOfContentsList extends Node {
     constructor(
         private _toc: TableOfContents_,
         private _relativePagePath = '',
-    ) {}
+    ) {
+        super();
+    }
 
     private _buildTableOfContentsLink(
         reference: TableOfContentsInlineReference,
@@ -983,14 +999,14 @@ export class TableOfContentsList implements Node {
     }
 }
 
-export class TableOfContents extends CollapsableSection implements Node {
+export class TableOfContents extends CollapsableSection {
     constructor(toc: TableOfContents_, relativePagePath?: string) {
         super(new Bold().addChild(new PlainText('Table of Contents')));
         this.addChild(new TableOfContentsList(toc, relativePagePath));
     }
 }
 
-export class DoNotEditComment extends PersistentHtmlComment implements Node {
+export class DoNotEditComment extends PersistentHtmlComment {
     constructor() {
         super(
             ' Do not edit this file. It is automatically generated by a build script. ',
@@ -998,7 +1014,7 @@ export class DoNotEditComment extends PersistentHtmlComment implements Node {
     }
 }
 
-export class Page extends Container implements Node {
+export class Page extends Container {
     constructor(private _metadata: PageMetadata) {
         super();
     }

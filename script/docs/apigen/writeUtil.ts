@@ -157,13 +157,14 @@ class EmbeddedNodeContext {
     }
 }
 
-class EmbeddedNode implements output.Node {
+class EmbeddedNode extends output.Node {
     private _marker: string;
 
     constructor(
         public node: output.Node,
         protected _context: EmbeddedNodeContext,
     ) {
+        super();
         if (node instanceof EmbeddedNode) {
             throw new Error(
                 'EmbeddedNode node argument cannot be an EmbeddedNode.',
@@ -181,12 +182,9 @@ class EmbeddedNode implements output.Node {
             return;
         }
 
-        const out = new output.MarkdownOutput();
-        const container = new output.Container().addChildren(
-            ...this.node.getChildren(),
-        );
-        container.writeAsMarkdown(out);
-        const markdown = out.toString();
+        const markdown = new output.Container()
+            .addChildren(...this.node.getChildren())
+            .renderAsMarkdown();
         const markdownContainer = output.parseMarkdown(markdown);
 
         this._substituteEmbeddedNodes(markdownContainer);
