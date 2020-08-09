@@ -23,6 +23,6 @@ pageMap
     .renderAsMarkdownToDirectoryMap()
     .writeToDirectory(outDir)
     .catch((error) => {
-        console.error('error writing pages to our directory...');
+        console.error('error writing pages to out directory...');
         throw error;
     });
