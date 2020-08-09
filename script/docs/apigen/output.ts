@@ -921,7 +921,7 @@ export class Table extends Container<TableRow> {
     }
 }
 
-export class CollapsableSection extends HtmlElement {
+export class CollapsibleSection extends HtmlElement {
     constructor(summaryNode: Node) {
         super('details');
         this.addChild(new HtmlElement('summary').addChild(summaryNode));
@@ -999,7 +999,7 @@ export class TableOfContentsList extends Node {
     }
 }
 
-export class TableOfContents extends CollapsableSection {
+export class TableOfContents extends CollapsibleSection {
     constructor(toc: TableOfContents_, relativePagePath?: string) {
         super(new Bold().addChild(new PlainText('Table of Contents')));
         this.addChild(new TableOfContentsList(toc, relativePagePath));

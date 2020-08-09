@@ -661,7 +661,7 @@ export class ApiPageMap {
 
                 return [
                     heading,
-                    new output.CollapsableSection(
+                    new output.CollapsibleSection(
                         new output.Bold().addChild(
                             new output.PlainText('Table of Contents'),
                         ),
