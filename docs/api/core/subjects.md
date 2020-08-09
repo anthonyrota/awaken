@@ -2,13 +2,13 @@
 
 # API Reference - Subjects
 
-## Table of Contents
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>CurrentValueSubject</code>](#currentvaluesubject) - [<code>Function</code>](#currentvaluesubject-function), [<code>Interface</code>](#currentvaluesubject-interface)
 2. [<code>FinalValueSubject</code>](#finalvaluesubject)
 3. [<code>ReplaySubject</code>](#replaysubject)
    1. [<code>ReplaySubjectTimeoutConfig</code>](#replaysubjecttimeoutconfig)
-4. [<code>SubjectBase</code>](#subjectbase)
+4. [<code>SubjectBase</code>](#subjectbase)</details>
 
 ## <code>CurrentValueSubject</code>
 
@@ -16,25 +16,25 @@
 
 <b>Signature</b>
 
-<pre>function CurrentValueSubject&lt;T&gt;(initialValue: T): <a href="_index.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
+<pre>function CurrentValueSubject&lt;T&gt;(initialValue: T): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
 
 ### <a name="currentvaluesubject-interface"></a><code>CurrentValueSubject - Interface</code>
 
 <b>Signature</b>
 
-<pre>interface CurrentValueSubject&lt;T&gt; extends <a href="_index.md#subject-interface">Subject</a>&lt;T&gt; </pre>
+<pre>interface CurrentValueSubject&lt;T&gt; extends <a href="basics.md#subject-interface">Subject</a>&lt;T&gt; </pre>
 
 ## <code>FinalValueSubject</code>
 
 <b>Signature</b>
 
-<pre>function FinalValueSubject&lt;T&gt;(): <a href="_index.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
+<pre>function FinalValueSubject&lt;T&gt;(): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
 
 ## <code>ReplaySubject</code>
 
 <b>Signature</b>
 
-<pre>function ReplaySubject&lt;T&gt;(count_?: number | null, timeoutConfig_?: <a href="#replaysubjecttimeoutconfig">ReplaySubjectTimeoutConfig</a> | null): <a href="_index.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
+<pre>function ReplaySubject&lt;T&gt;(count_?: number | null, timeoutConfig_?: <a href="#replaysubjecttimeoutconfig">ReplaySubjectTimeoutConfig</a> | null): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
 
 ## <code>ReplaySubjectTimeoutConfig</code>
 
@@ -46,4 +46,4 @@
 
 <b>Signature</b>
 
-<pre>function SubjectBase&lt;T&gt;(): <a href="_index.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
+<pre>function SubjectBase&lt;T&gt;(): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>

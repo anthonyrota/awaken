@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as aeModel from '@microsoft/api-extractor-model';
+import * as _ from 'lodash';
 import * as writeUtil from './writeUtil';
 import * as output from './output';
 import {
@@ -11,7 +12,11 @@ import {
     TableOfContents,
 } from '../pageMetadata';
 import { SourceMetadata } from './sourceMetadata';
-import { APIPageData, assertMappedApiItemNames, forEachPage } from './paths';
+import {
+    APIPageData,
+    assertMappedApiItemNames,
+    forEachPackageWithPages,
+} from './paths';
 
 interface ExportImplementation<T extends aeModel.ApiItem> {
     readonly actualKind: aeModel.ApiItemKind;
@@ -388,6 +393,7 @@ function getReleaseTag(apiItem: aeModel.ApiItem): aeModel.ReleaseTag {
 }
 
 class ApiPage {
+    public tableOfContents!: TableOfContents;
     private _nameToImplGroup = new Map<string, ExportImplementationGroup>();
 
     constructor(
@@ -443,7 +449,7 @@ class ApiPage {
     }
 
     public renderAsMarkdown(): string {
-        const tableOfContents: TableOfContents = [];
+        this.tableOfContents = [];
         for (const item of this._pageData.items) {
             const reference: TableOfContentsMainReference = {
                 text: item.main,
@@ -472,12 +478,12 @@ class ApiPage {
                     reference.nested_references.push(nestedReference);
                 }
             }
-            tableOfContents.push(reference);
+            this.tableOfContents.push(reference);
         }
 
         const page = new output.Page({
             title: this._pageData.title,
-            table_of_contents: tableOfContents,
+            table_of_contents: this.tableOfContents,
         });
 
         for (const [, implGroup] of this._nameToImplGroup) {
@@ -540,9 +546,11 @@ export class ApiPageMap {
 
         assertMappedApiItemNames(apiItemsByMemberName.keys());
 
-        forEachPage((pathName, pageData) => {
-            const page = new ApiPage(this._context, pageData);
-            this._pathToPage.set(pathName, page);
+        forEachPackageWithPages((packageName, pages) => {
+            for (const [pageName, pageData] of pages) {
+                const page = new ApiPage(this._context, pageData);
+                this._pathToPage.set(`${packageName}/${pageName}`, page);
+            }
         });
     }
 
@@ -551,10 +559,140 @@ export class ApiPageMap {
 
         for (const [path, page] of this._pathToPage) {
             renderedDirectoryMap.addContentAtPath(
-                path + '.md',
+                `${path}.md`,
                 page.renderAsMarkdown(),
             );
         }
+
+        interface GetPageLinksFunction {
+            (inBase: boolean): {
+                headingLink: output.Node;
+                tableOfContents: output.Node;
+            }[];
+        }
+
+        const packageNameToPageSummaryMap = new Map<
+            string,
+            {
+                isOneIndexPagePackage: boolean;
+                pageTitleTextNode: output.Node;
+                getPageLinks: GetPageLinksFunction;
+            }
+        >();
+
+        forEachPackageWithPages((packageName, pages) => {
+            const isOneIndexPagePackage =
+                pages.length === 1 && pages[0][0] === '_index';
+            const pageTitleTextNode = new output.PlainText(
+                `API Reference - ${_.upperFirst(_.camelCase(packageName))}`,
+            );
+            const getPageLinks: GetPageLinksFunction = (inBase) =>
+                pages.map(([pageName_, page]) => {
+                    const pageName = isOneIndexPagePackage
+                        ? 'README'
+                        : pageName_;
+                    const pagePath = inBase
+                        ? `${packageName}/${pageName}`
+                        : pageName;
+                    return {
+                        headingLink: new output.LocalPageLink(
+                            pagePath,
+                        ).addChild(new output.PlainText(page.title)),
+                        tableOfContents: new output.TableOfContents(
+                            // eslint-disable-next-line max-len
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            this._pathToPage.get(
+                                `${packageName}/${pageName_}`,
+                            )!.tableOfContents,
+                            pagePath,
+                        ),
+                    };
+                });
+
+            packageNameToPageSummaryMap.set(packageName, {
+                isOneIndexPagePackage,
+                pageTitleTextNode,
+                getPageLinks,
+            });
+
+            if (isOneIndexPagePackage) {
+                renderedDirectoryMap.replaceContentAtPath(
+                    `${packageName}/_index.md`,
+                    `${packageName}/README.md`,
+                );
+                return;
+            }
+
+            const out = new output.MarkdownOutput();
+            new output.Container()
+                .addChild(new output.DoNotEditComment())
+                .addChild(new output.PageTitle().addChild(pageTitleTextNode))
+                .addChildren(
+                    ...getPageLinks(
+                        false,
+                    ).flatMap(({ headingLink, tableOfContents }) => [
+                        new output.Heading().addChild(headingLink),
+                        tableOfContents,
+                    ]),
+                )
+                .writeAsMarkdown(out);
+
+            renderedDirectoryMap.addContentAtPath(
+                `${packageName}/README.md`,
+                out.toString(),
+            );
+        });
+
+        const packageNameAndSummaries = packageNameToPageSummaryMap.entries();
+        const packageSummaries = Array.from(packageNameAndSummaries).flatMap(
+            ([packageName, packageSummary]) => {
+                const {
+                    isOneIndexPagePackage,
+                    pageTitleTextNode,
+                    getPageLinks,
+                } = packageSummary;
+
+                const heading = new output.Heading().addChild(
+                    new output.LocalPageLink(`${packageName}/README`).addChild(
+                        pageTitleTextNode,
+                    ),
+                );
+
+                if (isOneIndexPagePackage) {
+                    const { tableOfContents } = getPageLinks(true)[0];
+                    return [heading, tableOfContents];
+                }
+
+                return [
+                    heading,
+                    new output.CollapsableSection(
+                        new output.Bold().addChild(
+                            new output.PlainText('Table of Contents'),
+                        ),
+                    ).addChildren(
+                        ...getPageLinks(
+                            true,
+                        ).flatMap(({ headingLink, tableOfContents }) => [
+                            new output.Subheading().addChild(headingLink),
+                            tableOfContents,
+                        ]),
+                    ),
+                ];
+            },
+        );
+
+        const out = new output.MarkdownOutput();
+        new output.Container()
+            .addChild(new output.DoNotEditComment())
+            .addChild(
+                new output.PageTitle().addChild(
+                    new output.PlainText('Awaken API Reference'),
+                ),
+            )
+            .addChildren(...packageSummaries)
+            .writeAsMarkdown(out);
+
+        renderedDirectoryMap.addContentAtPath('README.md', out.toString());
 
         return renderedDirectoryMap;
     }
@@ -568,7 +706,10 @@ class Folder {
 class RenderedDirectoryMap {
     private _rootFolder = new Folder();
 
-    public addContentAtPath(path: string, content: string): void {
+    private _getPathFolderAndFileName(
+        path: string,
+        foldersShouldExist?: boolean,
+    ): [Folder, string] {
         const splitPath = path.split('/');
         const fileName = splitPath.pop();
 
@@ -581,6 +722,9 @@ class RenderedDirectoryMap {
             let nestedFolder = folder.folders.get(dirName);
 
             if (!nestedFolder) {
+                if (foldersShouldExist) {
+                    throw new Error(`Folder does not exist at path ${path}.`);
+                }
                 nestedFolder = new Folder();
                 folder.folders.set(dirName, nestedFolder);
             }
@@ -588,11 +732,44 @@ class RenderedDirectoryMap {
             folder = nestedFolder;
         }
 
+        return [folder, fileName];
+    }
+
+    public addContentAtPath(path: string, content: string): void {
+        const [folder, fileName] = this._getPathFolderAndFileName(path);
+
         if (folder.files.has(fileName)) {
-            throw new Error(`Duplicate path ${path}`);
+            throw new Error(`Duplicate path ${path}.`);
         }
 
         folder.files.set(fileName, content);
+    }
+
+    public getContentAtPath(path: string): string {
+        const [folder, fileName] = this._getPathFolderAndFileName(path, true);
+        const content = folder.files.get(fileName);
+
+        if (content === undefined) {
+            throw new Error(`No content at path ${path}.`);
+        }
+
+        return content;
+    }
+
+    public removeContentAtPath(path: string): void {
+        const [folder, fileName] = this._getPathFolderAndFileName(path, true);
+
+        if (!folder.files.has(fileName)) {
+            throw new Error(`No content to delete at path ${path}.`);
+        }
+
+        folder.files.delete(fileName);
+    }
+
+    public replaceContentAtPath(oldPath: string, newPath: string): void {
+        const content = this.getContentAtPath(oldPath);
+        this.removeContentAtPath(oldPath);
+        this.addContentAtPath(newPath, content);
     }
 
     public writeToDirectory(dirName: string): Promise<unknown> {

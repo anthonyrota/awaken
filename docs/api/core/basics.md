@@ -2,7 +2,7 @@
 
 # API Reference - Basics
 
-## Table of Contents
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>Disposable</code>](#disposable) - [<code>Function</code>](#disposable-function), [<code>Interface</code>](#disposable-interface)
    1. [<code>isDisposable</code>](#isdisposable)
@@ -33,7 +33,7 @@
    3. [<code>SubjectDistributionSinkDisposalErrorConstructor</code>](#subjectdistributionsinkdisposalerrorconstructor)
    4. [<code>markAsSubject</code>](#markassubject)
    5. [<code>NonMarkedSubject</code>](#nonmarkedsubject)
-7. [<code>ScheduleFunction</code>](#schedulefunction)
+7. [<code>ScheduleFunction</code>](#schedulefunction)</details>
 
 ## <code>Disposable</code>
 

@@ -12,6 +12,7 @@ import * as unist from 'unist';
 import * as unified from 'unified';
 import * as remarkParse from 'remark-parse';
 import { IndentedWriter } from './util';
+import { htmlBlockElements } from './htmlBlockElements';
 import {
     TableOfContentsInlineReference,
     TableOfContentsNestedReference,
@@ -79,6 +80,7 @@ export class MarkdownOutput extends IndentedWriter {
     }
 
     public withMarkedNewParagraph(write: () => void): void {
+        this._inHtmlBlockTag = false;
         this._isMarkedNewParagraph = true;
         write();
         this._isMarkedNewParagraph = false;
@@ -117,6 +119,7 @@ export class MarkdownOutput extends IndentedWriter {
             this._isMarkedNewParagraph = false;
             return;
         }
+        this._inHtmlBlockTag = false;
         super.ensureSkippedLine();
     }
 
@@ -524,6 +527,16 @@ export class HtmlComment implements Node {
     }
 }
 
+export class PersistentHtmlComment implements Node {
+    constructor(private _comment: string) {}
+
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        output.write('<!--');
+        output.write(this._comment);
+        output.write('-->');
+    }
+}
+
 export class BlockQuote extends Container implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.increaseIndent('> ');
@@ -537,7 +550,7 @@ export class HtmlElement extends Container implements Node {
         super();
     }
 
-    public writeAsMarkdown(output: MarkdownOutput): void {
+    private _writeTagAsMarkdown(output: MarkdownOutput): void {
         output.write('<');
         writePlainText(output, this.tagName);
         output.write('>');
@@ -545,6 +558,19 @@ export class HtmlElement extends Container implements Node {
         output.write('</');
         writePlainText(output, this.tagName);
         output.write('>');
+    }
+
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        if (htmlBlockElements.has(this.tagName)) {
+            if (!output.constrainedToSingleLine && !output.inHtmlBlockTag) {
+                output.ensureNewParagraph();
+            }
+            output.withInHtmlBlockTag(() => {
+                this._writeTagAsMarkdown(output);
+            });
+            return;
+        }
+        this._writeTagAsMarkdown(output);
     }
 }
 
@@ -563,17 +589,6 @@ export class Bold extends HtmlElement implements Node {
 export class Strikethrough extends HtmlElement implements Node {
     constructor() {
         super('s');
-    }
-}
-
-export class HtmlBlockElement extends HtmlElement implements Node {
-    public writeAsMarkdown(output: MarkdownOutput): void {
-        if (!output.constrainedToSingleLine) {
-            output.ensureNewParagraph();
-        }
-        output.withInHtmlBlockTag(() => {
-            super.writeAsMarkdown(output);
-        });
     }
 }
 
@@ -632,7 +647,7 @@ export class RichCodeBlock extends Container implements Node {
             return;
         }
 
-        new HtmlBlockElement('pre')
+        new HtmlElement('pre')
             .addChildren(...this._children)
             .writeAsMarkdown(output);
     }
@@ -668,6 +683,22 @@ export class Link extends Container implements Node {
             }
             output.write(')');
         });
+    }
+}
+
+export class LocalPageLink extends Container implements Node {
+    constructor(private _destination: string, private _title?: string) {
+        super();
+    }
+
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        const [path, hash] = this._destination.split('#');
+        new Link(
+            path ? (hash ? `${path}.md#${hash}` : `${path}.md`) : `#${hash}`,
+            this._title,
+        )
+            .addChildren(...this._children)
+            .writeAsMarkdown(output);
     }
 }
 
@@ -718,7 +749,7 @@ export class Paragraph extends Container implements Node {
         }
         output.withInParagraphNode(() => {
             if (output.constrainedToSingleLine) {
-                new HtmlBlockElement('p')
+                new HtmlElement('p')
                     .addChildren(...this._children)
                     .writeAsMarkdown(output);
                 return;
@@ -876,7 +907,14 @@ export class Table extends Container<TableRow> implements Node {
     }
 }
 
-class PageTitle extends Container implements Node {
+export class CollapsableSection extends HtmlElement implements Node {
+    constructor(summaryNode: Node) {
+        super('details');
+        this.addChild(new HtmlElement('summary').addChild(summaryNode));
+    }
+}
+
+export class PageTitle extends Container implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.ensureNewParagraph();
         output.withInSingleLine(() => {
@@ -886,15 +924,18 @@ class PageTitle extends Container implements Node {
     }
 }
 
-class TableOfContents implements Node {
-    constructor(private _toc: TableOfContents_) {}
+export class TableOfContentsList implements Node {
+    constructor(
+        private _toc: TableOfContents_,
+        private _relativePagePath = '',
+    ) {}
 
     private _buildTableOfContentsLink(
         reference: TableOfContentsInlineReference,
-    ): Link {
-        return new Link(`#${reference.url_hash_text}`).addChild(
-            new CodeSpan().addChild(new PlainText(reference.text)),
-        );
+    ): Node {
+        return new LocalPageLink(
+            `${this._relativePagePath}#${reference.url_hash_text}`,
+        ).addChild(new CodeSpan().addChild(new PlainText(reference.text)));
     }
 
     private _buildTableOfContentsListItem(
@@ -924,12 +965,7 @@ class TableOfContents implements Node {
     }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
-        const container = new Container();
-        container.addChild(
-            new Heading().addChild(new PlainText('Table of Contents')),
-        );
         const contentsList = new List(true);
-        container.addChild(contentsList);
         for (const mainReference of this._toc) {
             const listItem = this._buildTableOfContentsListItem(mainReference);
             contentsList.addChild(listItem);
@@ -943,23 +979,38 @@ class TableOfContents implements Node {
                 }
             }
         }
-        container.writeAsMarkdown(output);
+        contentsList.writeAsMarkdown(output);
+    }
+}
+
+export class TableOfContents extends CollapsableSection implements Node {
+    constructor(toc: TableOfContents_, relativePagePath?: string) {
+        super(new Bold().addChild(new PlainText('Table of Contents')));
+        this.addChild(new TableOfContentsList(toc, relativePagePath));
+    }
+}
+
+export class DoNotEditComment extends PersistentHtmlComment implements Node {
+    constructor() {
+        super(
+            ' Do not edit this file. It is automatically generated by a build script. ',
+        );
     }
 }
 
 export class Page extends Container implements Node {
     constructor(private _metadata: PageMetadata) {
         super();
-        this.addChild(
-            new PageTitle().addChild(new PlainText(this._metadata.title)),
-        );
-        this.addChild(new TableOfContents(this._metadata.table_of_contents));
     }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
-        output.write(
-            '<!-- Do not edit this file. It is automatically generated by a build script. -->',
-        );
+        new Container()
+            .addChild(new DoNotEditComment())
+            .addChild(
+                new PageTitle().addChild(new PlainText(this._metadata.title)),
+            )
+            .addChild(new TableOfContents(this._metadata.table_of_contents))
+            .writeAsMarkdown(output);
         super.writeAsMarkdown(output);
         output.ensureNewLine();
     }

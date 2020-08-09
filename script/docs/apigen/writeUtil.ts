@@ -407,7 +407,7 @@ function writeLinkTagWithCodeDestination(
         identifier,
     );
     codeSpan.addChild(
-        new output.Link(destination).addChild(
+        new output.LocalPageLink(destination).addChild(
             new output.PlainText(
                 docLinkTag.linkText !== undefined
                     ? docLinkTag.linkText
@@ -474,7 +474,7 @@ function getLinkToApiItemName(
     const relativePath = getRelativePath(currentApiItemPath, apiItemPath);
     const titleHash = apiItemName.toLowerCase();
 
-    return relativePath ? `${relativePath}.md#${titleHash}` : `#${titleHash}`;
+    return relativePath ? `${relativePath}#${titleHash}` : `#${titleHash}`;
 }
 
 function getLinkToApiItem(
@@ -490,7 +490,7 @@ function getLinkToApiItem(
     const relativePath = getRelativePath(currentApiItemPath, apiItemPath);
     const titleHash = getApiItemAnchorName(apiItem, context);
 
-    return relativePath ? `${relativePath}.md#${titleHash}` : `#${titleHash}`;
+    return relativePath ? `${relativePath}#${titleHash}` : `#${titleHash}`;
 }
 
 function isDocSectionEmpty(docComment: tsdoc.DocSection): boolean {
@@ -752,7 +752,7 @@ function appendExcerptWithHyperlinks(
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
             codeBlock.addChild(
-                new output.Link(
+                new output.LocalPageLink(
                     getLinkToApiItem(
                         getApiItemName(apiItem),
                         result.apiItem,
@@ -1098,7 +1098,7 @@ function writeApiItemExcerpt(
                 context,
             );
             codeBlock.addChild(
-                new output.Link(destination).addChild(
+                new output.LocalPageLink(destination).addChild(
                     new output.PlainText(tokenText),
                 ),
             );

@@ -2,7 +2,7 @@
 
 # API Reference - Sources
 
-## Table of Contents
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>all</code>](#all)
 2. [<code>animationFrames</code>](#animationframes)
@@ -35,55 +35,55 @@
 29. [<code>throwError</code>](#throwerror)
 30. [<code>throwErrorScheduled</code>](#throwerrorscheduled)
 31. [<code>timer</code>](#timer)
-32. [<code>zipSources</code>](#zipsources)
+32. [<code>zipSources</code>](#zipsources)</details>
 
 ## <code>all</code>
 
 <b>Signature</b>
 
-<pre>function all&lt;T extends unknown[]&gt;(sources: WrapValuesInSource&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function all&lt;T extends unknown[]&gt;(sources: WrapValuesInSource&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>animationFrames</code>
 
 <b>Signature</b>
 
-<pre>var animationFrames: <a href="_index.md#source-interface">Source</a>&lt;number&gt;</pre>
+<pre>var animationFrames: <a href="basics.md#source-interface">Source</a>&lt;number&gt;</pre>
 
 ## <code>combineSources</code>
 
 <b>Signature</b>
 
-<pre>function combineSources&lt;T extends unknown[]&gt;(...sources: WrapValuesInSource&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function combineSources&lt;T extends unknown[]&gt;(...sources: WrapValuesInSource&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>concatSources</code>
 
 <b>Signature</b>
 
-<pre>function concatSources&lt;T&gt;(...sources: <a href="_index.md#source-interface">Source</a>&lt;T&gt;[]): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function concatSources&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>empty</code>
 
 <b>Signature</b>
 
-<pre>var empty: <a href="_index.md#source-interface">Source</a>&lt;never&gt;</pre>
+<pre>var empty: <a href="basics.md#source-interface">Source</a>&lt;never&gt;</pre>
 
 ## <code>emptyScheduled</code>
 
 <b>Signature</b>
 
-<pre>function emptyScheduled(schedule: <a href="_index.md#schedulefunction">ScheduleFunction</a>): <a href="_index.md#source-interface">Source</a>&lt;never&gt;;</pre>
+<pre>function emptyScheduled(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
 
 ## <code>flatSources</code>
 
 <b>Signature</b>
 
-<pre>function flatSources&lt;T&gt;(...sources: <a href="_index.md#source-interface">Source</a>&lt;T&gt;[]): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function flatSources&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromArray</code>
 
 <b>Signature</b>
 
-<pre>function fromArray&lt;T&gt;(array: ArrayLike&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromArray&lt;T&gt;(array: ArrayLike&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 Creates a Source from the given array\/array-like. The values of the array will be synchronously emitted by the created source upon each subscription.
 
@@ -97,7 +97,7 @@ Creates a Source from the given array\/array-like. The values of the array will 
 
 | Type | Description |
 | --- | --- |
-| <code>[Source](\_index.md#source-interface)&lt;T&gt;</code> | <p>The created source.</p> |
+| <code>[Source](basics.md#source-interface)&lt;T&gt;</code> | <p>The created source.</p> |
 
 <b>Example Usage</b>
 
@@ -130,25 +130,25 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function fromArrayScheduled&lt;T&gt;(array: ArrayLike&lt;T&gt;, schedule: <a href="_index.md#schedulefunction">ScheduleFunction</a>): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromArrayScheduled&lt;T&gt;(array: ArrayLike&lt;T&gt;, schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromAsyncIterable</code>
 
 <b>Signature</b>
 
-<pre>function fromAsyncIterable&lt;T&gt;(iterable: AsyncIterable&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromAsyncIterable&lt;T&gt;(iterable: AsyncIterable&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromIterable</code>
 
 <b>Signature</b>
 
-<pre>function fromIterable&lt;T&gt;(iterable: Iterable&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromIterable&lt;T&gt;(iterable: Iterable&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromPromise</code>
 
 <b>Signature</b>
 
-<pre>function fromPromise&lt;T&gt;(promise: PromiseLike&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromPromise&lt;T&gt;(promise: PromiseLike&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromReactiveValue</code>
 
@@ -156,13 +156,13 @@ pipe(
 
 <pre>function fromReactiveValue&lt;T extends unknown[], Signal&gt;(addCallback: (handler: (...args: T) =&gt; void) =&gt; Signal, removeCallback: (handler: (...args: T) =&gt; void, signal: {
     value: Signal;
-} | undefined) =&gt; void): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+} | undefined) =&gt; void): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromScheduleFunction</code>
 
 <b>Signature</b>
 
-<pre>function fromScheduleFunction&lt;T extends unknown[]&gt;(schedule: <a href="_index.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromScheduleFunction&lt;T extends unknown[]&gt;(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromSingularReactiveValue</code>
 
@@ -170,55 +170,55 @@ pipe(
 
 <pre>function fromSingularReactiveValue&lt;T, Signal&gt;(addCallback: (handler: (value: T) =&gt; void) =&gt; Signal, removeCallback: (handler: (value: T) =&gt; void, signal: {
     value: Signal;
-} | undefined) =&gt; void): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+} | undefined) =&gt; void): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>iif</code>
 
 <b>Signature</b>
 
-<pre>function iif&lt;T&gt;(condition: () =&gt; unknown, createSourceIfTrue: () =&gt; <a href="_index.md#source-interface">Source</a>&lt;T&gt;, createSourceIfFalse: () =&gt; <a href="_index.md#source-interface">Source</a>&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function iif&lt;T&gt;(condition: () =&gt; unknown, createSourceIfTrue: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;, createSourceIfFalse: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>interval</code>
 
 <b>Signature</b>
 
-<pre>function interval(delayMs: number): <a href="_index.md#source-interface">Source</a>&lt;number&gt;;</pre>
+<pre>function interval(delayMs: number): <a href="basics.md#source-interface">Source</a>&lt;number&gt;;</pre>
 
 ## <code>isEqual</code>
 
 <b>Signature</b>
 
-<pre>function isEqual&lt;T, U&gt;(sourceA: <a href="_index.md#source-interface">Source</a>&lt;T&gt;, sourceB: <a href="_index.md#source-interface">Source</a>&lt;U&gt;, areValuesEqual: (a: T, b: U, index: number) =&gt; unknown): <a href="_index.md#source-interface">Source</a>&lt;boolean&gt;;</pre>
+<pre>function isEqual&lt;T, U&gt;(sourceA: <a href="basics.md#source-interface">Source</a>&lt;T&gt;, sourceB: <a href="basics.md#source-interface">Source</a>&lt;U&gt;, areValuesEqual: (a: T, b: U, index: number) =&gt; unknown): <a href="basics.md#source-interface">Source</a>&lt;boolean&gt;;</pre>
 
 ## <code>lazy</code>
 
 <b>Signature</b>
 
-<pre>function lazy&lt;T&gt;(createSource: () =&gt; <a href="_index.md#source-interface">Source</a>&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function lazy&lt;T&gt;(createSource: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>mergeSources</code>
 
 <b>Signature</b>
 
-<pre>function mergeSources&lt;T&gt;(...sources: <a href="_index.md#source-interface">Source</a>&lt;T&gt;[]): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function mergeSources&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>mergeSourcesConcurrent</code>
 
 <b>Signature</b>
 
-<pre>function mergeSourcesConcurrent&lt;T&gt;(max: number, ...sources: <a href="_index.md#source-interface">Source</a>&lt;T&gt;[]): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function mergeSourcesConcurrent&lt;T&gt;(max: number, ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>never</code>
 
 <b>Signature</b>
 
-<pre>var never: <a href="_index.md#source-interface">Source</a>&lt;unknown&gt;</pre>
+<pre>var never: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;</pre>
 
 ## <code>of</code>
 
 <b>Signature</b>
 
-<pre>function of&lt;T&gt;(...items: T[]): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function of&lt;T&gt;(...items: T[]): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 Creates a Source from the given values.. The values will be synchronously emitted by the created source upon each subscription.
 
@@ -226,7 +226,7 @@ Creates a Source from the given values.. The values will be synchronously emitte
 
 | Type | Description |
 | --- | --- |
-| <code>[Source](\_index.md#source-interface)&lt;T&gt;</code> | <p>The created source.</p> |
+| <code>[Source](basics.md#source-interface)&lt;T&gt;</code> | <p>The created source.</p> |
 
 <b>Example Usage</b>
 
@@ -254,56 +254,56 @@ pipe(of(), subscribe(Sink(console.log)));
 
 <b>Signature</b>
 
-<pre>function ofEvent(event: <a href="_index.md#throw-interface">Throw</a> | <a href="_index.md#end-interface">End</a>): <a href="_index.md#source-interface">Source</a>&lt;never&gt;;</pre>
+<pre>function ofEvent(event: <a href="basics.md#throw-interface">Throw</a> | <a href="basics.md#end-interface">End</a>): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
 
-<pre>function ofEvent&lt;T&gt;(event: <a href="_index.md#event">Event</a>&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function ofEvent&lt;T&gt;(event: <a href="basics.md#event">Event</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>ofEventScheduled</code>
 
 <b>Signature</b>
 
-<pre>function ofEventScheduled&lt;T&gt;(event: <a href="_index.md#throw-interface">Throw</a> | <a href="_index.md#end-interface">End</a>, schedule: <a href="_index.md#schedulefunction">ScheduleFunction</a>): <a href="_index.md#source-interface">Source</a>&lt;never&gt;;</pre>
+<pre>function ofEventScheduled&lt;T&gt;(event: <a href="basics.md#throw-interface">Throw</a> | <a href="basics.md#end-interface">End</a>, schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
 
-<pre>function ofEventScheduled&lt;T&gt;(event: <a href="_index.md#event">Event</a>&lt;T&gt;, schedule: <a href="_index.md#schedulefunction">ScheduleFunction</a>): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function ofEventScheduled&lt;T&gt;(event: <a href="basics.md#event">Event</a>&lt;T&gt;, schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>ofScheduled</code>
 
 <b>Signature</b>
 
-<pre>function ofScheduled&lt;T&gt;(schedule: <a href="_index.md#schedulefunction">ScheduleFunction</a>, ...items: T[]): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function ofScheduled&lt;T&gt;(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>, ...items: T[]): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>raceSources</code>
 
 <b>Signature</b>
 
-<pre>function raceSources&lt;T&gt;(...sources: <a href="_index.md#source-interface">Source</a>&lt;T&gt;[]): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function raceSources&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>range</code>
 
 <b>Signature</b>
 
-<pre>function range(count: number, start?: number): <a href="_index.md#source-interface">Source</a>&lt;number&gt;;</pre>
+<pre>function range(count: number, start?: number): <a href="basics.md#source-interface">Source</a>&lt;number&gt;;</pre>
 
 ## <code>throwError</code>
 
 <b>Signature</b>
 
-<pre>function throwError(getError: () =&gt; unknown): <a href="_index.md#source-interface">Source</a>&lt;never&gt;;</pre>
+<pre>function throwError(getError: () =&gt; unknown): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
 
 ## <code>throwErrorScheduled</code>
 
 <b>Signature</b>
 
-<pre>function throwErrorScheduled(getError: () =&gt; unknown, schedule: <a href="_index.md#schedulefunction">ScheduleFunction</a>): <a href="_index.md#source-interface">Source</a>&lt;never&gt;;</pre>
+<pre>function throwErrorScheduled(getError: () =&gt; unknown, schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
 
 ## <code>timer</code>
 
 <b>Signature</b>
 
-<pre>function timer(durationMs: number): <a href="_index.md#source-interface">Source</a>&lt;never&gt;;</pre>
+<pre>function timer(durationMs: number): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
 
 ## <code>zipSources</code>
 
 <b>Signature</b>
 
-<pre>function zipSources&lt;T extends unknown[]&gt;(...sources: WrapValuesInSource&lt;T&gt;): <a href="_index.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function zipSources&lt;T extends unknown[]&gt;(...sources: WrapValuesInSource&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>

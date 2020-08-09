@@ -2,7 +2,7 @@
 
 # API Reference - Schedule Functions
 
-## Table of Contents
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>ScheduleAnimationFrameQueued</code>](#scheduleanimationframequeued)
 2. [<code>ScheduleInterval</code>](#scheduleinterval)
@@ -12,7 +12,7 @@
 6. [<code>ScheduleTimeout</code>](#scheduletimeout)
 7. [<code>ScheduleTimeoutQueued</code>](#scheduletimeoutqueued)
 8. [<code>scheduleAnimationFrame</code>](#scheduleanimationframe)
-9. [<code>scheduleSync</code>](#schedulesync)
+9. [<code>scheduleSync</code>](#schedulesync)</details>
 
 ## <code>ScheduleAnimationFrameQueued</code>
 
@@ -24,37 +24,37 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleInterval(delayMs: number): <a href="_index.md#schedulefunction">ScheduleFunction</a>;</pre>
+<pre>function ScheduleInterval(delayMs: number): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
 
 ## <code>ScheduleQueued</code>
 
 <b>Signature</b>
 
-<pre>function ScheduleQueued&lt;T extends any[] = []&gt;(schedule: (callNext: (...args: T) =&gt; void, subscription: <a href="_index.md#disposable-interface">Disposable</a>) =&gt; void): <a href="_index.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
+<pre>function ScheduleQueued&lt;T extends any[] = []&gt;(schedule: (callNext: (...args: T) =&gt; void, subscription: <a href="basics.md#disposable-interface">Disposable</a>) =&gt; void): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
 
 ## <code>ScheduleQueuedDiscrete</code>
 
 <b>Signature</b>
 
-<pre>function ScheduleQueuedDiscrete&lt;T extends any[] = []&gt;(schedule: (callback: (...args: T) =&gt; void, subscription: <a href="_index.md#disposable-interface">Disposable</a>) =&gt; void): <a href="_index.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
+<pre>function ScheduleQueuedDiscrete&lt;T extends any[] = []&gt;(schedule: (callback: (...args: T) =&gt; void, subscription: <a href="basics.md#disposable-interface">Disposable</a>) =&gt; void): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
 
 ## <code>ScheduleSyncQueued</code>
 
 <b>Signature</b>
 
-<pre>function ScheduleSyncQueued(): <a href="_index.md#schedulefunction">ScheduleFunction</a>;</pre>
+<pre>function ScheduleSyncQueued(): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
 
 ## <code>ScheduleTimeout</code>
 
 <b>Signature</b>
 
-<pre>function ScheduleTimeout(delayMs: number): <a href="_index.md#schedulefunction">ScheduleFunction</a>;</pre>
+<pre>function ScheduleTimeout(delayMs: number): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
 
 ## <code>ScheduleTimeoutQueued</code>
 
 <b>Signature</b>
 
-<pre>function ScheduleTimeoutQueued(delayMs: number): <a href="_index.md#schedulefunction">ScheduleFunction</a>;</pre>
+<pre>function ScheduleTimeoutQueued(delayMs: number): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
 
 ## <code>scheduleAnimationFrame</code>
 
@@ -66,4 +66,4 @@
 
 <b>Signature</b>
 
-<pre>var scheduleSync: <a href="_index.md#schedulefunction">ScheduleFunction</a></pre>
+<pre>var scheduleSync: <a href="basics.md#schedulefunction">ScheduleFunction</a></pre>

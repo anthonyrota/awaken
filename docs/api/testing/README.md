@@ -2,7 +2,7 @@
 
 # API Reference
 
-## Table of Contents
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>TestSource</code>](#testsource) - [<code>Function</code>](#testsource-function), [<code>Interface</code>](#testsource-interface)
 2. [<code>SharedTestSource</code>](#sharedtestsource) - [<code>Function</code>](#sharedtestsource-function), [<code>Interface</code>](#sharedtestsource-interface)
@@ -13,7 +13,7 @@
 7. [<code>watchSourceEvents</code>](#watchsourceevents)
 8. [<code>P</code>](#p)
 9. [<code>T</code>](#t)
-10. [<code>E</code>](#e)
+10. [<code>E</code>](#e)</details>
 
 ## <code>TestSource</code>
 
@@ -27,7 +27,7 @@
 
 <b>Signature</b>
 
-<pre>interface TestSource&lt;T&gt; extends <a href="../core/_index.md#source-interface">Source</a>&lt;T&gt; </pre>
+<pre>interface TestSource&lt;T&gt; extends <a href="../core/basics.md#source-interface">Source</a>&lt;T&gt; </pre>
 
 ## <code>SharedTestSource</code>
 
@@ -47,7 +47,7 @@
 
 <b>Signature</b>
 
-<pre>type TestSourceEvent&lt;T&gt; = <a href="../core/_index.md#event">Event</a>&lt;T&gt; & {
+<pre>type TestSourceEvent&lt;T&gt; = <a href="../core/basics.md#event">Event</a>&lt;T&gt; & {
     readonly frame: number;
 };</pre>
 
@@ -89,13 +89,13 @@
 
 <b>Signature</b>
 
-<pre>function watchSourceEvents&lt;T&gt;(source: <a href="../core/_index.md#source-interface">Source</a>&lt;T&gt;, testSchedule: <a href="#testschedule-interface">TestSchedule</a>, subscriptionInfo?: <a href="#testsubscriptioninfo-interface">TestSubscriptionInfo</a>): <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[];</pre>
+<pre>function watchSourceEvents&lt;T&gt;(source: <a href="../core/basics.md#source-interface">Source</a>&lt;T&gt;, testSchedule: <a href="#testschedule-interface">TestSchedule</a>, subscriptionInfo?: <a href="#testsubscriptioninfo-interface">TestSubscriptionInfo</a>): <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[];</pre>
 
 ## <code>P</code>
 
 <b>Signature</b>
 
-<pre>function P&lt;T&gt;(value: T, frame: number): <a href="../core/_index.md#push-interface">Push</a>&lt;T&gt; & {
+<pre>function P&lt;T&gt;(value: T, frame: number): <a href="../core/basics.md#push-interface">Push</a>&lt;T&gt; & {
     readonly frame: number;
 };</pre>
 
@@ -103,7 +103,7 @@
 
 <b>Signature</b>
 
-<pre>function T(error: unknown, frame: number): <a href="../core/_index.md#throw-interface">Throw</a> & {
+<pre>function T(error: unknown, frame: number): <a href="../core/basics.md#throw-interface">Throw</a> & {
     readonly frame: number;
 };</pre>
 
@@ -111,6 +111,6 @@
 
 <b>Signature</b>
 
-<pre>function E(frame: number): <a href="../core/_index.md#end-interface">End</a> & {
+<pre>function E(frame: number): <a href="../core/basics.md#end-interface">End</a> & {
     readonly frame: number;
 };</pre>
