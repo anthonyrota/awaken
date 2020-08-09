@@ -88,9 +88,9 @@ Thrown when at least one error is caught during the disposal of a disposable.
 
 #### Signature
 
-<pre>function implDisposableMethods&lt;T extends object&gt;(value: T, disposable: <a href="#disposable-interface">Disposable</a>): T &amp; <a href="#disposable-interface">Disposable</a>;</pre>
+<pre>function implDisposableMethods&lt;T extends object&gt;(value: T, disposable: <a href="#disposable-interface">Disposable</a>): T & <a href="#disposable-interface">Disposable</a>;</pre>
 
-Implements the Disposable Interface onto the given value by copying the disposable methods &amp; properties from the given value to the given disposable.
+Implements the Disposable Interface onto the given value by copying the disposable methods & properties from the given value to the given disposable.
 
 #### Parameters
 
@@ -103,7 +103,7 @@ Implements the Disposable Interface onto the given value by copying the disposab
 
 | Type | Description |
 | --- | --- |
-| <code>T &amp; [Disposable](#disposable-interface)</code> | <p>The given value which has been mutated. In strict javascript this is unnecessary but here it is useful as the returned value will have the type <code>T &amp; Disposable</code></p> |
+| <code>T & [Disposable](#disposable-interface)</code> | <p>The given value which has been mutated. In strict javascript this is unnecessary but here it is useful as the returned value will have the type <code>T & Disposable</code></p> |
 
 ## <code>Event</code>
 
@@ -497,7 +497,7 @@ source(sink);
 
 #### Signature
 
-<pre>function isSink(value: unknown): value is <a href="#sink-interface">Sink</a>&lt;unknown&gt;;</pre>
+<pre>function isSink(value: unknown): value is <a href="#source-interface">Source</a>&lt;unknown&gt;;</pre>
 
 Determines whether the given value is a <code>[Sink](#sink)</code>.
 
@@ -511,7 +511,7 @@ Determines whether the given value is a <code>[Sink](#sink)</code>.
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Sink](#sink-interface)&lt;unknown&gt;</code> | <p>Whether the value is a Sink.</p> |
+| <code>value is [Source](#source-interface)&lt;unknown&gt;</code> | <p>Whether the value is a Sink.</p> |
 
 #### Example
 

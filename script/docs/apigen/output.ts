@@ -152,7 +152,6 @@ export class Container<T extends Node = Node> implements Node {
 
 function escapeHtml(text: string): string {
     return text
-        .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
@@ -165,7 +164,10 @@ function escapeTable(text: string): string {
 }
 
 function escapeMarkdown(text: string): string {
-    return text.replace(/\\/, '\\\\').replace(/[*#/()[\]<>_]/g, '\\$&');
+    return text
+        .replace(/\\/, '\\\\')
+        .replace(/[*/()[\]<>_]/g, '\\$&')
+        .replace(/(?<!&)#/g, '\\$&');
 }
 
 export class RawText implements Node {

@@ -36,7 +36,7 @@ title: API Reference
 
 #### Signature
 
-<pre>type TestSourceEvent&lt;T&gt; = <a href="../core/_index.md#event">Event</a>&lt;T&gt; &amp; {
+<pre>type TestSourceEvent&lt;T&gt; = <a href="../core/_index.md#event">Event</a>&lt;T&gt; & {
     readonly frame: number;
 };</pre>
 
@@ -84,7 +84,7 @@ title: API Reference
 
 #### Signature
 
-<pre>function P&lt;T&gt;(value: T, frame: number): <a href="../core/_index.md#push-interface">Push</a>&lt;T&gt; &amp; {
+<pre>function P&lt;T&gt;(value: T, frame: number): <a href="../core/_index.md#push-interface">Push</a>&lt;T&gt; & {
     readonly frame: number;
 };</pre>
 
@@ -92,7 +92,7 @@ title: API Reference
 
 #### Signature
 
-<pre>function T(error: unknown, frame: number): <a href="../core/_index.md#throw-interface">Throw</a> &amp; {
+<pre>function T(error: unknown, frame: number): <a href="../core/_index.md#throw-interface">Throw</a> & {
     readonly frame: number;
 };</pre>
 
@@ -100,6 +100,6 @@ title: API Reference
 
 #### Signature
 
-<pre>function E(frame: number): <a href="../core/_index.md#end-interface">End</a> &amp; {
+<pre>function E(frame: number): <a href="../core/_index.md#end-interface">End</a> & {
     readonly frame: number;
 };</pre>

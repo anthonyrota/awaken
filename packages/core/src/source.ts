@@ -432,7 +432,7 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
  *
  * @public
  */
-export function isSink(value: unknown): value is Sink<unknown> {
+export function isSink(value: unknown): value is Source<unknown> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return value != null && $$Sink in (value as any);
 }

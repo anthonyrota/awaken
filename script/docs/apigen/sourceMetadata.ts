@@ -101,6 +101,9 @@ export function generateSourceMetadata(
                 );
 
                 if (commentRanges && commentRanges.length > 1) {
+                    if (commentRanges.length !== 2) {
+                        throw new Error("Can't have multiple base comments.");
+                    }
                     const firstCommentRange = commentRanges[0];
                     const baseDocComment: BaseDocComment = {
                         textRange: tsdoc.TextRange.fromStringRange(

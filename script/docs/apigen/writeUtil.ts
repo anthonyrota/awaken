@@ -200,7 +200,7 @@ class EmbeddedNode implements output.Node {
             if (child instanceof output.Container) {
                 this._substituteEmbeddedNodes(child);
             } else if (child instanceof output.HtmlComment) {
-                const match = /__EmbeddedNode__:(\d+)/g.exec(child.comment);
+                const match = /^__EmbeddedNode__:(\d+)$/.exec(child.comment);
                 if (match) {
                     const id = Number.parseInt(match[1]);
                     const embedded = this._context.getNodeForId(id);

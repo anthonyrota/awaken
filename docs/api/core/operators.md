@@ -424,7 +424,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <code>\(previousAccumulatedResult: R &\#124; I, currentValue: T, currentIndex: number\) =&gt; R</code> | <p>A function that transforms the previousAccumulatedResult (last value returned by this function), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result.</p> |
+| transform | <code>\(previousAccumulatedResult: R &#124; I, currentValue: T, currentIndex: number\) =&gt; R</code> | <p>A function that transforms the previousAccumulatedResult (last value returned by this function), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result.</p> |
 | initialValue | <code>I</code> | <p>This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult.</p> |
 
 ## <code>repeat</code>
@@ -475,7 +475,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <code>\(previousAccumulatedResult: R &\#124; I, currentValue: T, currentIndex: number\) =&gt; R</code> | <p>A function that transforms the previousAccumulatedResult (last value returned by this function), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result.</p> |
+| transform | <code>\(previousAccumulatedResult: R &#124; I, currentValue: T, currentIndex: number\) =&gt; R</code> | <p>A function that transforms the previousAccumulatedResult (last value returned by this function), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result.</p> |
 | initialValue | <code>I</code> | <p>This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult.</p> |
 
 ## <code>schedulePushEvents</code>
