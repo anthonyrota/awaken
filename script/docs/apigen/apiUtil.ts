@@ -74,35 +74,37 @@ class ExportFunctionImplementation
             context,
             this.simplifiedKind,
         );
+        const baseDocContainer = new output.Container();
         writeUtil.writeBaseDoc(
-            out,
+            baseDocContainer,
             this._overloads[0],
             context,
             ts.SyntaxKind.FunctionDeclaration,
         );
 
         let didNotOnlyWriteSignature = true;
+        const overloadsContainer = new output.Container();
 
         for (const fn of this._overloads) {
             const _didNotOnlyWriteSignature = didNotOnlyWriteSignature;
-            const container = new output.Container();
+            const overloadContainer = new output.Container();
             const didWriteSummary = writeUtil.writeSummary(
-                container,
+                overloadContainer,
                 fn,
                 context,
             );
             const didWriteParameters = writeUtil.writeParameters(
-                container,
+                overloadContainer,
                 fn,
                 context,
             );
             const didWriteExamples = writeUtil.writeExamples(
-                container,
+                overloadContainer,
                 fn,
                 context,
             );
             const didWriteSeeBlocks = writeUtil.writeSeeBlocks(
-                container,
+                overloadContainer,
                 fn,
                 context,
             );
@@ -112,12 +114,23 @@ class ExportFunctionImplementation
                 didWriteExamples ||
                 didWriteSeeBlocks;
             if (_didNotOnlyWriteSignature || didNotOnlyWriteSignature) {
-                writeUtil.writeSignature(out, fn, context);
-                out.addChildren(...container.getChildren());
+                writeUtil.writeSignature(overloadsContainer, fn, context);
+                if (didNotOnlyWriteSignature) {
+                    overloadsContainer.addChildren(
+                        ...overloadContainer.getChildren(),
+                    );
+                }
             } else {
-                writeUtil.writeSignatureExcerpt(out, fn, context);
+                writeUtil.writeSignatureExcerpt(
+                    overloadsContainer,
+                    fn,
+                    context,
+                );
             }
         }
+
+        out.addChildren(...baseDocContainer.getChildren());
+        out.addChildren(...overloadsContainer.getChildren());
     }
 }
 

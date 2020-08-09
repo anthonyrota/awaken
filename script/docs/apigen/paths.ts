@@ -58,7 +58,6 @@ const mainPaths: Record<string, APIPageData> = nullObj({
             {
                 main: 'groupBy',
                 nested: [
-                    'groupBy',
                     'GroupSource',
                     'ActiveGroupSource',
                     'RemovedGroupSource',
@@ -199,16 +198,13 @@ const mainPaths: Record<string, APIPageData> = nullObj({
         items: [
             { main: 'CurrentValueSubject' },
             { main: 'FinalValueSubject' },
-            { main: 'ReplaySubject' },
-            { main: 'ReplaySubjectTimeoutConfig' },
+            { main: 'ReplaySubject', nested: ['ReplaySubjectTimeoutConfig'] },
             { main: 'SubjectBase' },
         ],
     },
     'core/util': {
         title: 'API Reference - Utils',
         items: [
-            { main: 'pipe' },
-            { main: 'flow' },
             { main: 'setTimeout' },
             { main: 'setInterval' },
             { main: 'requestAnimationFrame' },
@@ -278,9 +274,15 @@ const nameToPath: Record<string, string> = {};
 const mainPathEntries = Object.entries(mainPaths);
 for (const [pathName, page] of mainPathEntries) {
     for (const item of page.items) {
+        if (item.main in nameToPath) {
+            throw new Error(`Duplicate name: ${item.main}`);
+        }
         nameToPath[item.main] = pathName;
         if (item.nested) {
             for (const name of item.nested) {
+                if (name in nameToPath) {
+                    throw new Error(`Duplicate name: ${name}`);
+                }
                 nameToPath[name] = pathName;
             }
         }

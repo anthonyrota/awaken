@@ -104,6 +104,13 @@ export function generateSourceMetadata(
                     if (commentRanges.length !== 2) {
                         throw new Error("Can't have multiple base comments.");
                     }
+                    if (
+                        declaration.kind !== ts.SyntaxKind.FunctionDeclaration
+                    ) {
+                        throw new Error(
+                            "Can't have a base comment for a non function declaration.",
+                        );
+                    }
                     const firstCommentRange = commentRanges[0];
                     const baseDocComment: BaseDocComment = {
                         textRange: tsdoc.TextRange.fromStringRange(

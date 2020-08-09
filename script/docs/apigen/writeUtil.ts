@@ -11,13 +11,13 @@
 /* eslint-enable max-len */
 
 import * as colors from 'colors';
+import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import * as aeModel from '@microsoft/api-extractor-model';
 import * as output from './output';
 import { getMainPathOfApiItemName } from './paths';
 import { SourceMetadata } from './sourceMetadata';
-import * as ts from 'typescript';
 
 export interface Context {
     sourceMetadata: SourceMetadata;
@@ -195,8 +195,7 @@ class EmbeddedNode implements output.Node {
 
     private _substituteEmbeddedNodes(node: output.Container): void {
         const children = node.getChildren();
-        for (let i = 0; i < children.length; i++) {
-            const child = children[i];
+        for (const [i, child] of children.entries()) {
             if (child instanceof output.Container) {
                 this._substituteEmbeddedNodes(child);
             } else if (child instanceof output.HtmlComment) {
@@ -539,7 +538,7 @@ export function writeExamples(
     let didWrite = false;
     for (const exampleBlock of getExampleBlocks(docComment)) {
         container.addChild(
-            new output.Title().addChild(new output.PlainText('Example')),
+            new output.Title().addChild(new output.PlainText('Example Usage')),
         );
         for (const block of exampleBlock.getChildNodes()) {
             writeApiItemDocNode(container, apiItem, block, context);

@@ -230,24 +230,27 @@ export interface Sink<T> extends Disposable {
  *
  * @example
  * ```ts
- * const sink = Sink<number>(event => {
- *     if (event.type === PushType) {
- *         console.log(event.value);
- *     } else if (event.type === EndType) {
- *         console.log('ended');
+ * // In this example the source emits values 0..49.
+ * const source = range(50);
+ * const sink = Sink(event => {
+ *     console.log(event);
+ *     if (event.value === 3) {
+ *         sink.dispose();
  *     }
- * });
- * sink(Push(1));
- * sink(Push(2));
- * sinK(End);
+ * })
+ * // Subscribe the source to the sink so that it produces values and sends them
+ * // to the sink.
+ * source(sink);
  * // Logs:
- * // 1
- * // 2
- * // ended
+ * // Push(0)
+ * // Push(1)
+ * // Push(2)
+ * // Push(3)
  * ```
  *
  * @example
  * ```ts
+ * // Passing a sink a throw event.
  * const sink = Sink<number>(event => {
  *     console.log(event);
  * });
@@ -259,116 +262,6 @@ export interface Sink<T> extends Disposable {
  * // Logs:
  * // { type: PushType, value: 1 }
  * // { type: ThrowType, error: Error }
- * ```
- *
- * @example
- * ```ts
- * const sink = Sink<number>(event => {
- *     if (event.type === PushType && event.value === 5) {
- *         // This means that the Sink will stop receiving values, and all
- *         // disposable children added to this Sink will be disposed, allowing
- *         // for cleanup, for example in sources subscribed to this Sink.
- *         sink.dispose();
- *     }
- *     console.log(event);
- * });
- * for (let i = 0; i < 1_000_000_000 && sink.active; i++) {
- *     // Because the loop above checks if `sink.active` is true at the start of
- *     // every iteration, the loop will be exited when i === 6 before the
- *     // following is called, meaning that the following will never be reached
- *     // when i > 5. This is important as we want to stop iterating after the
- *     // source is disposed, meaning it won't take any more values. This
- *     // optimization prevents us from iterating pointlessly one billion times,
- *     // and instead we only iterate six times, with the `sink.active` check
- *     // breaking the loop on the seventh iteration.
- *     sink(Push(i));
- * }
- * sink(End); // This is ignored.
- * // Logs:
- * // { type: PushType, value: 0 }
- * // { type: PushType, value: 1 }
- * // { type: PushType, value: 2 }
- * // { type: PushType, value: 3 }
- * // { type: PushType, value: 4 }
- * // { type: PushType, value: 5 }
- * // Note: The End event is ignored here, as the sink was disposed upon
- * // receiving the Push(5) event.
- * ```
- *
- * @example
- * ```ts
- * function onEvent(event: Event<unknown>): void {
- *     console.log(event);
- *     if (event.type === PushType && event.value === 2) {
- *         throw new Error('I don\'t like the value two. Begone.');
- *     }
- * }
- * const sink = Sink<number>(onEvent);
- * for (let i = 0; i < 10 && sink.active; i++) {
- *     // When i === 2, after the event is logged above, `onEvent` will throw an
- *     // error. When this happens, the sink will catch the error and it will be
- *     // thrown asynchronously in a setTimeout. As well as this, the sink will
- *     // be disposed immediately, unsubscribing anything subscribed to it.
- *     // Because the loop above checks if `sink.active` is true at the start of
- *     // every iteration, the loop will be exited when i === 3 before the
- *     // following is called.
- *     sink(Push(i));
- * }
- * sink(End); // This is ignored.
- * // Logs:
- * // { type: PushType, value: 0 }
- * // { type: PushType, value: 1 }
- * // { type: PushType, value: 2 }
- * ```
- *
- * @example
- * ```ts
- * import { Request, startRequest, cancelRequest } from './my-api.ts';
- *
- * const sink = Sink(() => {});
- * // This is important as, in the case where the sink is disposed later
- * // (meaning it will no longer take events), the request should be cancelled.
- * // Note that in this case, cancelRequest will be called straight after the
- * // sink receives the End event, which happens after the request completes and
- * // the sink has already received a Push event with the result of the request.
- * // However, in this example it is presumed that the cancelRequest function
- * // will do nothing when given an already completed request.
- * sink.add(() => {
- *     cancelRequest(myRequest);
- * });
- * const myRequest = startRequest(result => {
- *     sink(Push(result)));
- *     sink(End);
- * });
- *
- * // Alternatively, if `startRequest` takes a Disposable and will automatically
- * // cancel the request when the disposable is disposed, in a similar manner to
- * // `ScheduleFunction`, we can directly pass the sink to the `startRequest`
- * // function and the request will automatically be cancelled when the sink is
- * // disposed.
- * const sink = Sink(() => {});
- * startRequest(result => {
- *     sink(Push(result));
- *     sink(End)
- * }, sink);
- * ```
- *
- * @example
- * ```ts
- * // In this example the source emits values 0..49.
- * const source = range(50);
- * const sink = Sink(event => {
- *     console.log(event);
- *     if (event.value === 3) {
- *         sink.dispose();
- *     }
- * })
- * source(sink);
- * // Logs:
- * // Push(0)
- * // Push(1)
- * // Push(2)
- * // Push(3)
  * ```
  *
  * @see {@link Disposable}
@@ -546,30 +439,6 @@ export interface Source<T> {
  * // Push(1)
  * // ...
  * // Push(50)
- * // End
- * ```
- *
- * @example
- * ```ts
- * // Creating a Factory function which creates a Source that emits all the
- * // values in the provided array at construction.
- * function fromArray<T>(array: ArrayLike<T>): Source<T> {
- *     return Source(sink => {
- *         for (let i = 0; i < array.length && sink.active; i++) {
- *             sink(Push(array[i]));
- *         }
- *         sink(End);
- *     });
- * }
- * const array = [1, 2];
- * fromArray(array)(Sink(console.log));
- * fromArray(array)(Sink(console.log));
- * // Logs:
- * // Push(1)
- * // Push(2)
- * // End
- * // Push(1)
- * // Push(2)
  * // End
  * ```
  *
