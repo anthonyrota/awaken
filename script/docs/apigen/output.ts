@@ -815,8 +815,8 @@ export class Subheading extends Container {
 export class Title extends HtmlElement {
     constructor() {
         // At the time of writing Github styles regular text and h4 elements
-        // with the same font size. Therefore rendering the titles and bold
-        // spans will ensure that a anchor is not generated for this node in the
+        // with the same font size. Therefore rendering titles as bold spans
+        // will ensure that an anchor is not generated for this node in the
         // rendered html.
         super('b');
     }
