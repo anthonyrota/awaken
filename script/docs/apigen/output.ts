@@ -8,7 +8,6 @@
  */
 /* eslint-enable max-len */
 
-import * as yaml from 'yaml';
 import * as unist from 'unist';
 import * as unified from 'unified';
 import * as remarkParse from 'remark-parse';
@@ -16,7 +15,7 @@ import { IndentedWriter } from './util';
 import {
     TableOfContentsInlineReference,
     TableOfContentsNestedReference,
-    TableOfContents,
+    TableOfContents as TableOfContents_,
     PageMetadata,
 } from './../pageMetadata';
 
@@ -877,69 +876,87 @@ export class Table extends Container<TableRow> implements Node {
     }
 }
 
-function buildTableOfContentsLink(
-    reference: TableOfContentsInlineReference,
-): Link {
-    return new Link(`#${reference.url_hash_text}`).addChild(
-        new CodeSpan().addChild(new PlainText(reference.text)),
-    );
-}
-
-function buildTableOfContentsListItem(
-    reference: TableOfContentsNestedReference,
-): Container {
-    const listItem = new Container().addChild(
-        buildTableOfContentsLink(reference),
-    );
-    if (reference.inline_references && reference.inline_references.length > 0) {
-        listItem.addChild(new PlainText(' - '));
-        for (const [
-            i,
-            inlineReference,
-        ] of reference.inline_references.entries()) {
-            if (i !== 0) {
-                listItem.addChild(new PlainText(', '));
-            }
-            listItem.addChild(buildTableOfContentsLink(inlineReference));
-        }
+class PageTitle extends Container implements Node {
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        output.ensureNewParagraph();
+        output.withInSingleLine(() => {
+            output.write('# ');
+            super.writeAsMarkdown(output);
+        });
     }
-    return listItem;
 }
 
-function buildTableOfContents(toc: TableOfContents): Container {
-    const container = new Container();
-    container.addChild(
-        new Heading().addChild(new PlainText('Table of Contents')),
-    );
-    const contentsList = new List(true);
-    container.addChild(contentsList);
-    for (const mainReference of toc) {
-        const listItem = buildTableOfContentsListItem(mainReference);
-        contentsList.addChild(listItem);
-        if (mainReference.nested_references) {
-            const nestedList = new List(true);
-            listItem.addChild(nestedList);
-            for (const nestedReference of mainReference.nested_references) {
-                nestedList.addChild(
-                    buildTableOfContentsListItem(nestedReference),
+class TableOfContents implements Node {
+    constructor(private _toc: TableOfContents_) {}
+
+    private _buildTableOfContentsLink(
+        reference: TableOfContentsInlineReference,
+    ): Link {
+        return new Link(`#${reference.url_hash_text}`).addChild(
+            new CodeSpan().addChild(new PlainText(reference.text)),
+        );
+    }
+
+    private _buildTableOfContentsListItem(
+        reference: TableOfContentsNestedReference,
+    ): Container {
+        const listItem = new Container().addChild(
+            this._buildTableOfContentsLink(reference),
+        );
+        if (
+            reference.inline_references &&
+            reference.inline_references.length > 0
+        ) {
+            listItem.addChild(new PlainText(' - '));
+            for (const [
+                i,
+                inlineReference,
+            ] of reference.inline_references.entries()) {
+                if (i !== 0) {
+                    listItem.addChild(new PlainText(', '));
+                }
+                listItem.addChild(
+                    this._buildTableOfContentsLink(inlineReference),
                 );
             }
         }
+        return listItem;
     }
-    return container;
+
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        const container = new Container();
+        container.addChild(
+            new Heading().addChild(new PlainText('Table of Contents')),
+        );
+        const contentsList = new List(true);
+        container.addChild(contentsList);
+        for (const mainReference of this._toc) {
+            const listItem = this._buildTableOfContentsListItem(mainReference);
+            contentsList.addChild(listItem);
+            if (mainReference.nested_references) {
+                const nestedList = new List(true);
+                listItem.addChild(nestedList);
+                for (const nestedReference of mainReference.nested_references) {
+                    nestedList.addChild(
+                        this._buildTableOfContentsListItem(nestedReference),
+                    );
+                }
+            }
+        }
+        container.writeAsMarkdown(output);
+    }
 }
 
 export class Page extends Container implements Node {
     constructor(private _metadata: PageMetadata) {
         super();
-        this.addChild(buildTableOfContents(_metadata.table_of_contents));
+        this.addChild(
+            new PageTitle().addChild(new PlainText(this._metadata.title)),
+        );
+        this.addChild(new TableOfContents(this._metadata.table_of_contents));
     }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
-        output.writeLine('---');
-        output.write(yaml.stringify({ title: this._metadata.title }));
-        output.writeLine('---');
-        output.writeLine();
         output.write(
             '<!-- Do not edit this file. It is automatically generated by a build script. -->',
         );
