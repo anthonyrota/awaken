@@ -61,6 +61,12 @@ class StringBuilder {
     public toString(): string {
         return this.__result;
     }
+
+    public *iterateCharactersBackwards(): Generator<string, void, undefined> {
+        for (let i = this.__result.length - 1; i >= 0; i--) {
+            yield this.__result[i];
+        }
+    }
 }
 
 export class IndentedWriter {
@@ -186,6 +192,10 @@ export class IndentedWriter {
             }
         }
         return '';
+    }
+
+    public *iterateCharactersBackwards(): Generator<string, void, undefined> {
+        yield* this._builder.iterateCharactersBackwards();
     }
 
     /**

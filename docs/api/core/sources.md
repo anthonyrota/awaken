@@ -99,7 +99,7 @@ Creates a Source from the given array\/array-like. The values of the array will 
 
 | Type | Description |
 | --- | --- |
-| <code>[Source](_index.md#source-interface)&lt;T&gt;</code> | <p>The created source.</p> |
+| <code>[Source](\_index.md#source-interface)&lt;T&gt;</code> | <p>The created source.</p> |
 
 <b>Example Usage</b>
 
@@ -228,7 +228,7 @@ Creates a Source from the given values.. The values will be synchronously emitte
 
 | Type | Description |
 | --- | --- |
-| <code>[Source](_index.md#source-interface)&lt;T&gt;</code> | <p>The created source.</p> |
+| <code>[Source](\_index.md#source-interface)&lt;T&gt;</code> | <p>The created source.</p> |
 
 <b>Example Usage</b>
 

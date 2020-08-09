@@ -184,25 +184,7 @@ export class Container<T extends Node = Node> implements Node {
     }
 }
 
-function escapeHtml(text: string): string {
-    return text
-        .replace(/"/g, '&quot;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
-
 const newlineRegexp = /\r?\n/g;
-
-function escapeTable(text: string): string {
-    return text.replace(/\|/g, '&#124;');
-}
-
-function escapeMarkdown(text: string): string {
-    return text
-        .replace(/\\/, '\\\\')
-        .replace(/[*/()[\]<>_]/g, '\\$&')
-        .replace(/(?<!&)#/g, '\\$&');
-}
 
 export class RawText implements Node {
     constructor(public text: string) {}
@@ -216,22 +198,46 @@ export class RawText implements Node {
     }
 }
 
+function escapeHashAtEnd(str: string): string {
+    return `${str.slice(0, -1)}\\#`;
+}
+
 export class PlainText extends RawText implements Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         let { text } = this;
 
         if (!output.inMarkdownCode) {
-            text = escapeHtml(text);
+            text = text
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
 
             if (output.inTable) {
-                text = escapeTable(text);
+                text = text.replace(/\|/g, '&#124;');
                 if (!output.inSingleLineCodeBlock) {
                     text = text.replace(newlineRegexp, '<br>');
                 }
             }
 
             if (!output.inHtmlBlockTag) {
-                text = escapeMarkdown(text);
+                text = text
+                    .replace(/\\/, '\\\\')
+                    .replace(/[*/()[\]<>_]/g, '\\$&')
+                    .replace(/\n\s*#/g, escapeHashAtEnd);
+
+                let isOnlyWhitespace = true;
+                for (const char of output.iterateCharactersBackwards()) {
+                    if (char === '\n') {
+                        break;
+                    }
+                    if (char !== ' ') {
+                        isOnlyWhitespace = false;
+                        break;
+                    }
+                }
+                if (isOnlyWhitespace) {
+                    text = text.replace(/^\s*#/g, escapeHashAtEnd);
+                }
             }
 
             if (output.inSingleLineCodeBlock) {
@@ -249,6 +255,10 @@ export class PlainText extends RawText implements Node {
 
         output.write(text);
     }
+}
+
+export function writePlainText(output: MarkdownOutput, text: string): void {
+    new PlainText(text).writeAsMarkdown(output);
 }
 
 const remark = unified().use(remarkParse);
@@ -529,11 +539,11 @@ export class HtmlElement extends Container implements Node {
 
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.write('<');
-        output.write(this.tagName);
+        writePlainText(output, this.tagName);
         output.write('>');
         super.writeAsMarkdown(output);
         output.write('</');
-        output.write(this.tagName);
+        writePlainText(output, this.tagName);
         output.write('>');
     }
 }
@@ -597,7 +607,8 @@ export class CodeBlock extends Container implements Node {
         output.ensureNewParagraph();
         output.withInMarkdownCode(() => {
             output.write('```');
-            output.writeLine(this._language);
+            writePlainText(output, this._language);
+            output.writeLine();
             output.write(this._code);
             output.ensureNewLine();
         });
@@ -636,10 +647,10 @@ export class Link extends Container implements Node {
         output.withInSingleLine(() => {
             if (output.inHtmlBlockTag && !output.inTable) {
                 output.write('<a href="');
-                output.write(this._destination);
+                writePlainText(output, this._destination);
                 if (this._title) {
                     output.write('" title="');
-                    output.write(this._title);
+                    writePlainText(output, this._title);
                 }
                 output.write('">');
                 super.writeAsMarkdown(output);
@@ -649,10 +660,10 @@ export class Link extends Container implements Node {
             output.write('[');
             super.writeAsMarkdown(output);
             output.write('](');
-            output.write(this._destination);
+            writePlainText(output, this._destination);
             if (this._title) {
                 output.write(' "');
-                output.write(this._title);
+                writePlainText(output, this._title);
                 output.write('"');
             }
             output.write(')');
@@ -671,24 +682,24 @@ export class Image implements Node {
         output.withInSingleLine(() => {
             if (output.inHtmlBlockTag && !output.inTable) {
                 output.write('<img src="');
-                output.write(this._src);
+                writePlainText(output, this._src);
                 if (this._title) {
                     output.write('" title="');
-                    output.write(this._title);
+                    writePlainText(output, this._title);
                 }
                 if (this._alt) {
                     output.write('" alt="');
-                    output.write(this._alt);
+                    writePlainText(output, this._alt);
                 }
                 output.write('">');
             }
             output.write('![');
-            if (this._alt) output.write(this._alt);
+            if (this._alt) writePlainText(output, this._alt);
             output.write('](');
-            output.write(this._src);
+            writePlainText(output, this._src);
             if (this._title) {
                 output.write(' "');
-                output.write(this._title);
+                writePlainText(output, this._title);
                 output.write('"');
             }
             output.write(')');
@@ -729,7 +740,7 @@ export class Heading extends Container implements Node {
             output.write('## ');
             if (this._alternateId) {
                 output.write('<a name="');
-                output.write(this._alternateId);
+                writePlainText(output, this._alternateId);
                 output.write('"></a>');
             }
             super.writeAsMarkdown(output);
@@ -748,7 +759,7 @@ export class Subheading extends Container implements Node {
             output.write('### ');
             if (this._alternateId) {
                 output.write('<a name="');
-                output.write(this._alternateId);
+                writePlainText(output, this._alternateId);
                 output.write('"></a>');
             }
             super.writeAsMarkdown(output);
