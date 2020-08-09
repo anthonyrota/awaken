@@ -14,9 +14,10 @@ import * as unified from 'unified';
 import * as remarkParse from 'remark-parse';
 import { IndentedWriter } from './util';
 import {
+    TableOfContentsInlineReference,
     TableOfContentsNestedReference,
-    PageMetadata,
     TableOfContents,
+    PageMetadata,
 } from './../pageMetadata';
 
 export class MarkdownOutput extends IndentedWriter {
@@ -876,13 +877,19 @@ export class Table extends Container<TableRow> implements Node {
     }
 }
 
+function buildTableOfContentsLink(
+    reference: TableOfContentsInlineReference,
+): Link {
+    return new Link(`#${reference.url_hash_text}`).addChild(
+        new CodeSpan().addChild(new PlainText(reference.text)),
+    );
+}
+
 function buildTableOfContentsListItem(
     reference: TableOfContentsNestedReference,
 ): Container {
     const listItem = new Container().addChild(
-        new Link(`#${reference.url_hash_text}`).addChild(
-            new PlainText(reference.text),
-        ),
+        buildTableOfContentsLink(reference),
     );
     if (reference.inline_references && reference.inline_references.length > 0) {
         listItem.addChild(new PlainText(' - '));
@@ -893,11 +900,7 @@ function buildTableOfContentsListItem(
             if (i !== 0) {
                 listItem.addChild(new PlainText(', '));
             }
-            listItem.addChild(
-                new Link(`#${inlineReference.url_hash_text}`).addChild(
-                    new PlainText(inlineReference.text),
-                ),
-            );
+            listItem.addChild(buildTableOfContentsLink(inlineReference));
         }
     }
     return listItem;

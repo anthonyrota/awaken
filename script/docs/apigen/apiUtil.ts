@@ -187,7 +187,7 @@ class ExportInterfaceImplementation
 class ExportTypeAliasImplementation
     implements ExportImplementation<aeModel.ApiTypeAlias> {
     public readonly actualKind = aeModel.ApiItemKind.TypeAlias;
-    public readonly simplifiedKind = 'Type Alias';
+    public readonly simplifiedKind = 'Type';
     private _apiTypeAlias?: aeModel.ApiTypeAlias;
 
     constructor(private _context: writeUtil.Context) {}

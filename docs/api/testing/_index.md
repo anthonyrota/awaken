@@ -6,16 +6,16 @@ title: API Reference
 
 ## Table of Contents
 
-1. [TestSource](#testsource) - [Function](#testsource-function), [Interface](#testsource-interface)
-2. [SharedTestSource](#sharedtestsource) - [Function](#sharedtestsource-function), [Interface](#sharedtestsource-interface)
-3. [TestSourceEvent](#testsourceevent)
-4. [TestSubscriptionInfo](#testsubscriptioninfo) - [Function](#testsubscriptioninfo-function), [Interface](#testsubscriptioninfo-interface)
-5. [TestSourceSubscriptions](#testsourcesubscriptions)
-6. [TestSchedule](#testschedule) - [Function](#testschedule-function), [Interface](#testschedule-interface)
-7. [watchSourceEvents](#watchsourceevents)
-8. [P](#p)
-9. [T](#t)
-10. [E](#e)
+1. [<code>TestSource</code>](#testsource) - [<code>Function</code>](#testsource-function), [<code>Interface</code>](#testsource-interface)
+2. [<code>SharedTestSource</code>](#sharedtestsource) - [<code>Function</code>](#sharedtestsource-function), [<code>Interface</code>](#sharedtestsource-interface)
+3. [<code>TestSourceEvent</code>](#testsourceevent)
+4. [<code>TestSubscriptionInfo</code>](#testsubscriptioninfo) - [<code>Function</code>](#testsubscriptioninfo-function), [<code>Interface</code>](#testsubscriptioninfo-interface)
+5. [<code>TestSourceSubscriptions</code>](#testsourcesubscriptions)
+6. [<code>TestSchedule</code>](#testschedule) - [<code>Function</code>](#testschedule-function), [<code>Interface</code>](#testschedule-interface)
+7. [<code>watchSourceEvents</code>](#watchsourceevents)
+8. [<code>P</code>](#p)
+9. [<code>T</code>](#t)
+10. [<code>E</code>](#e)
 
 ## <code>TestSource</code>
 

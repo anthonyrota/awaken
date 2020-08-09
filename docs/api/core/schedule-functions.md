@@ -6,15 +6,15 @@ title: API Reference - Schedule Functions
 
 ## Table of Contents
 
-1. [ScheduleAnimationFrameQueued](#scheduleanimationframequeued)
-2. [ScheduleInterval](#scheduleinterval)
-3. [ScheduleQueued](#schedulequeued)
-4. [ScheduleQueuedDiscrete](#schedulequeueddiscrete)
-5. [ScheduleSyncQueued](#schedulesyncqueued)
-6. [ScheduleTimeout](#scheduletimeout)
-7. [ScheduleTimeoutQueued](#scheduletimeoutqueued)
-8. [scheduleAnimationFrame](#scheduleanimationframe)
-9. [scheduleSync](#schedulesync)
+1. [<code>ScheduleAnimationFrameQueued</code>](#scheduleanimationframequeued)
+2. [<code>ScheduleInterval</code>](#scheduleinterval)
+3. [<code>ScheduleQueued</code>](#schedulequeued)
+4. [<code>ScheduleQueuedDiscrete</code>](#schedulequeueddiscrete)
+5. [<code>ScheduleSyncQueued</code>](#schedulesyncqueued)
+6. [<code>ScheduleTimeout</code>](#scheduletimeout)
+7. [<code>ScheduleTimeoutQueued</code>](#scheduletimeoutqueued)
+8. [<code>scheduleAnimationFrame</code>](#scheduleanimationframe)
+9. [<code>scheduleSync</code>](#schedulesync)
 
 ## <code>ScheduleAnimationFrameQueued</code>
 

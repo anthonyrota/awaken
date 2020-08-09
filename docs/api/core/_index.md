@@ -6,36 +6,36 @@ title: API Reference - Basics
 
 ## Table of Contents
 
-1. [Disposable](#disposable) - [Function](#disposable-function), [Interface](#disposable-interface)
-   1. [isDisposable](#isdisposable)
-   2. [DisposalError](#disposalerror) - [Interface](#disposalerror-interface), [Variable](#disposalerror-variable)
-   3. [DisposalErrorConstructor](#disposalerrorconstructor)
-   4. [DISPOSED](#disposed)
-   5. [implDisposableMethods](#impldisposablemethods)
-2. [Event](#event)
-   1. [EventType](#eventtype)
-   2. [Push](#push) - [Function](#push-function), [Interface](#push-interface)
-   3. [PushType](#pushtype) - [Type Alias](#pushtype-typealias), [Variable](#pushtype-variable)
-   4. [Throw](#throw) - [Function](#throw-function), [Interface](#throw-interface)
-   5. [ThrowType](#throwtype) - [Type Alias](#throwtype-typealias), [Variable](#throwtype-variable)
-   6. [End](#end) - [Interface](#end-interface), [Variable](#end-variable)
-   7. [EndType](#endtype) - [Type Alias](#endtype-typealias), [Variable](#endtype-variable)
-3. [Sink](#sink) - [Function](#sink-function), [Interface](#sink-interface)
-   1. [isSink](#issink)
-4. [Source](#source) - [Function](#source-function), [Interface](#source-interface)
-   1. [isSource](#issource)
-   2. [subscribe](#subscribe)
-5. [Operator](#operator)
-   1. [IdentityOperator](#identityoperator)
-   2. [pipe](#pipe)
-   3. [flow](#flow)
-6. [Subject](#subject) - [Function](#subject-function), [Interface](#subject-interface)
-   1. [isSubject](#issubject)
-   2. [SubjectDistributionSinkDisposalError](#subjectdistributionsinkdisposalerror) - [Interface](#subjectdistributionsinkdisposalerror-interface), [Variable](#subjectdistributionsinkdisposalerror-variable)
-   3. [SubjectDistributionSinkDisposalErrorConstructor](#subjectdistributionsinkdisposalerrorconstructor)
-   4. [markAsSubject](#markassubject)
-   5. [NonMarkedSubject](#nonmarkedsubject)
-7. [ScheduleFunction](#schedulefunction)
+1. [<code>Disposable</code>](#disposable) - [<code>Function</code>](#disposable-function), [<code>Interface</code>](#disposable-interface)
+   1. [<code>isDisposable</code>](#isdisposable)
+   2. [<code>DisposalError</code>](#disposalerror) - [<code>Interface</code>](#disposalerror-interface), [<code>Variable</code>](#disposalerror-variable)
+   3. [<code>DisposalErrorConstructor</code>](#disposalerrorconstructor)
+   4. [<code>DISPOSED</code>](#disposed)
+   5. [<code>implDisposableMethods</code>](#impldisposablemethods)
+2. [<code>Event</code>](#event)
+   1. [<code>EventType</code>](#eventtype)
+   2. [<code>Push</code>](#push) - [<code>Function</code>](#push-function), [<code>Interface</code>](#push-interface)
+   3. [<code>PushType</code>](#pushtype) - [<code>Type</code>](#pushtype-typealias), [<code>Variable</code>](#pushtype-variable)
+   4. [<code>Throw</code>](#throw) - [<code>Function</code>](#throw-function), [<code>Interface</code>](#throw-interface)
+   5. [<code>ThrowType</code>](#throwtype) - [<code>Type</code>](#throwtype-typealias), [<code>Variable</code>](#throwtype-variable)
+   6. [<code>End</code>](#end) - [<code>Interface</code>](#end-interface), [<code>Variable</code>](#end-variable)
+   7. [<code>EndType</code>](#endtype) - [<code>Type</code>](#endtype-typealias), [<code>Variable</code>](#endtype-variable)
+3. [<code>Sink</code>](#sink) - [<code>Function</code>](#sink-function), [<code>Interface</code>](#sink-interface)
+   1. [<code>isSink</code>](#issink)
+4. [<code>Source</code>](#source) - [<code>Function</code>](#source-function), [<code>Interface</code>](#source-interface)
+   1. [<code>isSource</code>](#issource)
+   2. [<code>subscribe</code>](#subscribe)
+5. [<code>Operator</code>](#operator)
+   1. [<code>IdentityOperator</code>](#identityoperator)
+   2. [<code>pipe</code>](#pipe)
+   3. [<code>flow</code>](#flow)
+6. [<code>Subject</code>](#subject) - [<code>Function</code>](#subject-function), [<code>Interface</code>](#subject-interface)
+   1. [<code>isSubject</code>](#issubject)
+   2. [<code>SubjectDistributionSinkDisposalError</code>](#subjectdistributionsinkdisposalerror) - [<code>Interface</code>](#subjectdistributionsinkdisposalerror-interface), [<code>Variable</code>](#subjectdistributionsinkdisposalerror-variable)
+   3. [<code>SubjectDistributionSinkDisposalErrorConstructor</code>](#subjectdistributionsinkdisposalerrorconstructor)
+   4. [<code>markAsSubject</code>](#markassubject)
+   5. [<code>NonMarkedSubject</code>](#nonmarkedsubject)
+7. [<code>ScheduleFunction</code>](#schedulefunction)
 
 ## <code>Disposable</code>
 
@@ -226,7 +226,7 @@ console.log(event.value); // [1, 2, 3].
 
 ## <code>PushType</code>
 
-### <a name="pushtype-typealias"></a><code>PushType - Type Alias</code>
+### <a name="pushtype-typealias"></a><code>PushType - Type</code>
 
 <b>Signature</b>
 
@@ -280,7 +280,7 @@ console.log(event.value); // Error(...).
 
 ## <code>ThrowType</code>
 
-### <a name="throwtype-typealias"></a><code>ThrowType - Type Alias</code>
+### <a name="throwtype-typealias"></a><code>ThrowType - Type</code>
 
 <b>Signature</b>
 
@@ -326,7 +326,7 @@ sink(End); // This disposes the sink, then calls `onEvent` above.
 
 ## <code>EndType</code>
 
-### <a name="endtype-typealias"></a><code>EndType - Type Alias</code>
+### <a name="endtype-typealias"></a><code>EndType - Type</code>
 
 <b>Signature</b>
 

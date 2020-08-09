@@ -6,11 +6,11 @@ title: API Reference - Subjects
 
 ## Table of Contents
 
-1. [CurrentValueSubject](#currentvaluesubject) - [Function](#currentvaluesubject-function), [Interface](#currentvaluesubject-interface)
-2. [FinalValueSubject](#finalvaluesubject)
-3. [ReplaySubject](#replaysubject)
-   1. [ReplaySubjectTimeoutConfig](#replaysubjecttimeoutconfig)
-4. [SubjectBase](#subjectbase)
+1. [<code>CurrentValueSubject</code>](#currentvaluesubject) - [<code>Function</code>](#currentvaluesubject-function), [<code>Interface</code>](#currentvaluesubject-interface)
+2. [<code>FinalValueSubject</code>](#finalvaluesubject)
+3. [<code>ReplaySubject</code>](#replaysubject)
+   1. [<code>ReplaySubjectTimeoutConfig</code>](#replaysubjecttimeoutconfig)
+4. [<code>SubjectBase</code>](#subjectbase)
 
 ## <code>CurrentValueSubject</code>
 

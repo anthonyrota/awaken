@@ -6,11 +6,11 @@ title: API Reference - Utils
 
 ## Table of Contents
 
-1. [setTimeout](#settimeout)
-2. [setInterval](#setinterval)
-3. [requestAnimationFrame](#requestanimationframe)
-4. [asyncReportError](#asyncreporterror)
-5. [TimeProvider](#timeprovider)
+1. [<code>setTimeout</code>](#settimeout)
+2. [<code>setInterval</code>](#setinterval)
+3. [<code>requestAnimationFrame</code>](#requestanimationframe)
+4. [<code>asyncReportError</code>](#asyncreporterror)
+5. [<code>TimeProvider</code>](#timeprovider)
 
 ## <code>setTimeout</code>
 
