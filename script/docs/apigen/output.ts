@@ -8,11 +8,11 @@
  */
 /* eslint-enable max-len */
 
-import * as unist from 'unist';
 import * as unified from 'unified';
 import * as remarkParse from 'remark-parse';
+import * as mdast from 'mdast';
+import * as definitions from 'mdast-util-definitions';
 import { IndentedWriter } from './util';
-import { htmlBlockElements } from './htmlBlockElements';
 import {
     TableOfContentsInlineReference,
     TableOfContentsNestedReference,
@@ -26,9 +26,9 @@ export class MarkdownOutput extends IndentedWriter {
     private _writeSingleLine = false;
     private _inHtmlBlockTag = false;
     private _inMarkdownCode = false;
-    private _inParagraphNode = false;
     private _inListNode = false;
     private _isMarkedNewParagraph = false;
+    private _writingInlineHtmlTag = false;
 
     public withInTable(write: () => void): void {
         const before = this._inTable;
@@ -65,13 +65,6 @@ export class MarkdownOutput extends IndentedWriter {
         this._inMarkdownCode = before;
     }
 
-    public withInParagraphNode(write: () => void): void {
-        const before = this._inParagraphNode;
-        this._inParagraphNode = true;
-        write();
-        this._inParagraphNode = before;
-    }
-
     public withInListNode(write: () => void): void {
         const before = this._inListNode;
         this._inListNode = true;
@@ -79,11 +72,59 @@ export class MarkdownOutput extends IndentedWriter {
         this._inListNode = before;
     }
 
-    public withMarkedNewParagraph(write: () => void): void {
-        this._inHtmlBlockTag = false;
+    public withNewParagraph(
+        write: () => void,
+        opt?: {
+            singleLine?: {
+                writeStartBlockTag: () => void;
+                writeEndBlockTag: () => void;
+            };
+            writeNotSingleLine?: (write: () => void) => void;
+        },
+    ): void {
+        const _isMarkedNewParagraph = this._isMarkedNewParagraph;
+        if (
+            this._isMarkedNewParagraph &&
+            !(this.constrainedToSingleLine
+                ? opt?.singleLine
+                : opt?.writeNotSingleLine)
+        ) {
+            // TODO: check following line.
+            // this._isMarkedNewParagraph = false;
+            write();
+            return;
+        }
+        if (this.constrainedToSingleLine) {
+            if (opt?.singleLine) opt.singleLine.writeStartBlockTag();
+            else this.write('<p>');
+            this.markStartOfParagraph();
+            this.withInHtmlBlockTag(write);
+            if (opt?.singleLine) opt.singleLine.writeEndBlockTag();
+            else this.write('</p>');
+            return;
+        }
+        if (!_isMarkedNewParagraph) {
+            this.ensureSkippedLine();
+            // Content after skipped line in block tag is parsed as markdown.
+            this._inHtmlBlockTag = false;
+        }
+        this.markStartOfParagraph();
+        if (opt?.writeNotSingleLine) {
+            opt.writeNotSingleLine(write);
+        } else {
+            write();
+        }
+    }
+
+    public markStartOfParagraph(): void {
         this._isMarkedNewParagraph = true;
+    }
+
+    public withWritingInlineHtmlTag(write: () => void): void {
+        const before = this._writingInlineHtmlTag;
+        this._writingInlineHtmlTag = true;
         write();
-        this._isMarkedNewParagraph = false;
+        this._writingInlineHtmlTag = before;
     }
 
     public get constrainedToSingleLine(): boolean {
@@ -106,28 +147,19 @@ export class MarkdownOutput extends IndentedWriter {
         return this._inMarkdownCode;
     }
 
-    public get inParagraphNode(): boolean {
-        return this._inParagraphNode;
-    }
-
     public get inListNode(): boolean {
         return this._inListNode;
-    }
-
-    public ensureNewParagraph(): void {
-        if (this._isMarkedNewParagraph) {
-            this._isMarkedNewParagraph = false;
-            return;
-        }
-        this._inHtmlBlockTag = false;
-        super.ensureSkippedLine();
     }
 
     protected _write(str: string): void {
         if (this.constrainedToSingleLine && /[\n\r]/.test(str)) {
             throw new Error('Newline when constrained to single line.');
         }
-        if (this._isMarkedNewParagraph && /\S/.test(str)) {
+        if (
+            this._isMarkedNewParagraph &&
+            !this._writingInlineHtmlTag &&
+            /\S/.test(str)
+        ) {
             this._isMarkedNewParagraph = false;
         }
         super._write(str);
@@ -255,7 +287,7 @@ export class PlainText extends RawText {
                 text = text.split(newlineRegexp).join('</code><br><code>');
             } else if (output.inHtmlBlockTag && !output.inTable) {
                 const before = text;
-                text = text.replace(/(\r?\n){2}/, '<br><br>');
+                text = text.replace(/(\r?\n)/g, '<br>');
                 if (output.constrainedToSingleLine && before !== text) {
                     throw new Error(
                         "Can't have multiline text when constrained to single line.",
@@ -274,30 +306,40 @@ export function writePlainText(output: MarkdownOutput, text: string): void {
 
 const remark = unified().use(remarkParse);
 
-export function parseMarkdown(text: string): Container {
-    const rootNode = remark.parse(text);
+export function parseMarkdown(
+    text: string,
+    opt?: { unwrapFirstLineParagraph?: boolean },
+): Container {
+    const rootNode = remark.parse(text) as mdast.Root;
+    const definition = definitions(rootNode);
 
     // https://github.com/syntax-tree/mdast
-    function traverseNode(container: Container, node: unist.Node): void {
+    function traverseNode(container: Container, node: mdast.Content): void {
         /* eslint-disable @typescript-eslint/no-unsafe-member-access */
         /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         /* eslint-disable @typescript-eslint/no-unsafe-call */
         /* eslint-disable @typescript-eslint/no-explicit-any */
         switch (node.type) {
-            case 'root': {
-                traverseChildren(container, node as unist.Parent);
-                break;
-            }
             case 'paragraph': {
+                if (!node.position) {
+                    throw new Error('No.');
+                }
+                if (
+                    opt?.unwrapFirstLineParagraph &&
+                    node.position.start.column === 1 &&
+                    node.position.start.line === 1
+                ) {
+                    traverseChildren(container, node);
+                    break;
+                }
                 const paragraph = new Paragraph();
                 container.addChild(paragraph);
-                traverseChildren(paragraph, node as unist.Parent);
+                traverseChildren(paragraph, node);
                 break;
             }
             case 'heading': {
-                const depth = (node as any).depth;
                 let heading: Container;
-                switch (depth) {
+                switch (node.depth) {
                     case 2: {
                         heading = new Heading();
                         break;
@@ -311,11 +353,13 @@ export function parseMarkdown(text: string): Container {
                         break;
                     }
                     default: {
-                        throw new Error('Unsupported heading depth.');
+                        throw new Error(
+                            `Unsupported heading depth: ${node.depth}.`,
+                        );
                     }
                 }
                 container.addChild(heading);
-                traverseChildren(heading, node as unist.Parent);
+                traverseChildren(heading, node);
                 break;
             }
             case 'thematicBreak': {
@@ -325,7 +369,7 @@ export function parseMarkdown(text: string): Container {
             case 'blockquote': {
                 const blockQuote = new BlockQuote();
                 container.addChild(blockQuote);
-                traverseChildren(blockQuote, node as unist.Parent);
+                traverseChildren(blockQuote, node);
                 break;
             }
             case 'listItem': {
@@ -333,15 +377,15 @@ export function parseMarkdown(text: string): Container {
             }
             case 'list': {
                 const list = new List(
-                    (node as any).ordered ?? undefined,
-                    (node as any).start ?? undefined,
+                    node.ordered ?? undefined,
+                    node.start ?? undefined,
                 );
                 container.addChild(list);
-                for (const childNode of (node as unist.Parent).children) {
+                for (const childNode of node.children) {
                     const container = new Container();
                     list.addChild(container);
                     if (childNode.type === 'listItem') {
-                        if ((childNode as any).checked !== null) {
+                        if (childNode.checked !== null) {
                             throw new Error(
                                 `Unsupported list item type. ${JSON.stringify(
                                     node,
@@ -350,7 +394,7 @@ export function parseMarkdown(text: string): Container {
                                 )}`,
                             );
                         }
-                        traverseChildren(container, childNode as unist.Parent);
+                        traverseChildren(container, childNode);
                         continue;
                     }
                     traverseNode(container, childNode);
@@ -358,19 +402,17 @@ export function parseMarkdown(text: string): Container {
                 break;
             }
             case 'table': {
-                if ((node as any).align.some((item) => item !== null)) {
+                // TODO: support different align types.
+                if (node.align && node.align.some((item) => item !== null)) {
                     throw new Error('Unsupported table align.');
                 }
-                const tableNode = node as unist.Parent;
-                if (tableNode.children.length === 0) {
+                if (node.children.length === 0) {
                     throw new Error('Table has no rows.');
                 }
-                const heading = parseTableRow(
-                    tableNode.children[0] as unist.Parent,
-                );
+                const heading = parseTableRow(node.children[0]);
                 const table = new Table(heading);
-                for (const child of tableNode.children) {
-                    table.addChild(parseTableRow(child as unist.Parent));
+                for (const child of node.children) {
+                    table.addChild(parseTableRow(child));
                 }
                 break;
             }
@@ -384,7 +426,7 @@ export function parseMarkdown(text: string): Container {
                 // HTML tags should be stripped out into their own nodes by the
                 // TSDoc parser. HTML comments are used as metadata when parsing
                 // TSDoc nodes, therefore preserve them.
-                let value = (node as unist.Literal).value as string;
+                let value = node.value;
                 while (!/^\s*$/.test(value)) {
                     value = value.trimLeft();
                     if (!/^<!--/.test(value)) {
@@ -402,49 +444,45 @@ export function parseMarkdown(text: string): Container {
                 break;
             }
             case 'code': {
-                if ((node as any).meta !== null) {
+                if (node.meta !== null) {
                     throw new Error('Invalid code block.');
                 }
-                const codeBlock = new CodeBlock(
-                    (node as any).lang,
-                    (node as unist.Literal).value as string,
-                );
+                const codeBlock = new CodeBlock(node.lang, node.value);
                 container.addChild(codeBlock);
                 break;
             }
             case 'definition': {
-                throw new Error('Markdown definitions are not supported.');
+                // Don't output.
+                break;
             }
             case 'footnoteDefinition': {
                 throw new Error('Footnote definitions are not supported.');
             }
             case 'text': {
-                container.addChild(
-                    new PlainText((node as unist.Literal).value as string),
-                );
+                container.addChild(new PlainText(node.value));
                 break;
             }
             case 'emphasis': {
                 const italics = new Italics();
                 container.addChild(italics);
-                traverseChildren(italics, node as unist.Parent);
+                traverseChildren(italics, node);
                 break;
             }
             case 'strong': {
                 const bold = new Bold();
                 container.addChild(bold);
-                traverseChildren(bold, node as unist.Parent);
+                traverseChildren(bold, node);
                 break;
             }
             case 'delete': {
                 const strikethrough = new Strikethrough();
                 container.addChild(strikethrough);
-                traverseChildren(strikethrough, node as unist.Parent);
+                traverseChildren(strikethrough, node);
                 break;
             }
             case 'inlineCode': {
                 const inlineCode = new CodeSpan().addChild(
-                    new PlainText((node as unist.Literal).value as string),
+                    new PlainText(node.value),
                 );
                 container.addChild(inlineCode);
                 break;
@@ -455,27 +493,55 @@ export function parseMarkdown(text: string): Container {
                 );
             }
             case 'link': {
-                const link = new Link((node as any).url, (node as any).title);
+                const link = new Link(node.url, node.title);
                 container.addChild(link);
-                traverseChildren(link, node as unist.Parent);
+                traverseChildren(link, node);
                 break;
             }
             case 'image': {
-                const image = new Image(
-                    (node as any).url,
-                    (node as any).title,
-                    (node as any).alt,
-                );
+                const image = new Image(node.url, node.title, node.alt);
                 container.addChild(image);
                 break;
             }
             case 'linkReference': {
-                throw new Error('Link references are not supported.');
+                const definitionNode = definition(node.identifier);
+                if (!definitionNode) {
+                    throw new Error(
+                        `No definition found for identifier ${node.identifier}`,
+                    );
+                }
+                const link = new Link(definitionNode.url, definitionNode.title);
+                container.addChild(link);
+                if (node.children.length > 0) {
+                    traverseChildren(link, node);
+                } else {
+                    link.addChild(
+                        new PlainText(
+                            node.label ||
+                                definitionNode.label ||
+                                node.identifier,
+                        ),
+                    );
+                }
+                break;
             }
             case 'imageReference': {
-                throw new Error('Image references are not supported.');
+                const definitionNode = definition(node.identifier);
+                if (!definitionNode) {
+                    throw new Error(
+                        `No definition found for identifier ${node.identifier}`,
+                    );
+                }
+                const image = new Image(
+                    definitionNode.url,
+                    definitionNode.title,
+                    node.alt,
+                );
+                container.addChild(image);
+                break;
             }
             case 'footnote': {
+                // TODO: support footnotes.
                 throw new Error('Footnotes are not supported.');
             }
             default: {
@@ -489,20 +555,20 @@ export function parseMarkdown(text: string): Container {
         /* eslint-enable @typescript-eslint/no-explicit-any */
     }
 
-    function parseTableRow(node: unist.Parent): TableRow {
+    function parseTableRow(node: mdast.TableRow): TableRow {
         const row = new TableRow();
         // Loop over cells.
         for (const childNode of node.children) {
             const container = new Container();
             row.addChild(container);
-            traverseChildren(container, childNode as unist.Parent);
+            traverseChildren(container, childNode);
         }
         return row;
     }
 
     function traverseChildren(
         container: Container,
-        parent: unist.Parent,
+        parent: mdast.Parent,
     ): void {
         for (const node of parent.children) {
             traverseNode(container, node);
@@ -510,7 +576,7 @@ export function parseMarkdown(text: string): Container {
     }
 
     const container = new Container();
-    traverseNode(container, rootNode);
+    traverseChildren(container, rootNode);
     return container;
 }
 
@@ -518,10 +584,10 @@ export class HorizontalRule extends Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (output.constrainedToSingleLine) {
             output.write('<hr>');
-            return;
+        } else {
+            output.ensureSkippedLine();
+            output.writeLine('---');
         }
-        output.ensureNewLine();
-        output.write('---');
     }
 }
 
@@ -551,38 +617,89 @@ export class PersistentHtmlComment extends Node {
 
 export class BlockQuote extends Container {
     public writeAsMarkdown(output: MarkdownOutput): void {
-        output.increaseIndent('> ');
-        super.writeAsMarkdown(output);
-        output.decreaseIndent();
+        output.withNewParagraph(() => super.writeAsMarkdown(output), {
+            singleLine: {
+                writeStartBlockTag: () => output.write('<blockquote>'),
+                writeEndBlockTag: () => output.write('</blockquote>'),
+            },
+            writeNotSingleLine: (write) => {
+                output.increaseIndent('> ');
+                write();
+                output.decreaseIndent();
+            },
+        });
     }
 }
 
+// prettier-ignore
+const htmlBlockElements = new Set(['address', 'article', 'aside', 'blockquote', 'canvas', 'dd', 'div', 'dl', 'dt', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'header', 'hr', 'li', 'main', 'nav', 'noscript', 'ol', 'p', 'pre', 'section', 'table', 'tfoot', 'ul', 'video', 'base', 'basefont', 'body', 'caption', 'center', 'col', 'colgroup', 'details', 'dialog', 'dir', 'frame', 'frameset', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'hgroup', 'html', 'iframe', 'legend', 'link', 'menu', 'menuitem', 'meta', 'noframes', 'optgroup', 'option', 'param', 'source', 'title', 'summary', 'tbody', 'td', 'th', 'thead', 'tr', 'track']);
+// prettier-ignore
+const htmlSelfClosingElements = new Set(['area', 'base', 'basefont', 'br', 'col', 'command', 'embed', 'frame', 'hr', 'img', 'input', 'isindex', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
+
+export const enum HtmlTagClassification {
+    Inline,
+    Block,
+    SelfClosing,
+}
+
 export class HtmlElement extends Container {
+    public classification: HtmlTagClassification = htmlBlockElements.has(
+        this.tagName,
+    )
+        ? HtmlTagClassification.Block
+        : htmlSelfClosingElements.has(this.tagName)
+        ? HtmlTagClassification.SelfClosing
+        : HtmlTagClassification.Inline;
+
     constructor(public tagName: string) {
         super();
     }
 
-    private _writeTagAsMarkdown(output: MarkdownOutput): void {
+    private _writeStartTag(output: MarkdownOutput): void {
         output.write('<');
         writePlainText(output, this.tagName);
         output.write('>');
-        super.writeAsMarkdown(output);
+    }
+
+    private _writeEndTag(output: MarkdownOutput): void {
         output.write('</');
         writePlainText(output, this.tagName);
         output.write('>');
     }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
-        if (htmlBlockElements.has(this.tagName)) {
-            if (!output.constrainedToSingleLine && !output.inHtmlBlockTag) {
-                output.ensureNewParagraph();
-            }
-            output.withInHtmlBlockTag(() => {
-                this._writeTagAsMarkdown(output);
-            });
+        if (this.classification === HtmlTagClassification.Block) {
+            output.withNewParagraph(
+                () => {
+                    output.withInHtmlBlockTag(() => {
+                        super.writeAsMarkdown(output);
+                    });
+                },
+                {
+                    singleLine: {
+                        writeStartBlockTag: () => this._writeStartTag(output),
+                        writeEndBlockTag: () => this._writeEndTag(output),
+                    },
+                    writeNotSingleLine: (write) => {
+                        this._writeStartTag(output);
+                        output.markStartOfParagraph();
+                        write();
+                        this._writeEndTag(output);
+                    },
+                },
+            );
             return;
         }
-        this._writeTagAsMarkdown(output);
+        if (this.classification === HtmlTagClassification.SelfClosing) {
+            this._writeStartTag(output);
+            return;
+        }
+        // If marked new paragraph -> opening inline html shouldn't affect.
+        output.withWritingInlineHtmlTag(() => {
+            this._writeStartTag(output);
+        });
+        super.writeAsMarkdown(output);
+        this._writeEndTag(output);
     }
 }
 
@@ -616,8 +733,8 @@ export class CodeSpan extends HtmlElement {
     }
 }
 
-export class CodeBlock extends Container {
-    constructor(private _language: string, private _code: string) {
+export class CodeBlock extends Node {
+    constructor(private _language: string | undefined, private _code: string) {
         super();
     }
 
@@ -625,21 +742,24 @@ export class CodeBlock extends Container {
         if (output.constrainedToSingleLine) {
             output.withInSingleLineCodeBlock(() => {
                 new HtmlElement('code')
-                    .addChildren(...this._children)
+                    .addChild(new PlainText(this._code))
                     .writeAsMarkdown(output);
             });
             return;
         }
 
-        output.ensureNewParagraph();
-        output.withInMarkdownCode(() => {
+        output.withNewParagraph(() => {
+            output.withInMarkdownCode(() => {
+                output.write('```');
+                if (this._language) {
+                    writePlainText(output, this._language);
+                }
+                output.writeLine();
+                output.write(this._code);
+                output.ensureNewLine();
+            });
             output.write('```');
-            writePlainText(output, this._language);
-            output.writeLine();
-            output.write(this._code);
-            output.ensureNewLine();
         });
-        output.write('```');
     }
 }
 
@@ -653,14 +773,14 @@ export class RichCodeBlock extends Container {
         if (output.constrainedToSingleLine) {
             output.withInSingleLineCodeBlock(() => {
                 new HtmlElement('code')
-                    .addChildren(...this._children)
+                    .setChildren(this._children)
                     .writeAsMarkdown(output);
             });
             return;
         }
 
         new HtmlElement('pre')
-            .addChildren(...this._children)
+            .setChildren(this._children)
             .writeAsMarkdown(output);
     }
 }
@@ -673,13 +793,16 @@ export class Link extends Container {
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.withInSingleLine(() => {
             if (output.inHtmlBlockTag && !output.inTable) {
-                output.write('<a href="');
-                writePlainText(output, this._destination);
-                if (this._title) {
-                    output.write('" title="');
-                    writePlainText(output, this._title);
-                }
-                output.write('">');
+                // TODO: add property support to html element construct.
+                output.withWritingInlineHtmlTag(() => {
+                    output.write('<a href="');
+                    writePlainText(output, this._destination);
+                    if (this._title) {
+                        output.write('" title="');
+                        writePlainText(output, this._title);
+                    }
+                    output.write('">');
+                });
                 super.writeAsMarkdown(output);
                 output.write('</a>');
                 return;
@@ -709,7 +832,7 @@ export class LocalPageLink extends Container {
             path ? (hash ? `${path}.md#${hash}` : `${path}.md`) : `#${hash}`,
             this._title,
         )
-            .addChildren(...this._children)
+            .setChildren(this._children)
             .writeAsMarkdown(output);
     }
 }
@@ -754,78 +877,65 @@ export class Image extends Node {
 
 export class Paragraph extends Container {
     public writeAsMarkdown(output: MarkdownOutput): void {
-        if (this._children.length === 0) {
-            return;
-        }
-        if (output.inParagraphNode) {
-            super.writeAsMarkdown(output);
-            return;
-        }
-        output.withInParagraphNode(() => {
-            if (output.constrainedToSingleLine) {
-                new HtmlElement('p')
-                    .addChildren(...this._children)
-                    .writeAsMarkdown(output);
-                return;
-            }
-            output.ensureNewParagraph();
-            super.writeAsMarkdown(output);
-        });
+        output.withNewParagraph(() => super.writeAsMarkdown(output));
     }
 }
 
-export class Heading extends Container {
-    constructor(private _alternateId?: string) {
+class HeadingBase extends Container {
+    constructor(
+        private _level: 1 | 2 | 3 | 4 | 5 | 6,
+        private _alternateId?: string,
+    ) {
         super();
     }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
-        output.ensureNewParagraph();
-        output.withInSingleLine(() => {
-            output.write('## ');
-            if (this._alternateId) {
-                output.write('<a name="');
-                writePlainText(output, this._alternateId);
-                output.write('"></a>');
-            }
-            super.writeAsMarkdown(output);
-        });
+        output.withNewParagraph(
+            () => {
+                output.withInSingleLine(() => {
+                    if (this._alternateId) {
+                        output.write('<a name="');
+                        writePlainText(output, this._alternateId);
+                        output.write('"></a>');
+                    }
+                    super.writeAsMarkdown(output);
+                });
+            },
+            {
+                singleLine: {
+                    writeStartBlockTag: () => output.write(`<h${this._level}>`),
+                    writeEndBlockTag: () => output.write(`</h${this._level}>`),
+                },
+                writeNotSingleLine: (write) => {
+                    output.write(`${'#'.repeat(this._level)} `);
+                    write();
+                },
+            },
+        );
     }
 }
 
-export class Subheading extends Container {
-    constructor(private _alternateId?: string) {
-        super();
-    }
-
-    public writeAsMarkdown(output: MarkdownOutput): void {
-        output.ensureNewParagraph();
-        output.withInSingleLine(() => {
-            output.write('### ');
-            if (this._alternateId) {
-                output.write('<a name="');
-                writePlainText(output, this._alternateId);
-                output.write('"></a>');
-            }
-            super.writeAsMarkdown(output);
-        });
+export class Heading extends HeadingBase {
+    constructor(alternateId?: string) {
+        super(2, alternateId);
     }
 }
 
-export class Title extends HtmlElement {
-    constructor() {
-        // At the time of writing Github styles regular text and h4 elements
-        // with the same font size. Therefore rendering titles as bold spans
-        // will ensure that an anchor is not generated for this node in the
-        // rendered html.
-        super('b');
+export class Subheading extends HeadingBase {
+    constructor(alternateId?: string) {
+        super(3, alternateId);
     }
+}
 
+export class Title extends Container {
     public writeAsMarkdown(output: MarkdownOutput): void {
-        output.ensureNewParagraph();
-        output.withInSingleLine(() => {
-            super.writeAsMarkdown(output);
-        });
+        new Paragraph()
+            // At the time of writing Github styles regular text and h4 elements
+            // with the same font size. Therefore rendering titles as bold spans
+            // will ensure that an anchor is not generated for this node in the
+            // rendered html.
+            .addChild(new HtmlElement('b').setChildren(this._children))
+            .writeAsMarkdown(output);
     }
 }
 
@@ -834,12 +944,7 @@ export class List extends Container {
         super();
     }
 
-    public writeAsMarkdown(output: MarkdownOutput): void {
-        if (output.inListNode) {
-            output.ensureNewLine();
-        } else {
-            output.ensureNewParagraph();
-        }
+    private _writeListItems(output: MarkdownOutput): void {
         for (const [i, child] of this._children.entries()) {
             if (i !== 0) {
                 output.ensureNewLine();
@@ -847,13 +952,35 @@ export class List extends Container {
             const listMarker = this._ordered ? `${this._start + i}. ` : '- ';
             output.write(listMarker);
             output.increaseIndent(' '.repeat(listMarker.length));
-            output.withMarkedNewParagraph(() => {
-                output.withInListNode(() => {
-                    child.writeAsMarkdown(output);
-                });
+            output.markStartOfParagraph();
+            output.withInListNode(() => {
+                child.writeAsMarkdown(output);
             });
             output.decreaseIndent();
         }
+    }
+
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        if (output.constrainedToSingleLine) {
+            if (this._ordered) {
+                output.write('<ol start="');
+                output.write(`${this._start}`);
+                output.write(`">`);
+            } else {
+                output.write('<ul>');
+            }
+            for (const child of this._children) {
+                new HtmlElement('li').addChild(child).writeAsMarkdown(output);
+            }
+            output.write(`</${this._ordered ? 'ol' : 'ul'}>`);
+            return;
+        }
+        if (output.inListNode) {
+            output.ensureNewLine();
+            this._writeListItems(output);
+            return;
+        }
+        output.withNewParagraph(() => this._writeListItems(output));
     }
 }
 
@@ -869,6 +996,7 @@ export class TableRow extends Container {
         output.write('|');
         for (const cell of this._children) {
             output.write(' ');
+            output.markStartOfParagraph();
             output.withInTable(() => {
                 cell.writeAsMarkdown(output);
             });
@@ -899,25 +1027,26 @@ export class Table extends Container<TableRow> {
     }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
-        output.ensureNewParagraph();
+        // TODO: support when constrained to single line.
+        output.withNewParagraph(() => {
+            const columnCount = this._getColumnCount();
 
-        const columnCount = this._getColumnCount();
+            if (this._header) {
+                this._header.writeAsMarkdown(output, columnCount);
+            } else {
+                output.write('|  '.repeat(columnCount));
+                output.write('|');
+            }
 
-        if (this._header) {
-            this._header.writeAsMarkdown(output, columnCount);
-        } else {
-            output.write('|  '.repeat(columnCount));
+            // Divider.
+            output.writeLine();
+            output.write('| --- '.repeat(this._getColumnCount()));
             output.write('|');
-        }
 
-        // Divider.
-        output.writeLine();
-        output.write('| --- '.repeat(this._getColumnCount()));
-        output.write('|');
-
-        for (const child of this._children) {
-            child.writeAsMarkdown(output, columnCount, true);
-        }
+            for (const child of this._children) {
+                child.writeAsMarkdown(output, columnCount, true);
+            }
+        });
     }
 }
 
@@ -928,13 +1057,9 @@ export class CollapsibleSection extends HtmlElement {
     }
 }
 
-export class PageTitle extends Container {
-    public writeAsMarkdown(output: MarkdownOutput): void {
-        output.ensureNewParagraph();
-        output.withInSingleLine(() => {
-            output.write('# ');
-            super.writeAsMarkdown(output);
-        });
+export class PageTitle extends HeadingBase {
+    constructor(alternateId?: string) {
+        super(1, alternateId);
     }
 }
 
@@ -999,10 +1124,23 @@ export class TableOfContentsList extends Node {
     }
 }
 
-export class TableOfContents extends CollapsibleSection {
-    constructor(toc: TableOfContents_, relativePagePath?: string) {
-        super(new Bold().addChild(new PlainText('Table of Contents')));
-        this.addChild(new TableOfContentsList(toc, relativePagePath));
+export class TableOfContents extends Node {
+    constructor(
+        private _toc: TableOfContents_,
+        private _relativePagePath?: string,
+    ) {
+        super();
+    }
+
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        new CollapsibleSection(
+            new Bold().addChild(new PlainText('Table of Contents')),
+        )
+            .addChildren(
+                new HtmlElement('br'),
+                new TableOfContentsList(this._toc, this._relativePagePath),
+            )
+            .writeAsMarkdown(output);
     }
 }
 

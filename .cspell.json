@@ -25,7 +25,8 @@
         "tsdoc",
         "aedoc",
         "unist",
-        "strikethrough"
+        "strikethrough",
+        "mdast"
     ],
     "overrides": []
 }

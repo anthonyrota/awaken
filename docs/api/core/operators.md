@@ -2,7 +2,7 @@
 
 # API Reference - Operators
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>at</code>](#at)
 2. [<code>catchError</code>](#catcherror)
@@ -304,7 +304,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| predicate | <code>\(value: T, index: number\) =&gt; false</code> | <p>A function that accepts a value and an index. The filter method calls this function one time for each Push event of the given source. If and only if the function returns a truthy value, then the event will pass through.</p> |
+| predicate | <code>\(value: T, index: number\) =&gt; false</code> | A function that accepts a value and an index. The filter method calls this function one time for each Push event of the given source. If and only if the function returns a truthy value, then the event will pass through. |
 
 <b>Signature</b>
 
@@ -430,7 +430,7 @@ Calls the given transform function for each Push event of the given source and p
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <code>&lt;T&gt;\(value: T, index: number\) =&gt; U</code> | <p>A function which accepts a value and an index. The map method calls the transform function one time for each Push event of the given source and passes through the result.</p> |
+| transform | <code>&lt;T&gt;\(value: T, index: number\) =&gt; U</code> | A function which accepts a value and an index. The map method calls the transform function one time for each Push event of the given source and passes through the result. |
 
 <b>Signature</b>
 
@@ -462,7 +462,7 @@ Replaces the value of each received Push event with the given value.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>U</code> | <p>The value to push.</p> |
+| value | <code>U</code> | The value to push. |
 
 ## <code>max</code>
 
@@ -542,8 +542,8 @@ Calls the specified transform function for all the values pushed by the given so
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <code>\(previousAccumulatedResult: R &#124; I, currentValue: T, currentIndex: number\) =&gt; R</code> | <p>A function that transforms the previousAccumulatedResult (last value returned by this function), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result.</p> |
-| initialValue | <code>I</code> | <p>This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult.</p> |
+| transform | <code>\(previousAccumulatedResult: R &#124; I, currentValue: T, currentIndex: number\) =&gt; R</code> | A function that transforms the previousAccumulatedResult \(last value returned by this function\), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result. |
+| initialValue | <code>I</code> | This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult. |
 
 ## <code>repeat</code>
 
@@ -593,8 +593,8 @@ Calls the specified transform function for all the values pushed by the given so
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <code>\(previousAccumulatedResult: R &#124; I, currentValue: T, currentIndex: number\) =&gt; R</code> | <p>A function that transforms the previousAccumulatedResult (last value returned by this function), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result.</p> |
-| initialValue | <code>I</code> | <p>This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult.</p> |
+| transform | <code>\(previousAccumulatedResult: R &#124; I, currentValue: T, currentIndex: number\) =&gt; R</code> | A function that transforms the previousAccumulatedResult \(last value returned by this function\), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result. |
+| initialValue | <code>I</code> | This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult. |
 
 ## <code>schedulePushEvents</code>
 
@@ -774,7 +774,7 @@ Ignores all received Push events. When the source emits an End event, the last N
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| amount | <code>number</code> | <p>The amount of events to keep and distribute at the end.</p> |
+| amount | <code>number</code> | The amount of events to keep and distribute at the end. |
 
 ## <code>takeUntil</code>
 
@@ -794,7 +794,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| shouldContinue | <code>\(value: T, index: number\) =&gt; value is S</code> | <p>A function that accepts a value and an index. The takeWhile method calls this function one time for each Push event of the given source.</p> |
+| shouldContinue | <code>\(value: T, index: number\) =&gt; value is S</code> | A function that accepts a value and an index. The takeWhile method calls this function one time for each Push event of the given source. |
 
 <b>Signature</b>
 

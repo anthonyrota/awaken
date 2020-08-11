@@ -8,7 +8,7 @@
 
 ### [API Reference - Basics](core\/basics.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>Disposable</code>](core\/basics.md#disposable) - [<code>Function</code>](core\/basics.md#disposable-function), [<code>Interface</code>](core\/basics.md#disposable-interface)
    1. [<code>isDisposable</code>](core\/basics.md#isdisposable)
@@ -43,7 +43,7 @@
 
 ### [API Reference - Sources](core\/sources.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>all</code>](core\/sources.md#all)
 2. [<code>animationFrames</code>](core\/sources.md#animationframes)
@@ -80,7 +80,7 @@
 
 ### [API Reference - Operators](core\/operators.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>at</code>](core\/operators.md#at)
 2. [<code>catchError</code>](core\/operators.md#catcherror)
@@ -202,7 +202,7 @@
 
 ### [API Reference - Subjects](core\/subjects.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>CurrentValueSubject</code>](core\/subjects.md#currentvaluesubject) - [<code>Function</code>](core\/subjects.md#currentvaluesubject-function), [<code>Interface</code>](core\/subjects.md#currentvaluesubject-interface)
 2. [<code>FinalValueSubject</code>](core\/subjects.md#finalvaluesubject)
@@ -212,7 +212,7 @@
 
 ### [API Reference - Schedule Functions](core\/schedule-functions.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>ScheduleAnimationFrameQueued</code>](core\/schedule-functions.md#scheduleanimationframequeued)
 2. [<code>ScheduleInterval</code>](core\/schedule-functions.md#scheduleinterval)
@@ -226,7 +226,7 @@
 
 ### [API Reference - Utils](core\/util.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>setTimeout</code>](core\/util.md#settimeout)
 2. [<code>setInterval</code>](core\/util.md#setinterval)
@@ -236,7 +236,7 @@
 
 ## [API Reference - Testing](testing\/README.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>TestSource</code>](testing\/README.md#testsource) - [<code>Function</code>](testing\/README.md#testsource-function), [<code>Interface</code>](testing\/README.md#testsource-interface)
 2. [<code>SharedTestSource</code>](testing\/README.md#sharedtestsource) - [<code>Function</code>](testing\/README.md#sharedtestsource-function), [<code>Interface</code>](testing\/README.md#sharedtestsource-interface)

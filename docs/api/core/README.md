@@ -4,7 +4,7 @@
 
 ## [API Reference - Basics](basics.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>Disposable</code>](basics.md#disposable) - [<code>Function</code>](basics.md#disposable-function), [<code>Interface</code>](basics.md#disposable-interface)
    1. [<code>isDisposable</code>](basics.md#isdisposable)
@@ -39,7 +39,7 @@
 
 ## [API Reference - Sources](sources.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>all</code>](sources.md#all)
 2. [<code>animationFrames</code>](sources.md#animationframes)
@@ -76,7 +76,7 @@
 
 ## [API Reference - Operators](operators.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>at</code>](operators.md#at)
 2. [<code>catchError</code>](operators.md#catcherror)
@@ -198,7 +198,7 @@
 
 ## [API Reference - Subjects](subjects.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>CurrentValueSubject</code>](subjects.md#currentvaluesubject) - [<code>Function</code>](subjects.md#currentvaluesubject-function), [<code>Interface</code>](subjects.md#currentvaluesubject-interface)
 2. [<code>FinalValueSubject</code>](subjects.md#finalvaluesubject)
@@ -208,7 +208,7 @@
 
 ## [API Reference - Schedule Functions](schedule-functions.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>ScheduleAnimationFrameQueued</code>](schedule-functions.md#scheduleanimationframequeued)
 2. [<code>ScheduleInterval</code>](schedule-functions.md#scheduleinterval)
@@ -222,7 +222,7 @@
 
 ## [API Reference - Utils](util.md)
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>setTimeout</code>](util.md#settimeout)
 2. [<code>setInterval</code>](util.md#setinterval)

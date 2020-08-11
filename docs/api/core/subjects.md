@@ -2,7 +2,7 @@
 
 # API Reference - Subjects
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>CurrentValueSubject</code>](#currentvaluesubject) - [<code>Function</code>](#currentvaluesubject-function), [<code>Interface</code>](#currentvaluesubject-interface)
 2. [<code>FinalValueSubject</code>](#finalvaluesubject)

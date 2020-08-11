@@ -2,7 +2,7 @@
 
 # API Reference - Utils
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>setTimeout</code>](#settimeout)
 2. [<code>setInterval</code>](#setinterval)
@@ -22,10 +22,10 @@ Disposable-based alternative to built-in <code>setTimeout</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| callback | <code>\(...args: T\) =&gt; void</code> | <p>The callback to schedule.</p> |
-| delayMs | <code>number</code> | <p>The amount of delay.</p> |
-| subscription | <code>[Disposable](basics.md#disposable-interface)</code> | <p>If this is disposed then the request will be cancelled.</p> |
-| args | <code>T</code> | <p>The arguments to send to the callback.</p> |
+| callback | <code>\(...args: T\) =&gt; void</code> | The callback to schedule. |
+| delayMs | <code>number</code> | The amount of delay. |
+| subscription | <code>[Disposable](basics.md#disposable-interface)</code> | If this is disposed then the request will be cancelled. |
+| args | <code>T</code> | The arguments to send to the callback. |
 
 ## <code>setInterval</code>
 
@@ -39,10 +39,10 @@ Disposable-based alternative to built-in <code>setInterval</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| callback | <code>\(...args: T\) =&gt; void</code> | <p>The callback to schedule.</p> |
-| delayMs | <code>number</code> | <p>The amount of delay.</p> |
-| subscription | <code>[Disposable](basics.md#disposable-interface)</code> | <p>If this is disposed then the request will be cancelled.</p> |
-| args | <code>T</code> | <p>The arguments to send to the callback.</p> |
+| callback | <code>\(...args: T\) =&gt; void</code> | The callback to schedule. |
+| delayMs | <code>number</code> | The amount of delay. |
+| subscription | <code>[Disposable](basics.md#disposable-interface)</code> | If this is disposed then the request will be cancelled. |
+| args | <code>T</code> | The arguments to send to the callback. |
 
 ## <code>requestAnimationFrame</code>
 
@@ -56,8 +56,8 @@ Disposable-based alternative to built-in <code>requestAnimationFrame</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| callback | <code>\(time: number\) =&gt; void</code> | <p>The callback to schedule. This will be called with a <code>time</code> parameter.</p> |
-| subscription | <code>[Disposable](basics.md#disposable-interface)</code> | <p>If this is disposed then the request will be cancelled.</p> |
+| callback | <code>\(time: number\) =&gt; void</code> | The callback to schedule. This will be called with a <code>time</code> parameter. |
+| subscription | <code>[Disposable](basics.md#disposable-interface)</code> | If this is disposed then the request will be cancelled. |
 
 ## <code>asyncReportError</code>
 
@@ -71,7 +71,7 @@ Reports the given error asynchronously.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| error | <code>unknown</code> | <p>The error to report.</p> |
+| error | <code>unknown</code> | The error to report. |
 
 ## <code>TimeProvider</code>
 

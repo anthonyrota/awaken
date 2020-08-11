@@ -2,7 +2,7 @@
 
 # API Reference - Sources
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>all</code>](#all)
 2. [<code>animationFrames</code>](#animationframes)
@@ -91,13 +91,13 @@ Creates a Source from the given array\/array-like. The values of the array will 
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| array | <code>ArrayLike&lt;T&gt;</code> | <p>The array/array-like to iterate over.</p> |
+| array | <code>ArrayLike&lt;T&gt;</code> | The array\/array-like to iterate over. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>[Source](basics.md#source-interface)&lt;T&gt;</code> | <p>The created source.</p> |
+| <code>[Source](basics.md#source-interface)&lt;T&gt;</code> | The created source. |
 
 <b>Example Usage</b>
 
@@ -154,9 +154,7 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function fromReactiveValue&lt;T extends unknown[], Signal&gt;(addCallback: (handler: (...args: T) =&gt; void) =&gt; Signal, removeCallback: (handler: (...args: T) =&gt; void, signal: {
-    value: Signal;
-} | undefined) =&gt; void): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromReactiveValue&lt;T extends unknown[], Signal&gt;(addCallback: (handler: (...args: T) =&gt; void) =&gt; Signal, removeCallback: (handler: (...args: T) =&gt; void, signal: {<br>    value: Signal;<br>} | undefined) =&gt; void): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromScheduleFunction</code>
 
@@ -168,9 +166,7 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function fromSingularReactiveValue&lt;T, Signal&gt;(addCallback: (handler: (value: T) =&gt; void) =&gt; Signal, removeCallback: (handler: (value: T) =&gt; void, signal: {
-    value: Signal;
-} | undefined) =&gt; void): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromSingularReactiveValue&lt;T, Signal&gt;(addCallback: (handler: (value: T) =&gt; void) =&gt; Signal, removeCallback: (handler: (value: T) =&gt; void, signal: {<br>    value: Signal;<br>} | undefined) =&gt; void): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>iif</code>
 
@@ -226,7 +222,7 @@ Creates a Source from the given values.. The values will be synchronously emitte
 
 | Type | Description |
 | --- | --- |
-| <code>[Source](basics.md#source-interface)&lt;T&gt;</code> | <p>The created source.</p> |
+| <code>[Source](basics.md#source-interface)&lt;T&gt;</code> | The created source. |
 
 <b>Example Usage</b>
 

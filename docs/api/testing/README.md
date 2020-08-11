@@ -2,7 +2,7 @@
 
 # API Reference
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>TestSource</code>](#testsource) - [<code>Function</code>](#testsource-function), [<code>Interface</code>](#testsource-interface)
 2. [<code>SharedTestSource</code>](#sharedtestsource) - [<code>Function</code>](#sharedtestsource-function), [<code>Interface</code>](#sharedtestsource-interface)
@@ -47,9 +47,7 @@
 
 <b>Signature</b>
 
-<pre>type TestSourceEvent&lt;T&gt; = <a href="../core/basics.md#event">Event</a>&lt;T&gt; & {
-    readonly frame: number;
-};</pre>
+<pre>type TestSourceEvent&lt;T&gt; = <a href="../core/basics.md#event">Event</a>&lt;T&gt; & {<br>    readonly frame: number;<br>};</pre>
 
 ## <code>TestSubscriptionInfo</code>
 
@@ -95,22 +93,16 @@
 
 <b>Signature</b>
 
-<pre>function P&lt;T&gt;(value: T, frame: number): <a href="../core/basics.md#push-interface">Push</a>&lt;T&gt; & {
-    readonly frame: number;
-};</pre>
+<pre>function P&lt;T&gt;(value: T, frame: number): <a href="../core/basics.md#push-interface">Push</a>&lt;T&gt; & {<br>    readonly frame: number;<br>};</pre>
 
 ## <code>T</code>
 
 <b>Signature</b>
 
-<pre>function T(error: unknown, frame: number): <a href="../core/basics.md#throw-interface">Throw</a> & {
-    readonly frame: number;
-};</pre>
+<pre>function T(error: unknown, frame: number): <a href="../core/basics.md#throw-interface">Throw</a> & {<br>    readonly frame: number;<br>};</pre>
 
 ## <code>E</code>
 
 <b>Signature</b>
 
-<pre>function E(frame: number): <a href="../core/basics.md#end-interface">End</a> & {
-    readonly frame: number;
-};</pre>
+<pre>function E(frame: number): <a href="../core/basics.md#end-interface">End</a> & {<br>    readonly frame: number;<br>};</pre>

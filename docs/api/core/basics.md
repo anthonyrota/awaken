@@ -2,7 +2,7 @@
 
 # API Reference - Basics
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>Disposable</code>](#disposable) - [<code>Function</code>](#disposable-function), [<code>Interface</code>](#disposable-interface)
    1. [<code>isDisposable</code>](#isdisposable)
@@ -61,13 +61,13 @@ Determines whether the given value is a <code>[Disposable](#disposable)</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>unknown</code> | <p>The value to check.</p> |
+| value | <code>unknown</code> | The value to check. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Disposable](#disposable-interface)</code> | <p>Whether the value is a Disposable.</p> |
+| <code>value is [Disposable](#disposable-interface)</code> | Whether the value is a Disposable. |
 
 <b>Example Usage</b>
 
@@ -127,14 +127,14 @@ Implements the Disposable Interface onto the given value by copying the disposab
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>T</code> | <p>The value to implement the Disposable Interface on.</p> |
+| value | <code>T</code> | The value to implement the Disposable Interface on. |
 | disposable | <code>[Disposable](#disposable-interface)</code> |  |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>T & [Disposable](#disposable-interface)</code> | <p>The given value which has been mutated. In strict javascript this is unnecessary but here it is useful as the returned value will have the type <code>T & Disposable</code></p> |
+| <code>T & [Disposable](#disposable-interface)</code> | The given value which has been mutated. In strict javascript this is unnecessary but here it is useful as the returned value will have the type <code>T & Disposable</code> |
 
 ## <code>Event</code>
 
@@ -214,7 +214,7 @@ console.log(event.value); // [1, 2, 3].
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>T</code> | <p>The value to put in the returned event.</p> |
+| value | <code>T</code> | The value to put in the returned event. |
 
 ### <a name="push-interface"></a><code>Push - Interface</code>
 
@@ -250,13 +250,13 @@ A Throw represents the &quot;throwing&quot; of an error, and has an <code>error<
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| error | <code>unknown</code> | <p>The error to be thrown.</p> |
+| error | <code>unknown</code> | The error to be thrown. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>[Throw](#throw-interface)</code> | <p>The created Throw event.</p> |
+| <code>[Throw](#throw-interface)</code> | The created Throw event. |
 
 <b>Example Usage</b>
 
@@ -354,13 +354,13 @@ The sink constructor takes an <code>onEvent</code> function, which is called eve
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| onEvent | <code>\(event: [Event](#event)&lt;T&gt;\) =&gt; void</code> | <p>The callback for when an event is received.</p> |
+| onEvent | <code>\(event: [Event](#event)&lt;T&gt;\) =&gt; void</code> | The callback for when an event is received. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>[Sink](#sink-interface)&lt;T&gt;</code> | <p>The created Sink.</p> |
+| <code>[Sink](#sink-interface)&lt;T&gt;</code> | The created Sink. |
 
 <b>Example Usage</b>
 
@@ -425,13 +425,13 @@ Determines whether the given value is a <code>[Sink](#sink)</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>unknown</code> | <p>The value to check.</p> |
+| value | <code>unknown</code> | The value to check. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Source](#source-interface)&lt;unknown&gt;</code> | <p>Whether the value is a Sink.</p> |
+| <code>value is [Source](#source-interface)&lt;unknown&gt;</code> | Whether the value is a Sink. |
 
 <b>Example Usage</b>
 
@@ -507,13 +507,13 @@ const Source = produce => sink => {
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| produce | <code>\(sink: [Sink](#sink-interface)&lt;T&gt;\) =&gt; void</code> | <p>This will be called with the given sink each subscription. When the sink is disposed this function should stop trying to emit values, and should stop/cleanup any ongoing side processes</p> |
+| produce | <code>\(sink: [Sink](#sink-interface)&lt;T&gt;\) =&gt; void</code> | This will be called with the given sink each subscription. When the sink is disposed this function should stop trying to emit values, and should stop\/cleanup any ongoing side processes |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>[Source](#source-interface)&lt;T&gt;</code> | <p>The created Source.</p> |
+| <code>[Source](#source-interface)&lt;T&gt;</code> | The created Source. |
 
 <b>Example Usage</b>
 
@@ -599,13 +599,13 @@ Determines whether the given value is a <code>[Source](#source)</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>unknown</code> | <p>The value to check.</p> |
+| value | <code>unknown</code> | The value to check. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Sink](#sink-interface)&lt;unknown&gt;</code> | <p>Whether the value is a Source.</p> |
+| <code>value is [Sink](#sink-interface)&lt;unknown&gt;</code> | Whether the value is a Source. |
 
 <b>Example Usage</b>
 
@@ -637,13 +637,13 @@ Higher order function which takes a sink, and returns another function which rec
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| sink | <code>[Sink](#sink-interface)&lt;T&gt;</code> | <p>The sink to be given to the received source.</p> |
+| sink | <code>[Sink](#sink-interface)&lt;T&gt;</code> | The sink to be given to the received source. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>\(source: [Source](#source-interface)&lt;T&gt;\) =&gt; void</code> | <p>The higher order function which takes a source to subscribe to.</p> |
+| <code>\(source: [Source](#source-interface)&lt;T&gt;\) =&gt; void</code> | The higher order function which takes a source to subscribe to. |
 
 <b>Example Usage</b>
 
@@ -781,13 +781,13 @@ Determines whether the given value is a <code>[Subject](#subject)</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>unknown</code> | <p>The value to check.</p> |
+| value | <code>unknown</code> | The value to check. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Subject](#subject-interface)&lt;unknown&gt;</code> | <p>Whether the value is a Subject.</p> |
+| <code>value is [Subject](#subject-interface)&lt;unknown&gt;</code> | Whether the value is a Subject. |
 
 <b>Example Usage</b>
 

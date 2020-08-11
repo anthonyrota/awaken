@@ -2,7 +2,7 @@
 
 # API Reference - Schedule Functions
 
-<details><summary><b>Table of Contents</b></summary>
+<details><summary><b>Table of Contents</b></summary><br>
 
 1. [<code>ScheduleAnimationFrameQueued</code>](#scheduleanimationframequeued)
 2. [<code>ScheduleInterval</code>](#scheduleinterval)

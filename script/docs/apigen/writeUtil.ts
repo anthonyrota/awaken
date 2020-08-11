@@ -134,8 +134,13 @@ function writeApiItemDocNode(
         apiItem,
     };
     writeNode(docNode, context_);
-    new EmbeddedNode(container_, embeddedNodeContext).substituteEmbeddedNodes();
-    container.addChild(container_);
+    if (container_.getChildCount() > 0) {
+        new EmbeddedNode(
+            container_,
+            embeddedNodeContext,
+        ).substituteEmbeddedNodes();
+        container.addChild(container_);
+    }
 }
 
 class EmbeddedNodeContext {
@@ -181,11 +186,12 @@ class EmbeddedNode extends output.Node {
         if (!(this.node instanceof output.Container)) {
             return;
         }
-
         const markdown = new output.Container()
             .addChildren(...this.node.getChildren())
             .renderAsMarkdown();
-        const markdownContainer = output.parseMarkdown(markdown);
+        const markdownContainer = output.parseMarkdown(markdown, {
+            unwrapFirstLineParagraph: true,
+        });
 
         this._substituteEmbeddedNodes(markdownContainer);
         this.node.setChildren(markdownContainer.getChildren());
@@ -297,12 +303,14 @@ function writeNode(
             );
             const oldContainer = container;
             const paragraph = new output.Paragraph();
-            oldContainer.addChild(
-                new EmbeddedNode(paragraph, context.embeddedNodeContext),
-            );
             context.container = paragraph;
             for (const node of trimmedParagraph.nodes) {
                 writeNode(node, context);
+            }
+            if (paragraph.getChildCount() > 0) {
+                oldContainer.addChild(
+                    new EmbeddedNode(paragraph, context.embeddedNodeContext),
+                );
             }
             context.container = oldContainer;
             break;
@@ -491,14 +499,14 @@ function getLinkToApiItem(
     return relativePath ? `${relativePath}#${titleHash}` : `#${titleHash}`;
 }
 
-function isDocSectionEmpty(docComment: tsdoc.DocSection): boolean {
-    if (docComment.nodes.length === 0) {
+function isDocSectionEmpty(docComment: tsdoc.DocNode): boolean {
+    if (docComment.getChildNodes().length === 0) {
         return true;
     }
-    if (docComment.nodes.length > 1) {
+    if (docComment.getChildNodes().length > 1) {
         return false;
     }
-    const firstNode = docComment.nodes[0];
+    const firstNode = docComment.getChildNodes()[0];
     if (firstNode.kind !== tsdoc.DocNodeKind.Paragraph) {
         return false;
     }
