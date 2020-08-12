@@ -4,7 +4,7 @@
     "devDependencies": {
         "@commitlint/cli": "9.1.1",
         "@commitlint/config-conventional": "9.1.1",
-        "@microsoft/api-extractor": "7.9.3",
+        "@microsoft/api-extractor": "7.9.4",
         "@microsoft/api-extractor-model": "7.8.13",
         "@microsoft/tsdoc": "0.12.19",
         "@types/fs-extra": "9.0.1",
