@@ -26,7 +26,13 @@
         "aedoc",
         "unist",
         "strikethrough",
-        "mdast"
+        "mdast",
+        "onopentag",
+        "onclosetag",
+        "ontext",
+        "oncomment",
+        "oncdatastart",
+        "onprocessinginstruction"
     ],
     "overrides": []
 }

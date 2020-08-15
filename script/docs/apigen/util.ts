@@ -100,7 +100,28 @@ export function createProgram(sourceFilePaths: string[]): ts.Program {
     return program;
 }
 
-class StringBuilder {
+export interface Iter<T> {
+    next(): T | undefined;
+    forEach(cb: (node: T) => void): void;
+}
+
+export function Iter<T>(nodes: readonly T[]): Iter<T> {
+    let idx = 0;
+    const iter = {
+        next(): T | undefined {
+            return nodes[idx++];
+        },
+        forEach(cb: (node: T) => void): void {
+            let node: T | undefined;
+            while ((node = iter.next())) {
+                cb(node);
+            }
+        },
+    };
+    return iter;
+}
+
+export class StringBuilder {
     private __result = '';
 
     public write(text: string): void {
@@ -158,6 +179,15 @@ export class IndentedWriter {
         return this.getText();
     }
 
+    public withIndent(
+        indentPrefix: string | undefined,
+        write: () => void,
+    ): void {
+        this._increaseIndent(indentPrefix);
+        write();
+        this._decreaseIndent();
+    }
+
     /**
      * Increases the indentation.  Normally the indentation is two spaces,
      * however an arbitrary prefix can optional be specified.  (For example,
@@ -165,7 +195,7 @@ export class IndentedWriter {
      * Each call to IndentedWriter.increaseIndent() must be followed by a
      * corresponding call to IndentedWriter.decreaseIndent().
      */
-    public increaseIndent(indentPrefix?: string): void {
+    private _increaseIndent(indentPrefix?: string): void {
         this._indentStack.push(
             indentPrefix !== undefined
                 ? indentPrefix
@@ -178,19 +208,9 @@ export class IndentedWriter {
      * Decreases the indentation, reverting the effect of the corresponding call
      * to IndentedWriter.increaseIndent().
      */
-    public decreaseIndent(): void {
+    private _decreaseIndent(): void {
         this._indentStack.pop();
         this._updateIndentText();
-    }
-
-    /**
-     * A shorthand for ensuring that increaseIndent()/decreaseIndent() occur
-     * in pairs.
-     */
-    public indentScope(scope: () => void, indentPrefix?: string): void {
-        this.increaseIndent(indentPrefix);
-        scope();
-        this.decreaseIndent();
     }
 
     /**

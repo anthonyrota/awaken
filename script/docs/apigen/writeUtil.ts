@@ -15,9 +15,11 @@ import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import * as aeModel from '@microsoft/api-extractor-model';
+import * as uuid from 'uuid';
 import * as output from './output';
 import { getMainPathOfApiItemName } from './paths';
 import { SourceMetadata } from './sourceMetadata';
+import { Iter } from './util';
 
 export interface Context {
     sourceMetadata: SourceMetadata;
@@ -89,30 +91,9 @@ interface TSDocNodeWriteContext {
     context: Context;
     container: output.Container;
     embeddedNodeContext: EmbeddedNodeContext;
-    nodeIter: TSDocNodeIter;
+    nodeIter: Iter<tsdoc.DocNode>;
     htmlTagStack: output.HtmlElement[];
     apiItem: aeModel.ApiItem;
-}
-
-interface TSDocNodeIter {
-    next(): tsdoc.DocNode | undefined;
-    forEach(cb: (node: tsdoc.DocNode) => void): void;
-}
-
-function TSDocNodeIter(nodes: readonly tsdoc.DocNode[]): TSDocNodeIter {
-    let idx = 0;
-    const iter = {
-        next(): tsdoc.DocNode | undefined {
-            return nodes[idx++];
-        },
-        forEach(cb: (node: tsdoc.DocNode) => void): void {
-            let node: tsdoc.DocNode | undefined;
-            while ((node = iter.next())) {
-                cb(node);
-            }
-        },
-    };
-    return iter;
 }
 
 function writeApiItemDocNode(
@@ -121,7 +102,7 @@ function writeApiItemDocNode(
     docNode: tsdoc.DocNode,
     context: Context,
 ): void {
-    const nodeIter = TSDocNodeIter([docNode]);
+    const nodeIter = Iter([docNode]);
     nodeIter.next();
     const container_ = new output.Container();
     const embeddedNodeContext = new EmbeddedNodeContext();
@@ -146,14 +127,26 @@ function writeApiItemDocNode(
 class EmbeddedNodeContext {
     private _n = 0;
     private _idMap = new Map<number, EmbeddedNode>();
+    private _baseId = uuid.v4();
+    private _embeddedNodeRegexp = RegExp(
+        `^__EmbeddedNode-${this._baseId}__:(\\d+)$`,
+    );
 
     public generateMarker(node: EmbeddedNode): string {
         const id = this._n++;
         this._idMap.set(id, node);
-        return `<!--__EmbeddedNode__:${id}-->`;
+        return `<!--__EmbeddedNode-${this._baseId}__:${id}-->`;
     }
 
-    public getNodeForId(id: number): EmbeddedNode {
+    public extractNodeFromComment(comment: string): EmbeddedNode | void {
+        const match = this._embeddedNodeRegexp.exec(comment);
+        if (match) {
+            const id = Number.parseInt(match[1]);
+            return this._getNodeForId(id);
+        }
+    }
+
+    private _getNodeForId(id: number): EmbeddedNode {
         const node = this._idMap.get(id);
         if (!node) {
             throw new Error('No node defined for given id.');
@@ -166,11 +159,11 @@ class EmbeddedNode extends output.Node {
     private _marker: string;
 
     constructor(
-        public node: output.Node,
+        public originalNode: output.Node,
         protected _context: EmbeddedNodeContext,
     ) {
         super();
-        if (node instanceof EmbeddedNode) {
+        if (originalNode instanceof EmbeddedNode) {
             throw new Error(
                 'EmbeddedNode node argument cannot be an EmbeddedNode.',
             );
@@ -183,18 +176,19 @@ class EmbeddedNode extends output.Node {
     }
 
     public substituteEmbeddedNodes(): void {
-        if (!(this.node instanceof output.Container)) {
+        if (!(this.originalNode instanceof output.Container)) {
             return;
         }
+
         const markdown = new output.Container()
-            .addChildren(...this.node.getChildren())
+            .addChildren(...this.originalNode.getChildren())
             .renderAsMarkdown();
         const markdownContainer = output.parseMarkdown(markdown, {
             unwrapFirstLineParagraph: true,
         });
 
         this._substituteEmbeddedNodes(markdownContainer);
-        this.node.setChildren(markdownContainer.getChildren());
+        this.originalNode.setChildren(markdownContainer.getChildren());
     }
 
     private _substituteEmbeddedNodes(node: output.Container): void {
@@ -203,12 +197,12 @@ class EmbeddedNode extends output.Node {
             if (child instanceof output.Container) {
                 this._substituteEmbeddedNodes(child);
             } else if (child instanceof output.HtmlComment) {
-                const match = /^__EmbeddedNode__:(\d+)$/.exec(child.comment);
-                if (match) {
-                    const id = Number.parseInt(match[1]);
-                    const embedded = this._context.getNodeForId(id);
-                    embedded.substituteEmbeddedNodes();
-                    children[i] = embedded.node;
+                const embeddedNode = this._context.extractNodeFromComment(
+                    child.comment,
+                );
+                if (embeddedNode) {
+                    embeddedNode.substituteEmbeddedNodes();
+                    children[i] = embeddedNode.originalNode;
                 }
             }
         }

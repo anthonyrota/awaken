@@ -12,6 +12,7 @@ import * as unified from 'unified';
 import * as remarkParse from 'remark-parse';
 import * as mdast from 'mdast';
 import * as definitions from 'mdast-util-definitions';
+import * as htmlparser2 from 'htmlparser2';
 import { IndentedWriter } from './util';
 import {
     TableOfContentsInlineReference,
@@ -27,6 +28,7 @@ export class MarkdownOutput extends IndentedWriter {
     private _inHtmlBlockTag = false;
     private _inMarkdownCode = false;
     private _inListNode = false;
+    private _inHtmlAttribute = false;
     private _isMarkedNewParagraph = false;
     private _writingInlineHtmlTag = false;
 
@@ -72,48 +74,30 @@ export class MarkdownOutput extends IndentedWriter {
         this._inListNode = before;
     }
 
-    public withNewParagraph(
-        write: () => void,
-        opt?: {
-            singleLine?: {
-                writeStartBlockTag: () => void;
-                writeEndBlockTag: () => void;
-            };
-            writeNotSingleLine?: (write: () => void) => void;
-        },
-    ): void {
-        const _isMarkedNewParagraph = this._isMarkedNewParagraph;
-        if (
-            this._isMarkedNewParagraph &&
-            !(this.constrainedToSingleLine
-                ? opt?.singleLine
-                : opt?.writeNotSingleLine)
-        ) {
-            // TODO: check following line.
-            // this._isMarkedNewParagraph = false;
+    public withInHtmlAttribute(write: () => void): void {
+        const before = this._inHtmlAttribute;
+        this._inHtmlAttribute = true;
+        write();
+        this._inHtmlAttribute = before;
+    }
+
+    public withParagraphBreak(write: () => void): void {
+        if (this._isMarkedNewParagraph) {
             write();
             return;
         }
         if (this.constrainedToSingleLine) {
-            if (opt?.singleLine) opt.singleLine.writeStartBlockTag();
-            else this.write('<p>');
-            this.markStartOfParagraph();
-            this.withInHtmlBlockTag(write);
-            if (opt?.singleLine) opt.singleLine.writeEndBlockTag();
-            else this.write('</p>');
-            return;
+            throw new Error(
+                'Cannot start new paragraph if constrained to single line.',
+            );
         }
-        if (!_isMarkedNewParagraph) {
+        if (!this._isMarkedNewParagraph) {
             this.ensureSkippedLine();
             // Content after skipped line in block tag is parsed as markdown.
             this._inHtmlBlockTag = false;
+            this.markStartOfParagraph();
         }
-        this.markStartOfParagraph();
-        if (opt?.writeNotSingleLine) {
-            opt.writeNotSingleLine(write);
-        } else {
-            write();
-        }
+        write();
     }
 
     public markStartOfParagraph(): void {
@@ -149,6 +133,14 @@ export class MarkdownOutput extends IndentedWriter {
 
     public get inListNode(): boolean {
         return this._inListNode;
+    }
+
+    public get inHtmlAttribute(): boolean {
+        return this._inHtmlAttribute;
+    }
+
+    public get isMarkedNewParagraph(): boolean {
+        return this._isMarkedNewParagraph;
     }
 
     protected _write(str: string): void {
@@ -255,9 +247,14 @@ export class PlainText extends RawText {
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;');
 
+            if (!output.inHtmlBlockTag) {
+                // Escape four space code blocks: Space -> Em space.
+                text = text.replace(/^ {4}/gm, ' '.repeat(4));
+            }
+
             if (output.inTable) {
                 text = text.replace(/\|/g, '&#124;');
-                if (!output.inSingleLineCodeBlock) {
+                if (!output.inSingleLineCodeBlock && !output.inHtmlAttribute) {
                     text = text.replace(newlineRegexp, '<br>');
                 }
             }
@@ -283,16 +280,12 @@ export class PlainText extends RawText {
                 }
             }
 
-            if (output.inSingleLineCodeBlock) {
+            if (output.inHtmlAttribute) {
+                text = text.replace(newlineRegexp, '\\n');
+            } else if (output.inSingleLineCodeBlock) {
                 text = text.split(newlineRegexp).join('</code><br><code>');
             } else if (output.inHtmlBlockTag && !output.inTable) {
-                const before = text;
-                text = text.replace(/(\r?\n)/g, '<br>');
-                if (output.constrainedToSingleLine && before !== text) {
-                    throw new Error(
-                        "Can't have multiline text when constrained to single line.",
-                    );
-                }
+                text = text.replace(newlineRegexp, '<br>');
             }
         }
 
@@ -308,17 +301,46 @@ const remark = unified().use(remarkParse);
 
 export function parseMarkdown(
     text: string,
-    opt?: { unwrapFirstLineParagraph?: boolean },
+    opt?: {
+        unwrapFirstLineParagraph?: boolean;
+    },
 ): Container {
     const rootNode = remark.parse(text) as mdast.Root;
     const definition = definitions(rootNode);
 
+    let htmlParserContainer: Container;
+    const htmlParser = new htmlparser2.Parser({
+        onerror(error): void {
+            throw error;
+        },
+        onopentag(tagName, attributes): void {
+            tagName;
+            attributes;
+            // TODO.
+            throw new Error('Unexpected html tag.');
+        },
+        onclosetag(tagName): void {
+            tagName;
+            // TODO.
+        },
+        ontext(text: string): void {
+            text;
+            // TODO.
+            throw new Error('Unexpected html text.');
+        },
+        oncomment(comment: string): void {
+            htmlParserContainer.addChild(new HtmlComment(comment));
+        },
+        oncdatastart(): void {
+            throw new Error('Unexpected CDATA.');
+        },
+        onprocessinginstruction(): void {
+            throw new Error('Unexpected processing instruction.');
+        },
+    });
+
     // https://github.com/syntax-tree/mdast
     function traverseNode(container: Container, node: mdast.Content): void {
-        /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-        /* eslint-disable @typescript-eslint/no-unsafe-call */
-        /* eslint-disable @typescript-eslint/no-explicit-any */
         switch (node.type) {
             case 'paragraph': {
                 if (!node.position) {
@@ -411,7 +433,7 @@ export function parseMarkdown(
                 }
                 const heading = parseTableRow(node.children[0]);
                 const table = new Table(heading);
-                for (const child of node.children) {
+                for (const child of node.children.slice(1)) {
                     table.addChild(parseTableRow(child));
                 }
                 break;
@@ -423,24 +445,8 @@ export function parseMarkdown(
                 throw new Error('Unexpected table cell.');
             }
             case 'html': {
-                // HTML tags should be stripped out into their own nodes by the
-                // TSDoc parser. HTML comments are used as metadata when parsing
-                // TSDoc nodes, therefore preserve them.
-                let value = node.value;
-                while (!/^\s*$/.test(value)) {
-                    value = value.trimLeft();
-                    if (!/^<!--/.test(value)) {
-                        throw new Error('HTML content must be a comment.');
-                    }
-                    const lastIndex = value.indexOf('-->');
-                    if (lastIndex === -1) {
-                        throw new Error('Unclosed HTML comment.');
-                    }
-                    container.addChild(
-                        new HtmlComment(value.slice(4, lastIndex)),
-                    );
-                    value = value.slice(lastIndex + 3);
-                }
+                htmlParserContainer = container;
+                htmlParser.write(node.value);
                 break;
             }
             case 'code': {
@@ -549,10 +555,6 @@ export function parseMarkdown(
                 console.dir(node);
             }
         }
-        /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-        /* eslint-disable @typescript-eslint/no-unsafe-call */
-        /* eslint-enable @typescript-eslint/no-explicit-any */
     }
 
     function parseTableRow(node: mdast.TableRow): TableRow {
@@ -583,50 +585,43 @@ export function parseMarkdown(
 export class HorizontalRule extends Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (output.constrainedToSingleLine) {
-            output.write('<hr>');
+            new HtmlElement('hr').writeAsMarkdown(output);
         } else {
-            output.ensureSkippedLine();
-            output.writeLine('---');
+            output.withParagraphBreak(() => {
+                output.writeLine('---');
+            });
         }
     }
 }
 
 export class HtmlComment extends Node {
-    constructor(public comment: string) {
+    constructor(public comment: string, private _persist = true) {
         super();
     }
 
-    public writeAsMarkdown(): void {
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        if (this._persist) {
+            output.write('<!--');
+            output.write(this.comment);
+            output.write('-->');
+            return;
+        }
         throw new Error(
             'Attempted to write a HtmlComment node to output. HtmlComment nodes are only used for metadata when parsing TSDoc comments.',
         );
     }
 }
 
-export class PersistentHtmlComment extends Node {
-    constructor(private _comment: string) {
-        super();
-    }
-
-    public writeAsMarkdown(output: MarkdownOutput): void {
-        output.write('<!--');
-        output.write(this._comment);
-        output.write('-->');
-    }
-}
-
 export class BlockQuote extends Container {
     public writeAsMarkdown(output: MarkdownOutput): void {
-        output.withNewParagraph(() => super.writeAsMarkdown(output), {
-            singleLine: {
-                writeStartBlockTag: () => output.write('<blockquote>'),
-                writeEndBlockTag: () => output.write('</blockquote>'),
-            },
-            writeNotSingleLine: (write) => {
-                output.increaseIndent('> ');
-                write();
-                output.decreaseIndent();
-            },
+        if (output.constrainedToSingleLine) {
+            new HtmlElement('blockquote')
+                .addChildren(...this._children)
+                .writeAsMarkdown(output);
+            return;
+        }
+        output.withParagraphBreak(() => {
+            output.withIndent('> ', () => super.writeAsMarkdown(output));
         });
     }
 }
@@ -651,13 +646,25 @@ export class HtmlElement extends Container {
         ? HtmlTagClassification.SelfClosing
         : HtmlTagClassification.Inline;
 
-    constructor(public tagName: string) {
+    constructor(
+        public tagName: string,
+        private _attributesMap?: Map<string, string>,
+    ) {
         super();
     }
 
     private _writeStartTag(output: MarkdownOutput): void {
         output.write('<');
         writePlainText(output, this.tagName);
+        if (this._attributesMap) {
+            for (const [attributeName, attributeValue] of this._attributesMap) {
+                output.write(' ');
+                output.write(attributeName);
+                output.write('="');
+                writePlainText(output, attributeValue);
+                output.write('"');
+            }
+        }
         output.write('>');
     }
 
@@ -667,27 +674,30 @@ export class HtmlElement extends Container {
         output.write('>');
     }
 
+    private _writeAsBlockElement(output: MarkdownOutput): void {
+        this._writeStartTag(output);
+        output.markStartOfParagraph();
+        output.withInHtmlBlockTag(() => {
+            super.writeAsMarkdown(output);
+        });
+        this._writeEndTag(output);
+    }
+
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (this.classification === HtmlTagClassification.Block) {
-            output.withNewParagraph(
-                () => {
-                    output.withInHtmlBlockTag(() => {
-                        super.writeAsMarkdown(output);
-                    });
-                },
-                {
-                    singleLine: {
-                        writeStartBlockTag: () => this._writeStartTag(output),
-                        writeEndBlockTag: () => this._writeEndTag(output),
-                    },
-                    writeNotSingleLine: (write) => {
-                        this._writeStartTag(output);
-                        output.markStartOfParagraph();
-                        write();
-                        this._writeEndTag(output);
-                    },
-                },
-            );
+            if (this.tagName === 'p') {
+                output.withParagraphBreak(() => {
+                    super.writeAsMarkdown(output);
+                });
+                return;
+            }
+            if (output.constrainedToSingleLine) {
+                this._writeAsBlockElement(output);
+            } else {
+                output.withParagraphBreak(() => {
+                    this._writeAsBlockElement(output);
+                });
+            }
             return;
         }
         if (this.classification === HtmlTagClassification.SelfClosing) {
@@ -748,7 +758,7 @@ export class CodeBlock extends Node {
             return;
         }
 
-        output.withNewParagraph(() => {
+        output.withParagraphBreak(() => {
             output.withInMarkdownCode(() => {
                 output.write('```');
                 if (this._language) {
@@ -794,17 +804,15 @@ export class Link extends Container {
         output.withInSingleLine(() => {
             if (output.inHtmlBlockTag && !output.inTable) {
                 // TODO: add property support to html element construct.
-                output.withWritingInlineHtmlTag(() => {
-                    output.write('<a href="');
-                    writePlainText(output, this._destination);
-                    if (this._title) {
-                        output.write('" title="');
-                        writePlainText(output, this._title);
-                    }
-                    output.write('">');
-                });
-                super.writeAsMarkdown(output);
-                output.write('</a>');
+                const attributeMap = new Map<string, string>([
+                    ['href', this._destination],
+                ]);
+                if (this._title != null) {
+                    attributeMap.set('title', this._title);
+                }
+                new HtmlElement('a', attributeMap)
+                    .addChildren(...this._children)
+                    .writeAsMarkdown(output);
                 return;
             }
             output.write('[');
@@ -849,17 +857,16 @@ export class Image extends Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         output.withInSingleLine(() => {
             if (output.inHtmlBlockTag && !output.inTable) {
-                output.write('<img src="');
-                writePlainText(output, this._src);
+                const attributeMap = new Map<string, string>([
+                    ['src', this._src],
+                ]);
                 if (this._title) {
-                    output.write('" title="');
-                    writePlainText(output, this._title);
+                    attributeMap.set('title', this._title);
                 }
                 if (this._alt) {
-                    output.write('" alt="');
-                    writePlainText(output, this._alt);
+                    attributeMap.set('alt', this._alt);
                 }
-                output.write('">');
+                new HtmlElement('img', attributeMap).writeAsMarkdown(output);
             }
             output.write('![');
             if (this._alt) writePlainText(output, this._alt);
@@ -877,7 +884,15 @@ export class Image extends Node {
 
 export class Paragraph extends Container {
     public writeAsMarkdown(output: MarkdownOutput): void {
-        output.withNewParagraph(() => super.writeAsMarkdown(output));
+        new HtmlElement('p')
+            .addChildren(...this._children)
+            .writeAsMarkdown(output);
+    }
+}
+
+export class FunctionalNode extends Node {
+    constructor(public writeAsMarkdown: () => void) {
+        super();
     }
 }
 
@@ -889,29 +904,30 @@ class HeadingBase extends Container {
         super();
     }
 
+    private _writeInsides(output: MarkdownOutput): void {
+        output.withInSingleLine(() => {
+            if (this._alternateId) {
+                new HtmlElement(
+                    'a',
+                    new Map([['name', this._alternateId]]),
+                ).writeAsMarkdown(output);
+            }
+            super.writeAsMarkdown(output);
+        });
+    }
+
     public writeAsMarkdown(output: MarkdownOutput): void {
-        output.withNewParagraph(
-            () => {
-                output.withInSingleLine(() => {
-                    if (this._alternateId) {
-                        output.write('<a name="');
-                        writePlainText(output, this._alternateId);
-                        output.write('"></a>');
-                    }
-                    super.writeAsMarkdown(output);
-                });
-            },
-            {
-                singleLine: {
-                    writeStartBlockTag: () => output.write(`<h${this._level}>`),
-                    writeEndBlockTag: () => output.write(`</h${this._level}>`),
-                },
-                writeNotSingleLine: (write) => {
-                    output.write(`${'#'.repeat(this._level)} `);
-                    write();
-                },
-            },
-        );
+        if (output.constrainedToSingleLine) {
+            new HtmlElement(`h${this._level}`).addChild(
+                new FunctionalNode(() => this._writeInsides(output)),
+            );
+            return;
+        }
+
+        output.withParagraphBreak(() => {
+            output.write(`${'#'.repeat(this._level)} `);
+            this._writeInsides(output);
+        });
     }
 }
 
@@ -951,28 +967,22 @@ export class List extends Container {
             }
             const listMarker = this._ordered ? `${this._start + i}. ` : '- ';
             output.write(listMarker);
-            output.increaseIndent(' '.repeat(listMarker.length));
-            output.markStartOfParagraph();
-            output.withInListNode(() => {
-                child.writeAsMarkdown(output);
+            output.withIndent(' '.repeat(listMarker.length), () => {
+                output.markStartOfParagraph();
+                output.withInListNode(() => child.writeAsMarkdown(output));
             });
-            output.decreaseIndent();
         }
     }
 
     public writeAsMarkdown(output: MarkdownOutput): void {
         if (output.constrainedToSingleLine) {
-            if (this._ordered) {
-                output.write('<ol start="');
-                output.write(`${this._start}`);
-                output.write(`">`);
-            } else {
-                output.write('<ul>');
-            }
+            const htmlElement = this._ordered
+                ? new HtmlElement('ol', new Map([['start', `${this._start}`]]))
+                : new HtmlElement('ul');
             for (const child of this._children) {
-                new HtmlElement('li').addChild(child).writeAsMarkdown(output);
+                htmlElement.addChild(new HtmlElement('li').addChild(child));
             }
-            output.write(`</${this._ordered ? 'ol' : 'ul'}>`);
+            htmlElement.writeAsMarkdown(output);
             return;
         }
         if (output.inListNode) {
@@ -980,7 +990,7 @@ export class List extends Container {
             this._writeListItems(output);
             return;
         }
-        output.withNewParagraph(() => this._writeListItems(output));
+        output.withParagraphBreak(() => this._writeListItems(output));
     }
 }
 
@@ -988,11 +998,7 @@ export class TableRow extends Container {
     public writeAsMarkdown(
         output: MarkdownOutput,
         columnCount = this.getChildCount(),
-        isNotHeader = false,
     ): void {
-        if (isNotHeader) {
-            output.ensureNewLine();
-        }
         output.write('|');
         for (const cell of this._children) {
             output.write(' ');
@@ -1026,11 +1032,45 @@ export class Table extends Container<TableRow> {
         return columnCount;
     }
 
-    public writeAsMarkdown(output: MarkdownOutput): void {
-        // TODO: support when constrained to single line.
-        output.withNewParagraph(() => {
-            const columnCount = this._getColumnCount();
+    private _buildRowAsHtmlElement(
+        row: TableRow,
+        cellTagName: string,
+        columnCount: number,
+    ): HtmlElement {
+        const tableRow = new HtmlElement('tr');
+        const children = row.getChildren();
+        for (const child of children) {
+            tableRow.addChild(new HtmlElement(cellTagName).addChild(child));
+        }
+        for (let i = children.length; i < columnCount; i++) {
+            tableRow.addChild(new HtmlElement(cellTagName));
+        }
+        return tableRow;
+    }
 
+    public writeAsMarkdown(output: MarkdownOutput): void {
+        const columnCount = this._getColumnCount();
+
+        if (output.constrainedToSingleLine) {
+            const tableElement = new HtmlElement('table');
+            if (this._header) {
+                tableElement.addChild(
+                    this._buildRowAsHtmlElement(
+                        this._header,
+                        'th',
+                        columnCount,
+                    ),
+                );
+            }
+            for (const row of this._children) {
+                tableElement.addChild(
+                    this._buildRowAsHtmlElement(row, 'td', columnCount),
+                );
+            }
+            tableElement.writeAsMarkdown(output);
+        }
+
+        output.withParagraphBreak(() => {
             if (this._header) {
                 this._header.writeAsMarkdown(output, columnCount);
             } else {
@@ -1044,7 +1084,8 @@ export class Table extends Container<TableRow> {
             output.write('|');
 
             for (const child of this._children) {
-                child.writeAsMarkdown(output, columnCount, true);
+                output.ensureNewLine();
+                child.writeAsMarkdown(output, columnCount);
             }
         });
     }
@@ -1147,10 +1188,14 @@ export class TableOfContents extends Node {
 export class DoNotEditComment extends Node {
     public writeAsMarkdown(output: MarkdownOutput): void {
         new BlockQuote()
-            .addChild(
+            .addChildren(
                 new PlainText(
                     // TODO: make two spaces at end mean break in md parsing.
-                    'This file is automatically generated by a build script.  \nIf you notice anything off, please feel free to open a new issue!',
+                    'This file is automatically generated by a build script.',
+                ),
+                new HtmlElement('br'),
+                new PlainText(
+                    'If you notice anything off, please feel free to open a new issue!',
                 ),
             )
             .writeAsMarkdown(output);
