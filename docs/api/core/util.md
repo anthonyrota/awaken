@@ -12,6 +12,8 @@
 
 ## <code>setTimeout</code>
 
+> Source Location: [packages\/core\/src\/util.ts#L168](..\/..\/..\/packages\/core\/src\/util.ts#L168)
+
 <b>Signature</b>
 
 <pre>declare function setTimeoutImplementation&lt;T extends any[]&gt;(callback: (...args: T) =&gt; void, delayMs?: number, subscription?: <a href="basics.md#disposable-interface">Disposable</a>, ...args: T): void;</pre>
@@ -28,6 +30,8 @@ Disposable-based alternative to built-in <code>setTimeout</code>.
 | args | <code>T</code> | The arguments to send to the callback. |
 
 ## <code>setInterval</code>
+
+> Source Location: [packages\/core\/src\/util.ts#L208](..\/..\/..\/packages\/core\/src\/util.ts#L208)
 
 <b>Signature</b>
 
@@ -46,6 +50,8 @@ Disposable-based alternative to built-in <code>setInterval</code>.
 
 ## <code>requestAnimationFrame</code>
 
+> Source Location: [packages\/core\/src\/util.ts#L136](..\/..\/..\/packages\/core\/src\/util.ts#L136)
+
 <b>Signature</b>
 
 <pre>declare function requestAnimationFrameImplementation(callback: (time: number) =&gt; void, subscription?: <a href="basics.md#disposable-interface">Disposable</a>): void;</pre>
@@ -61,6 +67,8 @@ Disposable-based alternative to built-in <code>requestAnimationFrame</code>.
 
 ## <code>asyncReportError</code>
 
+> Source Location: [packages\/core\/src\/util.ts#L244](..\/..\/..\/packages\/core\/src\/util.ts#L244)
+
 <b>Signature</b>
 
 <pre>function asyncReportError(error: unknown): void;</pre>
@@ -74,6 +82,8 @@ Reports the given error asynchronously.
 | error | <code>unknown</code> | The error to report. |
 
 ## <code>TimeProvider</code>
+
+> Source Location: [packages\/core\/src\/util.ts#L305](..\/..\/..\/packages\/core\/src\/util.ts#L305)
 
 <b>Signature</b>
 

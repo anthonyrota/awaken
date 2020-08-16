@@ -39,17 +39,23 @@
 
 ### <a name="disposable-function"></a><code>Disposable - Function</code>
 
+> Source Location: [packages\/core\/src\/disposable.ts#L333](..\/..\/..\/packages\/core\/src\/disposable.ts#L333)
+
 <b>Signature</b>
 
 <pre>function Disposable(onDispose?: () =&gt; void): <a href="#disposable-interface">Disposable</a>;</pre>
 
 ### <a name="disposable-interface"></a><code>Disposable - Interface</code>
 
+> Source Location: [packages\/core\/src\/disposable.ts#L13](..\/..\/..\/packages\/core\/src\/disposable.ts#L13)
+
 <b>Signature</b>
 
 <pre>interface Disposable </pre>
 
 ## <code>isDisposable</code>
+
+> Source Location: [packages\/core\/src\/disposable.ts#L361](..\/..\/..\/packages\/core\/src\/disposable.ts#L361)
 
 <b>Signature</b>
 
@@ -91,11 +97,15 @@ isDisposable(null); // false.
 
 ### <a name="disposalerror-interface"></a><code>DisposalError - Interface</code>
 
+> Source Location: [packages\/core\/src\/disposable.ts#L280](..\/..\/..\/packages\/core\/src\/disposable.ts#L280)
+
 <b>Signature</b>
 
 <pre>interface DisposalError extends DisposalErrorImplementation </pre>
 
 ### <a name="disposalerror-variable"></a><code>DisposalError - Variable</code>
+
+> Source Location: [packages\/core\/src\/disposable.ts#L300](..\/..\/..\/packages\/core\/src\/disposable.ts#L300)
 
 <b>Signature</b>
 
@@ -105,17 +115,23 @@ Thrown when at least one error is caught during the disposal of a disposable.
 
 ## <code>DisposalErrorConstructor</code>
 
+> Source Location: [packages\/core\/src\/disposable.ts#L290](..\/..\/..\/packages\/core\/src\/disposable.ts#L290)
+
 <b>Signature</b>
 
 <pre>interface DisposalErrorConstructor </pre>
 
 ## <code>DISPOSED</code>
 
+> Source Location: [packages\/core\/src\/disposable.ts#L381](..\/..\/..\/packages\/core\/src\/disposable.ts#L381)
+
 <b>Signature</b>
 
 <pre>var DISPOSED: <a href="#disposable-interface">Disposable</a></pre>
 
 ## <code>implDisposableMethods</code>
+
+> Source Location: [packages\/core\/src\/disposable.ts#L214](..\/..\/..\/packages\/core\/src\/disposable.ts#L214)
 
 <b>Signature</b>
 
@@ -137,6 +153,8 @@ Implements the Disposable Interface onto the given value by copying the disposab
 | <code>T & [Disposable](#disposable-interface)</code> | The given value which has been mutated. In strict javascript this is unnecessary but here it is useful as the returned value will have the type <code>T & Disposable</code> |
 
 ## <code>Event</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L117](..\/..\/..\/packages\/core\/src\/source.ts#L117)
 
 <b>Signature</b>
 
@@ -176,6 +194,8 @@ sink(Throw(new Error('...'))); // `${ThrowType}`, Error(...).
 
 ## <code>EventType</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L48](..\/..\/..\/packages\/core\/src\/source.ts#L48)
+
 <b>Signature</b>
 
 <pre>type EventType = <a href="#pushtype-typealias">PushType</a> | <a href="#throwtype-typealias">ThrowType</a> | <a href="#endtype-typealias">EndType</a>;</pre>
@@ -202,6 +222,8 @@ console.log(event.value); // [1, 2, 3].
 
 - <code>[Event](#event)</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L139](..\/..\/..\/packages\/core\/src\/source.ts#L139)
+
 <b>Signature</b>
 
 <pre>function Push&lt;T&gt;(): <a href="#push-interface">Push</a>&lt;undefined&gt;;</pre>
@@ -218,6 +240,8 @@ console.log(event.value); // [1, 2, 3].
 
 ### <a name="push-interface"></a><code>Push - Interface</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L53](..\/..\/..\/packages\/core\/src\/source.ts#L53)
+
 <b>Signature</b>
 
 <pre>interface Push&lt;T&gt; </pre>
@@ -226,11 +250,15 @@ console.log(event.value); // [1, 2, 3].
 
 ### <a name="pushtype-typealias"></a><code>PushType - Type</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L24](..\/..\/..\/packages\/core\/src\/source.ts#L24)
+
 <b>Signature</b>
 
 <pre>type PushType = 0;</pre>
 
 ### <a name="pushtype-variable"></a><code>PushType - Variable</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L28](..\/..\/..\/packages\/core\/src\/source.ts#L28)
 
 <b>Signature</b>
 
@@ -239,6 +267,8 @@ console.log(event.value); // [1, 2, 3].
 ## <code>Throw</code>
 
 ### <a name="throw-function"></a><code>Throw - Function</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L169](..\/..\/..\/packages\/core\/src\/source.ts#L169)
 
 <b>Signature</b>
 
@@ -272,6 +302,8 @@ console.log(event.value); // Error(...).
 
 ### <a name="throw-interface"></a><code>Throw - Interface</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L61](..\/..\/..\/packages\/core\/src\/source.ts#L61)
+
 <b>Signature</b>
 
 <pre>interface Throw </pre>
@@ -280,11 +312,15 @@ console.log(event.value); // Error(...).
 
 ### <a name="throwtype-typealias"></a><code>ThrowType - Type</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L32](..\/..\/..\/packages\/core\/src\/source.ts#L32)
+
 <b>Signature</b>
 
 <pre>type ThrowType = 1;</pre>
 
 ### <a name="throwtype-variable"></a><code>ThrowType - Variable</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L36](..\/..\/..\/packages\/core\/src\/source.ts#L36)
 
 <b>Signature</b>
 
@@ -294,11 +330,15 @@ console.log(event.value); // Error(...).
 
 ### <a name="end-interface"></a><code>End - Interface</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L69](..\/..\/..\/packages\/core\/src\/source.ts#L69)
+
 <b>Signature</b>
 
 <pre>interface End </pre>
 
 ### <a name="end-variable"></a><code>End - Variable</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L193](..\/..\/..\/packages\/core\/src\/source.ts#L193)
 
 <b>Signature</b>
 
@@ -326,11 +366,15 @@ sink(End); // This disposes the sink, then calls `onEvent` above.
 
 ### <a name="endtype-typealias"></a><code>EndType - Type</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L40](..\/..\/..\/packages\/core\/src\/source.ts#L40)
+
 <b>Signature</b>
 
 <pre>type EndType = 2;</pre>
 
 ### <a name="endtype-variable"></a><code>EndType - Variable</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L44](..\/..\/..\/packages\/core\/src\/source.ts#L44)
 
 <b>Signature</b>
 
@@ -340,9 +384,11 @@ sink(End); // This disposes the sink, then calls `onEvent` above.
 
 ### <a name="sink-function"></a><code>Sink - Function</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L274](..\/..\/..\/packages\/core\/src\/source.ts#L274)
+
 <b>Signature</b>
 
-<pre>function Sink&lt;T&gt;(onEvent: (event: <a href="#event">Event</a>&lt;T&gt;) =&gt; void): <a href="#sink-interface">Sink</a>&lt;T&gt;;</pre>
+<pre>function Sink&lt;T&gt;(onEvent: (event: Event&lt;T&gt;) =&gt; void): <a href="#sink-interface">Sink</a>&lt;T&gt;;</pre>
 
 A Sink is what a <code>[Source](#source)</code> subscribes to. All events emitted by the source will be passed to the sink that has been given to the source.
 
@@ -354,7 +400,7 @@ The sink constructor takes an <code>onEvent</code> function, which is called eve
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| onEvent | <code>\(event: [Event](#event)&lt;T&gt;\) =&gt; void</code> | The callback for when an event is received. |
+| onEvent | <code>\(event: Event&lt;T&gt;\) =&gt; void</code> | The callback for when an event is received. |
 
 <b>Returns</b>
 
@@ -409,11 +455,15 @@ sink(Throw(...)); // Ignored.
 
 ### <a name="sink-interface"></a><code>Sink - Interface</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L198](..\/..\/..\/packages\/core\/src\/source.ts#L198)
+
 <b>Signature</b>
 
 <pre>interface Sink&lt;T&gt; extends <a href="#disposable-interface">Disposable</a> </pre>
 
 ## <code>isSink</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L328](..\/..\/..\/packages\/core\/src\/source.ts#L328)
 
 <b>Signature</b>
 
@@ -454,6 +504,8 @@ isSink(null); // false.
 ## <code>Source</code>
 
 ### <a name="source-function"></a><code>Source - Function</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L479](..\/..\/..\/packages\/core\/src\/source.ts#L479)
 
 <b>Signature</b>
 
@@ -583,11 +635,15 @@ const source = Source(sink => {
 
 ### <a name="source-interface"></a><code>Source - Interface</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L336](..\/..\/..\/packages\/core\/src\/source.ts#L336)
+
 <b>Signature</b>
 
 <pre>interface Source&lt;T&gt; </pre>
 
 ## <code>isSource</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L535](..\/..\/..\/packages\/core\/src\/source.ts#L535)
 
 <b>Signature</b>
 
@@ -626,6 +682,8 @@ isSource(null); // false.
 - <code>[isSubject](#issubject)</code>
 
 ## <code>subscribe</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L578](..\/..\/..\/packages\/core\/src\/source.ts#L578)
 
 <b>Signature</b>
 
@@ -677,11 +735,15 @@ pipe(
 
 ## <code>Operator</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1300](..\/..\/..\/packages\/core\/src\/source.ts#L1300)
+
 <b>Signature</b>
 
 <pre>interface Operator&lt;T, U&gt; </pre>
 
 ## <code>IdentityOperator</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1307](..\/..\/..\/packages\/core\/src\/source.ts#L1307)
 
 <b>Signature</b>
 
@@ -694,6 +756,8 @@ Calls the value accumulatively against all of the functions given left-to-right.
 <b>Returns</b>
 
 The result of accumulatively calling the given value against all of the functions given left-to-right.
+
+> Source Location: [packages\/core\/src\/util.ts#L19](..\/..\/..\/packages\/core\/src\/util.ts#L19)
 
 <b>Signature</b>
 
@@ -729,6 +793,8 @@ Combines all of the functions given into a single function. This function takes 
 
 A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right.
 
+> Source Location: [packages\/core\/src\/util.ts#L71](..\/..\/..\/packages\/core\/src\/util.ts#L71)
+
 <b>Signature</b>
 
 <pre>function flow(): &lt;T&gt;(x: T) =&gt; T;</pre>
@@ -759,17 +825,23 @@ A function which takes a value and will return the result of accumulatively call
 
 ### <a name="subject-function"></a><code>Subject - Function</code>
 
+> Source Location: [packages\/core\/src\/subject.ts#L339](..\/..\/..\/packages\/core\/src\/subject.ts#L339)
+
 <b>Signature</b>
 
 <pre>function Subject&lt;T&gt;(): <a href="#subject-interface">Subject</a>&lt;T&gt;;</pre>
 
 ### <a name="subject-interface"></a><code>Subject - Interface</code>
 
+> Source Location: [packages\/core\/src\/subject.ts#L35](..\/..\/..\/packages\/core\/src\/subject.ts#L35)
+
 <b>Signature</b>
 
 <pre>interface Subject&lt;T&gt; extends <a href="#source-interface">Source</a>&lt;T&gt;, <a href="#sink-interface">Sink</a>&lt;T&gt;, <a href="#nonmarkedsubject">NonMarkedSubject</a>&lt;T&gt; </pre>
 
 ## <code>isSubject</code>
+
+> Source Location: [packages\/core\/src\/subject.ts#L71](..\/..\/..\/packages\/core\/src\/subject.ts#L71)
 
 <b>Signature</b>
 
@@ -811,11 +883,15 @@ isSubject(null); // false.
 
 ### <a name="subjectdistributionsinkdisposalerror-interface"></a><code>SubjectDistributionSinkDisposalError - Interface</code>
 
+> Source Location: [packages\/core\/src\/subject.ts#L297](..\/..\/..\/packages\/core\/src\/subject.ts#L297)
+
 <b>Signature</b>
 
 <pre>interface SubjectDistributionSinkDisposalError extends SubjectDistributionSinkDisposalErrorImplementation </pre>
 
 ### <a name="subjectdistributionsinkdisposalerror-variable"></a><code>SubjectDistributionSinkDisposalError - Variable</code>
+
+> Source Location: [packages\/core\/src\/subject.ts#L320](..\/..\/..\/packages\/core\/src\/subject.ts#L320)
 
 <b>Signature</b>
 
@@ -825,11 +901,15 @@ Thrown when at least least one error is caught during the checking of whether a 
 
 ## <code>SubjectDistributionSinkDisposalErrorConstructor</code>
 
+> Source Location: [packages\/core\/src\/subject.ts#L308](..\/..\/..\/packages\/core\/src\/subject.ts#L308)
+
 <b>Signature</b>
 
 <pre>interface SubjectDistributionSinkDisposalErrorConstructor </pre>
 
 ## <code>markAsSubject</code>
+
+> Source Location: [packages\/core\/src\/subject.ts#L41](..\/..\/..\/packages\/core\/src\/subject.ts#L41)
 
 <b>Signature</b>
 
@@ -837,11 +917,15 @@ Thrown when at least least one error is caught during the checking of whether a 
 
 ## <code>NonMarkedSubject</code>
 
+> Source Location: [packages\/core\/src\/subject.ts#L28](..\/..\/..\/packages\/core\/src\/subject.ts#L28)
+
 <b>Signature</b>
 
 <pre>interface NonMarkedSubject&lt;T&gt; extends <a href="#disposable-interface">Disposable</a> </pre>
 
 ## <code>ScheduleFunction</code>
+
+> Source Location: [packages\/core\/src\/schedule.ts#L13](..\/..\/..\/packages\/core\/src\/schedule.ts#L13)
 
 <b>Signature</b>
 

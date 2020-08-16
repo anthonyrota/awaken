@@ -16,11 +16,15 @@
 
 ## <code>ScheduleAnimationFrameQueued</code>
 
+> Source Location: [packages\/core\/src\/schedule.ts#L237](..\/..\/..\/packages\/core\/src\/schedule.ts#L237)
+
 <b>Signature</b>
 
 <pre>function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;</pre>
 
 ## <code>ScheduleInterval</code>
+
+> Source Location: [packages\/core\/src\/schedule.ts#L260](..\/..\/..\/packages\/core\/src\/schedule.ts#L260)
 
 <b>Signature</b>
 
@@ -28,11 +32,15 @@
 
 ## <code>ScheduleQueued</code>
 
+> Source Location: [packages\/core\/src\/schedule.ts#L27](..\/..\/..\/packages\/core\/src\/schedule.ts#L27)
+
 <b>Signature</b>
 
 <pre>function ScheduleQueued&lt;T extends any[] = []&gt;(schedule: (callNext: (...args: T) =&gt; void, subscription: <a href="basics.md#disposable-interface">Disposable</a>) =&gt; void): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
 
 ## <code>ScheduleQueuedDiscrete</code>
+
+> Source Location: [packages\/core\/src\/schedule.ts#L176](..\/..\/..\/packages\/core\/src\/schedule.ts#L176)
 
 <b>Signature</b>
 
@@ -40,11 +48,15 @@
 
 ## <code>ScheduleSyncQueued</code>
 
+> Source Location: [packages\/core\/src\/schedule.ts#L222](..\/..\/..\/packages\/core\/src\/schedule.ts#L222)
+
 <b>Signature</b>
 
 <pre>function ScheduleSyncQueued(): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
 
 ## <code>ScheduleTimeout</code>
+
+> Source Location: [packages\/core\/src\/schedule.ts#L244](..\/..\/..\/packages\/core\/src\/schedule.ts#L244)
 
 <b>Signature</b>
 
@@ -52,17 +64,23 @@
 
 ## <code>ScheduleTimeoutQueued</code>
 
+> Source Location: [packages\/core\/src\/schedule.ts#L253](..\/..\/..\/packages\/core\/src\/schedule.ts#L253)
+
 <b>Signature</b>
 
 <pre>function ScheduleTimeoutQueued(delayMs: number): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
 
 ## <code>scheduleAnimationFrame</code>
 
+> Source Location: [packages\/core\/src\/schedule.ts#L232](..\/..\/..\/packages\/core\/src\/schedule.ts#L232)
+
 <b>Signature</b>
 
 <pre>var scheduleAnimationFrame: ScheduleAnimationFrameFunction</pre>
 
 ## <code>scheduleSync</code>
+
+> Source Location: [packages\/core\/src\/schedule.ts#L202](..\/..\/..\/packages\/core\/src\/schedule.ts#L202)
 
 <b>Signature</b>
 

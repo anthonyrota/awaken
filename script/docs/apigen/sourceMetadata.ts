@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
 export interface SourceLocation {
-    relativeFilePath: string;
+    filePath: string;
     lineNumber: number;
 }
 
@@ -70,7 +70,7 @@ export function generateSourceMetadata(
                 if (exportMetadata) {
                     if (
                         exportMetadata.exportNameToSourceLocation.get(
-                            symbol.name,
+                            export_.name,
                         )
                     ) {
                         continue;
@@ -120,20 +120,20 @@ export function generateSourceMetadata(
                         ),
                     };
                     exportMetadata.exportNameToBaseDocComment.set(
-                        symbol.name,
+                        export_.name,
                         baseDocComment,
                     );
                 }
 
-                exportMetadata.exportNameToSourceLocation.set(symbol.name, {
+                exportMetadata.exportNameToSourceLocation.set(export_.name, {
                     // eslint-disable-next-line max-len
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    relativeFilePath: path.relative(
+                    filePath: path.relative(
                         process.cwd(),
-                        sourceFile.fileName,
+                        declarationSourceFile.fileName,
                     ),
                     lineNumber:
-                        sourceFile.getLineAndCharacterOfPosition(
+                        declarationSourceFile.getLineAndCharacterOfPosition(
                             declaration.getStart(),
                         ).line + 1,
                 });

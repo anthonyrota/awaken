@@ -86,6 +86,12 @@ class ExportFunctionImplementation
             context,
             ts.SyntaxKind.FunctionDeclaration,
         );
+        writeUtil.writeSourceLocation(
+            baseDocContainer,
+            this._overloads[0],
+            context,
+            ts.SyntaxKind.FunctionDeclaration,
+        );
 
         let didNotOnlyWriteSignature = true;
         const overloadsContainer = new output.Container();
@@ -182,6 +188,12 @@ class ExportInterfaceImplementation
             context,
             ts.SyntaxKind.InterfaceDeclaration,
         );
+        writeUtil.writeSourceLocation(
+            output,
+            interface_,
+            context,
+            ts.SyntaxKind.InterfaceDeclaration,
+        );
         writeUtil.writeSignature(output, interface_, context);
         writeUtil.writeSummary(output, interface_, context);
         writeUtil.writeExamples(output, interface_, context);
@@ -232,6 +244,12 @@ class ExportTypeAliasImplementation
             context,
             ts.SyntaxKind.TypeAliasDeclaration,
         );
+        writeUtil.writeSourceLocation(
+            output,
+            typeAlias,
+            context,
+            ts.SyntaxKind.TypeAliasDeclaration,
+        );
         writeUtil.writeSignature(output, typeAlias, context);
         writeUtil.writeSummary(output, typeAlias, context);
         writeUtil.writeExamples(output, typeAlias, context);
@@ -277,6 +295,12 @@ class ExportVariableImplementation
             this.simplifiedKind,
         );
         writeUtil.writeBaseDoc(
+            output,
+            variable,
+            context,
+            ts.SyntaxKind.VariableDeclaration,
+        );
+        writeUtil.writeSourceLocation(
             output,
             variable,
             context,

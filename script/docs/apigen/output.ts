@@ -845,6 +845,8 @@ export class LocalPageLink extends Container {
     }
 }
 
+export class GithubSourceLink extends Link {}
+
 export class Image extends Node {
     constructor(
         private _src: string,

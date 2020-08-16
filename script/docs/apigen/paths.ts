@@ -301,6 +301,8 @@ const mainPaths: Record<string, [string, APIPageData][]> = nullObj({
     ],
 });
 
+export const outDir = 'docs/api';
+
 const nameToPath: Record<string, string> = {};
 const mainPathEntries = Object.entries(mainPaths);
 for (const [packageName, pages] of mainPathEntries) {

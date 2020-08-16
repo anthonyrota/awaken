@@ -17,7 +17,7 @@ import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationRefer
 import * as aeModel from '@microsoft/api-extractor-model';
 import * as uuid from 'uuid';
 import * as output from './output';
-import { getMainPathOfApiItemName } from './paths';
+import { outDir, getMainPathOfApiItemName } from './paths';
 import { SourceMetadata } from './sourceMetadata';
 import { Iter } from './util';
 
@@ -726,6 +726,46 @@ export function writeSeeBlocks(
     return false;
 }
 
+export function writeSourceLocation(
+    container: output.Container,
+    apiItem: aeModel.ApiItem,
+    context: Context,
+    kind: ts.SyntaxKind,
+): void {
+    // eslint-disable-next-line max-len
+    const exportNameMetadata = context.sourceMetadata.syntaxKindToExportNameMetadata.get(
+        kind,
+    );
+    if (!exportNameMetadata) {
+        throw new Error(`No export name metadata for kind ${kind}.`);
+    }
+
+    const apiItemName = getApiItemName(apiItem);
+    const sourceLocation = exportNameMetadata.exportNameToSourceLocation.get(
+        apiItemName,
+    );
+    if (!sourceLocation) {
+        // This should never be reached.
+        throw new UnsupportedApiItemError(apiItem, 'No source location.');
+    }
+
+    const currentApiItemPath = `${outDir}/${getMainPathOfApiItemName(
+        apiItemName,
+    )}`;
+    const sourceGithubPath = `${sourceLocation.filePath}#L${sourceLocation.lineNumber}`;
+    const relativePath = getRelativePath(currentApiItemPath, sourceGithubPath);
+
+    container.addChild(
+        new output.BlockQuote()
+            .addChild(new output.PlainText('Source Location: '))
+            .addChild(
+                new output.GithubSourceLink(relativePath).addChild(
+                    new output.PlainText(sourceGithubPath),
+                ),
+            ),
+    );
+}
+
 function appendExcerptWithHyperlinks(
     container: output.Container,
     excerpt: aeModel.Excerpt,
@@ -981,14 +1021,14 @@ function getExcerptTokenReference(
         // Requires (overloadIndex) at the end if a function.
         canonicalReference = canonicalReference.withOverloadIndex(1);
     }
-    if (canonicalReference.toString().includes('!Event')) {
-        // Event type shadows the global type so api-extractor replaces it
-        // with Event_2, but doesn't bother changing the references to
-        // the updated name.
-        canonicalReference = DeclarationReference.parse(
-            canonicalReference.toString().replace('!Event', '!Event_2'),
-        );
-    }
+    // if (canonicalReference.toString().includes('!Event')) {
+    //     // Event type shadows the global type so api-extractor replaces it
+    //     // with Event_2, but doesn't bother changing the references to
+    //     // the updated name.
+    //     canonicalReference = DeclarationReference.parse(
+    //         canonicalReference.toString().replace('!Event', '!Event_2'),
+    //     );
+    // }
     const result = resolveDeclarationReference(
         canonicalReference,
         undefined,

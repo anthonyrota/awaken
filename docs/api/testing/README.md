@@ -19,11 +19,15 @@
 
 ### <a name="testsource-function"></a><code>TestSource - Function</code>
 
+> Source Location: [packages\/testing\/src\/index.ts#L232](..\/..\/..\/packages\/testing\/src\/index.ts#L232)
+
 <b>Signature</b>
 
 <pre>function TestSource&lt;T&gt;(events: <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[], testSchedule: <a href="#testschedule-interface">TestSchedule</a>): <a href="#testsource-interface">TestSource</a>&lt;T&gt;;</pre>
 
 ### <a name="testsource-interface"></a><code>TestSource - Interface</code>
+
+> Source Location: [packages\/testing\/src\/index.ts#L225](..\/..\/..\/packages\/testing\/src\/index.ts#L225)
 
 <b>Signature</b>
 
@@ -33,17 +37,23 @@
 
 ### <a name="sharedtestsource-function"></a><code>SharedTestSource - Function</code>
 
+> Source Location: [packages\/testing\/src\/index.ts#L266](..\/..\/..\/packages\/testing\/src\/index.ts#L266)
+
 <b>Signature</b>
 
 <pre>function SharedTestSource&lt;T&gt;(events: <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[], testSchedule: <a href="#testschedule-interface">TestSchedule</a>): <a href="#sharedtestsource-interface">SharedTestSource</a>&lt;T&gt;;</pre>
 
 ### <a name="sharedtestsource-interface"></a><code>SharedTestSource - Interface</code>
 
+> Source Location: [packages\/testing\/src\/index.ts#L259](..\/..\/..\/packages\/testing\/src\/index.ts#L259)
+
 <b>Signature</b>
 
 <pre>interface SharedTestSource&lt;T&gt; extends <a href="#testsource-interface">TestSource</a>&lt;T&gt; </pre>
 
 ## <code>TestSourceEvent</code>
+
+> Source Location: [packages\/testing\/src\/index.ts#L179](..\/..\/..\/packages\/testing\/src\/index.ts#L179)
 
 <b>Signature</b>
 
@@ -53,17 +63,23 @@
 
 ### <a name="testsubscriptioninfo-function"></a><code>TestSubscriptionInfo - Function</code>
 
+> Source Location: [packages\/testing\/src\/index.ts#L142](..\/..\/..\/packages\/testing\/src\/index.ts#L142)
+
 <b>Signature</b>
 
 <pre>function TestSubscriptionInfo(subscriptionStartFrame: number, subscriptionEndFrame: number): <a href="#testsubscriptioninfo-interface">TestSubscriptionInfo</a>;</pre>
 
 ### <a name="testsubscriptioninfo-interface"></a><code>TestSubscriptionInfo - Interface</code>
 
+> Source Location: [packages\/testing\/src\/index.ts#L134](..\/..\/..\/packages\/testing\/src\/index.ts#L134)
+
 <b>Signature</b>
 
 <pre>interface TestSubscriptionInfo </pre>
 
 ## <code>TestSourceSubscriptions</code>
+
+> Source Location: [packages\/testing\/src\/index.ts#L172](..\/..\/..\/packages\/testing\/src\/index.ts#L172)
 
 <b>Signature</b>
 
@@ -73,11 +89,15 @@
 
 ### <a name="testschedule-function"></a><code>TestSchedule - Function</code>
 
+> Source Location: [packages\/testing\/src\/index.ts#L54](..\/..\/..\/packages\/testing\/src\/index.ts#L54)
+
 <b>Signature</b>
 
 <pre>function TestSchedule(): <a href="#testschedule-interface">TestSchedule</a>;</pre>
 
 ### <a name="testschedule-interface"></a><code>TestSchedule - Interface</code>
+
+> Source Location: [packages\/testing\/src\/index.ts#L30](..\/..\/..\/packages\/testing\/src\/index.ts#L30)
 
 <b>Signature</b>
 
@@ -85,11 +105,15 @@
 
 ## <code>watchSourceEvents</code>
 
+> Source Location: [packages\/testing\/src\/index.ts#L295](..\/..\/..\/packages\/testing\/src\/index.ts#L295)
+
 <b>Signature</b>
 
 <pre>function watchSourceEvents&lt;T&gt;(source: <a href="../core/basics.md#source-interface">Source</a>&lt;T&gt;, testSchedule: <a href="#testschedule-interface">TestSchedule</a>, subscriptionInfo?: <a href="#testsubscriptioninfo-interface">TestSubscriptionInfo</a>): <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[];</pre>
 
 ## <code>P</code>
+
+> Source Location: [packages\/testing\/src\/index.ts#L186](..\/..\/..\/packages\/testing\/src\/index.ts#L186)
 
 <b>Signature</b>
 
@@ -97,11 +121,15 @@
 
 ## <code>T</code>
 
+> Source Location: [packages\/testing\/src\/index.ts#L198](..\/..\/..\/packages\/testing\/src\/index.ts#L198)
+
 <b>Signature</b>
 
 <pre>function T(error: unknown, frame: number): <a href="../core/basics.md#throw-interface">Throw</a> & {<br>    readonly frame: number;<br>};</pre>
 
 ## <code>E</code>
+
+> Source Location: [packages\/testing\/src\/index.ts#L210](..\/..\/..\/packages\/testing\/src\/index.ts#L210)
 
 <b>Signature</b>
 

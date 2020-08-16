@@ -25,7 +25,6 @@ interface TestScheduleImplementation {
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export interface TestSchedule {
@@ -50,7 +49,6 @@ function getActionExecutionFrame(action: TestScheduleAction): number {
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export function TestSchedule(): TestSchedule {
@@ -131,7 +129,6 @@ export function TestSchedule(): TestSchedule {
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export interface TestSubscriptionInfo {
@@ -140,7 +137,6 @@ export interface TestSubscriptionInfo {
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export function TestSubscriptionInfo(
@@ -171,7 +167,6 @@ function watchSubscriptionInfo(
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export type TestSourceSubscriptions = ReadonlyArray<
@@ -179,7 +174,6 @@ export type TestSourceSubscriptions = ReadonlyArray<
 >;
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export type TestSourceEvent<T> = Event<T> & {
@@ -187,7 +181,6 @@ export type TestSourceEvent<T> = Event<T> & {
 };
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export function P<T>(
@@ -200,7 +193,6 @@ export function P<T>(
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export function T(
@@ -213,7 +205,6 @@ export function T(
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export function E(
@@ -229,7 +220,6 @@ interface TestSourceImplementation<T> extends Source<T> {
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export interface TestSource<T> extends Source<T> {
@@ -237,7 +227,6 @@ export interface TestSource<T> extends Source<T> {
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export function TestSource<T>(
@@ -265,7 +254,6 @@ interface SharedTestSourceImplementation<T>
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export interface SharedTestSource<T> extends TestSource<T> {
@@ -273,7 +261,6 @@ export interface SharedTestSource<T> extends TestSource<T> {
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export function SharedTestSource<T>(
@@ -303,7 +290,6 @@ export function SharedTestSource<T>(
 }
 
 /**
- * {@coreApiPath testing}
  * @public
  */
 export function watchSourceEvents<T>(

@@ -124,11 +124,15 @@
 
 ## <code>at</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1678](..\/..\/..\/packages\/core\/src\/source.ts#L1678)
+
 <b>Signature</b>
 
 <pre>function at(index: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>catchError</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3064](..\/..\/..\/packages\/core\/src\/source.ts#L3064)
 
 <b>Signature</b>
 
@@ -136,11 +140,15 @@
 
 ## <code>collect</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3288](..\/..\/..\/packages\/core\/src\/source.ts#L3288)
+
 <b>Signature</b>
 
 <pre>function collect&lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T[]&gt;;</pre>
 
 ## <code>combineWith</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1320](..\/..\/..\/packages\/core\/src\/source.ts#L1320)
 
 <b>Signature</b>
 
@@ -148,11 +156,15 @@
 
 ## <code>concat</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2143](..\/..\/..\/packages\/core\/src\/source.ts#L2143)
+
 <b>Signature</b>
 
 <pre>var concat: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;</pre>
 
 ## <code>concatDrop</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2073](..\/..\/..\/packages\/core\/src\/source.ts#L2073)
 
 <b>Signature</b>
 
@@ -160,11 +172,15 @@
 
 ## <code>concatDropMap</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2157](..\/..\/..\/packages\/core\/src\/source.ts#L2157)
+
 <b>Signature</b>
 
 <pre>function concatDropMap&lt;T, U&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>concatMap</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2134](..\/..\/..\/packages\/core\/src\/source.ts#L2134)
 
 <b>Signature</b>
 
@@ -172,17 +188,23 @@
 
 ## <code>concatWith</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2116](..\/..\/..\/packages\/core\/src\/source.ts#L2116)
+
 <b>Signature</b>
 
 <pre>function concatWith&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>count</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2778](..\/..\/..\/packages\/core\/src\/source.ts#L2778)
+
 <b>Signature</b>
 
 <pre>var count: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;number&gt;</pre>
 
 ## <code>debounce</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3351](..\/..\/..\/packages\/core\/src\/source.ts#L3351)
 
 <b>Signature</b>
 
@@ -192,17 +214,23 @@
 
 ## <code>DebounceConfig</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3320](..\/..\/..\/packages\/core\/src\/source.ts#L3320)
+
 <b>Signature</b>
 
 <pre>interface DebounceConfig </pre>
 
 ## <code>defaultDebounceConfig</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3329](..\/..\/..\/packages\/core\/src\/source.ts#L3329)
+
 <b>Signature</b>
 
 <pre>var defaultDebounceConfig: <a href="#debounceconfig">DebounceConfig</a></pre>
 
 ## <code>InitialDurationInfo</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3338](..\/..\/..\/packages\/core\/src\/source.ts#L3338)
 
 <b>Signature</b>
 
@@ -212,17 +240,23 @@
 
 ### <a name="debouncetrailingrestart-typealias"></a><code>DebounceTrailingRestart - Type</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3311](..\/..\/..\/packages\/core\/src\/source.ts#L3311)
+
 <b>Signature</b>
 
 <pre>type DebounceTrailingRestart = 'restart';</pre>
 
 ### <a name="debouncetrailingrestart-variable"></a><code>DebounceTrailingRestart - Variable</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3315](..\/..\/..\/packages\/core\/src\/source.ts#L3315)
+
 <b>Signature</b>
 
 <pre>var DebounceTrailingRestart: <a href="#debouncetrailingrestart-typealias">DebounceTrailingRestart</a></pre>
 
 ## <code>debounceMs</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3540](..\/..\/..\/packages\/core\/src\/source.ts#L3540)
 
 <b>Signature</b>
 
@@ -232,17 +266,23 @@
 
 ## <code>defaultIfEmpty</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2333](..\/..\/..\/packages\/core\/src\/source.ts#L2333)
+
 <b>Signature</b>
 
 <pre>function defaultIfEmpty&lt;T&gt;(getDefaultValue: () =&gt; T): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>defaultIfEmptyTo</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2364](..\/..\/..\/packages\/core\/src\/source.ts#L2364)
+
 <b>Signature</b>
 
 <pre>function defaultIfEmptyTo&lt;T&gt;(value: T): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>delay</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3652](..\/..\/..\/packages\/core\/src\/source.ts#L3652)
 
 <b>Signature</b>
 
@@ -252,11 +292,15 @@
 
 ## <code>delayMs</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3717](..\/..\/..\/packages\/core\/src\/source.ts#L3717)
+
 <b>Signature</b>
 
 <pre>function delayMs(ms: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>distinct</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2382](..\/..\/..\/packages\/core\/src\/source.ts#L2382)
 
 <b>Signature</b>
 
@@ -265,6 +309,8 @@
 <pre>function distinct&lt;T, K&gt;(getKey: (value: T, index: number) =&gt; K): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>distinctFromLast</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2443](..\/..\/..\/packages\/core\/src\/source.ts#L2443)
 
 <b>Signature</b>
 
@@ -276,11 +322,15 @@
 
 ## <code>endWith</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2179](..\/..\/..\/packages\/core\/src\/source.ts#L2179)
+
 <b>Signature</b>
 
 <pre>function endWith&lt;T&gt;(...values: T[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>every</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1688](..\/..\/..\/packages\/core\/src\/source.ts#L1688)
 
 <b>Signature</b>
 
@@ -288,11 +338,15 @@
 
 ## <code>expandMap</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2003](..\/..\/..\/packages\/core\/src\/source.ts#L2003)
+
 <b>Signature</b>
 
 <pre>var expandMap: &lt;T&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;, maxConcurrent?: number | undefined) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>filter</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1570](..\/..\/..\/packages\/core\/src\/source.ts#L1570)
 
 <b>Signature</b>
 
@@ -314,11 +368,15 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>finalize</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1709](..\/..\/..\/packages\/core\/src\/source.ts#L1709)
+
 <b>Signature</b>
 
 <pre>function finalize(callback: () =&gt; void): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>find</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1651](..\/..\/..\/packages\/core\/src\/source.ts#L1651)
 
 <b>Signature</b>
 
@@ -328,11 +386,15 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>findIndex</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1669](..\/..\/..\/packages\/core\/src\/source.ts#L1669)
+
 <b>Signature</b>
 
 <pre>function findIndex&lt;T&gt;(predicate: (value: T, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, number&gt;;</pre>
 
 ## <code>findWithIndex</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1621](..\/..\/..\/packages\/core\/src\/source.ts#L1621)
 
 <b>Signature</b>
 
@@ -342,11 +404,15 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>first</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2675](..\/..\/..\/packages\/core\/src\/source.ts#L2675)
+
 <b>Signature</b>
 
 <pre>var first: <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>flat</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1889](..\/..\/..\/packages\/core\/src\/source.ts#L1889)
 
 <b>Signature</b>
 
@@ -354,11 +420,15 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>flatMap</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2125](..\/..\/..\/packages\/core\/src\/source.ts#L2125)
+
 <b>Signature</b>
 
 <pre>function flatMap&lt;T, U&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>flatWith</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2078](..\/..\/..\/packages\/core\/src\/source.ts#L2078)
 
 <b>Signature</b>
 
@@ -366,11 +436,15 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>groupBy</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2499](..\/..\/..\/packages\/core\/src\/source.ts#L2499)
+
 <b>Signature</b>
 
 <pre>function groupBy&lt;T, K&gt;(getKey: (value: T, index: number) =&gt; K, Subject_?: typeof <a href="basics.md#subject-function">Subject</a>, removeGroupWhenNoSubscribers?: boolean): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#groupsource">GroupSource</a>&lt;T, K&gt;&gt;;</pre>
 
 ## <code>GroupSource</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2588](..\/..\/..\/packages\/core\/src\/source.ts#L2588)
 
 <b>Signature</b>
 
@@ -378,11 +452,15 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>ActiveGroupSource</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2572](..\/..\/..\/packages\/core\/src\/source.ts#L2572)
+
 <b>Signature</b>
 
 <pre>interface ActiveGroupSource&lt;T, K&gt; extends GroupSourceBase&lt;T&gt; </pre>
 
 ## <code>RemovedGroupSource</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2580](..\/..\/..\/packages\/core\/src\/source.ts#L2580)
 
 <b>Signature</b>
 
@@ -390,11 +468,15 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>ignorePushEvents</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1721](..\/..\/..\/packages\/core\/src\/source.ts#L1721)
+
 <b>Signature</b>
 
 <pre>var ignorePushEvents: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;never&gt;</pre>
 
 ## <code>isEmpty</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2314](..\/..\/..\/packages\/core\/src\/source.ts#L2314)
 
 <b>Signature</b>
 
@@ -402,11 +484,15 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>isEqualTo</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1879](..\/..\/..\/packages\/core\/src\/source.ts#L1879)
+
 <b>Signature</b>
 
 <pre>function isEqualTo&lt;T, U&gt;(otherSource: <a href="basics.md#source-interface">Source</a>&lt;U&gt;, areValuesEqual: (a: T, b: U, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
 
 ## <code>last</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2773](..\/..\/..\/packages\/core\/src\/source.ts#L2773)
 
 <b>Signature</b>
 
@@ -414,11 +500,15 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>loop</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2960](..\/..\/..\/packages\/core\/src\/source.ts#L2960)
+
 <b>Signature</b>
 
 <pre>var loop: <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>map</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1431](..\/..\/..\/packages\/core\/src\/source.ts#L1431)
 
 <b>Signature</b>
 
@@ -438,19 +528,25 @@ Calls the given transform function for each Push event of the given source and p
 
 ## <code>mapEvents</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1481](..\/..\/..\/packages\/core\/src\/source.ts#L1481)
+
 <b>Signature</b>
 
-<pre>function mapEvents&lt;T, U&gt;(transform: (event: <a href="basics.md#event">Event</a>&lt;T&gt;, index: number) =&gt; <a href="basics.md#event">Event</a>&lt;U&gt; | undefined | null): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function mapEvents&lt;T, U&gt;(transform: (event: Event&lt;T&gt;, index: number) =&gt; Event&lt;U&gt; | undefined | null): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>mapPushEvents</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1512](..\/..\/..\/packages\/core\/src\/source.ts#L1512)
 
 <b>Signature</b>
 
 <pre>function mapPushEvents&lt;T&gt;(transform: (pushEvents: <a href="basics.md#push-interface">Push</a>&lt;T&gt;, index: number) =&gt; <a href="basics.md#throw-interface">Throw</a> | <a href="basics.md#end-interface">End</a>): <a href="basics.md#operator">Operator</a>&lt;T, never&gt;;</pre>
 
-<pre>function mapPushEvents&lt;T, U&gt;(transform: (pushEvent: <a href="basics.md#push-interface">Push</a>&lt;T&gt;, index: number) =&gt; <a href="basics.md#event">Event</a>&lt;U&gt; | undefined | null): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function mapPushEvents&lt;T, U&gt;(transform: (pushEvent: <a href="basics.md#push-interface">Push</a>&lt;T&gt;, index: number) =&gt; Event&lt;U&gt; | undefined | null): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>mapTo</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1474](..\/..\/..\/packages\/core\/src\/source.ts#L1474)
 
 <b>Signature</b>
 
@@ -466,11 +562,15 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>max</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1854](..\/..\/..\/packages\/core\/src\/source.ts#L1854)
+
 <b>Signature</b>
 
 <pre>var max: <a href="basics.md#operator">Operator</a>&lt;number, number&gt;</pre>
 
 ## <code>maxCompare</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1830](..\/..\/..\/packages\/core\/src\/source.ts#L1830)
 
 <b>Signature</b>
 
@@ -478,11 +578,15 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>merge</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2017](..\/..\/..\/packages\/core\/src\/source.ts#L2017)
+
 <b>Signature</b>
 
 <pre>var merge: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;</pre>
 
 ## <code>mergeConcurrent</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2008](..\/..\/..\/packages\/core\/src\/source.ts#L2008)
 
 <b>Signature</b>
 
@@ -490,11 +594,15 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>mergeMap</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1998](..\/..\/..\/packages\/core\/src\/source.ts#L1998)
+
 <b>Signature</b>
 
 <pre>var mergeMap: &lt;T, U&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;, maxConcurrent?: number | undefined) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
 
 ## <code>mergeWith</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2098](..\/..\/..\/packages\/core\/src\/source.ts#L2098)
 
 <b>Signature</b>
 
@@ -502,11 +610,15 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>mergeWithConcurrent</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2087](..\/..\/..\/packages\/core\/src\/source.ts#L2087)
+
 <b>Signature</b>
 
 <pre>function mergeWithConcurrent&lt;T&gt;(max: number, ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>min</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1874](..\/..\/..\/packages\/core\/src\/source.ts#L1874)
 
 <b>Signature</b>
 
@@ -514,11 +626,15 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>minCompare</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1859](..\/..\/..\/packages\/core\/src\/source.ts#L1859)
+
 <b>Signature</b>
 
 <pre>function minCompare&lt;T&gt;(compare: (currentValue: T, lastValue: T, currentValueIndex: number) =&gt; number): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>pluck</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1554](..\/..\/..\/packages\/core\/src\/source.ts#L1554)
 
 <b>Signature</b>
 
@@ -526,11 +642,15 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>raceWith</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1330](..\/..\/..\/packages\/core\/src\/source.ts#L1330)
+
 <b>Signature</b>
 
 <pre>function raceWith&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>reduce</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1812](..\/..\/..\/packages\/core\/src\/source.ts#L1812)
 
 <b>Signature</b>
 
@@ -547,17 +667,23 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>repeat</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2950](..\/..\/..\/packages\/core\/src\/source.ts#L2950)
+
 <b>Signature</b>
 
 <pre>var repeat: (times: number) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>repeatWhen</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2970](..\/..\/..\/packages\/core\/src\/source.ts#L2970)
+
 <b>Signature</b>
 
-<pre>function repeatWhen&lt;T&gt;(getRepeatSource: (sourceEvents: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#event">Event</a>&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function repeatWhen&lt;T&gt;(getRepeatSource: (sourceEvents: <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>retry</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2955](..\/..\/..\/packages\/core\/src\/source.ts#L2955)
 
 <b>Signature</b>
 
@@ -565,11 +691,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>retryAlways</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2965](..\/..\/..\/packages\/core\/src\/source.ts#L2965)
+
 <b>Signature</b>
 
 <pre>var retryAlways: <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>sample</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3725](..\/..\/..\/packages\/core\/src\/source.ts#L3725)
 
 <b>Signature</b>
 
@@ -577,11 +707,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>sampleMs</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3758](..\/..\/..\/packages\/core\/src\/source.ts#L3758)
+
 <b>Signature</b>
 
 <pre>function sampleMs(ms: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>scan</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1758](..\/..\/..\/packages\/core\/src\/source.ts#L1758)
 
 <b>Signature</b>
 
@@ -598,17 +732,23 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>schedulePushEvents</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3828](..\/..\/..\/packages\/core\/src\/source.ts#L3828)
+
 <b>Signature</b>
 
 <pre>function schedulePushEvents(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>scheduleSubscription</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3838](..\/..\/..\/packages\/core\/src\/source.ts#L3838)
+
 <b>Signature</b>
 
 <pre>function scheduleSubscription(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>share</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3893](..\/..\/..\/packages\/core\/src\/source.ts#L3893)
 
 <b>Signature</b>
 
@@ -618,6 +758,8 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>shareControlled</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3855](..\/..\/..\/packages\/core\/src\/source.ts#L3855)
+
 <b>Signature</b>
 
 <pre>function shareControlled&lt;T&gt;(Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="#controllablesource">ControllableSource</a>&lt;T&gt;;</pre>
@@ -626,11 +768,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>ControllableSource</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3848](..\/..\/..\/packages\/core\/src\/source.ts#L3848)
+
 <b>Signature</b>
 
 <pre>interface ControllableSource&lt;T&gt; extends <a href="basics.md#source-interface">Source</a>&lt;T&gt; </pre>
 
 ## <code>shareOnce</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3932](..\/..\/..\/packages\/core\/src\/source.ts#L3932)
 
 <b>Signature</b>
 
@@ -640,6 +786,8 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>sharePersist</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3950](..\/..\/..\/packages\/core\/src\/source.ts#L3950)
+
 <b>Signature</b>
 
 <pre>function sharePersist&lt;T&gt;(Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
@@ -647,6 +795,8 @@ Calls the specified transform function for all the values pushed by the given so
 <pre>function sharePersist(Subject_?: typeof <a href="basics.md#subject-function">Subject</a>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>shareTransform</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3977](..\/..\/..\/packages\/core\/src\/source.ts#L3977)
 
 <b>Signature</b>
 
@@ -656,11 +806,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>skip</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2802](..\/..\/..\/packages\/core\/src\/source.ts#L2802)
+
 <b>Signature</b>
 
 <pre>function skip(amount: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>skipLast</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2854](..\/..\/..\/packages\/core\/src\/source.ts#L2854)
 
 <b>Signature</b>
 
@@ -668,11 +822,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>skipUntil</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2887](..\/..\/..\/packages\/core\/src\/source.ts#L2887)
+
 <b>Signature</b>
 
 <pre>function skipUntil(stopSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>skipWhile</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2822](..\/..\/..\/packages\/core\/src\/source.ts#L2822)
 
 <b>Signature</b>
 
@@ -680,23 +838,31 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>some</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1700](..\/..\/..\/packages\/core\/src\/source.ts#L1700)
+
 <b>Signature</b>
 
 <pre>function some&lt;T&gt;(predicate: (value: T, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
 
 ## <code>spyAfter</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2294](..\/..\/..\/packages\/core\/src\/source.ts#L2294)
+
 <b>Signature</b>
 
-<pre>var spyAfter: &lt;T&gt;(onEvent: (event: <a href="basics.md#event">Event</a>&lt;T&gt;) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
+<pre>var spyAfter: &lt;T&gt;(onEvent: (event: Event&lt;T&gt;) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>spyBefore</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2274](..\/..\/..\/packages\/core\/src\/source.ts#L2274)
+
 <b>Signature</b>
 
-<pre>var spyBefore: &lt;T&gt;(onEvent: (event: <a href="basics.md#event">Event</a>&lt;T&gt;) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
+<pre>var spyBefore: &lt;T&gt;(onEvent: (event: Event&lt;T&gt;) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>spyEndAfter</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2309](..\/..\/..\/packages\/core\/src\/source.ts#L2309)
 
 <b>Signature</b>
 
@@ -704,11 +870,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyEndBefore</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2289](..\/..\/..\/packages\/core\/src\/source.ts#L2289)
+
 <b>Signature</b>
 
 <pre>var spyEndBefore: (onEnd: () =&gt; void) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>spyPushAfter</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2299](..\/..\/..\/packages\/core\/src\/source.ts#L2299)
 
 <b>Signature</b>
 
@@ -716,11 +886,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyPushBefore</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2279](..\/..\/..\/packages\/core\/src\/source.ts#L2279)
+
 <b>Signature</b>
 
 <pre>var spyPushBefore: &lt;T&gt;(onPush: (value: T, index: number) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>spyThrowAfter</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2304](..\/..\/..\/packages\/core\/src\/source.ts#L2304)
 
 <b>Signature</b>
 
@@ -728,11 +902,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyThrowBefore</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2284](..\/..\/..\/packages\/core\/src\/source.ts#L2284)
+
 <b>Signature</b>
 
 <pre>var spyThrowBefore: (onThrow: (error: unknown) =&gt; void) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>startWith</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2166](..\/..\/..\/packages\/core\/src\/source.ts#L2166)
 
 <b>Signature</b>
 
@@ -740,11 +918,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>startWithSources</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2107](..\/..\/..\/packages\/core\/src\/source.ts#L2107)
+
 <b>Signature</b>
 
 <pre>function startWithSources&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>switchEach</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2068](..\/..\/..\/packages\/core\/src\/source.ts#L2068)
 
 <b>Signature</b>
 
@@ -752,17 +934,23 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>switchMap</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2148](..\/..\/..\/packages\/core\/src\/source.ts#L2148)
+
 <b>Signature</b>
 
 <pre>function switchMap&lt;T, U&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>take</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2645](..\/..\/..\/packages\/core\/src\/source.ts#L2645)
+
 <b>Signature</b>
 
 <pre>function take(amount: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>takeLast</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2734](..\/..\/..\/packages\/core\/src\/source.ts#L2734)
 
 <b>Signature</b>
 
@@ -778,11 +966,15 @@ Ignores all received Push events. When the source emits an End event, the last N
 
 ## <code>takeUntil</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L2786](..\/..\/..\/packages\/core\/src\/source.ts#L2786)
+
 <b>Signature</b>
 
 <pre>function takeUntil(stopSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>takeWhile</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2688](..\/..\/..\/packages\/core\/src\/source.ts#L2688)
 
 <b>Signature</b>
 
@@ -802,6 +994,8 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>throttle</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3597](..\/..\/..\/packages\/core\/src\/source.ts#L3597)
+
 <b>Signature</b>
 
 <pre>function throttle(getDurationSource: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, config?: <a href="#throttleconfig">ThrottleConfig</a> | null): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
@@ -810,11 +1004,15 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>ThrottleConfig</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3579](..\/..\/..\/packages\/core\/src\/source.ts#L3579)
+
 <b>Signature</b>
 
 <pre>interface ThrottleConfig </pre>
 
 ## <code>defaultThrottleConfig</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3588](..\/..\/..\/packages\/core\/src\/source.ts#L3588)
 
 <b>Signature</b>
 
@@ -822,11 +1020,15 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>throttleMs</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3641](..\/..\/..\/packages\/core\/src\/source.ts#L3641)
+
 <b>Signature</b>
 
 <pre>function throttleMs(durationMs: number, config?: <a href="#throttleconfig">ThrottleConfig</a> | null): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>throwIfEmpty</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L2373](..\/..\/..\/packages\/core\/src\/source.ts#L2373)
 
 <b>Signature</b>
 
@@ -834,11 +1036,15 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>timeout</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3035](..\/..\/..\/packages\/core\/src\/source.ts#L3035)
+
 <b>Signature</b>
 
 <pre>function timeout&lt;T&gt;(timeoutSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, replacementSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>timeoutMs</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3054](..\/..\/..\/packages\/core\/src\/source.ts#L3054)
 
 <b>Signature</b>
 
@@ -846,11 +1052,15 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>unwrapFromWrappedPushEvents</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1545](..\/..\/..\/packages\/core\/src\/source.ts#L1545)
+
 <b>Signature</b>
 
-<pre>var unwrapFromWrappedPushEvents: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#event">Event</a>&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;</pre>
+<pre>var unwrapFromWrappedPushEvents: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;</pre>
 
 ## <code>windowControlled</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3133](..\/..\/..\/packages\/core\/src\/source.ts#L3133)
 
 <b>Signature</b>
 
@@ -860,11 +1070,15 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>windowCount</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3246](..\/..\/..\/packages\/core\/src\/source.ts#L3246)
+
 <b>Signature</b>
 
 <pre>function windowCount(maxWindowLength: number, createEvery?: number): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
 
 ## <code>windowEach</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3213](..\/..\/..\/packages\/core\/src\/source.ts#L3213)
 
 <b>Signature</b>
 
@@ -874,11 +1088,15 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>windowEvery</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3095](..\/..\/..\/packages\/core\/src\/source.ts#L3095)
+
 <b>Signature</b>
 
 <pre>function windowEvery(boundariesSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
 
 ## <code>windowTime</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3266](..\/..\/..\/packages\/core\/src\/source.ts#L3266)
 
 <b>Signature</b>
 
@@ -886,11 +1104,15 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>withLatestFrom</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1367](..\/..\/..\/packages\/core\/src\/source.ts#L1367)
+
 <b>Signature</b>
 
 <pre>function withLatestFrom&lt;T extends unknown[]&gt;(...sources: WrapValuesInSource&lt;T&gt;): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
 
 ## <code>withLatestFromLazy</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1353](..\/..\/..\/packages\/core\/src\/source.ts#L1353)
 
 <b>Signature</b>
 
@@ -898,11 +1120,15 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>withPrevious</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1726](..\/..\/..\/packages\/core\/src\/source.ts#L1726)
+
 <b>Signature</b>
 
 <pre>function withPrevious&lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;[T, T]&gt;;</pre>
 
 ## <code>withTime</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3773](..\/..\/..\/packages\/core\/src\/source.ts#L3773)
 
 <b>Signature</b>
 
@@ -910,11 +1136,15 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>WithTime</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3765](..\/..\/..\/packages\/core\/src\/source.ts#L3765)
+
 <b>Signature</b>
 
 <pre>interface WithTime&lt;T&gt; </pre>
 
 ## <code>withTimeInterval</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L3794](..\/..\/..\/packages\/core\/src\/source.ts#L3794)
 
 <b>Signature</b>
 
@@ -922,17 +1152,23 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>TimeInterval</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L3782](..\/..\/..\/packages\/core\/src\/source.ts#L3782)
+
 <b>Signature</b>
 
 <pre>interface TimeInterval&lt;T&gt; </pre>
 
 ## <code>wrapInPushEvents</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L1538](..\/..\/..\/packages\/core\/src\/source.ts#L1538)
+
 <b>Signature</b>
 
-<pre>var wrapInPushEvents: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#event">Event</a>&lt;T&gt;&gt;</pre>
+<pre>var wrapInPushEvents: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;</pre>
 
 ## <code>zipWith</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L1339](..\/..\/..\/packages\/core\/src\/source.ts#L1339)
 
 <b>Signature</b>
 

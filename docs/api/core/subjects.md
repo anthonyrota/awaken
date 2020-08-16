@@ -14,11 +14,15 @@
 
 ### <a name="currentvaluesubject-function"></a><code>CurrentValueSubject - Function</code>
 
+> Source Location: [packages\/core\/src\/subject.ts#L376](..\/..\/..\/packages\/core\/src\/subject.ts#L376)
+
 <b>Signature</b>
 
 <pre>function CurrentValueSubject&lt;T&gt;(initialValue: T): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
 
 ### <a name="currentvaluesubject-interface"></a><code>CurrentValueSubject - Interface</code>
+
+> Source Location: [packages\/core\/src\/subject.ts#L369](..\/..\/..\/packages\/core\/src\/subject.ts#L369)
 
 <b>Signature</b>
 
@@ -26,11 +30,15 @@
 
 ## <code>FinalValueSubject</code>
 
+> Source Location: [packages\/core\/src\/subject.ts#L530](..\/..\/..\/packages\/core\/src\/subject.ts#L530)
+
 <b>Signature</b>
 
 <pre>function FinalValueSubject&lt;T&gt;(): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
 
 ## <code>ReplaySubject</code>
+
+> Source Location: [packages\/core\/src\/subject.ts#L410](..\/..\/..\/packages\/core\/src\/subject.ts#L410)
 
 <b>Signature</b>
 
@@ -38,11 +46,15 @@
 
 ## <code>ReplaySubjectTimeoutConfig</code>
 
+> Source Location: [packages\/core\/src\/subject.ts#L402](..\/..\/..\/packages\/core\/src\/subject.ts#L402)
+
 <b>Signature</b>
 
 <pre>interface ReplaySubjectTimeoutConfig </pre>
 
 ## <code>SubjectBase</code>
+
+> Source Location: [packages\/core\/src\/subject.ts#L90](..\/..\/..\/packages\/core\/src\/subject.ts#L90)
 
 <b>Signature</b>
 
