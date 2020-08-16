@@ -370,10 +370,10 @@ export function isEqual<T, U>(sourceA: Source<T>, sourceB: Source<U>, areValuesE
 export function isEqualTo<T, U>(otherSource: Source<U>, areValuesEqual: (a: T, b: U, index: number) => unknown): Operator<T, boolean>;
 
 // @public
-export function isSink(value: unknown): value is Source<unknown>;
+export function isSink(value: unknown): value is Sink<unknown>;
 
 // @public
-export function isSource(value: unknown): value is Sink<unknown>;
+export function isSource(value: unknown): value is Source<unknown>;
 
 // @public
 export function isSubject(value: unknown): value is Subject<unknown>;

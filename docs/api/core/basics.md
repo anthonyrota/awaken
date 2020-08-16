@@ -417,7 +417,7 @@ sink(Throw(...)); // Ignored.
 
 <b>Signature</b>
 
-<pre>function isSink(value: unknown): value is <a href="#source-interface">Source</a>&lt;unknown&gt;;</pre>
+<pre>function isSink(value: unknown): value is <a href="#sink-interface">Sink</a>&lt;unknown&gt;;</pre>
 
 Determines whether the given value is a <code>[Sink](#sink)</code>.
 
@@ -431,7 +431,7 @@ Determines whether the given value is a <code>[Sink](#sink)</code>.
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Source](#source-interface)&lt;unknown&gt;</code> | Whether the value is a Sink. |
+| <code>value is [Sink](#sink-interface)&lt;unknown&gt;</code> | Whether the value is a Sink. |
 
 <b>Example Usage</b>
 
@@ -591,7 +591,7 @@ const source = Source(sink => {
 
 <b>Signature</b>
 
-<pre>function isSource(value: unknown): value is <a href="#sink-interface">Sink</a>&lt;unknown&gt;;</pre>
+<pre>function isSource(value: unknown): value is <a href="#source-interface">Source</a>&lt;unknown&gt;;</pre>
 
 Determines whether the given value is a <code>[Source](#source)</code>.
 
@@ -605,7 +605,7 @@ Determines whether the given value is a <code>[Source](#source)</code>.
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Sink](#sink-interface)&lt;unknown&gt;</code> | Whether the value is a Source. |
+| <code>value is [Source](#source-interface)&lt;unknown&gt;</code> | Whether the value is a Source. |
 
 <b>Example Usage</b>
 

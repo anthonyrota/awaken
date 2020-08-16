@@ -325,7 +325,7 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
  *
  * @public
  */
-export function isSink(value: unknown): value is Source<unknown> {
+export function isSink(value: unknown): value is Sink<unknown> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return value != null && $$Sink in (value as any);
 }
@@ -532,7 +532,7 @@ export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
  *
  * @public
  */
-export function isSource(value: unknown): value is Sink<unknown> {
+export function isSource(value: unknown): value is Source<unknown> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return value != null && $$Source in (value as any);
 }
