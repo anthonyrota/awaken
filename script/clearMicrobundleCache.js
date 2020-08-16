@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { getAbsolutePath } = require('../script/util/fileUtil');
+const { getAbsolutePath } = require('./util/fileUtil');
 const fs = require('fs');
 const path = require('path');
 const rimraf = require('rimraf');

@@ -989,51 +989,11 @@ function getExcerptTokenReference(
             canonicalReference.toString().replace('!Event', '!Event_2'),
         );
     }
-    let result = resolveDeclarationReference(
+    const result = resolveDeclarationReference(
         canonicalReference,
         undefined,
         context,
     );
-    if (!result.resolvedApiItem) {
-        // Hack: for some reason the generated api model links not to
-        // the imported package but under its own package. Therefore go
-        // through each package and test if the import actually comes
-        // from there.
-        // This code is terrible but I can't be bothered.
-        const packages = context.apiModel.packages;
-        let containedPackage: aeModel.ApiPackage | undefined;
-        for (const package_ of packages) {
-            if (
-                canonicalReference
-                    .toString()
-                    .startsWith(package_.canonicalReference.toString())
-            ) {
-                containedPackage = package_;
-            }
-        }
-        if (containedPackage) {
-            const canonicalReferenceWithoutStart = canonicalReference
-                .toString()
-                .slice(containedPackage.canonicalReference.toString().length);
-            for (const package_ of packages) {
-                if (package_ === containedPackage) {
-                    continue;
-                }
-                const newReference = DeclarationReference.parse(
-                    package_.canonicalReference.toString() +
-                        canonicalReferenceWithoutStart,
-                );
-                result = resolveDeclarationReference(
-                    newReference,
-                    undefined,
-                    context,
-                );
-                if (result.resolvedApiItem) {
-                    break;
-                }
-            }
-        }
-    }
 
     if (result.errorMessage) {
         console.log(

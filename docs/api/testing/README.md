@@ -47,7 +47,7 @@
 
 <b>Signature</b>
 
-<pre>type TestSourceEvent&lt;T&gt; = <a href="../core/basics.md#event">Event</a>&lt;T&gt; & {<br>    readonly frame: number;<br>};</pre>
+<pre>type TestSourceEvent&lt;T&gt; = Event&lt;T&gt; & {<br>    readonly frame: number;<br>};</pre>
 
 ## <code>TestSubscriptionInfo</code>
 

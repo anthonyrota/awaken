@@ -49,7 +49,7 @@
         "yaml": "1.10.0"
     },
     "scripts": {
-        "build": "lerna run clean:prebuild && lerna run build",
+        "build": "lerna link && lerna run clean:prebuild && lerna run build",
         "build:docs": "npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
         "clean": "npm run clean:coverage && lerna run clean",
         "clean:coverage": "rimraf coverage",

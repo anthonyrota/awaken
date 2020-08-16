@@ -17,12 +17,12 @@ export interface Disposable {
     readonly active: boolean;
     /**
      * Some other documentation comment.
-     * @param child The Disposable to add.
+     * @param child - The Disposable to add.
      */
     add(child: Disposable): void;
     /**
      * Remove
-     * @param child Child
+     * @param child - Child
      */
     remove(child: Disposable): void;
     /**
