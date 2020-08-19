@@ -1,10 +1,20 @@
+import { Subheading } from './nodes/Subheading';
+import { Bold } from './nodes/Bold';
+import { CollapsibleSection } from './nodes/CollapsibleSection';
+import { PageTitle } from './nodes/PageTitle';
+import { DoNotEditComment } from './nodes/DoNotEditComment';
+import { TableOfContents as TableOfContentsNode } from './nodes/TableOfContents';
+import { LocalPageLink } from './nodes/LocalPageLink';
+import { Page } from './nodes/Page';
+import { CodeSpan } from './nodes/CodeSpan';
+import { Heading } from './nodes/Heading';
+import { Container } from './nodes/Container';
 import * as ts from 'typescript';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as aeModel from '@microsoft/api-extractor-model';
 import * as _ from 'lodash';
 import * as writeUtil from './writeUtil';
-import * as output from './output';
 import {
     TableOfContentsInlineReference,
     TableOfContentsNestedReference,
@@ -17,13 +27,21 @@ import {
     assertMappedApiItemNames,
     forEachPackageWithPages,
 } from './paths';
+import { DeepCoreNode } from './nodes';
+import {
+    addChildren,
+    addChildrenC,
+    ContainerBase,
+} from './nodes/abstract/ContainerBase';
+import { PlainText } from './nodes/PlainText';
+import { renderDeepCoreNodeAsMarkdown } from './render/markdown';
 
 interface ExportImplementation<T extends aeModel.ApiItem> {
     readonly actualKind: aeModel.ApiItemKind;
     readonly simplifiedKind: string;
     addImplementation(apiItem: T): void;
     hasImplementation(): boolean;
-    writeAsMarkdown(output: output.Container): void;
+    writeAsMarkdown(output: ContainerBase<DeepCoreNode>): void;
 }
 
 class ExportFunctionImplementation
@@ -52,7 +70,7 @@ class ExportFunctionImplementation
         return this._displayName !== undefined;
     }
 
-    public writeAsMarkdown(out: output.Container): void {
+    public writeAsMarkdown(out: Container<DeepCoreNode>): void {
         if (this._displayName === undefined) {
             throw new Error('Not implemented.');
         }
@@ -79,7 +97,7 @@ class ExportFunctionImplementation
             context,
             this.simplifiedKind,
         );
-        const baseDocContainer = new output.Container();
+        const baseDocContainer = Container<DeepCoreNode>();
         writeUtil.writeBaseDoc(
             baseDocContainer,
             this._overloads[0],
@@ -94,11 +112,11 @@ class ExportFunctionImplementation
         );
 
         let didNotOnlyWriteSignature = true;
-        const overloadsContainer = new output.Container();
+        const overloadsContainer = Container<DeepCoreNode>();
 
         for (const fn of this._overloads) {
             const _didNotOnlyWriteSignature = didNotOnlyWriteSignature;
-            const overloadContainer = new output.Container();
+            const overloadContainer = Container<DeepCoreNode>();
             const didWriteSummary = writeUtil.writeSummary(
                 overloadContainer,
                 fn,
@@ -127,8 +145,9 @@ class ExportFunctionImplementation
             if (_didNotOnlyWriteSignature || didNotOnlyWriteSignature) {
                 writeUtil.writeSignature(overloadsContainer, fn, context);
                 if (didNotOnlyWriteSignature) {
-                    overloadsContainer.addChildren(
-                        ...overloadContainer.getChildren(),
+                    addChildren(
+                        overloadsContainer,
+                        ...overloadContainer.children,
                     );
                 }
             } else {
@@ -140,8 +159,8 @@ class ExportFunctionImplementation
             }
         }
 
-        out.addChildren(...baseDocContainer.getChildren());
-        out.addChildren(...overloadsContainer.getChildren());
+        addChildren(out, ...baseDocContainer.children);
+        addChildren(out, ...overloadsContainer.children);
     }
 }
 
@@ -167,7 +186,7 @@ class ExportInterfaceImplementation
         return !!this._apiInterface;
     }
 
-    public writeAsMarkdown(output: output.Container): void {
+    public writeAsMarkdown(output: ContainerBase<DeepCoreNode>): void {
         const interface_ = this._apiInterface;
 
         if (!interface_) {
@@ -223,7 +242,7 @@ class ExportTypeAliasImplementation
         return !!this._apiTypeAlias;
     }
 
-    public writeAsMarkdown(output: output.Container): void {
+    public writeAsMarkdown(output: ContainerBase<DeepCoreNode>): void {
         const typeAlias = this._apiTypeAlias;
 
         if (!typeAlias) {
@@ -279,7 +298,7 @@ class ExportVariableImplementation
         return !!this._apiVariable;
     }
 
-    public writeAsMarkdown(output: output.Container): void {
+    public writeAsMarkdown(output: ContainerBase<DeepCoreNode>): void {
         const variable = this._apiVariable;
 
         if (!variable) {
@@ -384,7 +403,7 @@ class ExportImplementationGroup {
         }
     }
 
-    public writeAsMarkdown(container: output.Container): void {
+    public writeAsMarkdown(container: ContainerBase<DeepCoreNode>): void {
         if (
             this._displayName === undefined ||
             Array.from(this._implementations).every(
@@ -393,10 +412,13 @@ class ExportImplementationGroup {
         ) {
             throw new Error('No implementations.');
         }
-        container.addChild(
-            new output.Heading().addChild(
-                new output.CodeSpan().addChild(
-                    new output.PlainText(this._displayName),
+        addChildren(
+            container,
+            addChildrenC(
+                Heading<CodeSpan<PlainText>>({}),
+                addChildrenC(
+                    CodeSpan<PlainText>(),
+                    PlainText({ text: this._displayName }),
                 ),
             ),
         );
@@ -505,16 +527,18 @@ class ApiPage {
             this.tableOfContents.push(reference);
         }
 
-        const page = new output.Page({
-            title: this._pageData.title,
-            table_of_contents: this.tableOfContents,
+        const page = Page<DeepCoreNode>({
+            metadata: {
+                title: this._pageData.title,
+                table_of_contents: this.tableOfContents,
+            },
         });
 
         for (const [, implGroup] of this._nameToImplGroup) {
             implGroup.writeAsMarkdown(page);
         }
 
-        return page.renderAsMarkdown();
+        return renderDeepCoreNodeAsMarkdown(page);
     }
 }
 
@@ -588,8 +612,8 @@ export class ApiPageMap {
 
         interface GetPageLinksFunction {
             (inBase: boolean): {
-                headingLink: output.Node;
-                tableOfContents: output.Node;
+                headingLink: DeepCoreNode;
+                tableOfContents: DeepCoreNode;
             }[];
         }
 
@@ -597,7 +621,7 @@ export class ApiPageMap {
             string,
             {
                 isOneIndexPagePackage: boolean;
-                pageTitleTextNode: output.Node;
+                pageTitleTextNode: DeepCoreNode;
                 getPageLinks: GetPageLinksFunction;
             }
         >();
@@ -605,9 +629,11 @@ export class ApiPageMap {
         forEachPackageWithPages((packageName, pages) => {
             const isOneIndexPagePackage =
                 pages.length === 1 && pages[0][0] === '_index';
-            const pageTitleTextNode = new output.PlainText(
-                `API Reference - ${_.upperFirst(_.camelCase(packageName))}`,
-            );
+            const pageTitleTextNode = PlainText({
+                text: `API Reference - ${_.upperFirst(
+                    _.camelCase(packageName),
+                )}`,
+            });
             const getPageLinks: GetPageLinksFunction = (inBase) =>
                 pages.map(([pageName_, page]) => {
                     const pageName = isOneIndexPagePackage
@@ -617,17 +643,18 @@ export class ApiPageMap {
                         ? `${packageName}/${pageName}`
                         : pageName;
                     return {
-                        headingLink: new output.LocalPageLink(
-                            pagePath,
-                        ).addChild(new output.PlainText(page.title)),
-                        tableOfContents: new output.TableOfContents(
+                        headingLink: addChildrenC(
+                            LocalPageLink<PlainText>({ destination: pagePath }),
+                            PlainText({ text: page.title }),
+                        ),
+                        tableOfContents: TableOfContentsNode({
                             // eslint-disable-next-line max-len
                             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                            this._pathToPage.get(
+                            tableOfContents: this._pathToPage.get(
                                 `${packageName}/${pageName_}`,
                             )!.tableOfContents,
-                            pagePath,
-                        ),
+                            relativePagePath: pagePath,
+                        }),
                     };
                 });
 
@@ -645,21 +672,24 @@ export class ApiPageMap {
                 return;
             }
 
-            const contents = new output.Container()
-                .addChild(new output.DoNotEditComment())
-                .addChild(new output.PageTitle().addChild(pageTitleTextNode))
-                .addChildren(
-                    ...getPageLinks(
-                        false,
-                    ).flatMap(({ headingLink, tableOfContents }) => [
-                        new output.Heading().addChild(headingLink),
-                        tableOfContents,
-                    ]),
-                );
+            const contents = addChildrenC(
+                Container<DeepCoreNode>(),
+                DoNotEditComment(),
+                addChildrenC<DeepCoreNode, PageTitle<DeepCoreNode>>(
+                    PageTitle<DeepCoreNode>({}),
+                    pageTitleTextNode,
+                ),
+                ...getPageLinks(
+                    false,
+                ).flatMap(({ headingLink, tableOfContents }) => [
+                    addChildrenC(Heading<DeepCoreNode>({}), headingLink),
+                    tableOfContents,
+                ]),
+            );
 
             renderedDirectoryMap.addContentAtPath(
                 `${packageName}/README.md`,
-                contents.renderAsMarkdown(),
+                renderDeepCoreNodeAsMarkdown(contents),
             );
         });
 
@@ -672,8 +702,15 @@ export class ApiPageMap {
                     getPageLinks,
                 } = packageSummary;
 
-                const heading = new output.Heading().addChild(
-                    new output.LocalPageLink(`${packageName}/README`).addChild(
+                const heading = addChildrenC<
+                    DeepCoreNode,
+                    Heading<DeepCoreNode>
+                >(
+                    Heading<DeepCoreNode>({}),
+                    addChildrenC(
+                        LocalPageLink<DeepCoreNode>({
+                            destination: `${packageName}/README`,
+                        }),
                         pageTitleTextNode,
                     ),
                 );
@@ -685,15 +722,20 @@ export class ApiPageMap {
 
                 return [
                     heading,
-                    new output.CollapsibleSection(
-                        new output.Bold().addChild(
-                            new output.PlainText('Table of Contents'),
-                        ),
-                    ).addChildren(
+                    addChildrenC(
+                        CollapsibleSection<DeepCoreNode, DeepCoreNode>({
+                            summaryNode: addChildrenC(
+                                Bold<PlainText>(),
+                                PlainText({ text: 'Table of Contents' }),
+                            ),
+                        }),
                         ...getPageLinks(
                             true,
                         ).flatMap(({ headingLink, tableOfContents }) => [
-                            new output.Subheading().addChild(headingLink),
+                            addChildrenC(
+                                Subheading<DeepCoreNode>({}),
+                                headingLink,
+                            ),
                             tableOfContents,
                         ]),
                     ),
@@ -701,18 +743,19 @@ export class ApiPageMap {
             },
         );
 
-        const contents = new output.Container()
-            .addChild(new output.DoNotEditComment())
-            .addChild(
-                new output.PageTitle().addChild(
-                    new output.PlainText('Awaken API Reference'),
-                ),
-            )
-            .addChildren(...packageSummaries);
+        const contents = addChildrenC(
+            Container<DeepCoreNode>(),
+            DoNotEditComment(),
+            addChildrenC(
+                PageTitle<PlainText>({}),
+                PlainText({ text: 'Awaken API Reference' }),
+            ),
+            ...packageSummaries,
+        );
 
         renderedDirectoryMap.addContentAtPath(
             'README.md',
-            contents.renderAsMarkdown(),
+            renderDeepCoreNodeAsMarkdown(contents),
         );
 
         return renderedDirectoryMap;

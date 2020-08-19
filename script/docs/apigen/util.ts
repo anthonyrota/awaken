@@ -19,6 +19,10 @@ export function exit(): never {
     throw new Error('exiting...');
 }
 
+export function noop(): void {
+    // Do nothing.
+}
+
 export function logDiagnostic(diagnostic: ts.Diagnostic): void {
     const message = ts.flattenDiagnosticMessageText(
         diagnostic.messageText,

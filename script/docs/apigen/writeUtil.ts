@@ -16,10 +16,33 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import * as aeModel from '@microsoft/api-extractor-model';
 import * as uuid from 'uuid';
-import * as output from './output';
 import { outDir, getMainPathOfApiItemName } from './paths';
 import { SourceMetadata } from './sourceMetadata';
-import { Iter } from './util';
+import { Iter, StringBuilder } from './util';
+import {
+    addChildren,
+    isContainerBase,
+    addChildrenC,
+    ContainerBase,
+    getLastNestedChild,
+} from './nodes/abstract/ContainerBase';
+import { parseMarkdown } from './nodes/util/parseMarkdown';
+import { PlainText } from './nodes/PlainText';
+import { Table, TableRow, addTableRowC, addTableRow } from './nodes/Table';
+import { RichCodeBlock } from './nodes/RichCodeBlock';
+import { GithubSourceLink } from './nodes/GithubSourceLink';
+import { BlockQuote } from './nodes/BlockQuote';
+import { List } from './nodes/List';
+import { Subheading } from './nodes/Subheading';
+import { Title } from './nodes/Title';
+import { Link } from './nodes/Link';
+import { LocalPageLink } from './nodes/LocalPageLink';
+import { CodeBlock } from './nodes/CodeBlock';
+import { Paragraph } from './nodes/Paragraph';
+import { CodeSpan } from './nodes/CodeSpan';
+import { CoreNode, Node, DeepCoreNode, CoreNodeType } from './nodes/index';
+import { HtmlElement } from './nodes/HtmlElement';
+import { Container } from './nodes/Container';
 
 export interface Context {
     sourceMetadata: SourceMetadata;
@@ -89,22 +112,22 @@ export function getApiItemName(
 
 interface TSDocNodeWriteContext {
     context: Context;
-    container: output.Container;
+    container: ContainerBase<MarkdownParsingNode>;
     embeddedNodeContext: EmbeddedNodeContext;
     nodeIter: Iter<tsdoc.DocNode>;
-    htmlTagStack: output.HtmlElement[];
+    htmlTagStack: HtmlElement<MarkdownParsingNode>[];
     apiItem: aeModel.ApiItem;
 }
 
 function writeApiItemDocNode(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiItem,
     docNode: tsdoc.DocNode,
     context: Context,
 ): void {
     const nodeIter = Iter([docNode]);
     nodeIter.next();
-    const container_ = new output.Container();
+    const container_ = Container<MarkdownParsingNode>();
     const embeddedNodeContext = new EmbeddedNodeContext();
     const context_ = {
         context,
@@ -115,26 +138,30 @@ function writeApiItemDocNode(
         apiItem,
     };
     writeNode(docNode, context_);
-    if (container_.getChildCount() > 0) {
-        new EmbeddedNode(
-            container_,
-            embeddedNodeContext,
-        ).substituteEmbeddedNodes();
-        container.addChild(container_);
+    if (container_.children.length > 0) {
+        const embeddedNode = EmbeddedNode({
+            originalNode: container_,
+            context: embeddedNodeContext,
+        });
+        substituteEmbeddedNodes(embeddedNode, embeddedNodeContext);
+        addChildren(
+            container,
+            (container_ as unknown) as Container<DeepCoreNode>,
+        );
     }
 }
 
 class EmbeddedNodeContext {
     private _n = 0;
-    private _idMap = new Map<number, EmbeddedNode>();
+    private _idMap = new Map<number, () => EmbeddedNode>();
     private _baseId = uuid.v4();
     private _embeddedNodeRegexp = RegExp(
         `^__EmbeddedNode-${this._baseId}__:(\\d+)$`,
     );
 
-    public generateMarker(node: EmbeddedNode): string {
+    public generateMarker(getNode: () => EmbeddedNode): string {
         const id = this._n++;
-        this._idMap.set(id, node);
+        this._idMap.set(id, getNode);
         return `<!--__EmbeddedNode-${this._baseId}__:${id}-->`;
     }
 
@@ -147,63 +174,111 @@ class EmbeddedNodeContext {
     }
 
     private _getNodeForId(id: number): EmbeddedNode {
-        const node = this._idMap.get(id);
-        if (!node) {
+        const getNode = this._idMap.get(id);
+        if (!getNode) {
             throw new Error('No node defined for given id.');
         }
-        return node;
+        return getNode();
     }
 }
 
-class EmbeddedNode extends output.Node {
-    private _marker: string;
+enum MarkdownParsingNodeType {
+    EmbeddedNode = 'EmbeddedNode',
+    RawText = 'RawText',
+}
 
-    constructor(
-        public originalNode: output.Node,
-        protected _context: EmbeddedNodeContext,
-    ) {
-        super();
-        if (originalNode instanceof EmbeddedNode) {
-            throw new Error(
-                'EmbeddedNode node argument cannot be an EmbeddedNode.',
-            );
-        }
-        this._marker = _context.generateMarker(this);
+interface EmbeddedNode extends Node {
+    type: MarkdownParsingNodeType.EmbeddedNode;
+    originalNode: CoreNode<MarkdownParsingNode>;
+    marker: string;
+}
+
+interface EmbeddedNodeParameters {
+    originalNode: CoreNode<MarkdownParsingNode>;
+    context: EmbeddedNodeContext;
+}
+
+function EmbeddedNode(parameters: EmbeddedNodeParameters): EmbeddedNode {
+    if (parameters.originalNode instanceof EmbeddedNode) {
+        throw new Error(
+            'EmbeddedNode node argument cannot be an EmbeddedNode.',
+        );
+    }
+    const embeddedNode: EmbeddedNode = {
+        type: MarkdownParsingNodeType.EmbeddedNode,
+        originalNode: parameters.originalNode,
+        marker: parameters.context.generateMarker(() => embeddedNode),
+    };
+    return embeddedNode;
+}
+
+interface RawText extends Node {
+    type: MarkdownParsingNodeType.RawText;
+    text: string;
+}
+
+interface RawTextParameters {
+    text: string;
+}
+
+function RawText(parameters: RawTextParameters): RawText {
+    return {
+        type: MarkdownParsingNodeType.RawText,
+        text: parameters.text,
+    };
+}
+
+type MarkdownParsingNode = EmbeddedNode | RawText;
+
+function writeMarkdownParsingNode(
+    node: EmbeddedNode | RawText,
+    output: StringBuilder,
+): void {
+    if (node.type === MarkdownParsingNodeType.EmbeddedNode) {
+        output.write(node.marker);
+    } else {
+        output.write(node.text);
+    }
+}
+
+function substituteEmbeddedNodes(
+    embeddedNode: EmbeddedNode,
+    context: EmbeddedNodeContext,
+): void {
+    if (!isContainerBase(embeddedNode.originalNode)) {
+        return;
     }
 
-    public writeAsMarkdown(out: output.MarkdownOutput): void {
-        out.write(this._marker);
+    const output = new StringBuilder();
+    for (const node of embeddedNode.originalNode.children) {
+        writeMarkdownParsingNode(node, output);
     }
+    const markdown = output.toString();
 
-    public substituteEmbeddedNodes(): void {
-        if (!(this.originalNode instanceof output.Container)) {
-            return;
-        }
+    const markdownContainer = parseMarkdown(markdown, {
+        unwrapFirstLineParagraph: true,
+    });
 
-        const markdown = new output.Container()
-            .addChildren(...this.originalNode.getChildren())
-            .renderAsMarkdown();
-        const markdownContainer = output.parseMarkdown(markdown, {
-            unwrapFirstLineParagraph: true,
-        });
+    _substituteEmbeddedNodes(embeddedNode, context, markdownContainer);
+    // TODO: fix.
+    ((embeddedNode.originalNode as unknown) as ContainerBase<
+        DeepCoreNode
+    >).children = markdownContainer.children;
+}
 
-        this._substituteEmbeddedNodes(markdownContainer);
-        this.originalNode.setChildren(markdownContainer.getChildren());
-    }
-
-    private _substituteEmbeddedNodes(node: output.Container): void {
-        const children = node.getChildren();
-        for (const [i, child] of children.entries()) {
-            if (child instanceof output.Container) {
-                this._substituteEmbeddedNodes(child);
-            } else if (child instanceof output.HtmlComment) {
-                const embeddedNode = this._context.extractNodeFromComment(
-                    child.comment,
-                );
-                if (embeddedNode) {
-                    embeddedNode.substituteEmbeddedNodes();
-                    children[i] = embeddedNode.originalNode;
-                }
+function _substituteEmbeddedNodes(
+    embeddedNode: EmbeddedNode,
+    context: EmbeddedNodeContext,
+    node: ContainerBase<DeepCoreNode>,
+): void {
+    for (const [i, child] of node.children.entries()) {
+        if (isContainerBase(child)) {
+            _substituteEmbeddedNodes(embeddedNode, context, child);
+        } else if (child.type === CoreNodeType.HtmlComment) {
+            const embeddedNode = context.extractNodeFromComment(child.comment);
+            if (embeddedNode) {
+                substituteEmbeddedNodes(embeddedNode, context);
+                node.children[i] = embeddedNode.originalNode as DeepCoreNode;
             }
         }
     }
@@ -218,15 +293,21 @@ function writeNode(
     switch (docNode.kind) {
         case tsdoc.DocNodeKind.PlainText: {
             const docPlainText = docNode as tsdoc.DocPlainText;
-            container.addChild(new output.RawText(docPlainText.text));
+            addChildren(container, RawText({ text: docPlainText.text }));
             break;
         }
         case tsdoc.DocNodeKind.HtmlStartTag: {
             const docStartTag = docNode as tsdoc.DocHtmlStartTag;
             const oldContainer = container;
-            const htmlElement = new output.HtmlElement(docStartTag.name);
-            oldContainer.addChild(
-                new EmbeddedNode(htmlElement, context.embeddedNodeContext),
+            const htmlElement = HtmlElement<MarkdownParsingNode>({
+                tagName: docStartTag.name,
+            });
+            addChildren(
+                oldContainer,
+                EmbeddedNode({
+                    originalNode: htmlElement,
+                    context: context.embeddedNodeContext,
+                }),
             );
             context.container = htmlElement;
             context.htmlTagStack.push(htmlElement);
@@ -263,13 +344,21 @@ function writeNode(
         }
         case tsdoc.DocNodeKind.CodeSpan: {
             const docCodeSpan = docNode as tsdoc.DocCodeSpan;
-            container.addChild(
-                new EmbeddedNode(
-                    new output.CodeSpan().addChild(
-                        new output.PlainText(docCodeSpan.code),
+            addChildren(
+                container,
+                EmbeddedNode({
+                    originalNode: addChildrenC<
+                        MarkdownParsingNode,
+                        CodeSpan<MarkdownParsingNode>
+                    >(
+                        CodeSpan<MarkdownParsingNode>(),
+                        EmbeddedNode({
+                            originalNode: PlainText({ text: docCodeSpan.code }),
+                            context: context.embeddedNodeContext,
+                        }),
                     ),
-                    context.embeddedNodeContext,
-                ),
+                    context: context.embeddedNodeContext,
+                }),
             );
             break;
         }
@@ -280,11 +369,12 @@ function writeNode(
             } else if (docLinkTag.urlDestination) {
                 writeLinkTagWithUrlDestination(docLinkTag, context);
             } else if (docLinkTag.linkText) {
-                container.addChild(
-                    new EmbeddedNode(
-                        new output.PlainText(docLinkTag.linkText),
-                        context.embeddedNodeContext,
-                    ),
+                addChildren(
+                    container,
+                    EmbeddedNode({
+                        originalNode: PlainText({ text: docLinkTag.linkText }),
+                        context: context.embeddedNodeContext,
+                    }),
                 );
             }
             break;
@@ -296,14 +386,18 @@ function writeNode(
                 docParagraph,
             );
             const oldContainer = container;
-            const paragraph = new output.Paragraph();
+            const paragraph = Paragraph<MarkdownParsingNode>();
             context.container = paragraph;
             for (const node of trimmedParagraph.nodes) {
                 writeNode(node, context);
             }
-            if (paragraph.getChildCount() > 0) {
-                oldContainer.addChild(
-                    new EmbeddedNode(paragraph, context.embeddedNodeContext),
+            if (paragraph.children.length > 0) {
+                addChildren(
+                    oldContainer,
+                    EmbeddedNode({
+                        originalNode: paragraph,
+                        context: context.embeddedNodeContext,
+                    }),
                 );
             }
             context.container = oldContainer;
@@ -311,14 +405,15 @@ function writeNode(
         }
         case tsdoc.DocNodeKind.FencedCode: {
             const docFencedCode = docNode as tsdoc.DocFencedCode;
-            container.addChild(
-                new EmbeddedNode(
-                    new output.CodeBlock(
-                        docFencedCode.language,
-                        docFencedCode.code,
-                    ),
-                    context.embeddedNodeContext,
-                ),
+            addChildren(
+                container,
+                EmbeddedNode({
+                    originalNode: CodeBlock({
+                        language: docFencedCode.language,
+                        code: docFencedCode.code,
+                    }),
+                    context: context.embeddedNodeContext,
+                }),
             );
             break;
         }
@@ -330,38 +425,48 @@ function writeNode(
             break;
         }
         case tsdoc.DocNodeKind.SoftBreak: {
-            const lastChild = container.getLastNestedChild();
-            if (lastChild && lastChild instanceof output.RawText) {
-                if (lastChild.text && !/\s$/.test(lastChild.text)) {
-                    lastChild.append(' ');
+            const lastChild = getLastNestedChild(container);
+            // TODO: fix.
+            if (
+                lastChild &&
+                lastChild.type === MarkdownParsingNodeType.RawText
+            ) {
+                const rawText = lastChild as RawText;
+                if (rawText.text && !/\s$/.test(rawText.text)) {
+                    rawText.text += ' ';
                 }
             } else {
-                container.addChild(
-                    new EmbeddedNode(
-                        new output.PlainText(' '),
-                        context.embeddedNodeContext,
-                    ),
+                addChildren(
+                    container,
+                    EmbeddedNode({
+                        originalNode: PlainText({ text: ' ' }),
+                        context: context.embeddedNodeContext,
+                    }),
                 );
             }
             break;
         }
         case tsdoc.DocNodeKind.EscapedText: {
             const docEscapedText = docNode as tsdoc.DocEscapedText;
-            container.addChild(
-                new EmbeddedNode(
-                    new output.PlainText(docEscapedText.decodedText),
-                    context.embeddedNodeContext,
-                ),
+            addChildren(
+                container,
+                EmbeddedNode({
+                    originalNode: PlainText({
+                        text: docEscapedText.decodedText,
+                    }),
+                    context: context.embeddedNodeContext,
+                }),
             );
             break;
         }
         case tsdoc.DocNodeKind.ErrorText: {
             const docErrorText = docNode as tsdoc.DocErrorText;
-            container.addChild(
-                new EmbeddedNode(
-                    new output.PlainText(docErrorText.text),
-                    context.embeddedNodeContext,
-                ),
+            addChildren(
+                container,
+                EmbeddedNode({
+                    originalNode: PlainText({ text: docErrorText.text }),
+                    context: context.embeddedNodeContext,
+                }),
             );
             break;
         }
@@ -398,22 +503,36 @@ function writeLinkTagWithCodeDestination(
     if (!identifier) {
         throw new Error('No.');
     }
-    const codeSpan = new output.HtmlElement('code');
-    context.container.addChild(
-        new EmbeddedNode(codeSpan, context.embeddedNodeContext),
+    const codeSpan = HtmlElement<MarkdownParsingNode>({ tagName: 'code' });
+    addChildren(
+        context.container,
+        EmbeddedNode({
+            originalNode: codeSpan,
+            context: context.embeddedNodeContext,
+        }),
     );
     const destination = getLinkToApiItemName(
         getApiItemName(context.apiItem),
         identifier,
     );
-    codeSpan.addChild(
-        new output.LocalPageLink(destination).addChild(
-            new output.PlainText(
-                docLinkTag.linkText !== undefined
-                    ? docLinkTag.linkText
-                    : identifier,
+    addChildren(
+        codeSpan,
+
+        EmbeddedNode({
+            originalNode: addChildrenC(
+                LocalPageLink<EmbeddedNode>({ destination }),
+                EmbeddedNode({
+                    originalNode: PlainText({
+                        text:
+                            docLinkTag.linkText !== undefined
+                                ? docLinkTag.linkText
+                                : identifier,
+                    }),
+                    context: context.embeddedNodeContext,
+                }),
             ),
-        ),
+            context: context.embeddedNodeContext,
+        }),
     );
 }
 
@@ -428,13 +547,20 @@ function writeLinkTagWithUrlDestination(
             ? docLinkTag.linkText
             : urlDestination;
 
-    context.container.addChild(
-        new EmbeddedNode(
-            new output.Link(urlDestination).addChild(
-                new output.PlainText(linkText.replace(/\s+/g, ' ')),
+    addChildren(
+        context.container,
+        EmbeddedNode({
+            originalNode: addChildrenC(
+                Link<EmbeddedNode>({ destination: urlDestination }),
+                EmbeddedNode({
+                    originalNode: PlainText({
+                        text: linkText.replace(/\s+/g, ' '),
+                    }),
+                    context: context.embeddedNodeContext,
+                }),
             ),
-            context.embeddedNodeContext,
-        ),
+            context: context.embeddedNodeContext,
+        }),
     );
 }
 
@@ -515,7 +641,7 @@ function isDocSectionEmpty(docComment: tsdoc.DocNode): boolean {
 }
 
 export function writeSummary(
-    output: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiItem,
     context: Context,
     docComment = getDocComment(apiItem),
@@ -525,20 +651,24 @@ export function writeSummary(
     if (isEmpty) {
         return false;
     }
-    writeApiItemDocNode(output, apiItem, summarySection, context);
+    writeApiItemDocNode(container, apiItem, summarySection, context);
     return true;
 }
 
 export function writeExamples(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiItem,
     context: Context,
     docComment = getDocComment(apiItem),
 ): boolean {
     let didWrite = false;
     for (const exampleBlock of getExampleBlocks(docComment)) {
-        container.addChild(
-            new output.Title().addChild(new output.PlainText('Example Usage')),
+        addChildren(
+            container,
+            addChildrenC(
+                Title<PlainText>({}),
+                PlainText({ text: 'Example Usage' }),
+            ),
         );
         for (const block of exampleBlock.getChildNodes()) {
             writeApiItemDocNode(container, apiItem, block, context);
@@ -585,20 +715,23 @@ function getApiItemAnchorName(
 }
 
 export function writeApiItemAnchor(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiItem,
     context: Context,
     textKind: string,
 ): void {
     if (hasMultipleKinds(apiItem, context)) {
-        container.addChild(
-            new output.Subheading(
-                getMultiKindApiItemAnchorName(apiItem),
-            ).addChild(
-                new output.CodeSpan().addChild(
-                    new output.PlainText(
-                        `${getApiItemName(apiItem)} - ${textKind}`,
-                    ),
+        addChildren(
+            container,
+            addChildrenC(
+                Subheading<CodeSpan<PlainText>>({
+                    alternateId: getMultiKindApiItemAnchorName(apiItem),
+                }),
+                addChildrenC(
+                    CodeSpan<PlainText>(),
+                    PlainText({
+                        text: `${getApiItemName(apiItem)} - ${textKind}`,
+                    }),
                 ),
             ),
         );
@@ -606,7 +739,7 @@ export function writeApiItemAnchor(
 }
 
 export function writeBaseDoc(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiItem,
     context: Context,
     kind: ts.SyntaxKind,
@@ -658,7 +791,7 @@ export function writeBaseDoc(
 }
 
 function writeReturnsBlockWithoutType(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiItem,
     context: Context,
     docComment: tsdoc.DocComment,
@@ -667,8 +800,9 @@ function writeReturnsBlockWithoutType(
         return;
     }
 
-    container.addChild(
-        new output.Title().addChild(new output.PlainText('Returns')),
+    addChildren(
+        container,
+        addChildrenC(Title<PlainText>({}), PlainText({ text: 'Returns' })),
     );
     for (const node of docComment.returnsBlock.content.nodes) {
         writeApiItemDocNode(container, apiItem, node, context);
@@ -676,7 +810,7 @@ function writeReturnsBlockWithoutType(
 }
 
 export function writeSignatureExcerpt(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem:
         | aeModel.ApiFunction
         | aeModel.ApiInterface
@@ -688,7 +822,7 @@ export function writeSignatureExcerpt(
 }
 
 export function writeSignature(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem:
         | aeModel.ApiFunction
         | aeModel.ApiInterface
@@ -696,38 +830,40 @@ export function writeSignature(
         | aeModel.ApiTypeAlias,
     context: Context,
 ): void {
-    container.addChild(
-        new output.Title().addChild(new output.PlainText('Signature')),
+    addChildren(
+        container,
+        addChildrenC(Title<PlainText>({}), PlainText({ text: 'Signature' })),
     );
     writeSignatureExcerpt(container, apiItem, context);
 }
 
 export function writeSeeBlocks(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiItem,
     context: Context,
     docComment = getDocComment(apiItem),
 ): boolean {
-    const list = new output.List();
+    const list = List<DeepCoreNode>({});
     for (const seeBlock of getSeeBlocks(docComment)) {
-        const listItem = new output.Container();
-        list.addChild(listItem);
+        const listItem = Container<DeepCoreNode>();
+        addChildren(list, listItem);
         for (const block of seeBlock.getChildNodes()) {
             writeApiItemDocNode(listItem, apiItem, block, context);
         }
     }
-    if (list.getChildCount() > 0) {
-        container.addChild(
-            new output.Title().addChild(new output.PlainText('See Also')),
+    if (list.children.length > 0) {
+        addChildren(
+            container,
+            addChildrenC(Title<PlainText>({}), PlainText({ text: 'See Also' })),
         );
-        container.addChild(list);
+        addChildren(container, list);
         return true;
     }
     return false;
 }
 
 export function writeSourceLocation(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiItem,
     context: Context,
     kind: ts.SyntaxKind,
@@ -755,25 +891,31 @@ export function writeSourceLocation(
     const sourceGithubPath = `${sourceLocation.filePath}#L${sourceLocation.lineNumber}`;
     const relativePath = getRelativePath(currentApiItemPath, sourceGithubPath);
 
-    container.addChild(
-        new output.BlockQuote()
-            .addChild(new output.PlainText('Source Location: '))
-            .addChild(
-                new output.GithubSourceLink(relativePath).addChild(
-                    new output.PlainText(sourceGithubPath),
-                ),
+    addChildren(
+        container,
+        // Man...
+        addChildrenC<
+            PlainText | GithubSourceLink<PlainText>,
+            BlockQuote<PlainText | GithubSourceLink<PlainText>>
+        >(
+            BlockQuote<PlainText | GithubSourceLink<PlainText>>(),
+            PlainText({ text: 'Source Location: ' }),
+            addChildrenC(
+                GithubSourceLink<PlainText>({ destination: relativePath }),
+                PlainText({ text: sourceGithubPath }),
             ),
+        ),
     );
 }
 
 function appendExcerptWithHyperlinks(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     excerpt: aeModel.Excerpt,
     apiItem: aeModel.ApiItem,
     context: Context,
 ): void {
-    const codeBlock = new output.RichCodeBlock('ts');
-    container.addChild(codeBlock);
+    const codeBlock = RichCodeBlock<DeepCoreNode>({ language: 'ts' });
+    addChildren(container, codeBlock);
 
     const spannedTokens = excerpt.spannedTokens.slice();
     let token: aeModel.ExcerptToken | undefined;
@@ -787,18 +929,22 @@ function appendExcerptWithHyperlinks(
         );
 
         if (result === null) {
-            codeBlock.addChild(new output.PlainText(tokenText));
+            addChildren(codeBlock, PlainText({ text: tokenText }));
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
-            codeBlock.addChild(
-                new output.LocalPageLink(
-                    getLinkToApiItem(
-                        getApiItemName(apiItem),
-                        result.apiItem,
-                        context,
-                    ),
-                ).addChild(new output.PlainText(tokenText)),
+            addChildren(
+                codeBlock,
+                addChildrenC(
+                    LocalPageLink<PlainText>({
+                        destination: getLinkToApiItem(
+                            getApiItemName(apiItem),
+                            result.apiItem,
+                            context,
+                        ),
+                    }),
+                    PlainText({ text: tokenText }),
+                ),
             );
         } else {
             spannedTokens.unshift(...result.tokens);
@@ -810,12 +956,12 @@ function createNodeForTypeExcerpt(
     excerpt: aeModel.Excerpt,
     apiItem: aeModel.ApiItem,
     context: Context,
-): output.Node {
+): DeepCoreNode {
     if (!excerpt.text.trim()) {
-        return new output.PlainText('(not declared)');
+        return PlainText({ text: '(not declared)' });
     }
 
-    const container = new output.Container();
+    const container = Container<DeepCoreNode>();
 
     appendExcerptWithHyperlinks(container, excerpt, apiItem, context);
 
@@ -823,47 +969,53 @@ function createNodeForTypeExcerpt(
 }
 
 export function writeParameters(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiFunction,
     context: Context,
 ): boolean {
     let didWrite = false;
-    const parametersTable = new output.Table(
-        new output.TableRow()
-            .addChild(new output.PlainText('Parameter'))
-            .addChild(new output.PlainText('Type'))
-            .addChild(new output.PlainText('Description')),
-    );
+    const parametersTable = Table<DeepCoreNode, DeepCoreNode>({
+        header: addChildrenC(
+            TableRow<PlainText>(),
+            PlainText({ text: 'Parameter' }),
+            PlainText({ text: 'Type' }),
+            PlainText({ text: 'Description' }),
+        ),
+    });
 
     if (apiItem.parameters.some((param) => param.tsdocParamBlock)) {
         for (const apiParameter of apiItem.parameters) {
-            const parameterRow = new output.TableRow()
-                .addChild(new output.PlainText(apiParameter.name))
-                .addChild(
-                    createNodeForTypeExcerpt(
-                        apiParameter.parameterTypeExcerpt,
-                        apiItem,
-                        context,
-                    ),
-                );
+            const parameterRow = addChildrenC(
+                TableRow<DeepCoreNode>(),
+                PlainText({ text: apiParameter.name }),
+                createNodeForTypeExcerpt(
+                    apiParameter.parameterTypeExcerpt,
+                    apiItem,
+                    context,
+                ),
+            );
 
-            const cell = new output.Container();
-            parameterRow.addChild(cell);
+            const cell = Container<DeepCoreNode>();
+            addChildren(parameterRow, cell);
             if (apiParameter.tsdocParamBlock) {
                 for (const node of apiParameter.tsdocParamBlock.content.nodes) {
                     writeApiItemDocNode(cell, apiItem, node, context);
                 }
             }
 
-            parametersTable.addChild(parameterRow);
+            addTableRow(parametersTable, parameterRow);
         }
     }
 
-    if (parametersTable.getChildCount() > 0) {
-        container.addChild(
-            new output.Title().addChild(new output.PlainText('Parameters')),
+    if (parametersTable.rows.length > 0) {
+        addChildren(
+            container,
+            addChildrenC(
+                Title<PlainText>({}),
+                PlainText({ text: 'Parameters' }),
+            ),
         );
-        container.addChild(parametersTable);
+        addChildren(container, parametersTable);
         didWrite = true;
     }
 
@@ -872,7 +1024,8 @@ export function writeParameters(
         aeModel.ApiReturnTypeMixin.isBaseClassOf(apiItem) &&
         docComment.returnsBlock
     ) {
-        const returnsRow = new output.TableRow().addChild(
+        const returnsRow = addChildrenC(
+            TableRow<DeepCoreNode>(),
             createNodeForTypeExcerpt(
                 apiItem.returnTypeExcerpt,
                 apiItem,
@@ -880,21 +1033,28 @@ export function writeParameters(
             ),
         );
 
-        const cell = new output.Container();
-        returnsRow.addChild(cell);
+        const cell = Container<DeepCoreNode>();
+        addChildren(returnsRow, cell);
         for (const node of docComment.returnsBlock.content.nodes) {
             writeApiItemDocNode(cell, apiItem, node, context);
         }
 
-        container.addChild(
-            new output.Title().addChild(new output.PlainText('Returns')),
+        addChildren(
+            container,
+            addChildrenC(Title<PlainText>({}), PlainText({ text: 'Returns' })),
         );
-        container.addChild(
-            new output.Table(
-                new output.TableRow()
-                    .addChild(new output.PlainText('Type'))
-                    .addChild(new output.PlainText('Description')),
-            ).addChild(returnsRow),
+        addChildren(
+            container,
+            addTableRowC(
+                Table<DeepCoreNode, DeepCoreNode>({
+                    header: addChildrenC(
+                        TableRow<PlainText>(),
+                        PlainText({ text: 'Type' }),
+                        PlainText({ text: 'Description' }),
+                    ),
+                }),
+                returnsRow,
+            ),
         );
         didWrite = true;
     }
@@ -1058,7 +1218,7 @@ function getExcerptTokenReference(
 }
 
 function writeApiItemExcerpt(
-    container: output.Container,
+    container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiItem,
     excerpt: aeModel.Excerpt,
     context: Context,
@@ -1067,11 +1227,11 @@ function writeApiItemExcerpt(
         throw new Error(`Received excerpt with no declaration.`);
     }
 
-    const codeBlock = new output.RichCodeBlock('ts');
-    container.addChild(codeBlock);
+    const codeBlock = RichCodeBlock<DeepCoreNode>({ language: 'ts' });
+    addChildren(container, codeBlock);
 
     if (apiItem.kind === aeModel.ApiItemKind.Variable) {
-        codeBlock.addChild(new output.PlainText('var '));
+        addChildren(codeBlock, PlainText({ text: 'var ' }));
     }
 
     const spannedTokens = excerpt.spannedTokens.slice();
@@ -1088,7 +1248,7 @@ function writeApiItemExcerpt(
             context,
         );
         if (result === null) {
-            codeBlock.addChild(new output.PlainText(tokenText));
+            addChildren(codeBlock, PlainText({ text: tokenText }));
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
@@ -1097,9 +1257,11 @@ function writeApiItemExcerpt(
                 result.apiItem,
                 context,
             );
-            codeBlock.addChild(
-                new output.LocalPageLink(destination).addChild(
-                    new output.PlainText(tokenText),
+            addChildren(
+                codeBlock,
+                addChildrenC(
+                    LocalPageLink<PlainText>({ destination }),
+                    PlainText({ text: tokenText }),
                 ),
             );
         } else {
