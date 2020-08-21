@@ -1,14 +1,31 @@
-import { ContainerBase } from './abstract/ContainerBase';
+import { ContainerBase, ContainerParameters } from './Container';
 import { Node, CoreNodeType } from '.';
 
-export interface CodeSpan<ChildNode extends Node>
-    extends ContainerBase<ChildNode> {
+export interface CodeSpanParameters<ChildNode extends Node>
+    extends ContainerParameters<ChildNode> {}
+
+export interface CodeSpanBase<ChildNode extends Node>
+    extends ContainerBase<ChildNode> {}
+
+export function CodeSpanBase<ChildNode extends Node>(
+    parameters: CodeSpanParameters<ChildNode>,
+): CodeSpanBase<ChildNode> {
+    return {
+        ...ContainerBase<ChildNode>({ children: parameters.children }),
+    };
+}
+
+export interface CodeSpanNode<ChildNode extends Node>
+    extends CodeSpanBase<ChildNode>,
+        Node {
     type: CoreNodeType.CodeSpan;
 }
 
-export function CodeSpan<ChildNode extends Node>(): CodeSpan<ChildNode> {
+export function CodeSpanNode<ChildNode extends Node>(
+    parameters: CodeSpanParameters<ChildNode>,
+): CodeSpanNode<ChildNode> {
     return {
         type: CoreNodeType.CodeSpan,
-        ...ContainerBase<ChildNode>(),
+        ...CodeSpanBase(parameters),
     };
 }

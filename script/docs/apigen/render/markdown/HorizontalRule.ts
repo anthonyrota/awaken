@@ -1,14 +1,16 @@
-import { HorizontalRule } from '../../nodes/HorizontalRule';
-import { HtmlElement } from '../../nodes/HtmlElement';
+import { HorizontalRuleBase } from '../../nodes/HorizontalRule';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { noop } from '../../util';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeVoidHtmlElement } from './HtmlElement';
+import { ParamWriteCoreNode } from '.';
 
 export function writeHorizontalRule(
-    _horizontalRule: HorizontalRule,
+    _horizontalRule: HorizontalRuleBase,
     output: MarkdownOutput,
+    writeCoreNode: ParamWriteCoreNode,
 ): void {
     if (output.constrainedToSingleLine) {
-        writeVoidHtmlElement(HtmlElement({ tagName: 'hr' }), output);
+        writeCoreNode(HtmlElementNode({ tagName: 'hr' }), output, noop);
     } else {
         output.withParagraphBreak(() => {
             output.writeLine('---');

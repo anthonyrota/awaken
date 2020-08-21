@@ -1,21 +1,21 @@
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { CodeSpan } from '../../nodes/CodeSpan';
 import { Node } from '../../nodes';
+import { CodeSpanBase } from '../../nodes/CodeSpan';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
+import { ParamWriteCoreNode, ParamWriteChildNode } from '.';
 
 export function writeCodeSpan<ChildNode extends Node>(
-    codeSpan: CodeSpan<ChildNode>,
+    codeSpan: CodeSpanBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     output.withInSingleLine(() => {
-        writeHtmlElement(
-            addChildrenC(
-                HtmlElement<ChildNode>({ tagName: 'code' }),
-                ...codeSpan.children,
-            ),
+        writeCoreNode(
+            HtmlElementNode({
+                tagName: 'code',
+                children: codeSpan.children,
+            }),
             output,
             writeChildNode,
         );

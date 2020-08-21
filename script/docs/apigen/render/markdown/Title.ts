@@ -1,26 +1,26 @@
-import { Paragraph } from '../../nodes/Paragraph';
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { Title } from '../../nodes/Title';
 import { Node } from '../../nodes';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { ParagraphNode } from '../../nodes/Paragraph';
+import { TitleBase } from '../../nodes/Title';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
-import { writeParagraph } from './Paragraph';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeTitle<ChildNode extends Node>(
-    title: Title<ChildNode>,
+    title: TitleBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeParagraph(
-        addChildrenC(
-            Paragraph<HtmlElement<ChildNode>>(),
-            addChildrenC(
-                HtmlElement<ChildNode>({ tagName: 'b' }),
-                ...title.children,
-            ),
-        ),
+    writeCoreNode(
+        ParagraphNode({
+            children: [
+                HtmlElementNode({
+                    tagName: 'b',
+                    children: title.children,
+                }),
+            ],
+        }),
         output,
-        (node) => writeHtmlElement(node, output, writeChildNode),
+        (node) => writeCoreNode(node, output, writeChildNode),
     );
 }

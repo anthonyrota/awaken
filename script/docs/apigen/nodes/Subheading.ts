@@ -1,25 +1,39 @@
-import { ContainerBase } from './abstract/ContainerBase';
+import { ContainerParameters, ContainerBase } from './Container';
 import { Node, CoreNodeType } from '.';
 
-export interface Subheading<ChildNode extends Node>
+export interface SubheadingParameters<ChildNode extends Node>
+    extends ContainerParameters<ChildNode> {
+    alternateId?: string;
+}
+
+export interface SubheadingBase<ChildNode extends Node>
     extends ContainerBase<ChildNode> {
-    type: CoreNodeType.Subheading;
     alternateId?: string;
 }
 
-export interface SubheadingParameters {
-    alternateId?: string;
-}
-
-export function Subheading<ChildNode extends Node>(
-    parameters: SubheadingParameters,
-): Subheading<ChildNode> {
-    const subheading: Subheading<ChildNode> = {
-        type: CoreNodeType.Subheading,
-        ...ContainerBase<ChildNode>(),
+export function SubheadingBase<ChildNode extends Node>(
+    parameters: SubheadingParameters<ChildNode>,
+): SubheadingBase<ChildNode> {
+    const subheadingBase: SubheadingBase<ChildNode> = {
+        ...ContainerBase<ChildNode>({ children: parameters.children }),
     };
     if (parameters.alternateId !== undefined) {
-        subheading.alternateId = parameters.alternateId;
+        subheadingBase.alternateId = parameters.alternateId;
     }
-    return subheading;
+    return subheadingBase;
+}
+
+export interface SubheadingNode<ChildNode extends Node>
+    extends SubheadingBase<ChildNode>,
+        Node {
+    type: CoreNodeType.Subheading;
+}
+
+export function SubheadingNode<ChildNode extends Node>(
+    parameters: SubheadingParameters<ChildNode>,
+): SubheadingNode<ChildNode> {
+    return {
+        type: CoreNodeType.Subheading,
+        ...SubheadingBase(parameters),
+    };
 }

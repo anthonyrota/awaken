@@ -1,30 +1,44 @@
-import { ContainerBase } from './abstract/ContainerBase';
+import { ContainerBase, ContainerParameters } from './Container';
 import { Node, CoreNodeType } from '.';
 
-export interface HtmlElement<ChildNode extends Node>
+export interface HtmlElementParameters<ChildNode extends Node>
+    extends ContainerParameters<ChildNode> {
+    tagName: string;
+    attributes?: Record<string, string>;
+}
+
+export interface HtmlElementBase<ChildNode extends Node>
     extends ContainerBase<ChildNode> {
-    type: CoreNodeType.HtmlElement;
     tagName: string;
     attributes?: Record<string, string>;
 }
 
-export interface HtmlElementParameters {
-    tagName: string;
-    attributes?: Record<string, string>;
-}
-
-export function HtmlElement<ChildNode extends Node>(
-    parameters: HtmlElementParameters,
-): HtmlElement<ChildNode> {
-    const htmlElement: HtmlElement<ChildNode> = {
-        type: CoreNodeType.HtmlElement,
+export function HtmlElementBase<ChildNode extends Node>(
+    parameters: HtmlElementParameters<ChildNode>,
+): HtmlElementBase<ChildNode> {
+    const htmlElementBase: HtmlElementBase<ChildNode> = {
         tagName: parameters.tagName,
-        ...ContainerBase<ChildNode>(),
+        ...ContainerBase<ChildNode>({ children: parameters.children }),
     };
     if (parameters.attributes) {
-        htmlElement.attributes = parameters.attributes;
+        htmlElementBase.attributes = parameters.attributes;
     }
-    return htmlElement;
+    return htmlElementBase;
+}
+
+export interface HtmlElementNode<ChildNode extends Node>
+    extends HtmlElementBase<ChildNode>,
+        Node {
+    type: CoreNodeType.HtmlElement;
+}
+
+export function HtmlElementNode<ChildNode extends Node>(
+    parameters: HtmlElementParameters<ChildNode>,
+): HtmlElementNode<ChildNode> {
+    return {
+        type: CoreNodeType.HtmlElement,
+        ...HtmlElementBase(parameters),
+    };
 }
 
 export enum HtmlTagClassification {

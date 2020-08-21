@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+const fs = require('fs');
 const {
     getAbsolutePath,
     renameOutputModule,
 } = require('../../script/util/fileUtil');
-const fs = require('fs');
 
 renameOutputModule({
     from: getAbsolutePath('dist', 'awakenCore.module.js'),

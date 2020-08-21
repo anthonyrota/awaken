@@ -1,47 +1,61 @@
-import { ContainerBase } from './abstract/ContainerBase';
+import { ContainerBase, ContainerParameters } from './Container';
 import { Node, CoreNodeType } from '.';
 
-export type TableRow<CellNode extends Node> = ContainerBase<CellNode>;
+export interface TableRow<CellNode extends Node>
+    extends ContainerBase<CellNode> {}
 
-export function TableRow<CellNode extends Node>(): TableRow<CellNode> {
-    return ContainerBase<CellNode>();
+export interface TableRowParameters<CellNode extends Node>
+    extends ContainerParameters<CellNode> {}
+
+export function TableRow<CellNode extends Node>(
+    parameters: TableRowParameters<CellNode>,
+): TableRow<CellNode> {
+    return ContainerBase<CellNode>({ children: parameters.children });
 }
 
-export interface Table<HeaderCellNode extends Node, BodyCellNode extends Node>
-    extends Node {
-    type: CoreNodeType.Table;
+export interface TableParameters<
+    HeaderCellNode extends Node,
+    BodyCellNode extends Node
+> {
+    header: TableRow<HeaderCellNode>;
+    rows?: TableRow<BodyCellNode>[];
+}
+
+export interface TableBase<
+    HeaderCellNode extends Node,
+    BodyCellNode extends Node
+> {
     header: TableRow<HeaderCellNode>;
     rows: TableRow<BodyCellNode>[];
 }
 
-export interface TableParameters<HeaderCellNode extends Node> {
-    header: TableRow<HeaderCellNode>;
-}
-
-export function Table<HeaderCellNode extends Node, BodyCellNode extends Node>(
-    parameters: TableParameters<HeaderCellNode>,
-): Table<HeaderCellNode, BodyCellNode> {
-    return {
-        type: CoreNodeType.Table,
-        header: parameters.header,
-        rows: [],
-    };
-}
-
-export function addTableRowC<
+export function TableBase<
     HeaderCellNode extends Node,
     BodyCellNode extends Node
 >(
-    table: Table<HeaderCellNode, BodyCellNode>,
-    ...rows: TableRow<BodyCellNode>[]
-): Table<HeaderCellNode, BodyCellNode> {
-    table.rows.push(...rows);
-    return table;
+    parameters: TableParameters<HeaderCellNode, BodyCellNode>,
+): TableBase<HeaderCellNode, BodyCellNode> {
+    return {
+        header: parameters.header,
+        rows: parameters.rows ?? [],
+    };
 }
 
-export function addTableRow<BodyCellNode extends Node>(
-    table: Table<Node, BodyCellNode>,
-    ...rows: TableRow<BodyCellNode>[]
-): void {
-    table.rows.push(...rows);
+export interface TableNode<
+    HeaderCellNode extends Node,
+    BodyCellNode extends Node
+> extends TableBase<HeaderCellNode, BodyCellNode>, Node {
+    type: CoreNodeType.Table;
+}
+
+export function TableNode<
+    HeaderCellNode extends Node,
+    BodyCellNode extends Node
+>(
+    parameters: TableParameters<HeaderCellNode, BodyCellNode>,
+): TableNode<HeaderCellNode, BodyCellNode> {
+    return {
+        type: CoreNodeType.Table,
+        ...TableBase(parameters),
+    };
 }

@@ -1,20 +1,20 @@
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { Strikethrough } from '../../nodes/Strikethrough';
 import { Node } from '../../nodes';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { StrikethroughBase } from '../../nodes/Strikethrough';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeStrikethrough<ChildNode extends Node>(
-    strikethrough: Strikethrough<ChildNode>,
+    Strikethrough: StrikethroughBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeHtmlElement(
-        addChildrenC(
-            HtmlElement<ChildNode>({ tagName: 's' }),
-            ...strikethrough.children,
-        ),
+    writeCoreNode(
+        HtmlElementNode<ChildNode>({
+            tagName: 's',
+            children: Strikethrough.children,
+        }),
         output,
         writeChildNode,
     );

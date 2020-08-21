@@ -1,30 +1,41 @@
-import { MarkdownOutput } from './MarkdownOutput';
 import { Node } from '../../nodes';
+import { MarkdownOutput } from './MarkdownOutput';
+
+export interface MarkdownFunctionalParameters {
+    write: (output: MarkdownOutput) => void;
+}
+
+export interface MarkdownFunctionalBase {
+    write: (output: MarkdownOutput) => void;
+}
+
+export function MarkdownFunctionalBase(
+    parameters: MarkdownFunctionalParameters,
+): MarkdownFunctionalBase {
+    return {
+        write: parameters.write,
+    };
+}
 
 export const MarkdownFunctionalNodeType =
     'core/markdown/rendering/MarkdownFunctionalNodeType';
 export type MarkdownFunctionalNodeType = typeof MarkdownFunctionalNodeType;
 
-export interface MarkdownFunctionalNode extends Node {
+export interface MarkdownFunctionalNode extends MarkdownFunctionalBase, Node {
     type: MarkdownFunctionalNodeType;
-    write: (output: MarkdownOutput) => void;
-}
-
-export interface MarkdownFunctionalNodeParameters {
-    write: (output: MarkdownOutput) => void;
 }
 
 export function MarkdownFunctionalNode(
-    parameters: MarkdownFunctionalNodeParameters,
+    parameters: MarkdownFunctionalParameters,
 ): MarkdownFunctionalNode {
     return {
         type: MarkdownFunctionalNodeType,
-        write: parameters.write,
+        ...MarkdownFunctionalBase(parameters),
     };
 }
 
 export function writeMarkdownFunctionalNode(
-    markdownFunctionalNode: MarkdownFunctionalNode,
+    markdownFunctionalNode: MarkdownFunctionalBase,
     output: MarkdownOutput,
 ): void {
     markdownFunctionalNode.write(output);

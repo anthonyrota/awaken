@@ -1,51 +1,48 @@
-import { List } from './../../nodes/List';
-import { DeepCoreNode } from './../../nodes';
-import { PlainText } from '../../nodes/PlainText';
-import { CodeSpan } from '../../nodes/CodeSpan';
-import { Container } from '../../nodes/Container';
-import { LocalPageLink } from '../../nodes/LocalPageLink';
 import {
     TableOfContentsInlineReference,
     TableOfContentsNestedReference,
 } from '../../../pageMetadata';
-import { addChildrenC, addChildren } from '../../nodes/abstract/ContainerBase';
-import { TableOfContentsList } from '../../nodes/TableOfContentsList';
+import { DeepCoreNode } from '../../nodes';
+import { CodeSpanNode } from '../../nodes/CodeSpan';
+import { ContainerNode } from '../../nodes/Container';
+import { ListNode, ListType } from '../../nodes/List';
+import { LocalPageLinkNode } from '../../nodes/LocalPageLink';
+import { PlainTextNode } from '../../nodes/PlainText';
+import { TableOfContentsListBase } from '../../nodes/TableOfContentsList';
 import { MarkdownOutput } from './MarkdownOutput';
+import { ParamWriteCoreNode, writeDeepCoreNode } from '.';
 
 function buildTableOfContentsLink(
     reference: TableOfContentsInlineReference,
     relativePagePath: string,
 ): DeepCoreNode {
-    return addChildrenC<DeepCoreNode, LocalPageLink<DeepCoreNode>>(
-        LocalPageLink<DeepCoreNode>({
-            destination: `${relativePagePath}#${reference.url_hash_text}`,
-        }),
-        addChildrenC<DeepCoreNode, CodeSpan<DeepCoreNode>>(
-            CodeSpan<DeepCoreNode>(),
-            PlainText({ text: reference.text }),
-        ),
-    );
+    return LocalPageLinkNode<DeepCoreNode>({
+        destination: `${relativePagePath}#${reference.url_hash_text}`,
+        children: [
+            CodeSpanNode<DeepCoreNode>({
+                children: [PlainTextNode({ text: reference.text })],
+            }),
+        ],
+    });
 }
 
 function buildTableOfContentsListItem(
     reference: TableOfContentsNestedReference,
     relativePagePath: string,
-): Container<DeepCoreNode> {
-    const listItem = addChildrenC(
-        Container<DeepCoreNode>(),
-        buildTableOfContentsLink(reference, relativePagePath),
-    );
+): ContainerNode<DeepCoreNode> {
+    const listItem = ContainerNode<DeepCoreNode>({
+        children: [buildTableOfContentsLink(reference, relativePagePath)],
+    });
     if (reference.inline_references && reference.inline_references.length > 0) {
-        addChildren(listItem, PlainText({ text: ' - ' }));
+        listItem.children.push(PlainTextNode({ text: ' - ' }));
         for (const [
             i,
             inlineReference,
         ] of reference.inline_references.entries()) {
             if (i !== 0) {
-                addChildren(listItem, PlainText({ text: ', ' }));
+                listItem.children.push(PlainTextNode({ text: ', ' }));
             }
-            addChildren(
-                listItem,
+            listItem.children.push(
                 buildTableOfContentsLink(inlineReference, relativePagePath),
             );
         }
@@ -54,23 +51,26 @@ function buildTableOfContentsListItem(
 }
 
 export function writeTableOfContentsList(
-    tableOfContentsList: TableOfContentsList,
+    tableOfContentsList: TableOfContentsListBase,
     output: MarkdownOutput,
-    writeDeepCoreNode: (node: DeepCoreNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
 ): void {
-    const contentsList = List<DeepCoreNode>({ ordered: {} });
+    const contentsList = ListNode<DeepCoreNode>({
+        listType: ListType.Ordered,
+    });
     for (const mainReference of tableOfContentsList.tableOfContents) {
         const listItem = buildTableOfContentsListItem(
             mainReference,
             tableOfContentsList.relativePagePath,
         );
-        addChildren(contentsList, listItem);
+        contentsList.children.push(listItem);
         if (mainReference.nested_references) {
-            const nestedList = List<DeepCoreNode>({ ordered: {} });
-            addChildren(listItem, nestedList);
+            const nestedList = ListNode<DeepCoreNode>({
+                listType: ListType.Ordered,
+            });
+            listItem.children.push(nestedList);
             for (const nestedReference of mainReference.nested_references) {
-                addChildren(
-                    nestedList,
+                nestedList.children.push(
                     buildTableOfContentsListItem(
                         nestedReference,
                         tableOfContentsList.relativePagePath,
@@ -79,5 +79,5 @@ export function writeTableOfContentsList(
             }
         }
     }
-    writeDeepCoreNode(contentsList, output);
+    writeDeepCoreNode(contentsList, output, writeCoreNode);
 }

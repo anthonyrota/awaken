@@ -1,24 +1,23 @@
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { CodeBlock } from '../../nodes/CodeBlock';
+import { CodeBlockBase } from '../../nodes/CodeBlock';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { PlainTextNode } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
-import { writePlainText } from './PlainText';
-import { PlainText } from '../../nodes/PlainText';
+import { ParamWriteCoreNode, writeDeepCoreNode } from '.';
 
 export function writeCodeBlock(
-    codeBlock: CodeBlock,
+    codeBlock: CodeBlockBase,
     output: MarkdownOutput,
+    writeCoreNode: ParamWriteCoreNode,
 ): void {
     if (output.constrainedToSingleLine) {
         output.withInSingleLineCodeBlock(() => {
-            writeHtmlElement(
-                addChildrenC(
-                    HtmlElement<PlainText>({ tagName: 'code' }),
-                    PlainText({ text: codeBlock.code }),
-                ),
+            writeDeepCoreNode(
+                HtmlElementNode({
+                    tagName: 'code',
+                    children: [PlainTextNode({ text: codeBlock.code })],
+                }),
                 output,
-                writePlainText,
+                writeCoreNode,
             );
         });
         return;
@@ -28,10 +27,13 @@ export function writeCodeBlock(
         output.withInMarkdownCode(() => {
             output.write('```');
             if (codeBlock.language) {
-                writePlainText(PlainText({ text: codeBlock.language }), output);
+                writeCoreNode(
+                    PlainTextNode({ text: codeBlock.language }),
+                    output,
+                );
             }
             output.writeLine();
-            writePlainText(PlainText({ text: codeBlock.code }), output);
+            writeCoreNode(PlainTextNode({ text: codeBlock.code }), output);
             output.ensureNewLine();
         });
         output.write('```');

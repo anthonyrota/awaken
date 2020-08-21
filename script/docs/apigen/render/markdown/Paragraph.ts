@@ -1,20 +1,20 @@
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { Paragraph } from '../../nodes/Paragraph';
 import { Node } from '../../nodes';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { ParagraphBase } from '../../nodes/Paragraph';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeParagraph<ChildNode extends Node>(
-    paragraph: Paragraph<ChildNode>,
+    paragraph: ParagraphBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeHtmlElement(
-        addChildrenC(
-            HtmlElement<ChildNode>({ tagName: 'p' }),
-            ...paragraph.children,
-        ),
+    writeCoreNode(
+        HtmlElementNode<ChildNode>({
+            tagName: 'p',
+            children: paragraph.children,
+        }),
         output,
         writeChildNode,
     );

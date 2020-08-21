@@ -1,9 +1,9 @@
 import * as fs from 'fs-extra';
-import { generateSourceMetadata } from './sourceMetadata';
+import { getAbsolutePath } from '../../util/fileUtil';
 import { ApiPageMap } from './apiUtil';
 import { outDir } from './paths';
+import { generateSourceMetadata } from './sourceMetadata';
 import { globAbsolute, loadApiModel, createProgram } from './util';
-import { getAbsolutePath } from '../../util/fileUtil';
 
 const sourceFilePaths = globAbsolute('packages/*/src/**');
 const program = createProgram(sourceFilePaths);

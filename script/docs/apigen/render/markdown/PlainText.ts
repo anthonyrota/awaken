@@ -1,5 +1,6 @@
-import { PlainText } from '../../nodes/PlainText';
+import { PlainTextBase } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
+import { ParamWriteCoreNode } from '.';
 
 const newlineRegexp = /\r?\n/g;
 
@@ -8,8 +9,9 @@ function escapeHashAtEnd(str: string): string {
 }
 
 export function writePlainText(
-    plainTextNode: PlainText,
+    plainTextNode: PlainTextBase,
     output: MarkdownOutput,
+    _writeCoreNode: ParamWriteCoreNode,
 ): void {
     let { text } = plainTextNode;
 

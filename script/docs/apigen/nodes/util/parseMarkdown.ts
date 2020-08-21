@@ -1,33 +1,27 @@
-import { ImageParameters, Image } from '../Image';
-import { Link, LinkParameters } from '../Link';
-import { CodeSpan } from '../CodeSpan';
-import { Strikethrough } from '../Strikethrough';
-import { Bold } from '../Bold';
-import { Italics } from '../Italics';
-import { CodeBlock } from '../CodeBlock';
-import { Table, TableRow, addTableRow } from '../Table';
-import { List, ListParameters } from '../List';
-import { HorizontalRule } from '../HorizontalRule';
-import { BlockQuote } from '../BlockQuote';
-import { Title } from '../Title';
-import { Subheading } from '../Subheading';
-import { Heading } from '../Heading';
-import { Paragraph } from '../Paragraph';
-import { HtmlComment } from '../HtmlComment';
-import {
-    ContainerBase,
-    addChildren,
-    addChildrenC,
-} from '../abstract/ContainerBase';
-import * as unified from 'unified';
-import * as remarkParse from 'remark-parse';
+import * as htmlparser2 from 'htmlparser2';
 import * as mdast from 'mdast';
 import * as definitions from 'mdast-util-definitions';
-import * as htmlparser2 from 'htmlparser2';
-import { Container } from '../Container';
-
+import * as remarkParse from 'remark-parse';
+import * as unified from 'unified';
 import { DeepCoreNode } from '..';
-import { PlainText } from '../PlainText';
+import { BlockQuoteNode } from '../BlockQuote';
+import { BoldNode } from '../Bold';
+import { CodeBlockNode } from '../CodeBlock';
+import { CodeSpanNode } from '../CodeSpan';
+import { ContainerBase, ContainerNode } from '../Container';
+import { HeadingNode } from '../Heading';
+import { HorizontalRuleNode } from '../HorizontalRule';
+import { HtmlCommentNode } from '../HtmlComment';
+import { ImageNode, ImageParameters } from '../Image';
+import { ItalicsNode } from '../Italics';
+import { LinkNode, LinkParameters } from '../Link';
+import { ListNode, ListParameters, ListType } from '../List';
+import { ParagraphNode } from '../Paragraph';
+import { PlainTextNode } from '../PlainText';
+import { StrikethroughNode } from '../Strikethrough';
+import { SubheadingNode } from '../Subheading';
+import { TableNode, TableRow } from '../Table';
+import { TitleNode } from '../Title';
 
 const remark = unified().use(remarkParse);
 
@@ -36,7 +30,7 @@ export function parseMarkdown(
     opt?: {
         unwrapFirstLineParagraph?: boolean;
     },
-): Container<DeepCoreNode> {
+): ContainerNode<DeepCoreNode> {
     const rootNode = remark.parse(text) as mdast.Root;
     const definition = definitions(rootNode);
 
@@ -61,7 +55,7 @@ export function parseMarkdown(
             throw new Error('Unexpected html text.');
         },
         oncomment(comment: string): void {
-            addChildren(htmlParserContainer, HtmlComment({ comment }));
+            htmlParserContainer.children.push(HtmlCommentNode({ comment }));
         },
         oncdatastart(): void {
             throw new Error('Unexpected CDATA.');
@@ -89,8 +83,8 @@ export function parseMarkdown(
                     traverseChildren(container, node);
                     break;
                 }
-                const paragraph = Paragraph<DeepCoreNode>();
-                addChildren(container, paragraph);
+                const paragraph = ParagraphNode<DeepCoreNode>({});
+                container.children.push(paragraph);
                 traverseChildren(paragraph, node);
                 break;
             }
@@ -98,15 +92,15 @@ export function parseMarkdown(
                 let heading: DeepCoreNode;
                 switch (node.depth) {
                     case 2: {
-                        heading = Heading<DeepCoreNode>({});
+                        heading = HeadingNode<DeepCoreNode>({});
                         break;
                     }
                     case 3: {
-                        heading = Subheading<DeepCoreNode>({});
+                        heading = SubheadingNode<DeepCoreNode>({});
                         break;
                     }
                     case 4: {
-                        heading = Title<DeepCoreNode>({});
+                        heading = TitleNode<DeepCoreNode>({});
                         break;
                     }
                     default: {
@@ -115,17 +109,17 @@ export function parseMarkdown(
                         );
                     }
                 }
-                addChildren(container, heading);
+                container.children.push(heading);
                 traverseChildren(heading, node);
                 break;
             }
             case 'thematicBreak': {
-                addChildren(container, HorizontalRule());
+                container.children.push(HorizontalRuleNode({}));
                 break;
             }
             case 'blockquote': {
-                const blockQuote = BlockQuote<DeepCoreNode>();
-                addChildren(container, blockQuote);
+                const blockQuote = BlockQuoteNode<DeepCoreNode>({});
+                container.children.push(blockQuote);
                 traverseChildren(blockQuote, node);
                 break;
             }
@@ -133,18 +127,19 @@ export function parseMarkdown(
                 throw new Error('Unexpected list item node.');
             }
             case 'list': {
-                const parameters: ListParameters = {};
-                if (node.ordered) {
-                    parameters.ordered = {};
-                    if (node.start != null) {
-                        parameters.ordered.start = node.start;
-                    }
-                }
-                const list = List<DeepCoreNode>(parameters);
-                addChildren(container, list);
+                const parameters: ListParameters<DeepCoreNode> = node.ordered
+                    ? {
+                          listType: ListType.Ordered,
+                          start: node.start ?? undefined,
+                      }
+                    : {
+                          listType: ListType.Unordered,
+                      };
+                const list = ListNode<DeepCoreNode>(parameters);
+                container.children.push(list);
                 for (const childNode of node.children) {
-                    const container = Container<DeepCoreNode>();
-                    addChildren(list, container);
+                    const container = ContainerNode<DeepCoreNode>({});
+                    list.children.push(container);
                     if (childNode.type === 'listItem') {
                         if (childNode.checked !== null) {
                             throw new Error(
@@ -171,10 +166,11 @@ export function parseMarkdown(
                     throw new Error('Table has no rows.');
                 }
                 const header = parseTableRow(node.children[0]);
-                const table = Table<DeepCoreNode, DeepCoreNode>({ header });
-                for (const child of node.children.slice(1)) {
-                    addTableRow(table, parseTableRow(child));
-                }
+                const table = TableNode<DeepCoreNode, DeepCoreNode>({
+                    header,
+                    rows: node.children.slice(1).map(parseTableRow),
+                });
+                container.children.push(table);
                 break;
             }
             case 'tableRow': {
@@ -192,11 +188,11 @@ export function parseMarkdown(
                 if (node.meta !== null) {
                     throw new Error('Invalid code block.');
                 }
-                const codeBlock = CodeBlock({
+                const codeBlock = CodeBlockNode({
                     language: node.lang,
                     code: node.value,
                 });
-                addChildren(container, codeBlock);
+                container.children.push(codeBlock);
                 break;
             }
             case 'definition': {
@@ -207,33 +203,32 @@ export function parseMarkdown(
                 throw new Error('Footnote definitions are not supported.');
             }
             case 'text': {
-                addChildren(container, PlainText({ text: node.value }));
+                container.children.push(PlainTextNode({ text: node.value }));
                 break;
             }
             case 'emphasis': {
-                const italics = Italics<DeepCoreNode>();
-                addChildren(container, italics);
+                const italics = ItalicsNode<DeepCoreNode>({});
+                container.children.push(italics);
                 traverseChildren(italics, node);
                 break;
             }
             case 'strong': {
-                const bold = Bold<DeepCoreNode>();
-                addChildren(container, bold);
+                const bold = BoldNode<DeepCoreNode>({});
+                container.children.push(bold);
                 traverseChildren(bold, node);
                 break;
             }
             case 'delete': {
-                const strikethrough = Strikethrough<DeepCoreNode>();
-                addChildren(container, strikethrough);
+                const strikethrough = StrikethroughNode<DeepCoreNode>({});
+                container.children.push(strikethrough);
                 traverseChildren(strikethrough, node);
                 break;
             }
             case 'inlineCode': {
-                const inlineCode = addChildrenC(
-                    CodeSpan<PlainText>(),
-                    PlainText({ text: node.value }),
-                );
-                addChildren(container, inlineCode);
+                const inlineCode = CodeSpanNode<PlainTextNode>({
+                    children: [PlainTextNode({ text: node.value })],
+                });
+                container.children.push(inlineCode);
                 break;
             }
             case 'break': {
@@ -242,12 +237,14 @@ export function parseMarkdown(
                 );
             }
             case 'link': {
-                const parameters: LinkParameters = { destination: node.url };
+                const parameters: LinkParameters<DeepCoreNode> = {
+                    destination: node.url,
+                };
                 if (node.title !== undefined) {
                     parameters.title = node.title;
                 }
-                const link = Link<DeepCoreNode>(parameters);
-                addChildren(container, link);
+                const link = LinkNode<DeepCoreNode>(parameters);
+                container.children.push(link);
                 traverseChildren(link, node);
                 break;
             }
@@ -259,8 +256,8 @@ export function parseMarkdown(
                 if (node.alt !== undefined) {
                     parameters.alt = node.alt;
                 }
-                const image = Image(parameters);
-                addChildren(container, image);
+                const image = ImageNode(parameters);
+                container.children.push(image);
                 break;
             }
             case 'linkReference': {
@@ -270,20 +267,19 @@ export function parseMarkdown(
                         `No definition found for identifier ${node.identifier}`,
                     );
                 }
-                const parameters: LinkParameters = {
+                const parameters: LinkParameters<DeepCoreNode> = {
                     destination: definitionNode.url,
                 };
                 if (definitionNode.title !== undefined) {
                     parameters.title = definitionNode.title;
                 }
-                const link = Link<DeepCoreNode>(parameters);
-                addChildren(container, link);
+                const link = LinkNode<DeepCoreNode>(parameters);
+                container.children.push(link);
                 if (node.children.length > 0) {
                     traverseChildren(link, node);
                 } else {
-                    addChildren(
-                        link,
-                        PlainText({
+                    link.children.push(
+                        PlainTextNode({
                             text:
                                 node.label ||
                                 definitionNode.label ||
@@ -307,8 +303,8 @@ export function parseMarkdown(
                 if (node.alt !== undefined) {
                     parameters.alt = node.alt;
                 }
-                const image = Image(parameters);
-                addChildren(container, image);
+                const image = ImageNode(parameters);
+                container.children.push(image);
                 break;
             }
             case 'footnoteReference': {
@@ -333,11 +329,11 @@ export function parseMarkdown(
     }
 
     function parseTableRow(node: mdast.TableRow): TableRow<DeepCoreNode> {
-        const row = TableRow<DeepCoreNode>();
+        const row = TableRow<DeepCoreNode>({});
         // Loop over cells.
         for (const childNode of node.children) {
-            const container = Container<DeepCoreNode>();
-            addChildren(row, container);
+            const container = ContainerNode<DeepCoreNode>({});
+            row.children.push(container);
             traverseChildren(container, childNode);
         }
         return row;
@@ -352,7 +348,7 @@ export function parseMarkdown(
         }
     }
 
-    const container = Container<DeepCoreNode>();
+    const container = ContainerNode<DeepCoreNode>({});
     traverseChildren(container, rootNode);
     return container;
 }

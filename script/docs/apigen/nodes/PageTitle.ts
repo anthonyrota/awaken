@@ -1,25 +1,39 @@
-import { ContainerBase } from './abstract/ContainerBase';
+import { ContainerParameters, ContainerBase } from './Container';
 import { Node, CoreNodeType } from '.';
 
-export interface PageTitle<ChildNode extends Node>
+export interface PageTitleParameters<ChildNode extends Node>
+    extends ContainerParameters<ChildNode> {
+    alternateId?: string;
+}
+
+export interface PageTitleBase<ChildNode extends Node>
     extends ContainerBase<ChildNode> {
-    type: CoreNodeType.PageTitle;
     alternateId?: string;
 }
 
-export interface PageTitleParameters {
-    alternateId?: string;
-}
-
-export function PageTitle<ChildNode extends Node>(
-    parameters: PageTitleParameters,
-): PageTitle<ChildNode> {
-    const pageTitle: PageTitle<ChildNode> = {
-        type: CoreNodeType.PageTitle,
-        ...ContainerBase<ChildNode>(),
+export function PageTitleBase<ChildNode extends Node>(
+    parameters: PageTitleParameters<ChildNode>,
+): PageTitleBase<ChildNode> {
+    const pageTitleBase: PageTitleBase<ChildNode> = {
+        ...ContainerBase<ChildNode>({ children: parameters.children }),
     };
     if (parameters.alternateId !== undefined) {
-        pageTitle.alternateId = parameters.alternateId;
+        pageTitleBase.alternateId = parameters.alternateId;
     }
-    return pageTitle;
+    return pageTitleBase;
+}
+
+export interface PageTitleNode<ChildNode extends Node>
+    extends PageTitleBase<ChildNode>,
+        Node {
+    type: CoreNodeType.PageTitle;
+}
+
+export function PageTitleNode<ChildNode extends Node>(
+    parameters: PageTitleParameters<ChildNode>,
+): PageTitleNode<ChildNode> {
+    return {
+        type: CoreNodeType.PageTitle,
+        ...PageTitleBase(parameters),
+    };
 }

@@ -1,166 +1,209 @@
 import {
-    DeepCoreNode,
     Node,
+    LeafCoreNode,
     CoreNode,
+    DeepCoreNode,
     CoreNodeType,
-} from './../../nodes/index';
-import { MarkdownOutput } from './MarkdownOutput';
-import { writeContainerBase } from './ContainerBase';
-import { writePlainText } from './PlainText';
-import { writeHorizontalRule } from './HorizontalRule';
-import { writeHtmlComment } from './HtmlComment';
+} from '../../nodes/index';
 import { writeBlockQuote } from './BlockQuote';
-import { writeHtmlElement } from './HtmlElement';
-import { writeItalics } from './Italics';
 import { writeBold } from './Bold';
-import { writeStrikethrough } from './Strikethrough';
 import { writeCodeBlock } from './CodeBlock';
 import { writeCodeSpan } from './CodeSpan';
-import { writeRichCodeBlock } from './RichCodeBlock';
-import { writeLink } from './Link';
-import { writeLocalPageLink } from './LocalPageLink';
-import { writeGithubSourceLink } from './GithubSourceLink';
-import { writeImage } from './Image';
-import { writeParagraph } from './Paragraph';
-import { writeHeading123456 } from './Heading123456';
-import { writeHeading } from './Heading';
-import { writeSubheading } from './Subheading';
-import { writeTitle } from './Title';
-import { writeList } from './List';
-import { writeTable } from './Table';
 import { writeCollapsibleSection } from './CollapsibleSection';
-import { writePageTitle } from './PageTitle';
-import { writeTableOfContentsList } from './TableOfContentsList';
-import { writeTableOfContents } from './TableOfContents';
+import { writeContainer } from './ContainerBase';
 import { writeDoNotEditComment } from './DoNotEditComment';
+import { writeGithubSourceLink } from './GithubSourceLink';
+import { writeHeading } from './Heading';
+import { writeHeading123456 } from './Heading123456';
+import { writeHorizontalRule } from './HorizontalRule';
+import { writeHtmlComment } from './HtmlComment';
+import { writeHtmlElement } from './HtmlElement';
+import { writeImage } from './Image';
+import { writeItalics } from './Italics';
+import { writeLink } from './Link';
+import { writeList } from './List';
+import { writeLocalPageLink } from './LocalPageLink';
+import { MarkdownOutput } from './MarkdownOutput';
 import { writePage } from './Page';
+import { writePageTitle } from './PageTitle';
+import { writeParagraph } from './Paragraph';
+import { writePlainText } from './PlainText';
+import { writeRichCodeBlock } from './RichCodeBlock';
+import { writeStrikethrough } from './Strikethrough';
+import { writeSubheading } from './Subheading';
+import { writeTable } from './Table';
+import { writeTableOfContents } from './TableOfContents';
+import { writeTableOfContentsList } from './TableOfContentsList';
+import { writeTitle } from './Title';
 
+export interface ParamWriteChildNode<ChildNode extends Node> {
+    (node: ChildNode, output: MarkdownOutput): void;
+}
+
+export interface ParamWriteCoreNode {
+    (node: LeafCoreNode, output: MarkdownOutput): void;
+    <ChildNode extends Node>(
+        node: CoreNode<ChildNode>,
+        output: MarkdownOutput,
+        writeChildNode: ParamWriteChildNode<ChildNode>,
+    ): void;
+}
+
+export function writeDeepCoreNode(
+    node: DeepCoreNode,
+    output: MarkdownOutput,
+    writeCoreNode: ParamWriteCoreNode,
+): void {
+    (function writeChildNode(node: DeepCoreNode, output: MarkdownOutput): void {
+        writeCoreNode(node, output, writeChildNode);
+    })(node, output);
+}
+
+export function writeCoreNode(
+    node: LeafCoreNode,
+    output: MarkdownOutput,
+    writeCoreNode: ParamWriteCoreNode,
+): void;
 export function writeCoreNode<ChildNode extends Node>(
     node: CoreNode<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
-    writeDeepCoreNode: (node: DeepCoreNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
+): void;
+export function writeCoreNode<ChildNode extends Node>(
+    node: CoreNode<ChildNode>,
+    output: MarkdownOutput,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode?: ParamWriteChildNode<ChildNode>,
 ): void {
+    /* eslint-disable @typescript-eslint/no-non-null-assertion */
     switch (node.type) {
         case CoreNodeType.Container: {
-            writeContainerBase(node, output, writeChildNode);
+            writeContainer(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.PlainText: {
-            writePlainText(node, output);
+            writePlainText(node, output, writeCoreNode);
             break;
         }
         case CoreNodeType.HorizontalRule: {
-            writeHorizontalRule(node, output);
+            writeHorizontalRule(node, output, writeCoreNode);
             break;
         }
         case CoreNodeType.HtmlComment: {
-            writeHtmlComment(node, output);
+            writeHtmlComment(node, output, writeCoreNode);
             break;
         }
         case CoreNodeType.BlockQuote: {
-            writeBlockQuote(node, output, writeChildNode);
+            writeBlockQuote(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.HtmlElement: {
-            writeHtmlElement(node, output, writeChildNode);
+            writeHtmlElement(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Italics: {
-            writeItalics(node, output, writeChildNode);
+            writeItalics(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Bold: {
-            writeBold(node, output, writeChildNode);
+            writeBold(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Strikethrough: {
-            writeStrikethrough(node, output, writeChildNode);
+            writeStrikethrough(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.CodeSpan: {
-            writeCodeSpan(node, output, writeChildNode);
+            writeCodeSpan(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.CodeBlock: {
-            writeCodeBlock(node, output);
+            writeCodeBlock(node, output, writeCoreNode);
             break;
         }
         case CoreNodeType.RichCodeBlock: {
-            writeRichCodeBlock(node, output, writeChildNode);
+            writeRichCodeBlock(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Link: {
-            writeLink(node, output, writeChildNode);
+            writeLink(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.LocalPageLink: {
-            writeLocalPageLink(node, output, writeChildNode);
+            writeLocalPageLink(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.GithubSourceLink: {
-            writeGithubSourceLink(node, output, writeChildNode);
+            writeGithubSourceLink(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Image: {
-            writeImage(node, output);
+            writeImage(node, output, writeCoreNode);
             break;
         }
         case CoreNodeType.Paragraph: {
-            writeParagraph(node, output, writeChildNode);
+            writeParagraph(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Heading123456: {
-            writeHeading123456(node, output, writeChildNode);
+            writeHeading123456(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Heading: {
-            writeHeading(node, output, writeChildNode);
+            writeHeading(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Subheading: {
-            writeSubheading(node, output, writeChildNode);
+            writeSubheading(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Title: {
-            writeTitle(node, output, writeChildNode);
+            writeTitle(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.List: {
-            writeList(node, output, writeChildNode);
+            writeList(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Table: {
-            writeTable(node, output, writeChildNode);
+            writeTable(
+                node,
+                output,
+                writeCoreNode,
+                writeChildNode!,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.CollapsibleSection: {
             writeCollapsibleSection(
                 node,
                 output,
-                writeChildNode,
-                writeChildNode,
+                writeCoreNode,
+                writeChildNode!,
+                writeChildNode!,
             );
             break;
         }
         case CoreNodeType.PageTitle: {
-            writePageTitle(node, output, writeChildNode);
+            writePageTitle(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         case CoreNodeType.TableOfContentsList: {
-            writeTableOfContentsList(node, output, writeDeepCoreNode);
+            writeTableOfContentsList(node, output, writeCoreNode);
             break;
         }
         case CoreNodeType.TableOfContents: {
-            writeTableOfContents(node, output, writeDeepCoreNode);
+            writeTableOfContents(node, output, writeCoreNode);
             break;
         }
         case CoreNodeType.DoNotEditComment: {
-            writeDoNotEditComment(node, output, writeDeepCoreNode);
+            writeDoNotEditComment(node, output, writeCoreNode);
             break;
         }
         case CoreNodeType.Page: {
-            writePage(node, output, writeChildNode, writeDeepCoreNode);
+            writePage(node, output, writeCoreNode, writeChildNode!);
             break;
         }
         default: {
@@ -171,27 +214,35 @@ export function writeCoreNode<ChildNode extends Node>(
             throw new Error(`Unexpected node type ${node.type}`);
         }
     }
-}
-
-export function writeDeepCoreNode(
-    node: DeepCoreNode,
-    output: MarkdownOutput,
-): void {
-    writeCoreNode(node, output, writeDeepCoreNode, writeDeepCoreNode);
+    /* eslint-enable @typescript-eslint/no-non-null-assertion */
 }
 
 export function renderCoreNodeAsMarkdown<ChildNode extends Node>(
     node: CoreNode<ChildNode>,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
-    writeDeepCoreNode: (node: DeepCoreNode, output: MarkdownOutput) => void,
+    writeCoreNode_: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): string {
     const output = new MarkdownOutput();
-    writeCoreNode(node, output, writeChildNode, writeDeepCoreNode);
+    writeCoreNode(node, output, writeCoreNode_, writeChildNode);
     return output.toString();
 }
 
 export function renderDeepCoreNodeAsMarkdown(node: DeepCoreNode): string {
     const output = new MarkdownOutput();
-    writeDeepCoreNode(node, output);
+
+    const writeCoreNode_: ParamWriteCoreNode = <ChildNode extends Node>(
+        node: CoreNode<ChildNode>,
+        output: MarkdownOutput,
+        writeChildNode?: ParamWriteChildNode<ChildNode>,
+    ) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        writeCoreNode(node, output, writeCoreNode_, writeChildNode!);
+    };
+
+    function writeChildNode(node: DeepCoreNode, output: MarkdownOutput): void {
+        writeCoreNode(node, output, writeCoreNode_, writeChildNode);
+    }
+
+    writeCoreNode(node, output, writeCoreNode_, writeChildNode);
     return output.toString();
 }

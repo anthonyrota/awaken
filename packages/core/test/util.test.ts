@@ -1,3 +1,4 @@
+import each from 'jest-each';
 import { removeOnce, noop } from '../src/util';
 import {
     Disposable,
@@ -8,7 +9,6 @@ import {
     setInterval,
     asyncReportError,
 } from '@awaken/core';
-import each from 'jest-each';
 
 type CF = (x: string) => string;
 const composableFunction1: CF = (x) => x + '+f1';

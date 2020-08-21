@@ -1,23 +1,21 @@
-import { Heading123456 } from '../../nodes/Heading123456';
-import { Heading } from '../../nodes/Heading';
 import { Node } from '../../nodes';
+import { HeadingBase } from '../../nodes/Heading';
+import { Heading123456Node } from '../../nodes/Heading123456';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHeading123456 } from './Heading123456';
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeHeading<ChildNode extends Node>(
-    heading: Heading<ChildNode>,
+    heading: HeadingBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeHeading123456(
-        addChildrenC(
-            Heading123456<ChildNode>({
-                level: 2,
-                alternateId: heading.alternateId,
-            }),
-            ...heading.children,
-        ),
+    writeCoreNode(
+        Heading123456Node<ChildNode>({
+            level: 2,
+            alternateId: heading.alternateId,
+            children: heading.children,
+        }),
         output,
         writeChildNode,
     );

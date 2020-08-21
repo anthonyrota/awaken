@@ -1,22 +1,21 @@
-import { addChildrenC, addChildren } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { Table, TableRow } from '../../nodes/Table';
 import { Node } from '../../nodes';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { TableBase, TableRow } from '../../nodes/Table';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 function writeTableRow<CellNode extends Node>(
     tableRow: TableRow<CellNode>,
     columnCount: number,
     output: MarkdownOutput,
-    writeCellNode: (node: CellNode, output: MarkdownOutput) => void,
+    writeChildNode: ParamWriteChildNode<CellNode>,
 ): void {
     output.write('|');
     for (const cell of tableRow.children) {
         output.write(' ');
         output.markStartOfParagraph();
         output.withInTable(() => {
-            writeCellNode(cell, output);
+            writeChildNode(cell, output);
         });
         output.write(' |');
     }
@@ -25,7 +24,7 @@ function writeTableRow<CellNode extends Node>(
     );
 }
 
-function getColumnCount(table: Table<Node, Node>): number {
+function getColumnCount(table: TableBase<Node, Node>): number {
     const columnCount = Math.max(
         table.header.children.length,
         ...table.rows.map((row) => row.children.length),
@@ -42,19 +41,22 @@ function buildRowAsHtmlElement<CellNode extends Node>(
     row: TableRow<CellNode>,
     cellTagName: string,
     columnCount: number,
-): HtmlElement<HtmlElement<CellNode>> {
-    const tableRow = HtmlElement<HtmlElement<CellNode>>({ tagName: 'tr' });
-    for (const child of row.children) {
-        addChildren(
-            tableRow,
-            addChildrenC(
-                HtmlElement<CellNode>({ tagName: cellTagName }),
-                child,
-            ),
-        );
-    }
+): HtmlElementNode<HtmlElementNode<CellNode>> {
+    const tableRow = HtmlElementNode({
+        tagName: 'tr',
+        children: row.children.map((child) => {
+            return HtmlElementNode({
+                tagName: cellTagName,
+                children: [child],
+            });
+        }),
+    });
     for (let i = row.children.length; i < columnCount; i++) {
-        addChildren(tableRow, HtmlElement({ tagName: cellTagName }));
+        tableRow.children.push(
+            HtmlElementNode({
+                tagName: cellTagName,
+            }),
+        );
     }
     return tableRow;
 }
@@ -63,42 +65,58 @@ export function writeTable<
     HeaderCellNode extends Node,
     BodyCellNode extends Node
 >(
-    table: Table<HeaderCellNode, BodyCellNode>,
+    table: TableBase<HeaderCellNode, BodyCellNode>,
     output: MarkdownOutput,
-    writeCellNode: (
-        node: HeaderCellNode | BodyCellNode,
-        output: MarkdownOutput,
-    ) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeHeaderCellNode: ParamWriteChildNode<HeaderCellNode>,
+    writeBodyCellNode: ParamWriteChildNode<BodyCellNode>,
 ) {
     const columnCount = getColumnCount(table);
 
     if (output.constrainedToSingleLine) {
-        const tableElement = HtmlElement<
-            HtmlElement<HtmlElement<HeaderCellNode | BodyCellNode>>
-        >({ tagName: 'table' });
-        addChildren(
-            tableElement,
-            buildRowAsHtmlElement(table.header, 'th', columnCount),
-        );
-        for (const row of table.rows) {
-            addChildren(
-                tableElement,
-                buildRowAsHtmlElement(row, 'td', columnCount),
+        const tableElement = HtmlElementNode({
+            tagName: 'table',
+            children: [
+                buildRowAsHtmlElement(table.header, 'th', columnCount),
+                ...table.rows.map((row) =>
+                    buildRowAsHtmlElement(row, 'td', columnCount),
+                ),
+            ],
+        });
+        let isHeader = true;
+        writeCoreNode(tableElement, output, (node) => {
+            writeCoreNode<HtmlElementNode<HeaderCellNode | BodyCellNode>>(
+                node,
+                output,
+                (node) => {
+                    writeCoreNode<HeaderCellNode | BodyCellNode>(
+                        node,
+                        output,
+                        (node) => {
+                            if (isHeader) {
+                                writeHeaderCellNode(
+                                    node as HeaderCellNode,
+                                    output,
+                                );
+                            } else {
+                                writeBodyCellNode(node as BodyCellNode, output);
+                            }
+                        },
+                    );
+                },
             );
-        }
-        // TODO.
-        writeHtmlElement(tableElement, output, (node) => {
-            writeHtmlElement(node, output, (node) => {
-                writeHtmlElement(node, output, (node) => {
-                    writeCellNode(node, output);
-                });
-            });
+            isHeader = false;
         });
     }
 
     output.withParagraphBreak(() => {
         if (table.header) {
-            writeTableRow(table.header, columnCount, output, writeCellNode);
+            writeTableRow(
+                table.header,
+                columnCount,
+                output,
+                writeHeaderCellNode,
+            );
         } else {
             output.write('|  '.repeat(columnCount));
             output.write('|');
@@ -111,7 +129,7 @@ export function writeTable<
 
         for (const row of table.rows) {
             output.ensureNewLine();
-            writeTableRow(row, columnCount, output, writeCellNode);
+            writeTableRow(row, columnCount, output, writeBodyCellNode);
         }
     });
 }

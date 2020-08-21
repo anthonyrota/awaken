@@ -1,3 +1,4 @@
+import each from 'jest-each';
 import { noop } from '../src/util';
 import { throw_ } from './testUtils';
 import {
@@ -7,7 +8,6 @@ import {
     DISPOSED,
     implDisposableMethods,
 } from '@awaken/core';
-import each from 'jest-each';
 
 describe('isDisposable', () => {
     it('should be a function', () => {

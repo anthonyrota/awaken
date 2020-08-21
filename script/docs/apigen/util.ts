@@ -9,10 +9,10 @@
 /* eslint-enable max-len */
 
 import * as os from 'os';
-import * as colors from 'colors';
-import * as ts from 'typescript';
-import * as glob from 'glob';
 import { ApiModel } from '@microsoft/api-extractor-model';
+import * as colors from 'colors';
+import * as glob from 'glob';
+import * as ts from 'typescript';
 import { getAbsolutePath, readJSON } from '../../util/fileUtil';
 
 export function exit(): never {
@@ -106,6 +106,7 @@ export function createProgram(sourceFilePaths: string[]): ts.Program {
 
 export interface Iter<T> {
     next(): T | undefined;
+    peekNext(): T | undefined;
     forEach(cb: (node: T) => void): void;
 }
 
@@ -114,6 +115,9 @@ export function Iter<T>(nodes: readonly T[]): Iter<T> {
     const iter = {
         next(): T | undefined {
             return nodes[idx++];
+        },
+        peekNext(): T | undefined {
+            return nodes[idx];
         },
         forEach(cb: (node: T) => void): void {
             let node: T | undefined;

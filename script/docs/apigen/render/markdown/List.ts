@@ -1,20 +1,20 @@
-import { addChildrenC, addChildren } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { List } from '../../nodes/List';
 import { Node } from '../../nodes';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { ListBase, ListType } from '../../nodes/List';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 function writeListItems<ChildNode extends Node>(
-    list: List<ChildNode>,
+    list: ListBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     for (const [i, child] of list.children.entries()) {
         if (i !== 0) {
             output.ensureNewLine();
         }
-        const listMarker = list.ordered ? `${list.ordered.start + i}. ` : '- ';
+        const listMarker =
+            list.listType === ListType.Ordered ? `${list.start + i}. ` : '- ';
         output.write(listMarker);
         output.withIndent(' '.repeat(listMarker.length), () => {
             output.markStartOfParagraph();
@@ -24,28 +24,31 @@ function writeListItems<ChildNode extends Node>(
 }
 
 export function writeList<ChildNode extends Node>(
-    list: List<ChildNode>,
+    list: ListBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     if (output.constrainedToSingleLine) {
-        const htmlElement = list.ordered
-            ? HtmlElement<HtmlElement<ChildNode>>({
-                  tagName: 'ol',
-                  attributes: { start: `${list.ordered.start}` },
-              })
-            : HtmlElement<HtmlElement<ChildNode>>({ tagName: 'ul' });
-        for (const child of list.children) {
-            addChildren(
-                htmlElement,
-                addChildrenC(
-                    HtmlElement<ChildNode>({ tagName: 'li' }),
-                    child,
-                ),
-            );
-        }
-        writeHtmlElement(htmlElement, output, (node) => {
-            writeHtmlElement(node, output, writeChildNode);
+        const children = list.children.map((child) => {
+            return HtmlElementNode({
+                tagName: 'li',
+                children: [child],
+            });
+        });
+        const htmlElement =
+            list.listType === ListType.Ordered
+                ? HtmlElementNode({
+                      tagName: 'ol',
+                      attributes: { start: `${list.start}` },
+                      children,
+                  })
+                : HtmlElementNode({
+                      tagName: 'ul',
+                      children,
+                  });
+        writeCoreNode(htmlElement, output, (node) => {
+            writeCoreNode(node, output, writeChildNode);
         });
         return;
     }

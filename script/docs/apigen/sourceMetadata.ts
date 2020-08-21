@@ -1,6 +1,6 @@
 import * as path from 'path';
-import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
+import * as ts from 'typescript';
 
 export interface SourceLocation {
     filePath: string;

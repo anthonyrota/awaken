@@ -1,35 +1,32 @@
-import { PlainText } from './../../nodes/PlainText';
-import { Bold } from './../../nodes/Bold';
-import { TableOfContentsList } from './../../nodes/TableOfContentsList';
-import { HtmlElement } from './../../nodes/HtmlElement';
-import { CollapsibleSection } from './../../nodes/CollapsibleSection';
-import { DeepCoreNode } from './../../nodes';
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { TableOfContents } from '../../nodes/TableOfContents';
+import { DeepCoreNode } from '../../nodes';
+import { BoldNode } from '../../nodes/Bold';
+import { CollapsibleSectionNode } from '../../nodes/CollapsibleSection';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { PlainTextNode } from '../../nodes/PlainText';
+import { TableOfContentsBase } from '../../nodes/TableOfContents';
+import { TableOfContentsListNode } from '../../nodes/TableOfContentsList';
 import { MarkdownOutput } from './MarkdownOutput';
+import { ParamWriteCoreNode, writeDeepCoreNode } from '.';
 
 export function writeTableOfContents(
-    tableOfContents: TableOfContents,
+    tableOfContents: TableOfContentsBase,
     output: MarkdownOutput,
-    writeDeepCoreNode: (node: DeepCoreNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
 ): void {
     writeDeepCoreNode(
-        addChildrenC<
-            DeepCoreNode,
-            CollapsibleSection<DeepCoreNode, DeepCoreNode>
-        >(
-            CollapsibleSection<DeepCoreNode, DeepCoreNode>({
-                summaryNode: addChildrenC<DeepCoreNode, Bold<DeepCoreNode>>(
-                    Bold<DeepCoreNode>(),
-                    PlainText({ text: 'Table of Contents' }),
-                ),
+        CollapsibleSectionNode<DeepCoreNode, DeepCoreNode>({
+            summaryNode: BoldNode<DeepCoreNode>({
+                children: [PlainTextNode({ text: 'Table of Contents' })],
             }),
-            HtmlElement({ tagName: 'br' }),
-            TableOfContentsList({
-                tableOfContents: tableOfContents.tableOfContents,
-                relativePagePath: tableOfContents.relativePagePath,
-            }),
-        ),
+            children: [
+                HtmlElementNode({ tagName: 'br' }),
+                TableOfContentsListNode({
+                    tableOfContents: tableOfContents.tableOfContents,
+                    relativePagePath: tableOfContents.relativePagePath,
+                }),
+            ],
+        }),
         output,
+        writeCoreNode,
     );
 }

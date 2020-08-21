@@ -1,14 +1,31 @@
-import { ContainerBase } from './abstract/ContainerBase';
+import { ContainerBase, ContainerParameters } from './Container';
 import { Node, CoreNodeType } from '.';
 
-export interface Italics<ChildNode extends Node>
-    extends ContainerBase<ChildNode> {
+export interface ItalicsParameters<ChildNode extends Node>
+    extends ContainerParameters<ChildNode> {}
+
+export interface ItalicsBase<ChildNode extends Node>
+    extends ContainerBase<ChildNode> {}
+
+export function ItalicsBase<ChildNode extends Node>(
+    parameters: ItalicsParameters<ChildNode>,
+): ItalicsBase<ChildNode> {
+    return {
+        ...ContainerBase<ChildNode>({ children: parameters.children }),
+    };
+}
+
+export interface ItalicsNode<ChildNode extends Node>
+    extends ItalicsBase<ChildNode>,
+        Node {
     type: CoreNodeType.Italics;
 }
 
-export function Italics<ChildNode extends Node>(): Italics<ChildNode> {
+export function ItalicsNode<ChildNode extends Node>(
+    parameters: ItalicsParameters<ChildNode>,
+): ItalicsNode<ChildNode> {
     return {
         type: CoreNodeType.Italics,
-        ...ContainerBase<ChildNode>(),
+        ...ItalicsBase(parameters),
     };
 }

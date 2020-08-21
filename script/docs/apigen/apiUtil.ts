@@ -1,40 +1,35 @@
-import { Subheading } from './nodes/Subheading';
-import { Bold } from './nodes/Bold';
-import { CollapsibleSection } from './nodes/CollapsibleSection';
-import { PageTitle } from './nodes/PageTitle';
-import { DoNotEditComment } from './nodes/DoNotEditComment';
-import { TableOfContents as TableOfContentsNode } from './nodes/TableOfContents';
-import { LocalPageLink } from './nodes/LocalPageLink';
-import { Page } from './nodes/Page';
-import { CodeSpan } from './nodes/CodeSpan';
-import { Heading } from './nodes/Heading';
-import { Container } from './nodes/Container';
-import * as ts from 'typescript';
-import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as aeModel from '@microsoft/api-extractor-model';
+import * as fs from 'fs-extra';
 import * as _ from 'lodash';
-import * as writeUtil from './writeUtil';
+import * as ts from 'typescript';
 import {
     TableOfContentsInlineReference,
     TableOfContentsNestedReference,
     TableOfContentsMainReference,
     TableOfContents,
 } from '../pageMetadata';
-import { SourceMetadata } from './sourceMetadata';
+import { DeepCoreNode } from './nodes';
+import { BoldNode } from './nodes/Bold';
+import { CodeSpanNode } from './nodes/CodeSpan';
+import { CollapsibleSectionNode } from './nodes/CollapsibleSection';
+import { ContainerNode, ContainerBase } from './nodes/Container';
+import { DoNotEditCommentNode } from './nodes/DoNotEditComment';
+import { HeadingNode } from './nodes/Heading';
+import { LocalPageLinkNode } from './nodes/LocalPageLink';
+import { PageNode } from './nodes/Page';
+import { PageTitleNode } from './nodes/PageTitle';
+import { PlainTextNode } from './nodes/PlainText';
+import { SubheadingNode } from './nodes/Subheading';
+import { TableOfContentsNode } from './nodes/TableOfContents';
 import {
     APIPageData,
     assertMappedApiItemNames,
     forEachPackageWithPages,
 } from './paths';
-import { DeepCoreNode } from './nodes';
-import {
-    addChildren,
-    addChildrenC,
-    ContainerBase,
-} from './nodes/abstract/ContainerBase';
-import { PlainText } from './nodes/PlainText';
 import { renderDeepCoreNodeAsMarkdown } from './render/markdown';
+import { SourceMetadata } from './sourceMetadata';
+import * as writeUtil from './writeUtil';
 
 interface ExportImplementation<T extends aeModel.ApiItem> {
     readonly actualKind: aeModel.ApiItemKind;
@@ -70,7 +65,7 @@ class ExportFunctionImplementation
         return this._displayName !== undefined;
     }
 
-    public writeAsMarkdown(out: Container<DeepCoreNode>): void {
+    public writeAsMarkdown(out: ContainerBase<DeepCoreNode>): void {
         if (this._displayName === undefined) {
             throw new Error('Not implemented.');
         }
@@ -97,7 +92,7 @@ class ExportFunctionImplementation
             context,
             this.simplifiedKind,
         );
-        const baseDocContainer = Container<DeepCoreNode>();
+        const baseDocContainer = ContainerNode<DeepCoreNode>({});
         writeUtil.writeBaseDoc(
             baseDocContainer,
             this._overloads[0],
@@ -112,11 +107,11 @@ class ExportFunctionImplementation
         );
 
         let didNotOnlyWriteSignature = true;
-        const overloadsContainer = Container<DeepCoreNode>();
+        const overloadsContainer = ContainerNode<DeepCoreNode>({});
 
         for (const fn of this._overloads) {
             const _didNotOnlyWriteSignature = didNotOnlyWriteSignature;
-            const overloadContainer = Container<DeepCoreNode>();
+            const overloadContainer = ContainerNode<DeepCoreNode>({});
             const didWriteSummary = writeUtil.writeSummary(
                 overloadContainer,
                 fn,
@@ -145,8 +140,7 @@ class ExportFunctionImplementation
             if (_didNotOnlyWriteSignature || didNotOnlyWriteSignature) {
                 writeUtil.writeSignature(overloadsContainer, fn, context);
                 if (didNotOnlyWriteSignature) {
-                    addChildren(
-                        overloadsContainer,
+                    overloadsContainer.children.push(
                         ...overloadContainer.children,
                     );
                 }
@@ -159,8 +153,8 @@ class ExportFunctionImplementation
             }
         }
 
-        addChildren(out, ...baseDocContainer.children);
-        addChildren(out, ...overloadsContainer.children);
+        out.children.push(...baseDocContainer.children);
+        out.children.push(...overloadsContainer.children);
     }
 }
 
@@ -412,15 +406,14 @@ class ExportImplementationGroup {
         ) {
             throw new Error('No implementations.');
         }
-        addChildren(
-            container,
-            addChildrenC(
-                Heading<CodeSpan<PlainText>>({}),
-                addChildrenC(
-                    CodeSpan<PlainText>(),
-                    PlainText({ text: this._displayName }),
-                ),
-            ),
+        container.children.push(
+            HeadingNode({
+                children: [
+                    CodeSpanNode({
+                        children: [PlainTextNode({ text: this._displayName })],
+                    }),
+                ],
+            }),
         );
         for (const [, impl] of this._implementations) {
             if (impl.hasImplementation()) {
@@ -527,7 +520,7 @@ class ApiPage {
             this.tableOfContents.push(reference);
         }
 
-        const page = Page<DeepCoreNode>({
+        const page = PageNode<DeepCoreNode>({
             metadata: {
                 title: this._pageData.title,
                 table_of_contents: this.tableOfContents,
@@ -612,8 +605,8 @@ export class ApiPageMap {
 
         interface GetPageLinksFunction {
             (inBase: boolean): {
-                headingLink: DeepCoreNode;
-                tableOfContents: DeepCoreNode;
+                headingLink: LocalPageLinkNode<DeepCoreNode>;
+                tableOfContents: TableOfContentsNode;
             }[];
         }
 
@@ -621,7 +614,7 @@ export class ApiPageMap {
             string,
             {
                 isOneIndexPagePackage: boolean;
-                pageTitleTextNode: DeepCoreNode;
+                pageTitleTextNode: PlainTextNode;
                 getPageLinks: GetPageLinksFunction;
             }
         >();
@@ -629,7 +622,7 @@ export class ApiPageMap {
         forEachPackageWithPages((packageName, pages) => {
             const isOneIndexPagePackage =
                 pages.length === 1 && pages[0][0] === '_index';
-            const pageTitleTextNode = PlainText({
+            const pageTitleTextNode = PlainTextNode({
                 text: `API Reference - ${_.upperFirst(
                     _.camelCase(packageName),
                 )}`,
@@ -643,10 +636,10 @@ export class ApiPageMap {
                         ? `${packageName}/${pageName}`
                         : pageName;
                     return {
-                        headingLink: addChildrenC(
-                            LocalPageLink<PlainText>({ destination: pagePath }),
-                            PlainText({ text: page.title }),
-                        ),
+                        headingLink: LocalPageLinkNode({
+                            destination: pagePath,
+                            children: [PlainTextNode({ text: page.title })],
+                        }),
                         tableOfContents: TableOfContentsNode({
                             // eslint-disable-next-line max-len
                             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -672,20 +665,22 @@ export class ApiPageMap {
                 return;
             }
 
-            const contents = addChildrenC(
-                Container<DeepCoreNode>(),
-                DoNotEditComment(),
-                addChildrenC<DeepCoreNode, PageTitle<DeepCoreNode>>(
-                    PageTitle<DeepCoreNode>({}),
-                    pageTitleTextNode,
-                ),
-                ...getPageLinks(
-                    false,
-                ).flatMap(({ headingLink, tableOfContents }) => [
-                    addChildrenC(Heading<DeepCoreNode>({}), headingLink),
-                    tableOfContents,
-                ]),
-            );
+            const contents = ContainerNode({
+                children: [
+                    DoNotEditCommentNode({}),
+                    PageTitleNode({
+                        children: [pageTitleTextNode],
+                    }),
+                    ...getPageLinks(false).flatMap(
+                        ({ headingLink, tableOfContents }) => [
+                            HeadingNode({
+                                children: [headingLink],
+                            }),
+                            tableOfContents,
+                        ],
+                    ),
+                ],
+            });
 
             renderedDirectoryMap.addContentAtPath(
                 `${packageName}/README.md`,
@@ -694,64 +689,61 @@ export class ApiPageMap {
         });
 
         const packageNameAndSummaries = packageNameToPageSummaryMap.entries();
-        const packageSummaries = Array.from(packageNameAndSummaries).flatMap(
-            ([packageName, packageSummary]) => {
-                const {
-                    isOneIndexPagePackage,
-                    pageTitleTextNode,
-                    getPageLinks,
-                } = packageSummary;
+        const packageSummaries = Array.from(packageNameAndSummaries).flatMap<
+            DeepCoreNode
+        >(([packageName, packageSummary]) => {
+            const {
+                isOneIndexPagePackage,
+                pageTitleTextNode,
+                getPageLinks,
+            } = packageSummary;
 
-                const heading = addChildrenC<
-                    DeepCoreNode,
-                    Heading<DeepCoreNode>
-                >(
-                    Heading<DeepCoreNode>({}),
-                    addChildrenC(
-                        LocalPageLink<DeepCoreNode>({
-                            destination: `${packageName}/README`,
-                        }),
-                        pageTitleTextNode,
-                    ),
-                );
+            const heading = HeadingNode({
+                children: [
+                    LocalPageLinkNode({
+                        destination: `${packageName}/README`,
+                        children: [pageTitleTextNode],
+                    }),
+                ],
+            });
 
-                if (isOneIndexPagePackage) {
-                    const { tableOfContents } = getPageLinks(true)[0];
-                    return [heading, tableOfContents];
-                }
+            if (isOneIndexPagePackage) {
+                const { tableOfContents } = getPageLinks(true)[0];
+                return [heading, tableOfContents];
+            }
 
-                return [
-                    heading,
-                    addChildrenC(
-                        CollapsibleSection<DeepCoreNode, DeepCoreNode>({
-                            summaryNode: addChildrenC(
-                                Bold<PlainText>(),
-                                PlainText({ text: 'Table of Contents' }),
-                            ),
-                        }),
-                        ...getPageLinks(
-                            true,
-                        ).flatMap(({ headingLink, tableOfContents }) => [
-                            addChildrenC(
-                                Subheading<DeepCoreNode>({}),
-                                headingLink,
-                            ),
+            return [
+                heading,
+                CollapsibleSectionNode({
+                    summaryNode: BoldNode({
+                        children: [
+                            PlainTextNode({ text: 'Table of Contents' }),
+                        ],
+                    }),
+                    children: getPageLinks(true).flatMap(
+                        ({ headingLink, tableOfContents }) => [
+                            SubheadingNode({
+                                children: [headingLink],
+                            }),
                             tableOfContents,
-                        ]),
+                        ],
                     ),
-                ];
-            },
-        );
+                }),
+            ];
+        });
 
-        const contents = addChildrenC(
-            Container<DeepCoreNode>(),
-            DoNotEditComment(),
-            addChildrenC(
-                PageTitle<PlainText>({}),
-                PlainText({ text: 'Awaken API Reference' }),
-            ),
-            ...packageSummaries,
-        );
+        const contents = ContainerNode<DeepCoreNode>({
+            children: [
+                DoNotEditCommentNode({}),
+                PageTitleNode({
+                    children: [PlainTextNode({ text: 'Awaken API Reference' })],
+                }),
+                // TODO.
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                ...packageSummaries,
+            ],
+        });
 
         renderedDirectoryMap.addContentAtPath(
             'README.md',
@@ -763,8 +755,8 @@ export class ApiPageMap {
 }
 
 class Folder {
-    public files = new Map<string, string>();
     public folders = new Map<string, Folder>();
+    public files = new Map<string, string>();
 }
 
 class RenderedDirectoryMap {

@@ -1,28 +1,26 @@
-import { Link } from '../../nodes/Link';
-import { LocalPageLink } from '../../nodes/LocalPageLink';
 import { Node } from '../../nodes';
+import { LinkNode } from '../../nodes/Link';
+import { LocalPageLinkBase } from '../../nodes/LocalPageLink';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeLink } from './Link';
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeLocalPageLink<ChildNode extends Node>(
-    localPageLink: LocalPageLink<ChildNode>,
+    localPageLink: LocalPageLinkBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     const [path, hash] = localPageLink.destination.split('#');
-    writeLink(
-        addChildrenC(
-            Link<ChildNode>({
-                destination: path
-                    ? hash
-                        ? `${path}.md#${hash}`
-                        : `${path}.md`
-                    : `#${hash}`,
-                title: localPageLink.title,
-            }),
-            ...localPageLink.children,
-        ),
+    writeCoreNode(
+        LinkNode<ChildNode>({
+            destination: path
+                ? hash
+                    ? `${path}.md#${hash}`
+                    : `${path}.md`
+                : `#${hash}`,
+            title: localPageLink.title,
+            children: localPageLink.children,
+        }),
         output,
         writeChildNode,
     );

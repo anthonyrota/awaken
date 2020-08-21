@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+const rimraf = require('rimraf');
 const {
     getAbsolutePath,
     renameOutputModule,
 } = require('../../script/util/fileUtil');
-const rimraf = require('rimraf');
 
 renameOutputModule({
     from: getAbsolutePath('dist', 'awakenTesting.module.js'),

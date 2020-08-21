@@ -1,16 +1,31 @@
-import { ContainerBase } from './abstract/ContainerBase';
+import { ContainerBase, ContainerParameters } from './Container';
 import { Node, CoreNodeType } from '.';
 
-export interface Strikethrough<ChildNode extends Node>
-    extends ContainerBase<ChildNode> {
+export interface StrikethroughParameters<ChildNode extends Node>
+    extends ContainerParameters<ChildNode> {}
+
+export interface StrikethroughBase<ChildNode extends Node>
+    extends ContainerBase<ChildNode> {}
+
+export function StrikethroughBase<ChildNode extends Node>(
+    parameters: StrikethroughParameters<ChildNode>,
+): StrikethroughBase<ChildNode> {
+    return {
+        ...ContainerBase<ChildNode>({ children: parameters.children }),
+    };
+}
+
+export interface StrikethroughNode<ChildNode extends Node>
+    extends StrikethroughBase<ChildNode>,
+        Node {
     type: CoreNodeType.Strikethrough;
 }
 
-export function Strikethrough<ChildNode extends Node>(): Strikethrough<
-    ChildNode
-> {
+export function StrikethroughNode<ChildNode extends Node>(
+    parameters: StrikethroughParameters<ChildNode>,
+): StrikethroughNode<ChildNode> {
     return {
         type: CoreNodeType.Strikethrough,
-        ...ContainerBase<ChildNode>(),
+        ...StrikethroughBase(parameters),
     };
 }

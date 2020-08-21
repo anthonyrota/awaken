@@ -10,39 +10,35 @@
  */
 /* eslint-enable max-len */
 
-import * as colors from 'colors';
-import * as ts from 'typescript';
+import * as aeModel from '@microsoft/api-extractor-model';
 import * as tsdoc from '@microsoft/tsdoc';
 import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
-import * as aeModel from '@microsoft/api-extractor-model';
+import * as colors from 'colors';
+import * as ts from 'typescript';
 import * as uuid from 'uuid';
+import { BlockQuoteNode } from './nodes/BlockQuote';
+import { CodeBlockNode } from './nodes/CodeBlock';
+import { CodeSpanNode } from './nodes/CodeSpan';
+import { ContainerNode, ContainerBase } from './nodes/Container';
+import { GithubSourceLinkNode } from './nodes/GithubSourceLink';
+import { HtmlElementNode } from './nodes/HtmlElement';
+import { CoreNode, Node, DeepCoreNode, CoreNodeType } from './nodes/index';
+import { LinkNode } from './nodes/Link';
+import { ListNode, ListType } from './nodes/List';
+import { LocalPageLinkNode } from './nodes/LocalPageLink';
+import { ParagraphNode } from './nodes/Paragraph';
+import { PlainTextNode } from './nodes/PlainText';
+import { RichCodeBlockNode } from './nodes/RichCodeBlock';
+import { SubheadingNode } from './nodes/Subheading';
+import { TableNode, TableRow } from './nodes/Table';
+import { TitleNode } from './nodes/Title';
+import { parseMarkdown } from './nodes/util/parseMarkdown';
 import { outDir, getMainPathOfApiItemName } from './paths';
 import { SourceMetadata } from './sourceMetadata';
 import { Iter, StringBuilder } from './util';
-import {
-    addChildren,
-    isContainerBase,
-    addChildrenC,
-    ContainerBase,
-    getLastNestedChild,
-} from './nodes/abstract/ContainerBase';
-import { parseMarkdown } from './nodes/util/parseMarkdown';
-import { PlainText } from './nodes/PlainText';
-import { Table, TableRow, addTableRowC, addTableRow } from './nodes/Table';
-import { RichCodeBlock } from './nodes/RichCodeBlock';
-import { GithubSourceLink } from './nodes/GithubSourceLink';
-import { BlockQuote } from './nodes/BlockQuote';
-import { List } from './nodes/List';
-import { Subheading } from './nodes/Subheading';
-import { Title } from './nodes/Title';
-import { Link } from './nodes/Link';
-import { LocalPageLink } from './nodes/LocalPageLink';
-import { CodeBlock } from './nodes/CodeBlock';
-import { Paragraph } from './nodes/Paragraph';
-import { CodeSpan } from './nodes/CodeSpan';
-import { CoreNode, Node, DeepCoreNode, CoreNodeType } from './nodes/index';
-import { HtmlElement } from './nodes/HtmlElement';
-import { Container } from './nodes/Container';
+
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 export interface Context {
     sourceMetadata: SourceMetadata;
@@ -115,7 +111,7 @@ interface TSDocNodeWriteContext {
     container: ContainerBase<MarkdownParsingNode>;
     embeddedNodeContext: EmbeddedNodeContext;
     nodeIter: Iter<tsdoc.DocNode>;
-    htmlTagStack: HtmlElement<MarkdownParsingNode>[];
+    htmlTagStack: HtmlElementNode<MarkdownParsingNode>[];
     apiItem: aeModel.ApiItem;
 }
 
@@ -127,7 +123,7 @@ function writeApiItemDocNode(
 ): void {
     const nodeIter = Iter([docNode]);
     nodeIter.next();
-    const container_ = Container<MarkdownParsingNode>();
+    const container_ = ContainerNode<MarkdownParsingNode>({});
     const embeddedNodeContext = new EmbeddedNodeContext();
     const context_ = {
         context,
@@ -144,9 +140,8 @@ function writeApiItemDocNode(
             context: embeddedNodeContext,
         });
         substituteEmbeddedNodes(embeddedNode, embeddedNodeContext);
-        addChildren(
-            container,
-            (container_ as unknown) as Container<DeepCoreNode>,
+        container.children.push(
+            (container_ as unknown) as ContainerNode<DeepCoreNode>,
         );
     }
 }
@@ -245,7 +240,7 @@ function substituteEmbeddedNodes(
     embeddedNode: EmbeddedNode,
     context: EmbeddedNodeContext,
 ): void {
-    if (!isContainerBase(embeddedNode.originalNode)) {
+    if (!('children' in embeddedNode.originalNode)) {
         return;
     }
 
@@ -272,7 +267,7 @@ function _substituteEmbeddedNodes(
     node: ContainerBase<DeepCoreNode>,
 ): void {
     for (const [i, child] of node.children.entries()) {
-        if (isContainerBase(child)) {
+        if ('children' in child) {
             _substituteEmbeddedNodes(embeddedNode, context, child);
         } else if (child.type === CoreNodeType.HtmlComment) {
             const embeddedNode = context.extractNodeFromComment(child.comment);
@@ -293,17 +288,30 @@ function writeNode(
     switch (docNode.kind) {
         case tsdoc.DocNodeKind.PlainText: {
             const docPlainText = docNode as tsdoc.DocPlainText;
-            addChildren(container, RawText({ text: docPlainText.text }));
+            const textNode = RawText({ text: docPlainText.text });
+            container.children.push(textNode);
+            let node: tsdoc.DocNode | undefined;
+            let foundSoftBreak = false;
+            while ((node = context.nodeIter.peekNext())) {
+                if (node.kind === tsdoc.DocNodeKind.SoftBreak) {
+                    foundSoftBreak = true;
+                    context.nodeIter.next();
+                } else {
+                    break;
+                }
+            }
+            if (foundSoftBreak) {
+                textNode.text += ' ';
+            }
             break;
         }
         case tsdoc.DocNodeKind.HtmlStartTag: {
             const docStartTag = docNode as tsdoc.DocHtmlStartTag;
             const oldContainer = container;
-            const htmlElement = HtmlElement<MarkdownParsingNode>({
+            const htmlElement = HtmlElementNode<MarkdownParsingNode>({
                 tagName: docStartTag.name,
             });
-            addChildren(
-                oldContainer,
+            oldContainer.children.push(
                 EmbeddedNode({
                     originalNode: htmlElement,
                     context: context.embeddedNodeContext,
@@ -344,19 +352,18 @@ function writeNode(
         }
         case tsdoc.DocNodeKind.CodeSpan: {
             const docCodeSpan = docNode as tsdoc.DocCodeSpan;
-            addChildren(
-                container,
+            container.children.push(
                 EmbeddedNode({
-                    originalNode: addChildrenC<
-                        MarkdownParsingNode,
-                        CodeSpan<MarkdownParsingNode>
-                    >(
-                        CodeSpan<MarkdownParsingNode>(),
-                        EmbeddedNode({
-                            originalNode: PlainText({ text: docCodeSpan.code }),
-                            context: context.embeddedNodeContext,
-                        }),
-                    ),
+                    originalNode: CodeSpanNode<MarkdownParsingNode>({
+                        children: [
+                            EmbeddedNode({
+                                originalNode: PlainTextNode({
+                                    text: docCodeSpan.code,
+                                }),
+                                context: context.embeddedNodeContext,
+                            }),
+                        ],
+                    }),
                     context: context.embeddedNodeContext,
                 }),
             );
@@ -369,10 +376,11 @@ function writeNode(
             } else if (docLinkTag.urlDestination) {
                 writeLinkTagWithUrlDestination(docLinkTag, context);
             } else if (docLinkTag.linkText) {
-                addChildren(
-                    container,
+                container.children.push(
                     EmbeddedNode({
-                        originalNode: PlainText({ text: docLinkTag.linkText }),
+                        originalNode: PlainTextNode({
+                            text: docLinkTag.linkText,
+                        }),
                         context: context.embeddedNodeContext,
                     }),
                 );
@@ -386,14 +394,13 @@ function writeNode(
                 docParagraph,
             );
             const oldContainer = container;
-            const paragraph = Paragraph<MarkdownParsingNode>();
+            const paragraph = ParagraphNode<MarkdownParsingNode>({});
             context.container = paragraph;
             for (const node of trimmedParagraph.nodes) {
                 writeNode(node, context);
             }
             if (paragraph.children.length > 0) {
-                addChildren(
-                    oldContainer,
+                oldContainer.children.push(
                     EmbeddedNode({
                         originalNode: paragraph,
                         context: context.embeddedNodeContext,
@@ -405,10 +412,9 @@ function writeNode(
         }
         case tsdoc.DocNodeKind.FencedCode: {
             const docFencedCode = docNode as tsdoc.DocFencedCode;
-            addChildren(
-                container,
+            container.children.push(
                 EmbeddedNode({
-                    originalNode: CodeBlock({
+                    originalNode: CodeBlockNode({
                         language: docFencedCode.language,
                         code: docFencedCode.code,
                     }),
@@ -425,33 +431,20 @@ function writeNode(
             break;
         }
         case tsdoc.DocNodeKind.SoftBreak: {
-            const lastChild = getLastNestedChild(container);
-            // TODO: fix.
-            if (
-                lastChild &&
-                lastChild.type === MarkdownParsingNodeType.RawText
-            ) {
-                const rawText = lastChild as RawText;
-                if (rawText.text && !/\s$/.test(rawText.text)) {
-                    rawText.text += ' ';
-                }
-            } else {
-                addChildren(
-                    container,
-                    EmbeddedNode({
-                        originalNode: PlainText({ text: ' ' }),
-                        context: context.embeddedNodeContext,
-                    }),
-                );
-            }
+            // TODO: RawText?
+            container.children.push(
+                EmbeddedNode({
+                    originalNode: PlainTextNode({ text: ' ' }),
+                    context: context.embeddedNodeContext,
+                }),
+            );
             break;
         }
         case tsdoc.DocNodeKind.EscapedText: {
             const docEscapedText = docNode as tsdoc.DocEscapedText;
-            addChildren(
-                container,
+            container.children.push(
                 EmbeddedNode({
-                    originalNode: PlainText({
+                    originalNode: PlainTextNode({
                         text: docEscapedText.decodedText,
                     }),
                     context: context.embeddedNodeContext,
@@ -461,10 +454,9 @@ function writeNode(
         }
         case tsdoc.DocNodeKind.ErrorText: {
             const docErrorText = docNode as tsdoc.DocErrorText;
-            addChildren(
-                container,
+            container.children.push(
                 EmbeddedNode({
-                    originalNode: PlainText({ text: docErrorText.text }),
+                    originalNode: PlainTextNode({ text: docErrorText.text }),
                     context: context.embeddedNodeContext,
                 }),
             );
@@ -503,9 +495,8 @@ function writeLinkTagWithCodeDestination(
     if (!identifier) {
         throw new Error('No.');
     }
-    const codeSpan = HtmlElement<MarkdownParsingNode>({ tagName: 'code' });
-    addChildren(
-        context.container,
+    const codeSpan = HtmlElementNode<MarkdownParsingNode>({ tagName: 'code' });
+    context.container.children.push(
         EmbeddedNode({
             originalNode: codeSpan,
             context: context.embeddedNodeContext,
@@ -515,22 +506,22 @@ function writeLinkTagWithCodeDestination(
         getApiItemName(context.apiItem),
         identifier,
     );
-    addChildren(
-        codeSpan,
-
+    codeSpan.children.push(
         EmbeddedNode({
-            originalNode: addChildrenC(
-                LocalPageLink<EmbeddedNode>({ destination }),
-                EmbeddedNode({
-                    originalNode: PlainText({
-                        text:
-                            docLinkTag.linkText !== undefined
-                                ? docLinkTag.linkText
-                                : identifier,
+            originalNode: LocalPageLinkNode<EmbeddedNode>({
+                destination,
+                children: [
+                    EmbeddedNode({
+                        originalNode: PlainTextNode({
+                            text:
+                                docLinkTag.linkText !== undefined
+                                    ? docLinkTag.linkText
+                                    : identifier,
+                        }),
+                        context: context.embeddedNodeContext,
                     }),
-                    context: context.embeddedNodeContext,
-                }),
-            ),
+                ],
+            }),
             context: context.embeddedNodeContext,
         }),
     );
@@ -547,18 +538,19 @@ function writeLinkTagWithUrlDestination(
             ? docLinkTag.linkText
             : urlDestination;
 
-    addChildren(
-        context.container,
+    context.container.children.push(
         EmbeddedNode({
-            originalNode: addChildrenC(
-                Link<EmbeddedNode>({ destination: urlDestination }),
-                EmbeddedNode({
-                    originalNode: PlainText({
-                        text: linkText.replace(/\s+/g, ' '),
+            originalNode: LinkNode<EmbeddedNode>({
+                destination: urlDestination,
+                children: [
+                    EmbeddedNode({
+                        originalNode: PlainTextNode({
+                            text: linkText.replace(/\s+/g, ' '),
+                        }),
+                        context: context.embeddedNodeContext,
                     }),
-                    context: context.embeddedNodeContext,
-                }),
-            ),
+                ],
+            }),
             context: context.embeddedNodeContext,
         }),
     );
@@ -663,12 +655,10 @@ export function writeExamples(
 ): boolean {
     let didWrite = false;
     for (const exampleBlock of getExampleBlocks(docComment)) {
-        addChildren(
-            container,
-            addChildrenC(
-                Title<PlainText>({}),
-                PlainText({ text: 'Example Usage' }),
-            ),
+        container.children.push(
+            TitleNode({
+                children: [PlainTextNode({ text: 'Example Usage' })],
+            }),
         );
         for (const block of exampleBlock.getChildNodes()) {
             writeApiItemDocNode(container, apiItem, block, context);
@@ -721,19 +711,21 @@ export function writeApiItemAnchor(
     textKind: string,
 ): void {
     if (hasMultipleKinds(apiItem, context)) {
-        addChildren(
-            container,
-            addChildrenC(
-                Subheading<CodeSpan<PlainText>>({
-                    alternateId: getMultiKindApiItemAnchorName(apiItem),
-                }),
-                addChildrenC(
-                    CodeSpan<PlainText>(),
-                    PlainText({
-                        text: `${getApiItemName(apiItem)} - ${textKind}`,
+        container.children.push(
+            SubheadingNode({
+                alternateId: getMultiKindApiItemAnchorName(apiItem),
+                children: [
+                    CodeSpanNode({
+                        children: [
+                            PlainTextNode({
+                                text: `${getApiItemName(
+                                    apiItem,
+                                )} - ${textKind}`,
+                            }),
+                        ],
                     }),
-                ),
-            ),
+                ],
+            }),
         );
     }
 }
@@ -800,9 +792,10 @@ function writeReturnsBlockWithoutType(
         return;
     }
 
-    addChildren(
-        container,
-        addChildrenC(Title<PlainText>({}), PlainText({ text: 'Returns' })),
+    container.children.push(
+        TitleNode({
+            children: [PlainTextNode({ text: 'Returns' })],
+        }),
     );
     for (const node of docComment.returnsBlock.content.nodes) {
         writeApiItemDocNode(container, apiItem, node, context);
@@ -830,9 +823,10 @@ export function writeSignature(
         | aeModel.ApiTypeAlias,
     context: Context,
 ): void {
-    addChildren(
-        container,
-        addChildrenC(Title<PlainText>({}), PlainText({ text: 'Signature' })),
+    container.children.push(
+        TitleNode({
+            children: [PlainTextNode({ text: 'Signature' })],
+        }),
     );
     writeSignatureExcerpt(container, apiItem, context);
 }
@@ -843,20 +837,21 @@ export function writeSeeBlocks(
     context: Context,
     docComment = getDocComment(apiItem),
 ): boolean {
-    const list = List<DeepCoreNode>({});
+    const list = ListNode<DeepCoreNode>({ listType: ListType.Unordered });
     for (const seeBlock of getSeeBlocks(docComment)) {
-        const listItem = Container<DeepCoreNode>();
-        addChildren(list, listItem);
+        const listItem = ContainerNode<DeepCoreNode>({});
+        list.children.push(listItem);
         for (const block of seeBlock.getChildNodes()) {
             writeApiItemDocNode(listItem, apiItem, block, context);
         }
     }
     if (list.children.length > 0) {
-        addChildren(
-            container,
-            addChildrenC(Title<PlainText>({}), PlainText({ text: 'See Also' })),
+        container.children.push(
+            TitleNode({
+                children: [PlainTextNode({ text: 'See Also' })],
+            }),
         );
-        addChildren(container, list);
+        container.children.push(list);
         return true;
     }
     return false;
@@ -891,20 +886,16 @@ export function writeSourceLocation(
     const sourceGithubPath = `${sourceLocation.filePath}#L${sourceLocation.lineNumber}`;
     const relativePath = getRelativePath(currentApiItemPath, sourceGithubPath);
 
-    addChildren(
-        container,
-        // Man...
-        addChildrenC<
-            PlainText | GithubSourceLink<PlainText>,
-            BlockQuote<PlainText | GithubSourceLink<PlainText>>
-        >(
-            BlockQuote<PlainText | GithubSourceLink<PlainText>>(),
-            PlainText({ text: 'Source Location: ' }),
-            addChildrenC(
-                GithubSourceLink<PlainText>({ destination: relativePath }),
-                PlainText({ text: sourceGithubPath }),
-            ),
-        ),
+    container.children.push(
+        BlockQuoteNode({
+            children: [
+                PlainTextNode({ text: 'Source Location: ' }),
+                GithubSourceLinkNode({
+                    destination: relativePath,
+                    children: [PlainTextNode({ text: sourceGithubPath })],
+                }),
+            ],
+        }),
     );
 }
 
@@ -914,8 +905,8 @@ function appendExcerptWithHyperlinks(
     apiItem: aeModel.ApiItem,
     context: Context,
 ): void {
-    const codeBlock = RichCodeBlock<DeepCoreNode>({ language: 'ts' });
-    addChildren(container, codeBlock);
+    const codeBlock = RichCodeBlockNode<DeepCoreNode>({ language: 'ts' });
+    container.children.push(codeBlock);
 
     const spannedTokens = excerpt.spannedTokens.slice();
     let token: aeModel.ExcerptToken | undefined;
@@ -929,22 +920,19 @@ function appendExcerptWithHyperlinks(
         );
 
         if (result === null) {
-            addChildren(codeBlock, PlainText({ text: tokenText }));
+            codeBlock.children.push(PlainTextNode({ text: tokenText }));
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
-            addChildren(
-                codeBlock,
-                addChildrenC(
-                    LocalPageLink<PlainText>({
-                        destination: getLinkToApiItem(
-                            getApiItemName(apiItem),
-                            result.apiItem,
-                            context,
-                        ),
-                    }),
-                    PlainText({ text: tokenText }),
-                ),
+            codeBlock.children.push(
+                LocalPageLinkNode({
+                    destination: getLinkToApiItem(
+                        getApiItemName(apiItem),
+                        result.apiItem,
+                        context,
+                    ),
+                    children: [PlainTextNode({ text: tokenText })],
+                }),
             );
         } else {
             spannedTokens.unshift(...result.tokens);
@@ -958,10 +946,10 @@ function createNodeForTypeExcerpt(
     context: Context,
 ): DeepCoreNode {
     if (!excerpt.text.trim()) {
-        return PlainText({ text: '(not declared)' });
+        return PlainTextNode({ text: '(not declared)' });
     }
 
-    const container = Container<DeepCoreNode>();
+    const container = ContainerNode<DeepCoreNode>({});
 
     appendExcerptWithHyperlinks(container, excerpt, apiItem, context);
 
@@ -974,48 +962,48 @@ export function writeParameters(
     context: Context,
 ): boolean {
     let didWrite = false;
-    const parametersTable = Table<DeepCoreNode, DeepCoreNode>({
-        header: addChildrenC(
-            TableRow<PlainText>(),
-            PlainText({ text: 'Parameter' }),
-            PlainText({ text: 'Type' }),
-            PlainText({ text: 'Description' }),
-        ),
+    const parametersTable = TableNode<DeepCoreNode, DeepCoreNode>({
+        header: TableRow({
+            children: [
+                PlainTextNode({ text: 'Parameter' }),
+                PlainTextNode({ text: 'Type' }),
+                PlainTextNode({ text: 'Description' }),
+            ],
+        }),
     });
 
     if (apiItem.parameters.some((param) => param.tsdocParamBlock)) {
         for (const apiParameter of apiItem.parameters) {
-            const parameterRow = addChildrenC(
-                TableRow<DeepCoreNode>(),
-                PlainText({ text: apiParameter.name }),
-                createNodeForTypeExcerpt(
-                    apiParameter.parameterTypeExcerpt,
-                    apiItem,
-                    context,
-                ),
-            );
+            const parameterRow = TableRow<DeepCoreNode>({
+                children: [
+                    PlainTextNode({ text: apiParameter.name }),
+                    createNodeForTypeExcerpt(
+                        apiParameter.parameterTypeExcerpt,
+                        apiItem,
+                        context,
+                    ),
+                ],
+            });
 
-            const cell = Container<DeepCoreNode>();
-            addChildren(parameterRow, cell);
+            const cell = ContainerNode<DeepCoreNode>({});
+            parameterRow.children.push(cell);
             if (apiParameter.tsdocParamBlock) {
                 for (const node of apiParameter.tsdocParamBlock.content.nodes) {
                     writeApiItemDocNode(cell, apiItem, node, context);
                 }
             }
 
-            addTableRow(parametersTable, parameterRow);
+            parametersTable.rows.push(parameterRow);
         }
     }
 
     if (parametersTable.rows.length > 0) {
-        addChildren(
-            container,
-            addChildrenC(
-                Title<PlainText>({}),
-                PlainText({ text: 'Parameters' }),
-            ),
+        container.children.push(
+            TitleNode({
+                children: [PlainTextNode({ text: 'Parameters' })],
+            }),
         );
-        addChildren(container, parametersTable);
+        container.children.push(parametersTable);
         didWrite = true;
     }
 
@@ -1024,37 +1012,38 @@ export function writeParameters(
         aeModel.ApiReturnTypeMixin.isBaseClassOf(apiItem) &&
         docComment.returnsBlock
     ) {
-        const returnsRow = addChildrenC(
-            TableRow<DeepCoreNode>(),
-            createNodeForTypeExcerpt(
-                apiItem.returnTypeExcerpt,
-                apiItem,
-                context,
-            ),
-        );
+        const returnsRow = TableRow<DeepCoreNode>({
+            children: [
+                createNodeForTypeExcerpt(
+                    apiItem.returnTypeExcerpt,
+                    apiItem,
+                    context,
+                ),
+            ],
+        });
 
-        const cell = Container<DeepCoreNode>();
-        addChildren(returnsRow, cell);
+        const cell = ContainerNode<DeepCoreNode>({});
+        returnsRow.children.push(cell);
         for (const node of docComment.returnsBlock.content.nodes) {
             writeApiItemDocNode(cell, apiItem, node, context);
         }
 
-        addChildren(
-            container,
-            addChildrenC(Title<PlainText>({}), PlainText({ text: 'Returns' })),
+        container.children.push(
+            TitleNode({
+                children: [PlainTextNode({ text: 'Returns' })],
+            }),
         );
-        addChildren(
-            container,
-            addTableRowC(
-                Table<DeepCoreNode, DeepCoreNode>({
-                    header: addChildrenC(
-                        TableRow<PlainText>(),
-                        PlainText({ text: 'Type' }),
-                        PlainText({ text: 'Description' }),
-                    ),
+
+        container.children.push(
+            TableNode<DeepCoreNode, DeepCoreNode>({
+                header: TableRow({
+                    children: [
+                        PlainTextNode({ text: 'Type' }),
+                        PlainTextNode({ text: 'Description' }),
+                    ],
                 }),
-                returnsRow,
-            ),
+                rows: [returnsRow],
+            }),
         );
         didWrite = true;
     }
@@ -1227,11 +1216,11 @@ function writeApiItemExcerpt(
         throw new Error(`Received excerpt with no declaration.`);
     }
 
-    const codeBlock = RichCodeBlock<DeepCoreNode>({ language: 'ts' });
-    addChildren(container, codeBlock);
+    const codeBlock = RichCodeBlockNode<DeepCoreNode>({ language: 'ts' });
+    container.children.push(codeBlock);
 
     if (apiItem.kind === aeModel.ApiItemKind.Variable) {
-        addChildren(codeBlock, PlainText({ text: 'var ' }));
+        codeBlock.children.push(PlainTextNode({ text: 'var ' }));
     }
 
     const spannedTokens = excerpt.spannedTokens.slice();
@@ -1248,7 +1237,7 @@ function writeApiItemExcerpt(
             context,
         );
         if (result === null) {
-            addChildren(codeBlock, PlainText({ text: tokenText }));
+            codeBlock.children.push(PlainTextNode({ text: tokenText }));
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
@@ -1257,12 +1246,11 @@ function writeApiItemExcerpt(
                 result.apiItem,
                 context,
             );
-            addChildren(
-                codeBlock,
-                addChildrenC(
-                    LocalPageLink<PlainText>({ destination }),
-                    PlainText({ text: tokenText }),
-                ),
+            codeBlock.children.push(
+                LocalPageLinkNode({
+                    destination,
+                    children: [PlainTextNode({ text: tokenText })],
+                }),
             );
         } else {
             // Local signature reference.

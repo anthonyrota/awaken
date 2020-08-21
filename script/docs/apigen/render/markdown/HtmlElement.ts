@@ -1,20 +1,21 @@
-import { PlainText } from '../../nodes/PlainText';
+import { Node } from '../../nodes';
+import { ContainerNode } from '../../nodes/Container';
 import {
-    HtmlElement,
+    HtmlElementBase,
     HtmlTagClassification,
     getHtmlTagClassification,
 } from '../../nodes/HtmlElement';
-import { Node } from '../../nodes';
+import { PlainTextNode } from './../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeContainerBase } from './ContainerBase';
-import { writePlainText } from './PlainText';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 function writeStartTag(
-    htmlElement: HtmlElement<Node>,
+    htmlElement: HtmlElementBase<Node>,
     output: MarkdownOutput,
+    writeCoreNode: ParamWriteCoreNode,
 ): void {
     output.write('<');
-    writePlainText(PlainText({ text: htmlElement.tagName }), output);
+    writeCoreNode(PlainTextNode({ text: htmlElement.tagName }), output);
     if (htmlElement.attributes) {
         for (const [attributeName, attributeValue] of Object.entries(
             htmlElement.attributes,
@@ -22,7 +23,7 @@ function writeStartTag(
             output.write(' ');
             output.write(attributeName);
             output.write('="');
-            writePlainText(PlainText({ text: attributeValue }), output);
+            writeCoreNode(PlainTextNode({ text: attributeValue }), output);
             output.write('"');
         }
     }
@@ -30,72 +31,82 @@ function writeStartTag(
 }
 
 function writeEndTag(
-    htmlElement: HtmlElement<Node>,
+    htmlElement: HtmlElementBase<Node>,
     output: MarkdownOutput,
+    writeCoreNode: ParamWriteCoreNode,
 ): void {
     output.write('</');
-    writePlainText(PlainText({ text: htmlElement.tagName }), output);
+    writeCoreNode(PlainTextNode({ text: htmlElement.tagName }), output);
     output.write('>');
 }
 
 function writeAsBlockElement<ChildNode extends Node>(
-    htmlElement: HtmlElement<ChildNode>,
+    htmlElement: HtmlElementBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeStartTag(htmlElement, output);
+    writeStartTag(htmlElement, output, writeCoreNode);
     output.markStartOfParagraph();
     output.withInHtmlBlockTag(() => {
-        writeContainerBase(htmlElement, output, writeChildNode);
-    });
-    writeEndTag(htmlElement, output);
-}
-
-export function writeVoidHtmlElement(
-    htmlElement: HtmlElement<never>,
-    output: MarkdownOutput,
-): void {
-    if (
-        getHtmlTagClassification(htmlElement.tagName) !==
-        HtmlTagClassification.SelfClosing
-    ) {
-        throw new Error(
-            `Provided html element is not void: ${htmlElement.tagName}`,
+        writeCoreNode(
+            ContainerNode({ children: htmlElement.children }),
+            output,
+            writeChildNode,
         );
-    }
-    writeStartTag(htmlElement, output);
+    });
+    writeEndTag(htmlElement, output, writeCoreNode);
 }
 
 export function writeHtmlElement<ChildNode extends Node>(
-    htmlElement: HtmlElement<ChildNode>,
+    htmlElement: HtmlElementBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ) {
     const classification = getHtmlTagClassification(htmlElement.tagName);
     if (classification === HtmlTagClassification.Block) {
         if (htmlElement.tagName === 'p') {
             output.withParagraphBreak(() => {
-                writeContainerBase(htmlElement, output, writeChildNode);
+                writeCoreNode(
+                    ContainerNode({ children: htmlElement.children }),
+                    output,
+                    writeChildNode,
+                );
             });
             return;
         }
         if (output.constrainedToSingleLine) {
-            writeAsBlockElement(htmlElement, output, writeChildNode);
+            writeAsBlockElement(
+                htmlElement,
+                output,
+                writeCoreNode,
+                writeChildNode,
+            );
         } else {
             output.withParagraphBreak(() => {
-                writeAsBlockElement(htmlElement, output, writeChildNode);
+                writeAsBlockElement(
+                    htmlElement,
+                    output,
+                    writeCoreNode,
+                    writeChildNode,
+                );
             });
         }
         return;
     }
     if (classification === HtmlTagClassification.SelfClosing) {
-        writeStartTag(htmlElement, output);
+        writeStartTag(htmlElement, output, writeCoreNode);
         return;
     }
     // If marked new paragraph -> opening inline html shouldn't affect.
     output.withWritingInlineHtmlTag(() => {
-        writeStartTag(htmlElement, output);
+        writeStartTag(htmlElement, output, writeCoreNode);
     });
-    writeContainerBase(htmlElement, output, writeChildNode);
-    writeEndTag(htmlElement, output);
+    writeCoreNode(
+        ContainerNode({ children: htmlElement.children }),
+        output,
+        writeChildNode,
+    );
+    writeEndTag(htmlElement, output, writeCoreNode);
 }

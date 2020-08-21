@@ -1,20 +1,20 @@
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { Italics } from '../../nodes/Italics';
 import { Node } from '../../nodes';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { ItalicsBase } from '../../nodes/Italics';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeItalics<ChildNode extends Node>(
-    italics: Italics<ChildNode>,
+    Italics: ItalicsBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeHtmlElement(
-        addChildrenC(
-            HtmlElement<ChildNode>({ tagName: 'i' }),
-            ...italics.children,
-        ),
+    writeCoreNode(
+        HtmlElementNode<ChildNode>({
+            tagName: 'i',
+            children: Italics.children,
+        }),
         output,
         writeChildNode,
     );

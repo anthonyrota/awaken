@@ -1,98 +1,106 @@
-import { Page } from './Page';
-import { DoNotEditComment } from './DoNotEditComment';
-import { TableOfContents } from './TableOfContents';
-import { TableOfContentsList } from './TableOfContentsList';
-import { PageTitle } from './PageTitle';
-import { CollapsibleSection } from './CollapsibleSection';
-import { Table } from './Table';
-import { List } from './List';
-import { Title } from './Title';
-import { Subheading } from './Subheading';
-import { Heading } from './Heading';
-import { Heading123456 } from './Heading123456';
-import { Paragraph } from './Paragraph';
-import { Image } from './Image';
-import { GithubSourceLink } from './GithubSourceLink';
-import { LocalPageLink } from './LocalPageLink';
-import { Link } from './Link';
-import { RichCodeBlock } from './RichCodeBlock';
-import { CodeBlock } from './CodeBlock';
-import { CodeSpan } from './CodeSpan';
-import { Strikethrough } from './Strikethrough';
-import { Bold } from './Bold';
-import { Italics } from './Italics';
-import { HtmlElement } from './HtmlElement';
-import { BlockQuote } from './BlockQuote';
-import { HtmlComment } from './HtmlComment';
-import { HorizontalRule } from './HorizontalRule';
-import { PlainText } from './PlainText';
-import { Container } from './Container';
+import { BlockQuoteNode } from './BlockQuote';
+import { BoldNode } from './Bold';
+import { CodeBlockNode } from './CodeBlock';
+import { CodeSpanNode } from './CodeSpan';
+import { CollapsibleSectionNode } from './CollapsibleSection';
+import { ContainerNode } from './Container';
+import { DoNotEditCommentNode } from './DoNotEditComment';
+import { GithubSourceLinkNode } from './GithubSourceLink';
+import { HeadingNode } from './Heading';
+import { Heading123456Node } from './Heading123456';
+import { HorizontalRuleNode } from './HorizontalRule';
+import { HtmlCommentNode } from './HtmlComment';
+import { HtmlElementNode } from './HtmlElement';
+import { ImageNode } from './Image';
+import { ItalicsNode } from './Italics';
+import { LinkNode } from './Link';
+import { ListNode } from './List';
+import { LocalPageLinkNode } from './LocalPageLink';
+import { PageNode } from './Page';
+import { PageTitleNode } from './PageTitle';
+import { ParagraphNode } from './Paragraph';
+import { PlainTextNode } from './PlainText';
+import { RichCodeBlockNode } from './RichCodeBlock';
+import { StrikethroughNode } from './Strikethrough';
+import { SubheadingNode } from './Subheading';
+import { TableNode } from './Table';
+import { TableOfContentsNode } from './TableOfContents';
+import { TableOfContentsListNode } from './TableOfContentsList';
+import { TitleNode } from './Title';
 
 export interface Node {
     type: string;
 }
 
-export type CoreNode<ChildType extends Node> =
-    | Container<ChildType>
-    | PlainText
-    | HorizontalRule
-    | HtmlComment
-    | BlockQuote<ChildType>
-    | HtmlElement<ChildType>
-    | Italics<ChildType>
-    | Bold<ChildType>
-    | Strikethrough<ChildType>
-    | CodeSpan<ChildType>
-    | CodeBlock
-    | RichCodeBlock<ChildType>
-    | Link<ChildType>
-    | LocalPageLink<ChildType>
-    | GithubSourceLink<ChildType>
-    | Image
-    | Paragraph<ChildType>
-    | Heading123456<ChildType>
-    | Heading<ChildType>
-    | Subheading<ChildType>
-    | Title<ChildType>
-    | List<ChildType>
-    | Table<ChildType, ChildType>
-    | CollapsibleSection<ChildType, ChildType>
-    | PageTitle<ChildType>
-    | TableOfContentsList
-    | TableOfContents
-    | DoNotEditComment
-    | Page<ChildType>;
+export type LeafCoreNode =
+    | PlainTextNode
+    | HorizontalRuleNode
+    | HtmlCommentNode
+    | CodeBlockNode
+    | ImageNode
+    | TableOfContentsListNode
+    | TableOfContentsNode
+    | DoNotEditCommentNode;
 
+export type ParentCoreNode<ChildType extends Node> =
+    | ContainerNode<ChildType>
+    | BlockQuoteNode<ChildType>
+    | HtmlElementNode<ChildType>
+    | ItalicsNode<ChildType>
+    | BoldNode<ChildType>
+    | StrikethroughNode<ChildType>
+    | CodeSpanNode<ChildType>
+    | RichCodeBlockNode<ChildType>
+    | LinkNode<ChildType>
+    | LocalPageLinkNode<ChildType>
+    | GithubSourceLinkNode<ChildType>
+    | ParagraphNode<ChildType>
+    | Heading123456Node<ChildType>
+    | HeadingNode<ChildType>
+    | SubheadingNode<ChildType>
+    | TitleNode<ChildType>
+    | ListNode<ChildType>
+    | TableNode<ChildType, ChildType>
+    | CollapsibleSectionNode<ChildType, ChildType>
+    | PageTitleNode<ChildType>
+    | PageNode<ChildType>;
+
+export type CoreNode<ChildType extends Node> =
+    | LeafCoreNode
+    | ParentCoreNode<ChildType>;
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error TODO.
 export type DeepCoreNode =
-    | Container<DeepCoreNode>
-    | PlainText
-    | HorizontalRule
-    | HtmlComment
-    | BlockQuote<DeepCoreNode>
-    | HtmlElement<DeepCoreNode>
-    | Italics<DeepCoreNode>
-    | Bold<DeepCoreNode>
-    | Strikethrough<DeepCoreNode>
-    | CodeSpan<DeepCoreNode>
-    | CodeBlock
-    | RichCodeBlock<DeepCoreNode>
-    | Link<DeepCoreNode>
-    | LocalPageLink<DeepCoreNode>
-    | GithubSourceLink<DeepCoreNode>
-    | Image
-    | Paragraph<DeepCoreNode>
-    | Heading123456<DeepCoreNode>
-    | Heading<DeepCoreNode>
-    | Subheading<DeepCoreNode>
-    | Title<DeepCoreNode>
-    | List<DeepCoreNode>
-    | Table<DeepCoreNode, DeepCoreNode>
-    | CollapsibleSection<DeepCoreNode, DeepCoreNode>
-    | PageTitle<DeepCoreNode>
-    | TableOfContentsList
-    | TableOfContents
-    | DoNotEditComment
-    | Page<DeepCoreNode>;
+    | ContainerNode<DeepCoreNode>
+    | PlainTextNode
+    | HorizontalRuleNode
+    | HtmlCommentNode
+    | BlockQuoteNode<DeepCoreNode>
+    | HtmlElementNode<DeepCoreNode>
+    | ItalicsNode<DeepCoreNode>
+    | BoldNode<DeepCoreNode>
+    | StrikethroughNode<DeepCoreNode>
+    | CodeSpanNode<DeepCoreNode>
+    | CodeBlockNode
+    | RichCodeBlockNode<DeepCoreNode>
+    | LinkNode<DeepCoreNode>
+    | LocalPageLinkNode<DeepCoreNode>
+    | GithubSourceLinkNode<DeepCoreNode>
+    | ImageNode
+    | ParagraphNode<DeepCoreNode>
+    | Heading123456Node<DeepCoreNode>
+    | HeadingNode<DeepCoreNode>
+    | SubheadingNode<DeepCoreNode>
+    | TitleNode<DeepCoreNode>
+    | ListNode<DeepCoreNode>
+    | TableNode<DeepCoreNode, DeepCoreNode>
+    | CollapsibleSectionNode<DeepCoreNode, DeepCoreNode>
+    | PageTitleNode<DeepCoreNode>
+    | TableOfContentsListNode
+    | TableOfContentsNode
+    | DoNotEditCommentNode
+    | PageNode<DeepCoreNode>;
 
 export enum CoreNodeType {
     Container = 'core/Container',

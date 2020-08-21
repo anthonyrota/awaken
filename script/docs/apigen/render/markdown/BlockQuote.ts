@@ -1,22 +1,22 @@
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { BlockQuote } from '../../nodes/BlockQuote';
 import { Node } from '../../nodes';
+import { BlockQuoteBase } from '../../nodes/BlockQuote';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { ContainerNode } from './../../nodes/Container';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeContainerBase } from './ContainerBase';
-import { writeHtmlElement } from './HtmlElement';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeBlockQuote<ChildNode extends Node>(
-    blockQuote: BlockQuote<ChildNode>,
+    blockQuote: BlockQuoteBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     if (output.constrainedToSingleLine) {
-        writeHtmlElement(
-            addChildrenC(
-                HtmlElement<ChildNode>({ tagName: 'blockquote' }),
-                ...blockQuote.children,
-            ),
+        writeCoreNode(
+            HtmlElementNode<ChildNode>({
+                tagName: 'blockquote',
+                children: blockQuote.children,
+            }),
             output,
             writeChildNode,
         );
@@ -24,7 +24,11 @@ export function writeBlockQuote<ChildNode extends Node>(
     }
     output.withParagraphBreak(() => {
         output.withIndent('> ', () =>
-            writeContainerBase(blockQuote, output, writeChildNode),
+            writeCoreNode(
+                ContainerNode({ children: blockQuote.children }),
+                output,
+                writeChildNode,
+            ),
         );
     });
 }

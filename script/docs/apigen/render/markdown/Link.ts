@@ -1,17 +1,16 @@
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { Link } from '../../nodes/Link';
 import { Node } from '../../nodes';
+import { ContainerNode } from '../../nodes/Container';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { LinkBase } from '../../nodes/Link';
+import { PlainTextNode } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
-import { writeContainerBase } from './ContainerBase';
-import { writePlainText } from './PlainText';
-import { PlainText } from '../../nodes/PlainText';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeLink<ChildNode extends Node>(
-    link: Link<ChildNode>,
+    link: LinkBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     output.withInSingleLine(() => {
         if (output.inHtmlBlockTag && !output.inTable) {
@@ -21,23 +20,28 @@ export function writeLink<ChildNode extends Node>(
             if (link.title !== undefined) {
                 attributes.title = link.title;
             }
-            writeHtmlElement(
-                addChildrenC(
-                    HtmlElement<ChildNode>({ tagName: 'a', attributes }),
-                    ...link.children,
-                ),
+            writeCoreNode(
+                HtmlElementNode<ChildNode>({
+                    tagName: 'a',
+                    attributes,
+                    children: link.children,
+                }),
                 output,
                 writeChildNode,
             );
             return;
         }
         output.write('[');
-        writeContainerBase(link, output, writeChildNode);
+        writeCoreNode(
+            ContainerNode({ children: link.children }),
+            output,
+            writeChildNode,
+        );
         output.write('](');
-        writePlainText(PlainText({ text: link.destination }), output);
+        writeCoreNode(PlainTextNode({ text: link.destination }), output);
         if (link.title) {
             output.write(' "');
-            writePlainText(PlainText({ text: link.title }), output);
+            writeCoreNode(PlainTextNode({ text: link.title }), output);
             output.write('"');
         }
         output.write(')');

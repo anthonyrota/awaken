@@ -1,23 +1,34 @@
-import { TableOfContents as TableOfContents_ } from '../../pageMetadata';
+import { TableOfContents } from '../../pageMetadata';
 import { Node, CoreNodeType } from '.';
 
-export interface TableOfContents extends Node {
-    type: CoreNodeType.TableOfContents;
-    tableOfContents: TableOfContents_;
-    relativePagePath: string;
-}
-
 export interface TableOfContentsParameters {
-    tableOfContents: TableOfContents_;
+    tableOfContents: TableOfContents;
     relativePagePath?: string;
 }
 
-export function TableOfContents(
+export interface TableOfContentsBase {
+    tableOfContents: TableOfContents;
+    relativePagePath: string;
+}
+
+export function TableOfContentsBase(
     parameters: TableOfContentsParameters,
-): TableOfContents {
+): TableOfContentsBase {
     return {
-        type: CoreNodeType.TableOfContents,
         tableOfContents: parameters.tableOfContents,
         relativePagePath: parameters.relativePagePath ?? '',
+    };
+}
+
+export interface TableOfContentsNode extends TableOfContentsBase, Node {
+    type: CoreNodeType.TableOfContents;
+}
+
+export function TableOfContentsNode(
+    parameters: TableOfContentsParameters,
+): TableOfContentsNode {
+    return {
+        type: CoreNodeType.TableOfContents,
+        ...TableOfContentsBase(parameters),
     };
 }

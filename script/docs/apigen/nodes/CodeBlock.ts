@@ -1,23 +1,32 @@
 import { Node, CoreNodeType } from '.';
 
-export interface CodeBlock extends Node {
-    type: CoreNodeType.CodeBlock;
-    language?: string;
-    code: string;
-}
-
 export interface CodeBlockParameters {
     language?: string;
     code: string;
 }
 
-export function CodeBlock(parameters: CodeBlockParameters): CodeBlock {
-    const codeBlock: CodeBlock = {
-        type: CoreNodeType.CodeBlock,
+export interface CodeBlockBase {
+    language?: string;
+    code: string;
+}
+
+export function CodeBlockBase(parameters: CodeBlockParameters): CodeBlockBase {
+    const codeBlockBase: CodeBlockBase = {
         code: parameters.code,
     };
     if (parameters.language !== undefined) {
-        codeBlock.language = parameters.language;
+        codeBlockBase.language = parameters.language;
     }
-    return codeBlock;
+    return codeBlockBase;
+}
+
+export interface CodeBlockNode extends CodeBlockBase, Node {
+    type: CoreNodeType.CodeBlock;
+}
+
+export function CodeBlockNode(parameters: CodeBlockParameters): CodeBlockNode {
+    return {
+        type: CoreNodeType.CodeBlock,
+        ...CodeBlockBase(parameters),
+    };
 }

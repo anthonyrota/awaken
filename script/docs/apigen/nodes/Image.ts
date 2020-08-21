@@ -1,28 +1,37 @@
 import { Node, CoreNodeType } from '.';
 
-export interface Image extends Node {
-    type: CoreNodeType.Image;
-    src: string;
-    title?: string;
-    alt?: string;
-}
-
 export interface ImageParameters {
     src: string;
     title?: string;
     alt?: string;
 }
 
-export function Image(parameters: ImageParameters): Image {
-    const image: Image = {
-        type: CoreNodeType.Image,
+export interface ImageBase {
+    src: string;
+    title?: string;
+    alt?: string;
+}
+
+export function ImageBase(parameters: ImageParameters): ImageBase {
+    const imageBase: ImageBase = {
         src: parameters.src,
     };
     if (parameters.title !== undefined) {
-        image.title = parameters.title;
+        imageBase.title = parameters.title;
     }
     if (parameters.alt) {
-        image.alt = parameters.alt;
+        imageBase.alt = parameters.alt;
     }
-    return image;
+    return imageBase;
+}
+
+export interface ImageNode extends ImageBase, Node {
+    type: CoreNodeType.Image;
+}
+
+export function ImageNode(parameters: ImageParameters): ImageNode {
+    return {
+        type: CoreNodeType.Image,
+        ...ImageBase(parameters),
+    };
 }

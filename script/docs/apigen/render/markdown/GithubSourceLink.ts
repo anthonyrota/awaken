@@ -1,23 +1,21 @@
-import { Link } from '../../nodes/Link';
-import { GithubSourceLink } from '../../nodes/GithubSourceLink';
 import { Node } from '../../nodes';
+import { GithubSourceLinkBase } from '../../nodes/GithubSourceLink';
+import { LinkNode } from '../../nodes/Link';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeLink } from './Link';
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeGithubSourceLink<ChildNode extends Node>(
-    githubSourceLink: GithubSourceLink<ChildNode>,
+    githubSourceLink: GithubSourceLinkBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeLink(
-        addChildrenC(
-            Link<ChildNode>({
-                destination: githubSourceLink.destination,
-                title: githubSourceLink.title,
-            }),
-            ...githubSourceLink.children,
-        ),
+    writeCoreNode(
+        LinkNode<ChildNode>({
+            destination: githubSourceLink.destination,
+            title: githubSourceLink.title,
+            children: githubSourceLink.children,
+        }),
         output,
         writeChildNode,
     );

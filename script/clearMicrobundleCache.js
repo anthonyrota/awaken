@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { getAbsolutePath } = require('./util/fileUtil');
 const fs = require('fs');
 const path = require('path');
 const rimraf = require('rimraf');
+const { getAbsolutePath } = require('./util/fileUtil');
 
 const nodeModulesPath = getAbsolutePath('node_modules');
 const cachePath = path.join(nodeModulesPath, '.cache');

@@ -1,31 +1,37 @@
-import { Node, DeepCoreNode } from './../../nodes';
-import { PageTitle } from './../../nodes/PageTitle';
-import { PlainText } from './../../nodes/PlainText';
-import { Page } from '../../nodes/Page';
+import { Node, DeepCoreNode } from '../../nodes';
+import { ContainerNode } from '../../nodes/Container';
+import { DoNotEditCommentNode } from '../../nodes/DoNotEditComment';
+import { PageBase } from '../../nodes/Page';
+import { PageTitleNode } from '../../nodes/PageTitle';
+import { PlainTextNode } from '../../nodes/PlainText';
+import { TableOfContentsNode } from '../../nodes/TableOfContents';
 import { MarkdownOutput } from './MarkdownOutput';
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { DoNotEditComment } from '../../nodes/DoNotEditComment';
-import { TableOfContents } from '../../nodes/TableOfContents';
-import { writeContainerBase } from './ContainerBase';
+import { ParamWriteCoreNode, ParamWriteChildNode, writeDeepCoreNode } from '.';
 
 export function writePage<ChildNode extends Node>(
-    page: Page<ChildNode>,
+    page: PageBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
-    writeDeepCoreNode: (node: DeepCoreNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeDeepCoreNode(DoNotEditComment(), output);
+    writeCoreNode(DoNotEditCommentNode({}), output);
     writeDeepCoreNode(
-        addChildrenC<DeepCoreNode, PageTitle<DeepCoreNode>>(
-            PageTitle<DeepCoreNode>({}),
-            PlainText({ text: page.metadata.title }),
-        ),
+        PageTitleNode<DeepCoreNode>({
+            children: [PlainTextNode({ text: page.metadata.title })],
+        }),
+        output,
+        writeCoreNode,
+    );
+    writeCoreNode(
+        TableOfContentsNode({
+            tableOfContents: page.metadata.table_of_contents,
+        }),
         output,
     );
-    writeDeepCoreNode(
-        TableOfContents({ tableOfContents: page.metadata.table_of_contents }),
+    writeCoreNode(
+        ContainerNode({ children: page.children }),
         output,
+        writeChildNode,
     );
-    writeContainerBase(page, output, writeChildNode);
     output.ensureNewLine();
 }

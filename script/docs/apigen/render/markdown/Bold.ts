@@ -1,20 +1,20 @@
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { Bold } from '../../nodes/Bold';
 import { Node } from '../../nodes';
+import { BoldBase } from '../../nodes/Bold';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeBold<ChildNode extends Node>(
-    bold: Bold<ChildNode>,
+    bold: BoldBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeHtmlElement(
-        addChildrenC(
-            HtmlElement<ChildNode>({ tagName: 'b' }),
-            ...bold.children,
-        ),
+    writeCoreNode(
+        HtmlElementNode<ChildNode>({
+            tagName: 'b',
+            children: bold.children,
+        }),
         output,
         writeChildNode,
     );

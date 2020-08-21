@@ -1,22 +1,22 @@
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { RichCodeBlock } from '../../nodes/RichCodeBlock';
 import { Node } from '../../nodes';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { RichCodeBlockBase } from '../../nodes/RichCodeBlock';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
+import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 
 export function writeRichCodeBlock<ChildNode extends Node>(
-    richCodeBlock: RichCodeBlock<ChildNode>,
+    richCodeBlock: RichCodeBlockBase<ChildNode>,
     output: MarkdownOutput,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     if (output.constrainedToSingleLine) {
         output.withInSingleLineCodeBlock(() => {
-            writeHtmlElement(
-                addChildrenC(
-                    HtmlElement<ChildNode>({ tagName: 'code' }),
-                    ...richCodeBlock.children,
-                ),
+            writeCoreNode(
+                HtmlElementNode<ChildNode>({
+                    tagName: 'code',
+                    children: richCodeBlock.children,
+                }),
                 output,
                 writeChildNode,
             );
@@ -24,11 +24,11 @@ export function writeRichCodeBlock<ChildNode extends Node>(
         return;
     }
 
-    writeHtmlElement(
-        addChildrenC(
-            HtmlElement<ChildNode>({ tagName: 'pre' }),
-            ...richCodeBlock.children,
-        ),
+    writeCoreNode(
+        HtmlElementNode<ChildNode>({
+            tagName: 'pre',
+            children: richCodeBlock.children,
+        }),
         output,
         writeChildNode,
     );

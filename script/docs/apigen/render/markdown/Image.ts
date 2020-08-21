@@ -1,11 +1,15 @@
-import { PlainText } from '../../nodes/PlainText';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { Image } from '../../nodes/Image';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { ImageBase } from '../../nodes/Image';
+import { PlainTextNode } from '../../nodes/PlainText';
+import { noop } from '../../util';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeVoidHtmlElement } from './HtmlElement';
-import { writePlainText } from './PlainText';
+import { ParamWriteCoreNode } from '.';
 
-export function writeImage(image: Image, output: MarkdownOutput): void {
+export function writeImage(
+    image: ImageBase,
+    output: MarkdownOutput,
+    writeCoreNode: ParamWriteCoreNode,
+): void {
     output.withInSingleLine(() => {
         if (output.inHtmlBlockTag && !output.inTable) {
             const attributes: Record<string, string> = {
@@ -17,18 +21,20 @@ export function writeImage(image: Image, output: MarkdownOutput): void {
             if (image.alt !== undefined) {
                 attributes.alt = image.alt;
             }
-            writeVoidHtmlElement(
-                HtmlElement({ tagName: 'img', attributes }),
+            writeCoreNode(
+                HtmlElementNode({ tagName: 'img', attributes }),
                 output,
+                noop,
             );
         }
         output.write('![');
-        if (image.alt) writePlainText(PlainText({ text: image.alt }), output);
+        if (image.alt)
+            writeCoreNode(PlainTextNode({ text: image.alt }), output);
         output.write('](');
-        writePlainText(PlainText({ text: image.src }), output);
+        writeCoreNode(PlainTextNode({ text: image.src }), output);
         if (image.title) {
             output.write(' "');
-            writePlainText(PlainText({ text: image.title }), output);
+            writeCoreNode(PlainTextNode({ text: image.title }), output);
             output.write('"');
         }
         output.write(')');

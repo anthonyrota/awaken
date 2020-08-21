@@ -1,40 +1,36 @@
-import { Container } from '../../nodes/Container';
-import { addChildrenC } from '../../nodes/abstract/ContainerBase';
-import { HtmlElement } from '../../nodes/HtmlElement';
-import { CollapsibleSection } from '../../nodes/CollapsibleSection';
 import { Node, CoreNodeType } from '../../nodes';
+import { CollapsibleSectionBase } from '../../nodes/CollapsibleSection';
+import { ContainerNode } from '../../nodes/Container';
+import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { writeContainer } from './ContainerBase';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeHtmlElement } from './HtmlElement';
-import { writeContainerBase } from './ContainerBase';
+import { ParamWriteCoreNode, ParamWriteChildNode } from '.';
 
 export function writeCollapsibleSection<
     SummaryNode extends Node,
     ChildNode extends Node
 >(
-    collapsibleSection: CollapsibleSection<SummaryNode, ChildNode>,
+    collapsibleSection: CollapsibleSectionBase<SummaryNode, ChildNode>,
     output: MarkdownOutput,
-    writeSummaryNode: (node: SummaryNode, output: MarkdownOutput) => void,
-    writeChildNode: (node: ChildNode, output: MarkdownOutput) => void,
+    writeCoreNode: ParamWriteCoreNode,
+    writeSummaryNode: ParamWriteChildNode<SummaryNode>,
+    writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    // Typescript...
-    const detailsElement = addChildrenC<
-        HtmlElement<SummaryNode> | Container<ChildNode>,
-        HtmlElement<HtmlElement<SummaryNode> | Container<ChildNode>>
-    >(
-        HtmlElement<HtmlElement<SummaryNode> | Container<ChildNode>>({
-            tagName: 'details',
-        }),
-        addChildrenC(
-            HtmlElement<SummaryNode>({ tagName: 'summary' }),
-            collapsibleSection.summaryNode,
-        ),
-        addChildrenC(Container<ChildNode>(), ...collapsibleSection.children),
-    );
-    writeHtmlElement(detailsElement, output, (node) => {
+    const detailsElement = HtmlElementNode({
+        tagName: 'details',
+        children: [
+            HtmlElementNode<SummaryNode>({
+                tagName: 'summary',
+                children: [collapsibleSection.summaryNode],
+            }),
+            ContainerNode<ChildNode>({ children: collapsibleSection.children }),
+        ],
+    });
+    writeCoreNode(detailsElement, output, (node) => {
         if (node.type === CoreNodeType.Container) {
-            writeContainerBase(node, output, writeChildNode);
+            writeContainer(node, output, writeCoreNode, writeChildNode);
             return;
         }
-        writeHtmlElement(node, output, writeSummaryNode);
+        writeCoreNode(node, output, writeSummaryNode);
     });
 }
