@@ -136,7 +136,7 @@
 
 <b>Signature</b>
 
-<pre>function catchError&lt;T&gt;(getNewSource: (error: unknown) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function catchError&lt;T&gt;(<br>    getNewSource: (error: unknown) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>collect</code>
 
@@ -152,7 +152,7 @@
 
 <b>Signature</b>
 
-<pre>function combineWith&lt;T extends unknown[]&gt;(...sources: WrapValuesInSource&lt;T&gt;): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
+<pre>function combineWith&lt;T extends unknown[]&gt;(<br>    ...sources: WrapValuesInSource&lt;T&gt;<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
 
 ## <code>concat</code>
 
@@ -176,7 +176,7 @@
 
 <b>Signature</b>
 
-<pre>function concatDropMap&lt;T, U&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function concatDropMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>concatMap</code>
 
@@ -184,7 +184,7 @@
 
 <b>Signature</b>
 
-<pre>function concatMap&lt;T, U&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function concatMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>concatWith</code>
 
@@ -192,7 +192,7 @@
 
 <b>Signature</b>
 
-<pre>function concatWith&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function concatWith&lt;T&gt;(<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>count</code>
 
@@ -208,9 +208,9 @@
 
 <b>Signature</b>
 
-<pre>function debounce&lt;T&gt;(getDurationSource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, getInitialDurationRange?: ((firstDebouncedValue: T, index: number) =&gt; <a href="#initialdurationinfo">InitialDurationInfo</a>) | null, config?: <a href="#debounceconfig">DebounceConfig</a> | null): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function debounce&lt;T&gt;(<br>    getDurationSource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    getInitialDurationRange?:<br>        | ((firstDebouncedValue: T, index: number) =&gt; <a href="#initialdurationinfo">InitialDurationInfo</a>)<br>        | null,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
-<pre>function debounce&lt;T&gt;(getDurationSource: undefined | null, getInitialDurationRange: (firstDebouncedValue: T, index: number) =&gt; <a href="#initialdurationinfo">InitialDurationInfo</a>, config?: <a href="#debounceconfig">DebounceConfig</a> | null): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function debounce&lt;T&gt;(<br>    getDurationSource: undefined | null,<br>    getInitialDurationRange: (<br>        firstDebouncedValue: T,<br>        index: number,<br>    ) =&gt; <a href="#initialdurationinfo">InitialDurationInfo</a>,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>DebounceConfig</code>
 
@@ -218,7 +218,9 @@
 
 <b>Signature</b>
 
-<pre>interface DebounceConfig </pre>
+```ts
+interface DebounceConfig 
+```
 
 ## <code>defaultDebounceConfig</code>
 
@@ -234,7 +236,7 @@
 
 <b>Signature</b>
 
-<pre>type InitialDurationInfo = [<a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, (<a href="basics.md#source-interface">Source</a>&lt;unknown&gt; | undefined | null)?] | [undefined | null, <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;];</pre>
+<pre>type InitialDurationInfo =<br>    | [<a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, (<a href="basics.md#source-interface">Source</a>&lt;unknown&gt; | undefined | null)?]<br>    | [undefined | null, <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;];</pre>
 
 ## <code>DebounceTrailingRestart</code>
 
@@ -244,7 +246,9 @@
 
 <b>Signature</b>
 
-<pre>type DebounceTrailingRestart = 'restart';</pre>
+```ts
+type DebounceTrailingRestart = 'restart';
+```
 
 ### <a name="debouncetrailingrestart-variable"></a><code>DebounceTrailingRestart - Variable</code>
 
@@ -260,9 +264,9 @@
 
 <b>Signature</b>
 
-<pre>function debounceMs(durationMs: number, maxDurationMs?: number | null, config?: <a href="#debounceconfig">DebounceConfig</a> | null): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function debounceMs(<br>    durationMs: number,<br>    maxDurationMs?: number | null,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
-<pre>function debounceMs(durationMs: null | undefined, maxDurationMs: number, config?: <a href="#debounceconfig">DebounceConfig</a> | null): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function debounceMs(<br>    durationMs: null | undefined,<br>    maxDurationMs: number,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>defaultIfEmpty</code>
 
@@ -270,7 +274,7 @@
 
 <b>Signature</b>
 
-<pre>function defaultIfEmpty&lt;T&gt;(getDefaultValue: () =&gt; T): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function defaultIfEmpty&lt;T&gt;(<br>    getDefaultValue: () =&gt; T,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>defaultIfEmptyTo</code>
 
@@ -278,7 +282,7 @@
 
 <b>Signature</b>
 
-<pre>function defaultIfEmptyTo&lt;T&gt;(value: T): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function defaultIfEmptyTo&lt;T&gt;(<br>    value: T,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>delay</code>
 
@@ -286,9 +290,9 @@
 
 <b>Signature</b>
 
-<pre>function delay&lt;T&gt;(getDelaySource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function delay&lt;T&gt;(<br>    getDelaySource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
-<pre>function delay(getDelaySource: &lt;T&gt;(value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function delay(<br>    getDelaySource: &lt;T&gt;(value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>delayMs</code>
 
@@ -306,7 +310,7 @@
 
 <pre>function distinct(): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
-<pre>function distinct&lt;T, K&gt;(getKey: (value: T, index: number) =&gt; K): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function distinct&lt;T, K&gt;(<br>    getKey: (value: T, index: number) =&gt; K,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>distinctFromLast</code>
 
@@ -316,9 +320,9 @@
 
 <pre>function distinctFromLast(): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
-<pre>function distinctFromLast&lt;T&gt;(isDifferent: (keyA: T, keyB: T, currentIndex: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function distinctFromLast&lt;T&gt;(<br>    isDifferent: (keyA: T, keyB: T, currentIndex: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
-<pre>function distinctFromLast&lt;T, K&gt;(isDifferent: ((keyA: K, keyB: K, currentIndex: number) =&gt; unknown) | undefined, getKey: (value: T) =&gt; K): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function distinctFromLast&lt;T, K&gt;(<br>    isDifferent:<br>        | ((keyA: K, keyB: K, currentIndex: number) =&gt; unknown)<br>        | undefined,<br>    getKey: (value: T) =&gt; K,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>endWith</code>
 
@@ -326,7 +330,7 @@
 
 <b>Signature</b>
 
-<pre>function endWith&lt;T&gt;(...values: T[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function endWith&lt;T&gt;(<br>    ...values: T[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>every</code>
 
@@ -334,7 +338,7 @@
 
 <b>Signature</b>
 
-<pre>function every&lt;T&gt;(predicate: (value: T, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
+<pre>function every&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
 
 ## <code>expandMap</code>
 
@@ -342,7 +346,7 @@
 
 <b>Signature</b>
 
-<pre>var expandMap: &lt;T&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;, maxConcurrent?: number | undefined) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
+<pre>var expandMap: &lt;T&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>    maxConcurrent?: number | undefined,<br>) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>filter</code>
 
@@ -350,7 +354,7 @@
 
 <b>Signature</b>
 
-<pre>function filter&lt;T&gt;(predicate: (value: T, index: number) =&gt; false): <a href="basics.md#operator">Operator</a>&lt;T, never&gt;;</pre>
+<pre>function filter&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; false,<br>): <a href="basics.md#operator">Operator</a>&lt;T, never&gt;;</pre>
 
 Calls the predicate function for each Push event of the given source, only passing through events whose value meet the condition specified by the predicate function.
 
@@ -358,13 +362,13 @@ Calls the predicate function for each Push event of the given source, only passi
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| predicate | <code>\(value: T, index: number\) =&gt; false</code> | A function that accepts a value and an index. The filter method calls this function one time for each Push event of the given source. If and only if the function returns a truthy value, then the event will pass through. |
+| predicate | <pre lang="ts">(value: T, index: number) =&gt; false;</pre> | A function that accepts a value and an index. The filter method calls this function one time for each Push event of the given source. If and only if the function returns a truthy value, then the event will pass through. |
 
 <b>Signature</b>
 
-<pre>function filter&lt;T, S extends T&gt;(predicate: (value: T, index: number) =&gt; value is S): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;;</pre>
+<pre>function filter&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;;</pre>
 
-<pre>function filter&lt;T&gt;(predicate: (value: T, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function filter&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>finalize</code>
 
@@ -380,9 +384,9 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>function find&lt;T, S extends T&gt;(predicate: (value: T, index: number) =&gt; value is S): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;;</pre>
+<pre>function find&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;;</pre>
 
-<pre>function find&lt;T&gt;(predicate: (value: T, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function find&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>findIndex</code>
 
@@ -390,7 +394,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>function findIndex&lt;T&gt;(predicate: (value: T, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, number&gt;;</pre>
+<pre>function findIndex&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, number&gt;;</pre>
 
 ## <code>findWithIndex</code>
 
@@ -398,9 +402,9 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>function findWithIndex&lt;T, S extends T&gt;(predicate: (value: T, index: number) =&gt; value is S): <a href="basics.md#operator">Operator</a>&lt;T, WithIndex&lt;S&gt;&gt;;</pre>
+<pre>function findWithIndex&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, WithIndex&lt;S&gt;&gt;;</pre>
 
-<pre>function findWithIndex&lt;T&gt;(predicate: (value: T, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, WithIndex&lt;T&gt;&gt;;</pre>
+<pre>function findWithIndex&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, WithIndex&lt;T&gt;&gt;;</pre>
 
 ## <code>first</code>
 
@@ -424,7 +428,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>function flatMap&lt;T, U&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function flatMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>flatWith</code>
 
@@ -432,7 +436,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>function flatWith&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function flatWith&lt;T&gt;(<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>groupBy</code>
 
@@ -440,7 +444,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>function groupBy&lt;T, K&gt;(getKey: (value: T, index: number) =&gt; K, Subject_?: typeof <a href="basics.md#subject-function">Subject</a>, removeGroupWhenNoSubscribers?: boolean): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#groupsource">GroupSource</a>&lt;T, K&gt;&gt;;</pre>
+<pre>function groupBy&lt;T, K&gt;(<br>    getKey: (value: T, index: number) =&gt; K,<br>    Subject_?: typeof <a href="basics.md#subject-function">Subject</a>,<br>    removeGroupWhenNoSubscribers?: boolean,<br>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#groupsource">GroupSource</a>&lt;T, K&gt;&gt;;</pre>
 
 ## <code>GroupSource</code>
 
@@ -448,7 +452,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>type GroupSource&lt;T, K&gt; = <a href="#activegroupsource">ActiveGroupSource</a>&lt;T, K&gt; | <a href="#removedgroupsource">RemovedGroupSource</a>&lt;T&gt;;</pre>
+<pre>type GroupSource&lt;T, K&gt; =<br>    | <a href="#activegroupsource">ActiveGroupSource</a>&lt;T, K&gt;<br>    | <a href="#removedgroupsource">RemovedGroupSource</a>&lt;T&gt;;</pre>
 
 ## <code>ActiveGroupSource</code>
 
@@ -456,7 +460,9 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>interface ActiveGroupSource&lt;T, K&gt; extends GroupSourceBase&lt;T&gt; </pre>
+```ts
+interface ActiveGroupSource<T, K> extends GroupSourceBase<T> 
+```
 
 ## <code>RemovedGroupSource</code>
 
@@ -464,7 +470,9 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>interface RemovedGroupSource&lt;T&gt; extends GroupSourceBase&lt;T&gt; </pre>
+```ts
+interface RemovedGroupSource<T> extends GroupSourceBase<T> 
+```
 
 ## <code>ignorePushEvents</code>
 
@@ -488,7 +496,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>function isEqualTo&lt;T, U&gt;(otherSource: <a href="basics.md#source-interface">Source</a>&lt;U&gt;, areValuesEqual: (a: T, b: U, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
+<pre>function isEqualTo&lt;T, U&gt;(<br>    otherSource: <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>    areValuesEqual: (a: T, b: U, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
 
 ## <code>last</code>
 
@@ -512,7 +520,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 <b>Signature</b>
 
-<pre>function map&lt;U&gt;(transform: &lt;T&gt;(value: T, index: number) =&gt; U): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;;</pre>
+<pre>function map&lt;U&gt;(<br>    transform: &lt;T&gt;(value: T, index: number) =&gt; U,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;;</pre>
 
 Calls the given transform function for each Push event of the given source and passes through the result.
 
@@ -520,11 +528,11 @@ Calls the given transform function for each Push event of the given source and p
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <code>&lt;T&gt;\(value: T, index: number\) =&gt; U</code> | A function which accepts a value and an index. The map method calls the transform function one time for each Push event of the given source and passes through the result. |
+| transform | <pre lang="ts">&lt;T&gt;(value: T, index: number) =&gt; U;</pre> | A function which accepts a value and an index. The map method calls the transform function one time for each Push event of the given source and passes through the result. |
 
 <b>Signature</b>
 
-<pre>function map&lt;T, U&gt;(transform: (value: T, index: number) =&gt; U): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function map&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; U,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>mapEvents</code>
 
@@ -532,7 +540,7 @@ Calls the given transform function for each Push event of the given source and p
 
 <b>Signature</b>
 
-<pre>function mapEvents&lt;T, U&gt;(transform: (event: Event&lt;T&gt;, index: number) =&gt; Event&lt;U&gt; | undefined | null): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function mapEvents&lt;T, U&gt;(<br>    transform: (event: Event&lt;T&gt;, index: number) =&gt; Event&lt;U&gt; | undefined | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>mapPushEvents</code>
 
@@ -540,9 +548,9 @@ Calls the given transform function for each Push event of the given source and p
 
 <b>Signature</b>
 
-<pre>function mapPushEvents&lt;T&gt;(transform: (pushEvents: <a href="basics.md#push-interface">Push</a>&lt;T&gt;, index: number) =&gt; <a href="basics.md#throw-interface">Throw</a> | <a href="basics.md#end-interface">End</a>): <a href="basics.md#operator">Operator</a>&lt;T, never&gt;;</pre>
+<pre>function mapPushEvents&lt;T&gt;(<br>    transform: (pushEvents: <a href="basics.md#push-interface">Push</a>&lt;T&gt;, index: number) =&gt; <a href="basics.md#throw-interface">Throw</a> | <a href="basics.md#end-interface">End</a>,<br>): <a href="basics.md#operator">Operator</a>&lt;T, never&gt;;</pre>
 
-<pre>function mapPushEvents&lt;T, U&gt;(transform: (pushEvent: <a href="basics.md#push-interface">Push</a>&lt;T&gt;, index: number) =&gt; Event&lt;U&gt; | undefined | null): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function mapPushEvents&lt;T, U&gt;(<br>    transform: (<br>        pushEvent: <a href="basics.md#push-interface">Push</a>&lt;T&gt;,<br>        index: number,<br>    ) =&gt; Event&lt;U&gt; | undefined | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>mapTo</code>
 
@@ -558,7 +566,7 @@ Replaces the value of each received Push event with the given value.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>U</code> | The value to push. |
+| value | <pre lang="ts">U;</pre> | The value to push. |
 
 ## <code>max</code>
 
@@ -574,7 +582,7 @@ Replaces the value of each received Push event with the given value.
 
 <b>Signature</b>
 
-<pre>function maxCompare&lt;T&gt;(compare: (currentValue: T, lastValue: T, currentValueIndex: number) =&gt; number): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function maxCompare&lt;T&gt;(<br>    compare: (<br>        currentValue: T,<br>        lastValue: T,<br>        currentValueIndex: number,<br>    ) =&gt; number,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>merge</code>
 
@@ -590,7 +598,7 @@ Replaces the value of each received Push event with the given value.
 
 <b>Signature</b>
 
-<pre>function mergeConcurrent(maxConcurrent: number): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function mergeConcurrent(<br>    maxConcurrent: number,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>mergeMap</code>
 
@@ -598,7 +606,7 @@ Replaces the value of each received Push event with the given value.
 
 <b>Signature</b>
 
-<pre>var mergeMap: &lt;T, U&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;, maxConcurrent?: number | undefined) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
+<pre>var mergeMap: &lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>    maxConcurrent?: number | undefined,<br>) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
 
 ## <code>mergeWith</code>
 
@@ -606,7 +614,7 @@ Replaces the value of each received Push event with the given value.
 
 <b>Signature</b>
 
-<pre>function mergeWith&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function mergeWith&lt;T&gt;(<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>mergeWithConcurrent</code>
 
@@ -614,7 +622,7 @@ Replaces the value of each received Push event with the given value.
 
 <b>Signature</b>
 
-<pre>function mergeWithConcurrent&lt;T&gt;(max: number, ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function mergeWithConcurrent&lt;T&gt;(<br>    max: number,<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>min</code>
 
@@ -630,7 +638,7 @@ Replaces the value of each received Push event with the given value.
 
 <b>Signature</b>
 
-<pre>function minCompare&lt;T&gt;(compare: (currentValue: T, lastValue: T, currentValueIndex: number) =&gt; number): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function minCompare&lt;T&gt;(<br>    compare: (<br>        currentValue: T,<br>        lastValue: T,<br>        currentValueIndex: number,<br>    ) =&gt; number,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>pluck</code>
 
@@ -646,7 +654,7 @@ Replaces the value of each received Push event with the given value.
 
 <b>Signature</b>
 
-<pre>function raceWith&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function raceWith&lt;T&gt;(<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>reduce</code>
 
@@ -654,7 +662,7 @@ Replaces the value of each received Push event with the given value.
 
 <b>Signature</b>
 
-<pre>function reduce&lt;T, R, I&gt;(transform: (previousAccumulatedResult: R | I, currentValue: T, currentIndex: number) =&gt; R, initialValue: I): <a href="basics.md#operator">Operator</a>&lt;T, R&gt;;</pre>
+<pre>function reduce&lt;T, R, I&gt;(<br>    transform: (<br>        previousAccumulatedResult: R | I,<br>        currentValue: T,<br>        currentIndex: number,<br>    ) =&gt; R,<br>    initialValue: I,<br>): <a href="basics.md#operator">Operator</a>&lt;T, R&gt;;</pre>
 
 Calls the specified transform function for all the values pushed by the given source. The return value of the transform function is the accumulated result, and is provided as an argument in the next call to the transform function. The accumulated result will be emitted as a Push event once the given source ends.
 
@@ -662,8 +670,8 @@ Calls the specified transform function for all the values pushed by the given so
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <code>\(previousAccumulatedResult: R &#124; I, currentValue: T, currentIndex: number\) =&gt; R</code> | A function that transforms the previousAccumulatedResult \(last value returned by this function\), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result. |
-| initialValue | <code>I</code> | This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult. |
+| transform | <pre>(<br>    previousAccumulatedResult: R &#124; I,<br>    currentValue: T,<br>    currentIndex: number,<br>) =&gt; R;</pre> | A function that transforms the previousAccumulatedResult \(last value returned by this function\), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result. |
+| initialValue | <pre lang="ts">I;</pre> | This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult. |
 
 ## <code>repeat</code>
 
@@ -679,7 +687,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function repeatWhen&lt;T&gt;(getRepeatSource: (sourceEvents: <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function repeatWhen&lt;T&gt;(<br>    getRepeatSource: (sourceEvents: <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>retry</code>
 
@@ -703,7 +711,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function sample(scheduleSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function sample(<br>    scheduleSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>sampleMs</code>
 
@@ -719,7 +727,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function scan&lt;T, R, I&gt;(transform: (previousAccumulatedResult: R | I, currentValue: T, currentIndex: number) =&gt; R, initialValue: I): <a href="basics.md#operator">Operator</a>&lt;T, R&gt;;</pre>
+<pre>function scan&lt;T, R, I&gt;(<br>    transform: (<br>        previousAccumulatedResult: R | I,<br>        currentValue: T,<br>        currentIndex: number,<br>    ) =&gt; R,<br>    initialValue: I,<br>): <a href="basics.md#operator">Operator</a>&lt;T, R&gt;;</pre>
 
 Calls the specified transform function for all the values pushed by the given source. The return value of the transform function is the accumulated result, and is provided as an argument in the next call to the transform function. The accumulated will be emitted after each Push event.
 
@@ -727,8 +735,8 @@ Calls the specified transform function for all the values pushed by the given so
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <code>\(previousAccumulatedResult: R &#124; I, currentValue: T, currentIndex: number\) =&gt; R</code> | A function that transforms the previousAccumulatedResult \(last value returned by this function\), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result. |
-| initialValue | <code>I</code> | This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult. |
+| transform | <pre>(<br>    previousAccumulatedResult: R &#124; I,<br>    currentValue: T,<br>    currentIndex: number,<br>) =&gt; R;</pre> | A function that transforms the previousAccumulatedResult \(last value returned by this function\), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result. |
+| initialValue | <pre lang="ts">I;</pre> | This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult. |
 
 ## <code>schedulePushEvents</code>
 
@@ -736,7 +744,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function schedulePushEvents(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function schedulePushEvents(<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>scheduleSubscription</code>
 
@@ -744,7 +752,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function scheduleSubscription(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function scheduleSubscription(<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>share</code>
 
@@ -762,9 +770,9 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function shareControlled&lt;T&gt;(Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="#controllablesource">ControllableSource</a>&lt;T&gt;;</pre>
+<pre>function shareControlled&lt;T&gt;(<br>    Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;,<br>): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="#controllablesource">ControllableSource</a>&lt;T&gt;;</pre>
 
-<pre>function shareControlled(Subject_?: typeof <a href="basics.md#subject-function">Subject</a>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="#controllablesource">ControllableSource</a>&lt;T&gt;;</pre>
+<pre>function shareControlled(<br>    Subject_?: typeof <a href="basics.md#subject-function">Subject</a>,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="#controllablesource">ControllableSource</a>&lt;T&gt;;</pre>
 
 ## <code>ControllableSource</code>
 
@@ -780,7 +788,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function shareOnce&lt;T&gt;(Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function shareOnce&lt;T&gt;(<br>    Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 <pre>function shareOnce(Subject_?: typeof <a href="basics.md#subject-function">Subject</a>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
@@ -790,9 +798,9 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function sharePersist&lt;T&gt;(Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function sharePersist&lt;T&gt;(<br>    Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
-<pre>function sharePersist(Subject_?: typeof <a href="basics.md#subject-function">Subject</a>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function sharePersist(<br>    Subject_?: typeof <a href="basics.md#subject-function">Subject</a>,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>shareTransform</code>
 
@@ -800,9 +808,9 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function shareTransform&lt;T, U&gt;(Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;, transform: (shared: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function shareTransform&lt;T, U&gt;(<br>    Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;,<br>    transform: (shared: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
-<pre>function shareTransform&lt;U&gt;(Subject_: typeof <a href="basics.md#subject-function">Subject</a>, transform: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;): &lt;T&gt;(shared: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;;</pre>
+<pre>function shareTransform&lt;U&gt;(<br>    Subject_: typeof <a href="basics.md#subject-function">Subject</a>,<br>    transform: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): &lt;T&gt;(shared: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;;</pre>
 
 ## <code>skip</code>
 
@@ -826,7 +834,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function skipUntil(stopSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function skipUntil(<br>    stopSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>skipWhile</code>
 
@@ -834,7 +842,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function skipWhile&lt;T&gt;(shouldContinueSkipping: (value: T, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function skipWhile&lt;T&gt;(<br>    shouldContinueSkipping: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>some</code>
 
@@ -842,7 +850,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function some&lt;T&gt;(predicate: (value: T, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
+<pre>function some&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
 
 ## <code>spyAfter</code>
 
@@ -850,7 +858,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>var spyAfter: &lt;T&gt;(onEvent: (event: Event&lt;T&gt;) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
+<pre>var spyAfter: &lt;T&gt;(<br>    onEvent: (event: Event&lt;T&gt;) =&gt; void,<br>) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>spyBefore</code>
 
@@ -858,7 +866,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>var spyBefore: &lt;T&gt;(onEvent: (event: Event&lt;T&gt;) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
+<pre>var spyBefore: &lt;T&gt;(<br>    onEvent: (event: Event&lt;T&gt;) =&gt; void,<br>) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>spyEndAfter</code>
 
@@ -882,7 +890,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>var spyPushAfter: &lt;T&gt;(onPush: (value: T, index: number) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
+<pre>var spyPushAfter: &lt;T&gt;(<br>    onPush: (value: T, index: number) =&gt; void,<br>) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>spyPushBefore</code>
 
@@ -890,7 +898,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>var spyPushBefore: &lt;T&gt;(onPush: (value: T, index: number) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
+<pre>var spyPushBefore: &lt;T&gt;(<br>    onPush: (value: T, index: number) =&gt; void,<br>) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>spyThrowAfter</code>
 
@@ -898,7 +906,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>var spyThrowAfter: (onThrow: (error: unknown) =&gt; void) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
+<pre>var spyThrowAfter: (<br>    onThrow: (error: unknown) =&gt; void,<br>) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>spyThrowBefore</code>
 
@@ -906,7 +914,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>var spyThrowBefore: (onThrow: (error: unknown) =&gt; void) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
+<pre>var spyThrowBefore: (<br>    onThrow: (error: unknown) =&gt; void,<br>) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>startWith</code>
 
@@ -914,7 +922,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function startWith&lt;T&gt;(...values: T[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function startWith&lt;T&gt;(<br>    ...values: T[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>startWithSources</code>
 
@@ -922,7 +930,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function startWithSources&lt;T&gt;(...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function startWithSources&lt;T&gt;(<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>switchEach</code>
 
@@ -938,7 +946,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 <b>Signature</b>
 
-<pre>function switchMap&lt;T, U&gt;(transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function switchMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
 
 ## <code>take</code>
 
@@ -962,7 +970,7 @@ Ignores all received Push events. When the source emits an End event, the last N
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| amount | <code>number</code> | The amount of events to keep and distribute at the end. |
+| amount | <pre lang="ts">number;</pre> | The amount of events to keep and distribute at the end. |
 
 ## <code>takeUntil</code>
 
@@ -970,7 +978,7 @@ Ignores all received Push events. When the source emits an End event, the last N
 
 <b>Signature</b>
 
-<pre>function takeUntil(stopSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function takeUntil(<br>    stopSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>takeWhile</code>
 
@@ -978,7 +986,7 @@ Ignores all received Push events. When the source emits an End event, the last N
 
 <b>Signature</b>
 
-<pre>function takeWhile&lt;T, S extends T&gt;(shouldContinue: (value: T, index: number) =&gt; value is S): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;;</pre>
+<pre>function takeWhile&lt;T, S extends T&gt;(<br>    shouldContinue: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;;</pre>
 
 Calls the shouldContinue function for each Push event of the given source. The returned source will emit an End event instead of the received Push event when the given shouldContinue function returns a falsy value.
 
@@ -986,11 +994,11 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| shouldContinue | <code>\(value: T, index: number\) =&gt; value is S</code> | A function that accepts a value and an index. The takeWhile method calls this function one time for each Push event of the given source. |
+| shouldContinue | <pre lang="ts">(value: T, index: number) =&gt; value is S;</pre> | A function that accepts a value and an index. The takeWhile method calls this function one time for each Push event of the given source. |
 
 <b>Signature</b>
 
-<pre>function takeWhile&lt;T&gt;(shouldContinue: (value: T, index: number) =&gt; unknown): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function takeWhile&lt;T&gt;(<br>    shouldContinue: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>throttle</code>
 
@@ -998,9 +1006,9 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function throttle(getDurationSource: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, config?: <a href="#throttleconfig">ThrottleConfig</a> | null): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function throttle(<br>    getDurationSource: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    config?: <a href="#throttleconfig">ThrottleConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
-<pre>function throttle&lt;T&gt;(getDurationSource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, config?: <a href="#throttleconfig">ThrottleConfig</a> | null): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function throttle&lt;T&gt;(<br>    getDurationSource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    config?: <a href="#throttleconfig">ThrottleConfig</a> | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
 
 ## <code>ThrottleConfig</code>
 
@@ -1008,7 +1016,9 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>interface ThrottleConfig </pre>
+```ts
+interface ThrottleConfig 
+```
 
 ## <code>defaultThrottleConfig</code>
 
@@ -1024,7 +1034,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function throttleMs(durationMs: number, config?: <a href="#throttleconfig">ThrottleConfig</a> | null): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function throttleMs(<br>    durationMs: number,<br>    config?: <a href="#throttleconfig">ThrottleConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
 
 ## <code>throwIfEmpty</code>
 
@@ -1040,7 +1050,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function timeout&lt;T&gt;(timeoutSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, replacementSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function timeout&lt;T&gt;(<br>    timeoutSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    replacementSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>timeoutMs</code>
 
@@ -1048,7 +1058,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function timeoutMs&lt;T&gt;(ms: number, replacementSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function timeoutMs&lt;T&gt;(<br>    ms: number,<br>    replacementSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
 
 ## <code>unwrapFromWrappedPushEvents</code>
 
@@ -1056,7 +1066,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>var unwrapFromWrappedPushEvents: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;</pre>
+<pre>var unwrapFromWrappedPushEvents: &lt;T&gt;(<br>    source: <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;,<br>) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;</pre>
 
 ## <code>windowControlled</code>
 
@@ -1064,9 +1074,9 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function windowControlled(getWindowOpeningsSource: &lt;T&gt;(sharedSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, getWindowClosingSource: &lt;T&gt;(currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowControlled(<br>    getWindowOpeningsSource: &lt;T&gt;(sharedSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    getWindowClosingSource: &lt;T&gt;(currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
 
-<pre>function windowControlled&lt;T&gt;(getWindowOpeningsSource: (sharedSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, getWindowClosingSource: (currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowControlled&lt;T&gt;(<br>    getWindowOpeningsSource: (sharedSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    getWindowClosingSource: (currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
 
 ## <code>windowCount</code>
 
@@ -1074,7 +1084,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function windowCount(maxWindowLength: number, createEvery?: number): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowCount(<br>    maxWindowLength: number,<br>    createEvery?: number,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
 
 ## <code>windowEach</code>
 
@@ -1082,9 +1092,9 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function windowEach(getWindowClosingSource: &lt;T&gt;(currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowEach(<br>    getWindowClosingSource: &lt;T&gt;(currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
 
-<pre>function windowEach&lt;T&gt;(getWindowClosingSource: (currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowEach&lt;T&gt;(<br>    getWindowClosingSource: (currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
 
 ## <code>windowEvery</code>
 
@@ -1092,7 +1102,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function windowEvery(boundariesSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowEvery(<br>    boundariesSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
 
 ## <code>windowTime</code>
 
@@ -1100,7 +1110,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function windowTime(maxWindowDuration?: number | null, creationInterval?: number | null, maxWindowLength?: number): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowTime(<br>    maxWindowDuration?: number | null,<br>    creationInterval?: number | null,<br>    maxWindowLength?: number,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
 
 ## <code>withLatestFrom</code>
 
@@ -1108,7 +1118,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function withLatestFrom&lt;T extends unknown[]&gt;(...sources: WrapValuesInSource&lt;T&gt;): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
+<pre>function withLatestFrom&lt;T extends unknown[]&gt;(<br>    ...sources: WrapValuesInSource&lt;T&gt;<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
 
 ## <code>withLatestFromLazy</code>
 
@@ -1116,7 +1126,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function withLatestFromLazy&lt;T extends unknown[]&gt;(getSources: () =&gt; WrapValuesInSource&lt;T&gt;): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
+<pre>function withLatestFromLazy&lt;T extends unknown[]&gt;(<br>    getSources: () =&gt; WrapValuesInSource&lt;T&gt;,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
 
 ## <code>withPrevious</code>
 
@@ -1132,7 +1142,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function withTime&lt;T&gt;(provideTime: <a href="util.md#timeprovider">TimeProvider</a>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#withtime">WithTime</a>&lt;T&gt;&gt;;</pre>
+<pre>function withTime&lt;T&gt;(<br>    provideTime: <a href="util.md#timeprovider">TimeProvider</a>,<br>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#withtime">WithTime</a>&lt;T&gt;&gt;;</pre>
 
 ## <code>WithTime</code>
 
@@ -1140,7 +1150,9 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>interface WithTime&lt;T&gt; </pre>
+```ts
+interface WithTime<T> 
+```
 
 ## <code>withTimeInterval</code>
 
@@ -1148,7 +1160,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function withTimeInterval&lt;T&gt;(provideTime: <a href="util.md#timeprovider">TimeProvider</a>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#timeinterval">TimeInterval</a>&lt;T&gt;&gt;;</pre>
+<pre>function withTimeInterval&lt;T&gt;(<br>    provideTime: <a href="util.md#timeprovider">TimeProvider</a>,<br>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#timeinterval">TimeInterval</a>&lt;T&gt;&gt;;</pre>
 
 ## <code>TimeInterval</code>
 
@@ -1156,7 +1168,9 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>interface TimeInterval&lt;T&gt; </pre>
+```ts
+interface TimeInterval<T> 
+```
 
 ## <code>wrapInPushEvents</code>
 
@@ -1164,7 +1178,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>var wrapInPushEvents: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;</pre>
+<pre>var wrapInPushEvents: &lt;T&gt;(<br>    source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;</pre>
 
 ## <code>zipWith</code>
 
@@ -1172,4 +1186,4 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 <b>Signature</b>
 
-<pre>function zipWith&lt;T extends unknown[]&gt;(...sources: WrapValuesInSource&lt;T&gt;): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
+<pre>function zipWith&lt;T extends unknown[]&gt;(<br>    ...sources: WrapValuesInSource&lt;T&gt;<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>

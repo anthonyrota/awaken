@@ -57,6 +57,7 @@ export function writePlainText(
         if (output.inHtmlAttribute) {
             text = text.replace(newlineRegexp, '\\n');
         } else if (output.inSingleLineCodeBlock) {
+            // Unused at the moment.
             text = text.split(newlineRegexp).join('</code><br><code>');
         } else if (output.inHtmlBlockTag && !output.inTable) {
             text = text.replace(newlineRegexp, '<br>');

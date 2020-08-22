@@ -15,7 +15,7 @@ import { HtmlCommentNode } from '../HtmlComment';
 import { ImageNode, ImageParameters } from '../Image';
 import { ItalicsNode } from '../Italics';
 import { LinkNode, LinkParameters } from '../Link';
-import { ListNode, ListParameters, ListType } from '../List';
+import { ListNode, ListType, ListTypeParameters } from '../List';
 import { ParagraphNode } from '../Paragraph';
 import { PlainTextNode } from '../PlainText';
 import { StrikethroughNode } from '../Strikethrough';
@@ -127,15 +127,15 @@ export function parseMarkdown(
                 throw new Error('Unexpected list item node.');
             }
             case 'list': {
-                const parameters: ListParameters<DeepCoreNode> = node.ordered
+                const listType: ListTypeParameters = node.ordered
                     ? {
-                          listType: ListType.Ordered,
+                          type: ListType.Ordered,
                           start: node.start ?? undefined,
                       }
                     : {
-                          listType: ListType.Unordered,
+                          type: ListType.Unordered,
                       };
-                const list = ListNode<DeepCoreNode>(parameters);
+                const list = ListNode<DeepCoreNode>({ listType });
                 container.children.push(list);
                 for (const childNode of node.children) {
                     const container = ContainerNode<DeepCoreNode>({});

@@ -14,7 +14,9 @@ function writeListItems<ChildNode extends Node>(
             output.ensureNewLine();
         }
         const listMarker =
-            list.listType === ListType.Ordered ? `${list.start + i}. ` : '- ';
+            list.listType.type === ListType.Ordered
+                ? `${list.listType.start + i}. `
+                : '- ';
         output.write(listMarker);
         output.withIndent(' '.repeat(listMarker.length), () => {
             output.markStartOfParagraph();
@@ -37,10 +39,10 @@ export function writeList<ChildNode extends Node>(
             });
         });
         const htmlElement =
-            list.listType === ListType.Ordered
+            list.listType.type === ListType.Ordered
                 ? HtmlElementNode({
                       tagName: 'ol',
-                      attributes: { start: `${list.start}` },
+                      attributes: { start: `${list.listType.start}` },
                       children,
                   })
                 : HtmlElementNode({

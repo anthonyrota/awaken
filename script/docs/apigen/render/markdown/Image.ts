@@ -1,7 +1,7 @@
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { ImageBase } from '../../nodes/Image';
 import { PlainTextNode } from '../../nodes/PlainText';
-import { noop } from '../../util';
+import { noop } from '../../util/noop';
 import { MarkdownOutput } from './MarkdownOutput';
 import { ParamWriteCoreNode } from '.';
 

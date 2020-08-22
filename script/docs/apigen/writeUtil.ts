@@ -35,7 +35,9 @@ import { TitleNode } from './nodes/Title';
 import { parseMarkdown } from './nodes/util/parseMarkdown';
 import { outDir, getMainPathOfApiItemName } from './paths';
 import { SourceMetadata } from './sourceMetadata';
-import { Iter, StringBuilder } from './util';
+import { Iter } from './util/Iter';
+import { format, Language } from './util/prettier';
+import { StringBuilder } from './util/StringBuilder';
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -837,7 +839,11 @@ export function writeSeeBlocks(
     context: Context,
     docComment = getDocComment(apiItem),
 ): boolean {
-    const list = ListNode<DeepCoreNode>({ listType: ListType.Unordered });
+    const list = ListNode<DeepCoreNode>({
+        listType: {
+            type: ListType.Unordered,
+        },
+    });
     for (const seeBlock of getSeeBlocks(docComment)) {
         const listItem = ContainerNode<DeepCoreNode>({});
         list.children.push(listItem);
@@ -899,17 +905,23 @@ export function writeSourceLocation(
     );
 }
 
-function appendExcerptWithHyperlinks(
-    container: ContainerBase<DeepCoreNode>,
+function createNodeForTypeExcerpt(
     excerpt: aeModel.Excerpt,
     apiItem: aeModel.ApiItem,
     context: Context,
-): void {
-    const codeBlock = RichCodeBlockNode<DeepCoreNode>({ language: 'ts' });
-    container.children.push(codeBlock);
+): DeepCoreNode {
+    if (!excerpt.text.trim()) {
+        return PlainTextNode({ text: '(not declared)' });
+    }
+
+    const richCodeBlock = RichCodeBlockNode<DeepCoreNode>({
+        language: 'ts',
+    });
 
     const spannedTokens = excerpt.spannedTokens.slice();
     let token: aeModel.ExcerptToken | undefined;
+    let isOnlyText = true;
+
     while ((token = spannedTokens.shift())) {
         const tokenText = token.text;
         const result = getExcerptTokenReference(
@@ -920,11 +932,12 @@ function appendExcerptWithHyperlinks(
         );
 
         if (result === null) {
-            codeBlock.children.push(PlainTextNode({ text: tokenText }));
+            richCodeBlock.children.push(PlainTextNode({ text: tokenText }));
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
-            codeBlock.children.push(
+            isOnlyText = false;
+            richCodeBlock.children.push(
                 LocalPageLinkNode({
                     destination: getLinkToApiItem(
                         getApiItemName(apiItem),
@@ -935,25 +948,31 @@ function appendExcerptWithHyperlinks(
                 }),
             );
         } else {
+            // Local signature reference.
             spannedTokens.unshift(...result.tokens);
         }
     }
-}
 
-function createNodeForTypeExcerpt(
-    excerpt: aeModel.Excerpt,
-    apiItem: aeModel.ApiItem,
-    context: Context,
-): DeepCoreNode {
-    if (!excerpt.text.trim()) {
-        return PlainTextNode({ text: '(not declared)' });
+    if (isOnlyText) {
+        let formattedText: string;
+        try {
+            formattedText = format(
+                `type X = ${excerpt.text}`,
+                Language.TypeScript,
+            )
+                .replace(/^type X =/, '')
+                .trim();
+        } catch (error) {
+            console.error(error);
+            formattedText = excerpt.text;
+        }
+        return CodeBlockNode({
+            language: 'ts',
+            code: formattedText,
+        });
     }
 
-    const container = ContainerNode<DeepCoreNode>({});
-
-    appendExcerptWithHyperlinks(container, excerpt, apiItem, context);
-
-    return container;
+    return richCodeBlock;
 }
 
 export function writeParameters(
@@ -1206,6 +1225,10 @@ function getExcerptTokenReference(
     return null;
 }
 
+function removeExportDeclare(tokenText: string): string {
+    return tokenText.replace(/^export (declare )?/, '');
+}
+
 function writeApiItemExcerpt(
     container: ContainerBase<DeepCoreNode>,
     apiItem: aeModel.ApiItem,
@@ -1216,19 +1239,20 @@ function writeApiItemExcerpt(
         throw new Error(`Received excerpt with no declaration.`);
     }
 
-    const codeBlock = RichCodeBlockNode<DeepCoreNode>({ language: 'ts' });
-    container.children.push(codeBlock);
+    const richCodeBlock = RichCodeBlockNode<DeepCoreNode>({ language: 'ts' });
 
     if (apiItem.kind === aeModel.ApiItemKind.Variable) {
-        codeBlock.children.push(PlainTextNode({ text: 'var ' }));
+        richCodeBlock.children.push(PlainTextNode({ text: 'var ' }));
     }
 
     const spannedTokens = excerpt.spannedTokens.slice();
     let token: aeModel.ExcerptToken | undefined;
+    let isOnlyText = true;
+
     while ((token = spannedTokens.shift())) {
         let tokenText = token.text;
         if (token === excerpt.spannedTokens[0]) {
-            tokenText = tokenText.replace(/^export (declare )?/, '');
+            tokenText = removeExportDeclare(tokenText);
         }
         const result = getExcerptTokenReference(
             token,
@@ -1237,7 +1261,7 @@ function writeApiItemExcerpt(
             context,
         );
         if (result === null) {
-            codeBlock.children.push(PlainTextNode({ text: tokenText }));
+            richCodeBlock.children.push(PlainTextNode({ text: tokenText }));
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
@@ -1246,7 +1270,8 @@ function writeApiItemExcerpt(
                 result.apiItem,
                 context,
             );
-            codeBlock.children.push(
+            isOnlyText = false;
+            richCodeBlock.children.push(
                 LocalPageLinkNode({
                     destination,
                     children: [PlainTextNode({ text: tokenText })],
@@ -1257,4 +1282,27 @@ function writeApiItemExcerpt(
             spannedTokens.unshift(...result.tokens);
         }
     }
+
+    if (isOnlyText) {
+        let formattedText = removeExportDeclare(excerpt.text);
+        if (apiItem.kind !== aeModel.ApiItemKind.Interface) {
+            try {
+                formattedText = format(
+                    removeExportDeclare(excerpt.text),
+                    Language.TypeScript,
+                ).trim();
+            } catch (error) {
+                console.error(error);
+                formattedText = excerpt.text;
+            }
+        }
+        const codeBlock = CodeBlockNode({
+            language: 'ts',
+            code: formattedText,
+        });
+        container.children.push(codeBlock);
+        return;
+    }
+
+    container.children.push(richCodeBlock);
 }

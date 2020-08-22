@@ -56,7 +56,9 @@ export function writeTableOfContentsList(
     writeCoreNode: ParamWriteCoreNode,
 ): void {
     const contentsList = ListNode<DeepCoreNode>({
-        listType: ListType.Ordered,
+        listType: {
+            type: ListType.Ordered,
+        },
     });
     for (const mainReference of tableOfContentsList.tableOfContents) {
         const listItem = buildTableOfContentsListItem(
@@ -66,7 +68,9 @@ export function writeTableOfContentsList(
         contentsList.children.push(listItem);
         if (mainReference.nested_references) {
             const nestedList = ListNode<DeepCoreNode>({
-                listType: ListType.Ordered,
+                listType: {
+                    type: ListType.Ordered,
+                },
             });
             listItem.children.push(nestedList);
             for (const nestedReference of mainReference.nested_references) {

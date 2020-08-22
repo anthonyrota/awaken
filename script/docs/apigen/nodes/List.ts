@@ -20,45 +20,50 @@ export interface UnorderedListParameters {}
 
 export type ListTypeParameters =
     | ({
-          listType: ListType.Ordered;
+          type: ListType.Ordered;
       } & OrderedListParameters)
     | ({
-          listType: ListType.Unordered;
+          type: ListType.Unordered;
       } & UnorderedListParameters);
 
-export type ListParameters<ChildNode extends Node> = ContainerParameters<
-    ChildNode
-> &
-    ListTypeParameters;
+export interface ListParameters<ChildNode extends Node>
+    extends ContainerParameters<ChildNode> {
+    listType: ListTypeParameters;
+}
 
 export type ListBaseTypeProperties =
     | ({
-          listType: ListType.Ordered;
+          type: ListType.Ordered;
       } & OrderedListProperties)
     | ({
-          listType: ListType.Unordered;
+          type: ListType.Unordered;
       } & UnorderedListProperties);
 
-export type ListBase<ChildNode extends Node> = ContainerBase<ChildNode> &
-    ListBaseTypeProperties;
+export interface ListBase<ChildNode extends Node>
+    extends ContainerBase<ChildNode> {
+    listType: ListBaseTypeProperties;
+}
 
 export function ListBase<ChildNode extends Node>(
     parameters: ListParameters<ChildNode>,
 ): ListBase<ChildNode> {
-    const linkBaseTypeProperties: ListBaseTypeProperties =
-        parameters.listType === ListType.Ordered
-            ? { listType: ListType.Ordered, start: parameters.start ?? 1 }
-            : { listType: ListType.Unordered };
     return {
-        ...linkBaseTypeProperties,
+        listType:
+            parameters.listType.type === ListType.Ordered
+                ? {
+                      type: ListType.Ordered,
+                      start: parameters.listType.start ?? 1,
+                  }
+                : { type: ListType.Unordered },
         ...ContainerBase({ children: parameters.children }),
     };
 }
 
-export type ListNode<ChildNode extends Node> = ListBase<ChildNode> &
-    Node & {
-        type: CoreNodeType.List;
-    };
+export interface ListNode<ChildNode extends Node>
+    extends ListBase<ChildNode>,
+        Node {
+    type: CoreNodeType.List;
+}
 
 export function ListNode<ChildNode extends Node>(
     parameters: ListParameters<ChildNode>,

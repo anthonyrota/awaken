@@ -11,16 +11,15 @@ export function writeRichCodeBlock<ChildNode extends Node>(
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     if (output.constrainedToSingleLine) {
-        output.withInSingleLineCodeBlock(() => {
-            writeCoreNode(
-                HtmlElementNode<ChildNode>({
-                    tagName: 'code',
-                    children: richCodeBlock.children,
-                }),
-                output,
-                writeChildNode,
-            );
-        });
+        writeCoreNode(
+            // TODO: fix breaking inside nested blocks.
+            HtmlElementNode<ChildNode>({
+                tagName: 'pre',
+                children: richCodeBlock.children,
+            }),
+            output,
+            writeChildNode,
+        );
         return;
     }
 

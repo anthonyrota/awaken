@@ -1,7 +1,7 @@
 import { Node } from '../../nodes';
 import { BlockQuoteBase } from '../../nodes/BlockQuote';
+import { ContainerNode } from '../../nodes/Container';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
-import { ContainerNode } from './../../nodes/Container';
 import { MarkdownOutput } from './MarkdownOutput';
 import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 

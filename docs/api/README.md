@@ -2,11 +2,11 @@
 
 # Awaken API Reference
 
-## [API Reference - Core](core\/README.md)
+## [API Reference - Core](core\/README.md#readme)
 
 <details><summary><b>Table of Contents</b></summary>
 
-### [API Reference - Basics](core\/basics.md)
+### [API Reference - Basics](core\/basics.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -41,7 +41,7 @@
    5. [<code>NonMarkedSubject</code>](core\/basics.md#nonmarkedsubject)
 7. [<code>ScheduleFunction</code>](core\/basics.md#schedulefunction)</details>
 
-### [API Reference - Sources](core\/sources.md)
+### [API Reference - Sources](core\/sources.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -78,7 +78,7 @@
 31. [<code>timer</code>](core\/sources.md#timer)
 32. [<code>zipSources</code>](core\/sources.md#zipsources)</details>
 
-### [API Reference - Operators](core\/operators.md)
+### [API Reference - Operators](core\/operators.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -200,7 +200,7 @@
 104. [<code>wrapInPushEvents</code>](core\/operators.md#wrapinpushevents)
 105. [<code>zipWith</code>](core\/operators.md#zipwith)</details>
 
-### [API Reference - Subjects](core\/subjects.md)
+### [API Reference - Subjects](core\/subjects.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -210,7 +210,7 @@
    1. [<code>ReplaySubjectTimeoutConfig</code>](core\/subjects.md#replaysubjecttimeoutconfig)
 4. [<code>SubjectBase</code>](core\/subjects.md#subjectbase)</details>
 
-### [API Reference - Schedule Functions](core\/schedule-functions.md)
+### [API Reference - Schedule Functions](core\/schedule-functions.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -224,7 +224,7 @@
 8. [<code>scheduleAnimationFrame</code>](core\/schedule-functions.md#scheduleanimationframe)
 9. [<code>scheduleSync</code>](core\/schedule-functions.md#schedulesync)</details>
 
-### [API Reference - Utils](core\/util.md)
+### [API Reference - Utils](core\/util.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -234,7 +234,7 @@
 4. [<code>asyncReportError</code>](core\/util.md#asyncreporterror)
 5. [<code>TimeProvider</code>](core\/util.md#timeprovider)</details></details>
 
-## [API Reference - Testing](testing\/README.md)
+## [API Reference - Testing](testing\/README.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 

@@ -32,7 +32,8 @@
         "ontext",
         "oncomment",
         "oncdatastart",
-        "onprocessinginstruction"
+        "onprocessinginstruction",
+        "apigen"
     ],
     "overrides": []
 }

@@ -1,7 +1,7 @@
 coverage
-dist
-testing/dist
+**/dist/**
 *.md
 mangle.json
 extractor
 docs/api
+temp/*.api.json

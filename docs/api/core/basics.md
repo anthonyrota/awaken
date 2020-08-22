@@ -51,7 +51,9 @@
 
 <b>Signature</b>
 
-<pre>interface Disposable </pre>
+```ts
+interface Disposable 
+```
 
 ## <code>isDisposable</code>
 
@@ -67,13 +69,13 @@ Determines whether the given value is a <code>[Disposable](#disposable)</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>unknown</code> | The value to check. |
+| value | <pre lang="ts">unknown;</pre> | The value to check. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Disposable](#disposable-interface)</code> | Whether the value is a Disposable. |
+| <pre>value is [Disposable](#disposable-interface)</pre> | Whether the value is a Disposable. |
 
 <b>Example Usage</b>
 
@@ -101,7 +103,9 @@ isDisposable(null); // false.
 
 <b>Signature</b>
 
-<pre>interface DisposalError extends DisposalErrorImplementation </pre>
+```ts
+interface DisposalError extends DisposalErrorImplementation 
+```
 
 ### <a name="disposalerror-variable"></a><code>DisposalError - Variable</code>
 
@@ -119,7 +123,9 @@ Thrown when at least one error is caught during the disposal of a disposable.
 
 <b>Signature</b>
 
-<pre>interface DisposalErrorConstructor </pre>
+```ts
+interface DisposalErrorConstructor 
+```
 
 ## <code>DISPOSED</code>
 
@@ -135,7 +141,7 @@ Thrown when at least one error is caught during the disposal of a disposable.
 
 <b>Signature</b>
 
-<pre>function implDisposableMethods&lt;T extends object&gt;(value: T, disposable: <a href="#disposable-interface">Disposable</a>): T & <a href="#disposable-interface">Disposable</a>;</pre>
+<pre>function implDisposableMethods&lt;T extends object&gt;(<br>    value: T,<br>    disposable: <a href="#disposable-interface">Disposable</a>,<br>): T & <a href="#disposable-interface">Disposable</a>;</pre>
 
 Implements the Disposable Interface onto the given value by copying the disposable methods & properties from the given value to the given disposable.
 
@@ -143,14 +149,14 @@ Implements the Disposable Interface onto the given value by copying the disposab
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>T</code> | The value to implement the Disposable Interface on. |
-| disposable | <code>[Disposable](#disposable-interface)</code> |  |
+| value | <pre lang="ts">T;</pre> | The value to implement the Disposable Interface on. |
+| disposable | <pre>[Disposable](#disposable-interface)</pre> |  |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>T & [Disposable](#disposable-interface)</code> | The given value which has been mutated. In strict javascript this is unnecessary but here it is useful as the returned value will have the type <code>T & Disposable</code> |
+| <pre>T & [Disposable](#disposable-interface)</pre> | The given value which has been mutated. In strict javascript this is unnecessary but here it is useful as the returned value will have the type <code>T & Disposable</code> |
 
 ## <code>Event</code>
 
@@ -236,7 +242,7 @@ console.log(event.value); // [1, 2, 3].
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>T</code> | The value to put in the returned event. |
+| value | <pre lang="ts">T;</pre> | The value to put in the returned event. |
 
 ### <a name="push-interface"></a><code>Push - Interface</code>
 
@@ -244,7 +250,9 @@ console.log(event.value); // [1, 2, 3].
 
 <b>Signature</b>
 
-<pre>interface Push&lt;T&gt; </pre>
+```ts
+interface Push<T> 
+```
 
 ## <code>PushType</code>
 
@@ -254,7 +262,9 @@ console.log(event.value); // [1, 2, 3].
 
 <b>Signature</b>
 
-<pre>type PushType = 0;</pre>
+```ts
+type PushType = 0;
+```
 
 ### <a name="pushtype-variable"></a><code>PushType - Variable</code>
 
@@ -280,13 +290,13 @@ A Throw represents the &quot;throwing&quot; of an error, and has an <code>error<
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| error | <code>unknown</code> | The error to be thrown. |
+| error | <pre lang="ts">unknown;</pre> | The error to be thrown. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>[Throw](#throw-interface)</code> | The created Throw event. |
+| <pre>[Throw](#throw-interface)</pre> | The created Throw event. |
 
 <b>Example Usage</b>
 
@@ -306,7 +316,9 @@ console.log(event.value); // Error(...).
 
 <b>Signature</b>
 
-<pre>interface Throw </pre>
+```ts
+interface Throw 
+```
 
 ## <code>ThrowType</code>
 
@@ -316,7 +328,9 @@ console.log(event.value); // Error(...).
 
 <b>Signature</b>
 
-<pre>type ThrowType = 1;</pre>
+```ts
+type ThrowType = 1;
+```
 
 ### <a name="throwtype-variable"></a><code>ThrowType - Variable</code>
 
@@ -334,7 +348,9 @@ console.log(event.value); // Error(...).
 
 <b>Signature</b>
 
-<pre>interface End </pre>
+```ts
+interface End 
+```
 
 ### <a name="end-variable"></a><code>End - Variable</code>
 
@@ -370,7 +386,9 @@ sink(End); // This disposes the sink, then calls `onEvent` above.
 
 <b>Signature</b>
 
-<pre>type EndType = 2;</pre>
+```ts
+type EndType = 2;
+```
 
 ### <a name="endtype-variable"></a><code>EndType - Variable</code>
 
@@ -400,13 +418,13 @@ The sink constructor takes an <code>onEvent</code> function, which is called eve
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| onEvent | <code>\(event: Event&lt;T&gt;\) =&gt; void</code> | The callback for when an event is received. |
+| onEvent | <pre lang="ts">(event: Event&lt;T&gt;) =&gt; void;</pre> | The callback for when an event is received. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>[Sink](#sink-interface)&lt;T&gt;</code> | The created Sink. |
+| <pre>[Sink](#sink-interface)&lt;T&gt;</pre> | The created Sink. |
 
 <b>Example Usage</b>
 
@@ -475,13 +493,13 @@ Determines whether the given value is a <code>[Sink](#sink)</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>unknown</code> | The value to check. |
+| value | <pre lang="ts">unknown;</pre> | The value to check. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Sink](#sink-interface)&lt;unknown&gt;</code> | Whether the value is a Sink. |
+| <pre>value is [Sink](#sink-interface)&lt;unknown&gt;</pre> | Whether the value is a Sink. |
 
 <b>Example Usage</b>
 
@@ -559,13 +577,13 @@ const Source = produce => sink => {
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| produce | <code>\(sink: [Sink](#sink-interface)&lt;T&gt;\) =&gt; void</code> | This will be called with the given sink each subscription. When the sink is disposed this function should stop trying to emit values, and should stop\/cleanup any ongoing side processes |
+| produce | <pre>(sink: [Sink](#sink-interface)&lt;T&gt;) =&gt; void</pre> | This will be called with the given sink each subscription. When the sink is disposed this function should stop trying to emit values, and should stop\/cleanup any ongoing side processes |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>[Source](#source-interface)&lt;T&gt;</code> | The created Source. |
+| <pre>[Source](#source-interface)&lt;T&gt;</pre> | The created Source. |
 
 <b>Example Usage</b>
 
@@ -639,7 +657,9 @@ const source = Source(sink => {
 
 <b>Signature</b>
 
-<pre>interface Source&lt;T&gt; </pre>
+```ts
+interface Source<T> 
+```
 
 ## <code>isSource</code>
 
@@ -655,13 +675,13 @@ Determines whether the given value is a <code>[Source](#source)</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>unknown</code> | The value to check. |
+| value | <pre lang="ts">unknown;</pre> | The value to check. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Source](#source-interface)&lt;unknown&gt;</code> | Whether the value is a Source. |
+| <pre>value is [Source](#source-interface)&lt;unknown&gt;</pre> | Whether the value is a Source. |
 
 <b>Example Usage</b>
 
@@ -687,7 +707,7 @@ isSource(null); // false.
 
 <b>Signature</b>
 
-<pre>function subscribe&lt;T&gt;(sink?: <a href="#sink-interface">Sink</a>&lt;T&gt;): (source: <a href="#source-interface">Source</a>&lt;T&gt;) =&gt; void;</pre>
+<pre>function subscribe&lt;T&gt;(<br>    sink?: <a href="#sink-interface">Sink</a>&lt;T&gt;,<br>): (source: <a href="#source-interface">Source</a>&lt;T&gt;) =&gt; void;</pre>
 
 Higher order function which takes a sink, and returns another function which receives a source that will be subscribed to using the given sink. This is useful, for example, at the end of pipe calls in order to subscribe to the transformed source.
 
@@ -695,13 +715,13 @@ Higher order function which takes a sink, and returns another function which rec
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| sink | <code>[Sink](#sink-interface)&lt;T&gt;</code> | The sink to be given to the received source. |
+| sink | <pre>[Sink](#sink-interface)&lt;T&gt;</pre> | The sink to be given to the received source. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>\(source: [Source](#source-interface)&lt;T&gt;\) =&gt; void</code> | The higher order function which takes a source to subscribe to. |
+| <pre>(source: [Source](#source-interface)&lt;T&gt;) =&gt; void</pre> | The higher order function which takes a source to subscribe to. |
 
 <b>Example Usage</b>
 
@@ -739,7 +759,9 @@ pipe(
 
 <b>Signature</b>
 
-<pre>interface Operator&lt;T, U&gt; </pre>
+```ts
+interface Operator<T, U> 
+```
 
 ## <code>IdentityOperator</code>
 
@@ -747,7 +769,9 @@ pipe(
 
 <b>Signature</b>
 
-<pre>interface IdentityOperator </pre>
+```ts
+interface IdentityOperator 
+```
 
 ## <code>pipe</code>
 
@@ -761,29 +785,121 @@ The result of accumulatively calling the given value against all of the function
 
 <b>Signature</b>
 
-<pre>function pipe&lt;T&gt;(x: T): T;</pre>
+```ts
+function pipe<T>(x: T): T;
+```
 
-<pre>function pipe&lt;T, R&gt;(x: T, f1: (x: T) =&gt; R): R;</pre>
+```ts
+function pipe<T, R>(x: T, f1: (x: T) => R): R;
+```
 
-<pre>function pipe&lt;T, A, R&gt;(x: T, f1: (x: T) =&gt; A, f2: (x: A) =&gt; R): R;</pre>
+```ts
+function pipe<T, A, R>(x: T, f1: (x: T) => A, f2: (x: A) => R): R;
+```
 
-<pre>function pipe&lt;T, A, B, R&gt;(x: T, f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; R): R;</pre>
+```ts
+function pipe<T, A, B, R>(
+    x: T,
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => R,
+): R;
+```
 
-<pre>function pipe&lt;T, A, B, C, R&gt;(x: T, f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; R): R;</pre>
+```ts
+function pipe<T, A, B, C, R>(
+    x: T,
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => R,
+): R;
+```
 
-<pre>function pipe&lt;T, A, B, C, D, R&gt;(x: T, f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; R): R;</pre>
+```ts
+function pipe<T, A, B, C, D, R>(
+    x: T,
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => R,
+): R;
+```
 
-<pre>function pipe&lt;T, A, B, C, D, E, R&gt;(x: T, f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; E, f6: (x: E) =&gt; R): R;</pre>
+```ts
+function pipe<T, A, B, C, D, E, R>(
+    x: T,
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => E,
+    f6: (x: E) => R,
+): R;
+```
 
-<pre>function pipe&lt;T, A, B, C, D, E, F, R&gt;(x: T, f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; E, f6: (x: E) =&gt; F, f7: (x: F) =&gt; R): R;</pre>
+```ts
+function pipe<T, A, B, C, D, E, F, R>(
+    x: T,
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => E,
+    f6: (x: E) => F,
+    f7: (x: F) => R,
+): R;
+```
 
-<pre>function pipe&lt;T, A, B, C, D, E, F, G, R&gt;(x: T, f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; E, f6: (x: E) =&gt; F, f7: (x: F) =&gt; G, f8: (x: G) =&gt; R): R;</pre>
+```ts
+function pipe<T, A, B, C, D, E, F, G, R>(
+    x: T,
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => E,
+    f6: (x: E) => F,
+    f7: (x: F) => G,
+    f8: (x: G) => R,
+): R;
+```
 
-<pre>function pipe&lt;T, A, B, C, D, E, F, G, H, R&gt;(x: T, f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; E, f6: (x: E) =&gt; F, f7: (x: F) =&gt; G, f8: (x: G) =&gt; H, f9: (x: H) =&gt; R): R;</pre>
+```ts
+function pipe<T, A, B, C, D, E, F, G, H, R>(
+    x: T,
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => E,
+    f6: (x: E) => F,
+    f7: (x: F) => G,
+    f8: (x: G) => H,
+    f9: (x: H) => R,
+): R;
+```
 
-<pre>function pipe&lt;T, A, B, C, D, E, F, G, H, R&gt;(x: T, f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; E, f6: (x: E) =&gt; F, f7: (x: F) =&gt; G, f8: (x: G) =&gt; H, f9: (x: H) =&gt; R, ...funcs: Array&lt;(x: any) =&gt; any&gt;): R;</pre>
+```ts
+function pipe<T, A, B, C, D, E, F, G, H, R>(
+    x: T,
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => E,
+    f6: (x: E) => F,
+    f7: (x: F) => G,
+    f8: (x: G) => H,
+    f9: (x: H) => R,
+    ...funcs: Array<(x: any) => any>
+): R;
+```
 
-<pre>function pipe&lt;T&gt;(x: T, ...fns: ((x: T) =&gt; T)[]): T;</pre>
+```ts
+function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T;
+```
 
 ## <code>flow</code>
 
@@ -797,29 +913,113 @@ A function which takes a value and will return the result of accumulatively call
 
 <b>Signature</b>
 
-<pre>function flow(): &lt;T&gt;(x: T) =&gt; T;</pre>
+```ts
+function flow(): <T>(x: T) => T;
+```
 
-<pre>function flow&lt;T, R&gt;(f1: (x: T) =&gt; R): (x: T) =&gt; R;</pre>
+```ts
+function flow<T, R>(f1: (x: T) => R): (x: T) => R;
+```
 
-<pre>function flow&lt;T, A, R&gt;(f1: (x: T) =&gt; A, f2: (x: A) =&gt; R): (x: T) =&gt; R;</pre>
+```ts
+function flow<T, A, R>(f1: (x: T) => A, f2: (x: A) => R): (x: T) => R;
+```
 
-<pre>function flow&lt;T, A, B, R&gt;(f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; R): (x: T) =&gt; R;</pre>
+```ts
+function flow<T, A, B, R>(
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => R,
+): (x: T) => R;
+```
 
-<pre>function flow&lt;T, A, B, C, R&gt;(f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; R): (x: T) =&gt; R;</pre>
+```ts
+function flow<T, A, B, C, R>(
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => R,
+): (x: T) => R;
+```
 
-<pre>function flow&lt;T, A, B, C, D, R&gt;(f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; R): (x: T) =&gt; R;</pre>
+```ts
+function flow<T, A, B, C, D, R>(
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => R,
+): (x: T) => R;
+```
 
-<pre>function flow&lt;T, A, B, C, D, E, R&gt;(f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; E, f6: (x: E) =&gt; R): (x: T) =&gt; R;</pre>
+```ts
+function flow<T, A, B, C, D, E, R>(
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => E,
+    f6: (x: E) => R,
+): (x: T) => R;
+```
 
-<pre>function flow&lt;T, A, B, C, D, E, F, R&gt;(f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; E, f6: (x: E) =&gt; F, f7: (x: F) =&gt; R): (x: T) =&gt; R;</pre>
+```ts
+function flow<T, A, B, C, D, E, F, R>(
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => E,
+    f6: (x: E) => F,
+    f7: (x: F) => R,
+): (x: T) => R;
+```
 
-<pre>function flow&lt;T, A, B, C, D, E, F, G, R&gt;(f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; E, f6: (x: E) =&gt; F, f7: (x: F) =&gt; G, f8: (x: G) =&gt; R): (x: T) =&gt; R;</pre>
+```ts
+function flow<T, A, B, C, D, E, F, G, R>(
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => E,
+    f6: (x: E) => F,
+    f7: (x: F) => G,
+    f8: (x: G) => R,
+): (x: T) => R;
+```
 
-<pre>function flow&lt;T, A, B, C, D, E, F, G, H, R&gt;(f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; E, f6: (x: E) =&gt; F, f7: (x: F) =&gt; G, f8: (x: G) =&gt; H, f9: (x: H) =&gt; R): (x: T) =&gt; R;</pre>
+```ts
+function flow<T, A, B, C, D, E, F, G, H, R>(
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => E,
+    f6: (x: E) => F,
+    f7: (x: F) => G,
+    f8: (x: G) => H,
+    f9: (x: H) => R,
+): (x: T) => R;
+```
 
-<pre>function flow&lt;T, A, B, C, D, E, F, G, H, R&gt;(f1: (x: T) =&gt; A, f2: (x: A) =&gt; B, f3: (x: B) =&gt; C, f4: (x: C) =&gt; D, f5: (x: D) =&gt; E, f6: (x: E) =&gt; F, f7: (x: F) =&gt; G, f8: (x: G) =&gt; H, f9: (x: H) =&gt; R, ...funcs: Array&lt;(x: any) =&gt; any&gt;): (x: T) =&gt; R;</pre>
+```ts
+function flow<T, A, B, C, D, E, F, G, H, R>(
+    f1: (x: T) => A,
+    f2: (x: A) => B,
+    f3: (x: B) => C,
+    f4: (x: C) => D,
+    f5: (x: D) => E,
+    f6: (x: E) => F,
+    f7: (x: F) => G,
+    f8: (x: G) => H,
+    f9: (x: H) => R,
+    ...funcs: Array<(x: any) => any>
+): (x: T) => R;
+```
 
-<pre>function flow&lt;T&gt;(...fns: Array&lt;(x: T) =&gt; T&gt;): (x: T) =&gt; T;</pre>
+```ts
+function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T;
+```
 
 ## <code>Subject</code>
 
@@ -853,13 +1053,13 @@ Determines whether the given value is a <code>[Subject](#subject)</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <code>unknown</code> | The value to check. |
+| value | <pre lang="ts">unknown;</pre> | The value to check. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>value is [Subject](#subject-interface)&lt;unknown&gt;</code> | Whether the value is a Subject. |
+| <pre>value is [Subject](#subject-interface)&lt;unknown&gt;</pre> | Whether the value is a Subject. |
 
 <b>Example Usage</b>
 
@@ -887,7 +1087,10 @@ isSubject(null); // false.
 
 <b>Signature</b>
 
-<pre>interface SubjectDistributionSinkDisposalError extends SubjectDistributionSinkDisposalErrorImplementation </pre>
+```ts
+interface SubjectDistributionSinkDisposalError
+    extends SubjectDistributionSinkDisposalErrorImplementation 
+```
 
 ### <a name="subjectdistributionsinkdisposalerror-variable"></a><code>SubjectDistributionSinkDisposalError - Variable</code>
 
@@ -905,7 +1108,9 @@ Thrown when at least least one error is caught during the checking of whether a 
 
 <b>Signature</b>
 
-<pre>interface SubjectDistributionSinkDisposalErrorConstructor </pre>
+```ts
+interface SubjectDistributionSinkDisposalErrorConstructor 
+```
 
 ## <code>markAsSubject</code>
 
@@ -913,7 +1118,7 @@ Thrown when at least least one error is caught during the checking of whether a 
 
 <b>Signature</b>
 
-<pre>function markAsSubject&lt;T&gt;(subjectFunction: <a href="#nonmarkedsubject">NonMarkedSubject</a>&lt;T&gt;): <a href="#subject-interface">Subject</a>&lt;T&gt;;</pre>
+<pre>function markAsSubject&lt;T&gt;(<br>    subjectFunction: <a href="#nonmarkedsubject">NonMarkedSubject</a>&lt;T&gt;,<br>): <a href="#subject-interface">Subject</a>&lt;T&gt;;</pre>
 
 ## <code>NonMarkedSubject</code>
 
@@ -929,4 +1134,6 @@ Thrown when at least least one error is caught during the checking of whether a 
 
 <b>Signature</b>
 
-<pre>interface ScheduleFunction&lt;T extends any[] = []&gt; </pre>
+```ts
+interface ScheduleFunction<T extends any[] = []> 
+```

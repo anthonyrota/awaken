@@ -20,7 +20,9 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;</pre>
+```ts
+function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;
+```
 
 ## <code>ScheduleInterval</code>
 
@@ -36,7 +38,7 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleQueued&lt;T extends any[] = []&gt;(schedule: (callNext: (...args: T) =&gt; void, subscription: <a href="basics.md#disposable-interface">Disposable</a>) =&gt; void): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
+<pre>function ScheduleQueued&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callNext: (...args: T) =&gt; void,<br>        subscription: <a href="basics.md#disposable-interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
 
 ## <code>ScheduleQueuedDiscrete</code>
 
@@ -44,7 +46,7 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleQueuedDiscrete&lt;T extends any[] = []&gt;(schedule: (callback: (...args: T) =&gt; void, subscription: <a href="basics.md#disposable-interface">Disposable</a>) =&gt; void): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
+<pre>function ScheduleQueuedDiscrete&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callback: (...args: T) =&gt; void,<br>        subscription: <a href="basics.md#disposable-interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
 
 ## <code>ScheduleSyncQueued</code>
 
@@ -68,7 +70,7 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleTimeoutQueued(delayMs: number): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
+<pre>function ScheduleTimeoutQueued(<br>    delayMs: number,<br>): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
 
 ## <code>scheduleAnimationFrame</code>
 
@@ -76,7 +78,9 @@
 
 <b>Signature</b>
 
-<pre>var scheduleAnimationFrame: ScheduleAnimationFrameFunction</pre>
+```ts
+scheduleAnimationFrame: ScheduleAnimationFrameFunction;
+```
 
 ## <code>scheduleSync</code>
 

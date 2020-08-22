@@ -42,7 +42,7 @@
 
 <b>Signature</b>
 
-<pre>function ReplaySubject&lt;T&gt;(count_?: number | null, timeoutConfig_?: <a href="#replaysubjecttimeoutconfig">ReplaySubjectTimeoutConfig</a> | null): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
+<pre>function ReplaySubject&lt;T&gt;(<br>    count_?: number | null,<br>    timeoutConfig_?: <a href="#replaysubjecttimeoutconfig">ReplaySubjectTimeoutConfig</a> | null,<br>): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
 
 ## <code>ReplaySubjectTimeoutConfig</code>
 
@@ -50,7 +50,9 @@
 
 <b>Signature</b>
 
-<pre>interface ReplaySubjectTimeoutConfig </pre>
+```ts
+interface ReplaySubjectTimeoutConfig 
+```
 
 ## <code>SubjectBase</code>
 

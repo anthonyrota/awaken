@@ -24,7 +24,7 @@ export function writePage<ChildNode extends Node>(
     );
     writeCoreNode(
         TableOfContentsNode({
-            tableOfContents: page.metadata.table_of_contents,
+            tableOfContents: page.metadata.tableOfContents,
         }),
         output,
     );

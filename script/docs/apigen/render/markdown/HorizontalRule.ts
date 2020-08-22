@@ -1,6 +1,6 @@
 import { HorizontalRuleBase } from '../../nodes/HorizontalRule';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
-import { noop } from '../../util';
+import { noop } from '../../util/noop';
 import { MarkdownOutput } from './MarkdownOutput';
 import { ParamWriteCoreNode } from '.';
 

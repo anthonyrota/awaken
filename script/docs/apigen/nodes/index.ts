@@ -69,25 +69,19 @@ export type CoreNode<ChildType extends Node> =
     | LeafCoreNode
     | ParentCoreNode<ChildType>;
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error TODO.
 export type DeepCoreNode =
+    | LeafCoreNode
     | ContainerNode<DeepCoreNode>
-    | PlainTextNode
-    | HorizontalRuleNode
-    | HtmlCommentNode
     | BlockQuoteNode<DeepCoreNode>
     | HtmlElementNode<DeepCoreNode>
     | ItalicsNode<DeepCoreNode>
     | BoldNode<DeepCoreNode>
     | StrikethroughNode<DeepCoreNode>
     | CodeSpanNode<DeepCoreNode>
-    | CodeBlockNode
     | RichCodeBlockNode<DeepCoreNode>
     | LinkNode<DeepCoreNode>
     | LocalPageLinkNode<DeepCoreNode>
     | GithubSourceLinkNode<DeepCoreNode>
-    | ImageNode
     | ParagraphNode<DeepCoreNode>
     | Heading123456Node<DeepCoreNode>
     | HeadingNode<DeepCoreNode>
@@ -97,9 +91,6 @@ export type DeepCoreNode =
     | TableNode<DeepCoreNode, DeepCoreNode>
     | CollapsibleSectionNode<DeepCoreNode, DeepCoreNode>
     | PageTitleNode<DeepCoreNode>
-    | TableOfContentsListNode
-    | TableOfContentsNode
-    | DoNotEditCommentNode
     | PageNode<DeepCoreNode>;
 
 export enum CoreNodeType {

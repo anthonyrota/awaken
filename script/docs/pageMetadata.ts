@@ -17,5 +17,5 @@ export type TableOfContents = TableOfContentsMainReference[];
 
 export interface PageMetadata {
     title: string;
-    table_of_contents: TableOfContents;
+    tableOfContents: TableOfContents;
 }

@@ -135,7 +135,7 @@
          * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
          * DEFAULT VALUE: "<projectFolder>/etc/"
          */
-        "reportFolder": "<projectFolder>/apiExtractor/report/",
+        "reportFolder": "<projectFolder>/apiReport",
 
         /**
          * Specifies the folder where the temporary report file is written.  The file name portion is determined by
@@ -150,7 +150,7 @@
          * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
          * DEFAULT VALUE: "<projectFolder>/temp/"
          */
-        "reportTempFolder": "<projectFolder>/apiExtractor/temp/"
+        "reportTempFolder": "<projectFolder>/temp"
     },
 
     /**
@@ -171,7 +171,7 @@
          * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
          * DEFAULT VALUE: "<projectFolder>/temp/<unscopedPackageName>.api.json"
          */
-        "apiJsonFilePath": "<projectFolder>/apiExtractor/temp/<unscopedPackageName>.api.json"
+        "apiJsonFilePath": "<projectFolder>/temp/<unscopedPackageName>.api.json"
     },
 
     /**

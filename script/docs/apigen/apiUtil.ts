@@ -1,6 +1,4 @@
-import * as path from 'path';
 import * as aeModel from '@microsoft/api-extractor-model';
-import * as fs from 'fs-extra';
 import * as _ from 'lodash';
 import * as ts from 'typescript';
 import {
@@ -29,6 +27,7 @@ import {
 } from './paths';
 import { renderDeepCoreNodeAsMarkdown } from './render/markdown';
 import { SourceMetadata } from './sourceMetadata';
+import * as folderUtil from './util/Folder';
 import * as writeUtil from './writeUtil';
 
 interface ExportImplementation<T extends aeModel.ApiItem> {
@@ -400,7 +399,7 @@ class ExportImplementationGroup {
     public writeAsMarkdown(container: ContainerBase<DeepCoreNode>): void {
         if (
             this._displayName === undefined ||
-            Array.from(this._implementations).every(
+            [...this._implementations].every(
                 ([, impl]) => !impl.hasImplementation(),
             )
         ) {
@@ -432,7 +431,6 @@ function getReleaseTag(apiItem: aeModel.ApiItem): aeModel.ReleaseTag {
 }
 
 class ApiPage {
-    public tableOfContents!: TableOfContents;
     private _nameToImplGroup = new Map<string, ExportImplementationGroup>();
 
     constructor(
@@ -487,8 +485,8 @@ class ApiPage {
         return references;
     }
 
-    public renderAsMarkdown(): string {
-        this.tableOfContents = [];
+    public build(): PageNode<DeepCoreNode> {
+        const tableOfContents: TableOfContents = [];
         for (const item of this._pageData.items) {
             const reference: TableOfContentsMainReference = {
                 text: item.main,
@@ -517,13 +515,13 @@ class ApiPage {
                     reference.nested_references.push(nestedReference);
                 }
             }
-            this.tableOfContents.push(reference);
+            tableOfContents.push(reference);
         }
 
         const page = PageNode<DeepCoreNode>({
             metadata: {
                 title: this._pageData.title,
-                table_of_contents: this.tableOfContents,
+                tableOfContents: tableOfContents,
             },
         });
 
@@ -531,7 +529,7 @@ class ApiPage {
             implGroup.writeAsMarkdown(page);
         }
 
-        return renderDeepCoreNodeAsMarkdown(page);
+        return page;
     }
 }
 
@@ -593,105 +591,115 @@ export class ApiPageMap {
         });
     }
 
-    public renderAsMarkdownToDirectoryMap(): RenderedDirectoryMap {
-        const renderedDirectoryMap = new RenderedDirectoryMap();
+    public build(): Map<string, PageNode<DeepCoreNode>> {
+        return new Map(
+            Array.from(this._pathToPage, ([path, page]) => [
+                path,
+                page.build(),
+            ]),
+        );
+    }
+}
 
-        for (const [path, page] of this._pathToPage) {
-            renderedDirectoryMap.addContentAtPath(
-                `${path}.md`,
-                page.renderAsMarkdown(),
-            );
+export function renderPageNodeMapToFolder(
+    pageNodeMap: Map<string, PageNode<DeepCoreNode>>,
+): folderUtil.Folder {
+    const outFolder = folderUtil.Folder();
+
+    for (const [path, page] of pageNodeMap) {
+        folderUtil.addFileToFolder(
+            outFolder,
+            `${path}.md`,
+            renderDeepCoreNodeAsMarkdown(page),
+        );
+    }
+
+    interface GetPageLinksFunction {
+        (inBase: boolean): {
+            headingLink: LocalPageLinkNode<DeepCoreNode>;
+            tableOfContents: TableOfContentsNode;
+        }[];
+    }
+
+    const packageNameToPageSummaryMap = new Map<
+        string,
+        {
+            isOneIndexPagePackage: boolean;
+            pageTitleTextNode: PlainTextNode;
+            getPageLinks: GetPageLinksFunction;
         }
+    >();
 
-        interface GetPageLinksFunction {
-            (inBase: boolean): {
-                headingLink: LocalPageLinkNode<DeepCoreNode>;
-                tableOfContents: TableOfContentsNode;
-            }[];
-        }
-
-        const packageNameToPageSummaryMap = new Map<
-            string,
-            {
-                isOneIndexPagePackage: boolean;
-                pageTitleTextNode: PlainTextNode;
-                getPageLinks: GetPageLinksFunction;
-            }
-        >();
-
-        forEachPackageWithPages((packageName, pages) => {
-            const isOneIndexPagePackage =
-                pages.length === 1 && pages[0][0] === '_index';
-            const pageTitleTextNode = PlainTextNode({
-                text: `API Reference - ${_.upperFirst(
-                    _.camelCase(packageName),
-                )}`,
-            });
-            const getPageLinks: GetPageLinksFunction = (inBase) =>
-                pages.map(([pageName_, page]) => {
-                    const pageName = isOneIndexPagePackage
-                        ? 'README'
-                        : pageName_;
-                    const pagePath = inBase
-                        ? `${packageName}/${pageName}`
-                        : pageName;
-                    return {
-                        headingLink: LocalPageLinkNode({
-                            destination: pagePath,
-                            children: [PlainTextNode({ text: page.title })],
-                        }),
-                        tableOfContents: TableOfContentsNode({
-                            // eslint-disable-next-line max-len
-                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                            tableOfContents: this._pathToPage.get(
-                                `${packageName}/${pageName_}`,
-                            )!.tableOfContents,
-                            relativePagePath: pagePath,
-                        }),
-                    };
-                });
-
-            packageNameToPageSummaryMap.set(packageName, {
-                isOneIndexPagePackage,
-                pageTitleTextNode,
-                getPageLinks,
-            });
-
-            if (isOneIndexPagePackage) {
-                renderedDirectoryMap.replaceContentAtPath(
-                    `${packageName}/_index.md`,
-                    `${packageName}/README.md`,
-                );
-                return;
-            }
-
-            const contents = ContainerNode({
-                children: [
-                    DoNotEditCommentNode({}),
-                    PageTitleNode({
-                        children: [pageTitleTextNode],
+    forEachPackageWithPages((packageName, pages) => {
+        const isOneIndexPagePackage =
+            pages.length === 1 && pages[0][0] === '_index';
+        const pageTitleTextNode = PlainTextNode({
+            text: `API Reference - ${_.upperFirst(_.camelCase(packageName))}`,
+        });
+        const getPageLinks: GetPageLinksFunction = (inBase) =>
+            pages.map(([pageName_, page]) => {
+                const pageName = isOneIndexPagePackage ? 'README' : pageName_;
+                const pagePath = inBase
+                    ? `${packageName}/${pageName}`
+                    : pageName;
+                return {
+                    headingLink: LocalPageLinkNode({
+                        destination: pagePath,
+                        children: [PlainTextNode({ text: page.title })],
                     }),
-                    ...getPageLinks(false).flatMap(
-                        ({ headingLink, tableOfContents }) => [
-                            HeadingNode({
-                                children: [headingLink],
-                            }),
-                            tableOfContents,
-                        ],
-                    ),
-                ],
+                    tableOfContents: TableOfContentsNode({
+                        // eslint-disable-next-line max-len
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        tableOfContents: pageNodeMap.get(
+                            `${packageName}/${pageName_}`,
+                        )!.metadata.tableOfContents,
+                        relativePagePath: pagePath,
+                    }),
+                };
             });
 
-            renderedDirectoryMap.addContentAtPath(
-                `${packageName}/README.md`,
-                renderDeepCoreNodeAsMarkdown(contents),
-            );
+        packageNameToPageSummaryMap.set(packageName, {
+            isOneIndexPagePackage,
+            pageTitleTextNode,
+            getPageLinks,
         });
 
-        const packageNameAndSummaries = packageNameToPageSummaryMap.entries();
-        const packageSummaries = Array.from(packageNameAndSummaries).flatMap<
-            DeepCoreNode
-        >(([packageName, packageSummary]) => {
+        if (isOneIndexPagePackage) {
+            folderUtil.moveFileInFolder(
+                outFolder,
+                `${packageName}/_index.md`,
+                `${packageName}/README.md`,
+            );
+            return;
+        }
+
+        const contents = ContainerNode({
+            children: [
+                DoNotEditCommentNode({}),
+                PageTitleNode({
+                    children: [pageTitleTextNode],
+                }),
+                ...getPageLinks(false).flatMap(
+                    ({ headingLink, tableOfContents }) => [
+                        HeadingNode({
+                            children: [headingLink],
+                        }),
+                        tableOfContents,
+                    ],
+                ),
+            ],
+        });
+
+        folderUtil.addFileToFolder(
+            outFolder,
+            `${packageName}/README.md`,
+            renderDeepCoreNodeAsMarkdown(contents),
+        );
+    });
+
+    const packageNameAndSummaries = packageNameToPageSummaryMap.entries();
+    const packageSummaries = [...packageNameAndSummaries].flatMap<DeepCoreNode>(
+        ([packageName, packageSummary]) => {
             const {
                 isOneIndexPagePackage,
                 pageTitleTextNode,
@@ -730,135 +738,27 @@ export class ApiPageMap {
                     ),
                 }),
             ];
-        });
+        },
+    );
 
-        const contents = ContainerNode<DeepCoreNode>({
-            children: [
-                DoNotEditCommentNode({}),
-                PageTitleNode({
-                    children: [PlainTextNode({ text: 'Awaken API Reference' })],
-                }),
-                // TODO.
-                // eslint-disable-next-line max-len
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                ...packageSummaries,
-            ],
-        });
+    const contents = ContainerNode<DeepCoreNode>({
+        children: [
+            DoNotEditCommentNode({}),
+            PageTitleNode({
+                children: [PlainTextNode({ text: 'Awaken API Reference' })],
+            }),
+            // TODO.
+            // eslint-disable-next-line max-len
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            ...packageSummaries,
+        ],
+    });
 
-        renderedDirectoryMap.addContentAtPath(
-            'README.md',
-            renderDeepCoreNodeAsMarkdown(contents),
-        );
+    folderUtil.addFileToFolder(
+        outFolder,
+        'README.md',
+        renderDeepCoreNodeAsMarkdown(contents),
+    );
 
-        return renderedDirectoryMap;
-    }
-}
-
-class Folder {
-    public folders = new Map<string, Folder>();
-    public files = new Map<string, string>();
-}
-
-class RenderedDirectoryMap {
-    private _rootFolder = new Folder();
-
-    private _getPathFolderAndFileName(
-        path: string,
-        foldersShouldExist?: boolean,
-    ): [Folder, string] {
-        const splitPath = path.split('/');
-        const fileName = splitPath.pop();
-
-        if (!fileName) {
-            throw new Error(`Empty path.`);
-        }
-
-        let folder = this._rootFolder;
-        for (const dirName of splitPath) {
-            let nestedFolder = folder.folders.get(dirName);
-
-            if (!nestedFolder) {
-                if (foldersShouldExist) {
-                    throw new Error(`Folder does not exist at path ${path}.`);
-                }
-                nestedFolder = new Folder();
-                folder.folders.set(dirName, nestedFolder);
-            }
-
-            folder = nestedFolder;
-        }
-
-        return [folder, fileName];
-    }
-
-    public addContentAtPath(path: string, content: string): void {
-        const [folder, fileName] = this._getPathFolderAndFileName(path);
-
-        if (folder.files.has(fileName)) {
-            throw new Error(`Duplicate path ${path}.`);
-        }
-
-        folder.files.set(fileName, content);
-    }
-
-    public getContentAtPath(path: string): string {
-        const [folder, fileName] = this._getPathFolderAndFileName(path, true);
-        const content = folder.files.get(fileName);
-
-        if (content === undefined) {
-            throw new Error(`No content at path ${path}.`);
-        }
-
-        return content;
-    }
-
-    public removeContentAtPath(path: string): void {
-        const [folder, fileName] = this._getPathFolderAndFileName(path, true);
-
-        if (!folder.files.has(fileName)) {
-            throw new Error(`No content to delete at path ${path}.`);
-        }
-
-        folder.files.delete(fileName);
-    }
-
-    public replaceContentAtPath(oldPath: string, newPath: string): void {
-        const content = this.getContentAtPath(oldPath);
-        this.removeContentAtPath(oldPath);
-        this.addContentAtPath(newPath, content);
-    }
-
-    public writeToDirectory(dirName: string): Promise<unknown> {
-        return this._writeFolderToPath(dirName, this._rootFolder);
-    }
-
-    private async _writeFolderToPath(
-        dirName: string,
-        folder: Folder,
-    ): Promise<unknown> {
-        await fs.ensureDir(dirName);
-
-        const promises: Promise<unknown>[] = [];
-
-        for (const [fileName, fileContent] of folder.files) {
-            promises.push(
-                fs.writeFile(
-                    path.join(dirName, fileName),
-                    fileContent,
-                    'utf-8',
-                ),
-            );
-        }
-
-        for (const [folderName, nestedFolder] of folder.folders) {
-            promises.push(
-                this._writeFolderToPath(
-                    path.join(dirName, folderName),
-                    nestedFolder,
-                ),
-            );
-        }
-
-        return Promise.all(promises);
-    }
+    return outFolder;
 }

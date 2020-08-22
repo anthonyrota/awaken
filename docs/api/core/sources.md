@@ -43,7 +43,7 @@
 
 <b>Signature</b>
 
-<pre>function all&lt;T extends unknown[]&gt;(sources: WrapValuesInSource&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function all&lt;T extends unknown[]&gt;(<br>    sources: WrapValuesInSource&lt;T&gt;,<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>animationFrames</code>
 
@@ -59,7 +59,7 @@
 
 <b>Signature</b>
 
-<pre>function combineSources&lt;T extends unknown[]&gt;(...sources: WrapValuesInSource&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function combineSources&lt;T extends unknown[]&gt;(<br>    ...sources: WrapValuesInSource&lt;T&gt;<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>concatSources</code>
 
@@ -83,7 +83,7 @@
 
 <b>Signature</b>
 
-<pre>function emptyScheduled(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
+<pre>function emptyScheduled(<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>,<br>): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
 
 ## <code>flatSources</code>
 
@@ -107,13 +107,13 @@ Creates a Source from the given array\/array-like. The values of the array will 
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| array | <code>ArrayLike&lt;T&gt;</code> | The array\/array-like to iterate over. |
+| array | <pre lang="ts">ArrayLike&lt;T&gt;;</pre> | The array\/array-like to iterate over. |
 
 <b>Returns</b>
 
 | Type | Description |
 | --- | --- |
-| <code>[Source](basics.md#source-interface)&lt;T&gt;</code> | The created source. |
+| <pre>[Source](basics.md#source-interface)&lt;T&gt;</pre> | The created source. |
 
 <b>Example Usage</b>
 
@@ -148,7 +148,7 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function fromArrayScheduled&lt;T&gt;(array: ArrayLike&lt;T&gt;, schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromArrayScheduled&lt;T&gt;(<br>    array: ArrayLike&lt;T&gt;,<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>,<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromAsyncIterable</code>
 
@@ -156,7 +156,7 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function fromAsyncIterable&lt;T&gt;(iterable: AsyncIterable&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromAsyncIterable&lt;T&gt;(<br>    iterable: AsyncIterable&lt;T&gt;,<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromIterable</code>
 
@@ -180,7 +180,7 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function fromReactiveValue&lt;T extends unknown[], Signal&gt;(addCallback: (handler: (...args: T) =&gt; void) =&gt; Signal, removeCallback: (handler: (...args: T) =&gt; void, signal: {<br>    value: Signal;<br>} | undefined) =&gt; void): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromReactiveValue&lt;T extends unknown[], Signal&gt;(<br>    addCallback: (handler: (...args: T) =&gt; void) =&gt; Signal,<br>    removeCallback: (<br>        handler: (...args: T) =&gt; void,<br>        signal:<br>            | {<br>                  value: Signal;<br>              }<br>            | undefined,<br>    ) =&gt; void,<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromScheduleFunction</code>
 
@@ -188,7 +188,7 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function fromScheduleFunction&lt;T extends unknown[]&gt;(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromScheduleFunction&lt;T extends unknown[]&gt;(<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;,<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>fromSingularReactiveValue</code>
 
@@ -196,7 +196,7 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function fromSingularReactiveValue&lt;T, Signal&gt;(addCallback: (handler: (value: T) =&gt; void) =&gt; Signal, removeCallback: (handler: (value: T) =&gt; void, signal: {<br>    value: Signal;<br>} | undefined) =&gt; void): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function fromSingularReactiveValue&lt;T, Signal&gt;(<br>    addCallback: (handler: (value: T) =&gt; void) =&gt; Signal,<br>    removeCallback: (<br>        handler: (value: T) =&gt; void,<br>        signal:<br>            | {<br>                  value: Signal;<br>              }<br>            | undefined,<br>    ) =&gt; void,<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>iif</code>
 
@@ -204,7 +204,7 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function iif&lt;T&gt;(condition: () =&gt; unknown, createSourceIfTrue: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;, createSourceIfFalse: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function iif&lt;T&gt;(<br>    condition: () =&gt; unknown,<br>    createSourceIfTrue: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>    createSourceIfFalse: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>interval</code>
 
@@ -220,7 +220,7 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function isEqual&lt;T, U&gt;(sourceA: <a href="basics.md#source-interface">Source</a>&lt;T&gt;, sourceB: <a href="basics.md#source-interface">Source</a>&lt;U&gt;, areValuesEqual: (a: T, b: U, index: number) =&gt; unknown): <a href="basics.md#source-interface">Source</a>&lt;boolean&gt;;</pre>
+<pre>function isEqual&lt;T, U&gt;(<br>    sourceA: <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>    sourceB: <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>    areValuesEqual: (a: T, b: U, index: number) =&gt; unknown,<br>): <a href="basics.md#source-interface">Source</a>&lt;boolean&gt;;</pre>
 
 ## <code>lazy</code>
 
@@ -244,7 +244,7 @@ pipe(
 
 <b>Signature</b>
 
-<pre>function mergeSourcesConcurrent&lt;T&gt;(max: number, ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function mergeSourcesConcurrent&lt;T&gt;(<br>    max: number,<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>never</code>
 
@@ -268,7 +268,7 @@ Creates a Source from the given values.. The values will be synchronously emitte
 
 | Type | Description |
 | --- | --- |
-| <code>[Source](basics.md#source-interface)&lt;T&gt;</code> | The created source. |
+| <pre>[Source](basics.md#source-interface)&lt;T&gt;</pre> | The created source. |
 
 <b>Example Usage</b>
 
@@ -308,9 +308,9 @@ pipe(of(), subscribe(Sink(console.log)));
 
 <b>Signature</b>
 
-<pre>function ofEventScheduled&lt;T&gt;(event: <a href="basics.md#throw-interface">Throw</a> | <a href="basics.md#end-interface">End</a>, schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
+<pre>function ofEventScheduled&lt;T&gt;(<br>    event: <a href="basics.md#throw-interface">Throw</a> | <a href="basics.md#end-interface">End</a>,<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>,<br>): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
 
-<pre>function ofEventScheduled&lt;T&gt;(event: Event&lt;T&gt;, schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function ofEventScheduled&lt;T&gt;(<br>    event: Event&lt;T&gt;,<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>,<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>ofScheduled</code>
 
@@ -318,7 +318,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 <b>Signature</b>
 
-<pre>function ofScheduled&lt;T&gt;(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>, ...items: T[]): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function ofScheduled&lt;T&gt;(<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>,<br>    ...items: T[]<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
 
 ## <code>raceSources</code>
 
@@ -350,7 +350,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 <b>Signature</b>
 
-<pre>function throwErrorScheduled(getError: () =&gt; unknown, schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
+<pre>function throwErrorScheduled(<br>    getError: () =&gt; unknown,<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>,<br>): <a href="basics.md#source-interface">Source</a>&lt;never&gt;;</pre>
 
 ## <code>timer</code>
 
@@ -366,4 +366,4 @@ pipe(of(), subscribe(Sink(console.log)));
 
 <b>Signature</b>
 
-<pre>function zipSources&lt;T extends unknown[]&gt;(...sources: WrapValuesInSource&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function zipSources&lt;T extends unknown[]&gt;(<br>    ...sources: WrapValuesInSource&lt;T&gt;<br>): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>

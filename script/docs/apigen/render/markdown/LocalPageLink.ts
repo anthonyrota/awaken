@@ -16,7 +16,7 @@ export function writeLocalPageLink<ChildNode extends Node>(
             destination: path
                 ? hash
                     ? `${path}.md#${hash}`
-                    : `${path}.md`
+                    : `${path}.md#readme`
                 : `#${hash}`,
             title: localPageLink.title,
             children: localPageLink.children,

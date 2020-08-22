@@ -5,7 +5,7 @@ import {
     HtmlTagClassification,
     getHtmlTagClassification,
 } from '../../nodes/HtmlElement';
-import { PlainTextNode } from './../../nodes/PlainText';
+import { PlainTextNode } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
 import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
 

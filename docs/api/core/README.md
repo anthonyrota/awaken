@@ -2,7 +2,7 @@
 
 # API Reference - Core
 
-## [API Reference - Basics](basics.md)
+## [API Reference - Basics](basics.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -37,7 +37,7 @@
    5. [<code>NonMarkedSubject</code>](basics.md#nonmarkedsubject)
 7. [<code>ScheduleFunction</code>](basics.md#schedulefunction)</details>
 
-## [API Reference - Sources](sources.md)
+## [API Reference - Sources](sources.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -74,7 +74,7 @@
 31. [<code>timer</code>](sources.md#timer)
 32. [<code>zipSources</code>](sources.md#zipsources)</details>
 
-## [API Reference - Operators](operators.md)
+## [API Reference - Operators](operators.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -196,7 +196,7 @@
 104. [<code>wrapInPushEvents</code>](operators.md#wrapinpushevents)
 105. [<code>zipWith</code>](operators.md#zipwith)</details>
 
-## [API Reference - Subjects](subjects.md)
+## [API Reference - Subjects](subjects.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -206,7 +206,7 @@
    1. [<code>ReplaySubjectTimeoutConfig</code>](subjects.md#replaysubjecttimeoutconfig)
 4. [<code>SubjectBase</code>](subjects.md#subjectbase)</details>
 
-## [API Reference - Schedule Functions](schedule-functions.md)
+## [API Reference - Schedule Functions](schedule-functions.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
@@ -220,7 +220,7 @@
 8. [<code>scheduleAnimationFrame</code>](schedule-functions.md#scheduleanimationframe)
 9. [<code>scheduleSync</code>](schedule-functions.md#schedulesync)</details>
 
-## [API Reference - Utils](util.md)
+## [API Reference - Utils](util.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 
