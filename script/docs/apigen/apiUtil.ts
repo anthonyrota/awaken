@@ -1,5 +1,4 @@
 import * as aeModel from '@microsoft/api-extractor-model';
-import * as _ from 'lodash';
 import * as ts from 'typescript';
 import {
     TableOfContentsInlineReference,
@@ -7,7 +6,29 @@ import {
     TableOfContentsMainReference,
     TableOfContents,
 } from '../pageMetadata';
-import { DeepCoreNode } from './nodes';
+import {
+    buildApiItemAnchor,
+    getMultiKindApiItemAnchorNameFromIdentifierAndKind,
+} from './analyze/build/buildApiItemAnchor';
+import { buildApiItemBaseDoc } from './analyze/build/buildApiItemBaseDoc';
+import { buildApiItemExamples } from './analyze/build/buildApiItemExamples';
+import { buildApiItemParameters } from './analyze/build/buildApiItemParameters';
+import { buildApiItemSeeBlocks } from './analyze/build/buildApiItemSeeBlocks';
+import {
+    buildApiItemSignature,
+    buildApiItemSignatureExcerpt,
+} from './analyze/build/buildApiItemSignature';
+import { buildApiItemSourceLocationLink } from './analyze/build/buildApiItemSourceLocationLink';
+import { buildApiItemSummary } from './analyze/build/buildApiItemSummary';
+import { AnalyzeContext } from './analyze/Context';
+import {
+    ExportIdentifier,
+    getUniqueExportIdentifierKey,
+} from './analyze/Identifier';
+import { SourceMetadata } from './analyze/sourceMetadata';
+import { getApiItemIdentifier } from './analyze/util/getApiItemIdentifier';
+import { UnsupportedApiItemError } from './analyze/util/UnsupportedApiItemError';
+import { DeepCoreNode, Node } from './nodes';
 import { BoldNode } from './nodes/Bold';
 import { CodeSpanNode } from './nodes/CodeSpan';
 import { CollapsibleSectionNode } from './nodes/CollapsibleSection';
@@ -20,15 +41,9 @@ import { PageTitleNode } from './nodes/PageTitle';
 import { PlainTextNode } from './nodes/PlainText';
 import { SubheadingNode } from './nodes/Subheading';
 import { TableOfContentsNode } from './nodes/TableOfContents';
-import {
-    APIPageData,
-    assertMappedApiItemNames,
-    forEachPackageWithPages,
-} from './paths';
+import { APIPageData, packageIdentifierToPath, packageDataList } from './paths';
 import { renderDeepCoreNodeAsMarkdown } from './render/markdown';
-import { SourceMetadata } from './sourceMetadata';
 import * as folderUtil from './util/Folder';
-import * as writeUtil from './writeUtil';
 
 interface ExportImplementation<T extends aeModel.ApiItem> {
     readonly actualKind: aeModel.ApiItemKind;
@@ -38,41 +53,68 @@ interface ExportImplementation<T extends aeModel.ApiItem> {
     writeAsMarkdown(output: ContainerBase<DeepCoreNode>): void;
 }
 
+function addChild<ChildNode extends Node>(
+    container: ContainerBase<ChildNode>,
+    child: ChildNode | undefined,
+): boolean {
+    if (child) {
+        container.children.push(child);
+        return true;
+    }
+    return false;
+}
+
+function addChildren<ChildNode extends Node>(
+    container: ContainerBase<ChildNode>,
+    ...children: (ChildNode | undefined)[]
+): boolean {
+    let didAddAny = false;
+    for (const child of children) {
+        const didAdd = addChild(container, child);
+        if (didAdd) {
+            didAddAny = true;
+        }
+    }
+    return didAddAny;
+}
+
 class ExportFunctionImplementation
     implements ExportImplementation<aeModel.ApiFunction> {
     public readonly actualKind = aeModel.ApiItemKind.Function;
     public readonly simplifiedKind = 'Function';
-    private _displayName?: string;
+    private _identifierKey?: string;
     private _overloads: aeModel.ApiFunction[] = [];
 
-    constructor(private _context: writeUtil.Context) {}
+    constructor(private _context: AnalyzeContext) {}
 
     public addImplementation(apiFunction: aeModel.ApiFunction): void {
-        const apiFunctionName = writeUtil.getApiItemName(apiFunction);
-        if (this._displayName === undefined) {
-            this._displayName = apiFunctionName;
-        } else if (this._displayName !== apiFunctionName) {
-            throw new writeUtil.UnsupportedApiItemError(
+        const identifierKey = getUniqueExportIdentifierKey(
+            getApiItemIdentifier(apiFunction),
+        );
+        if (this._identifierKey === undefined) {
+            this._identifierKey = identifierKey;
+        } else if (this._identifierKey !== identifierKey) {
+            throw new UnsupportedApiItemError(
                 apiFunction,
-                `Expected displayName property equal to ${this._displayName}.`,
+                `Expected identifier key property equal to ${this._identifierKey}.`,
             );
         }
         this._overloads.push(apiFunction);
     }
 
     public hasImplementation(): boolean {
-        return this._displayName !== undefined;
+        return this._identifierKey !== undefined;
     }
 
     public writeAsMarkdown(out: ContainerBase<DeepCoreNode>): void {
-        if (this._displayName === undefined) {
+        if (this._identifierKey === undefined) {
             throw new Error('Not implemented.');
         }
 
         this._overloads.sort((a, b) => a.overloadIndex - b.overloadIndex);
         this._overloads.forEach((overload, i) => {
             if (overload.overloadIndex !== i + 1) {
-                throw new writeUtil.UnsupportedApiItemError(
+                throw new UnsupportedApiItemError(
                     overload,
                     `Invalid overload index ${
                         overload.overloadIndex
@@ -85,24 +127,30 @@ class ExportFunctionImplementation
 
         const context = this._context;
 
-        writeUtil.writeApiItemAnchor(
+        addChild(
             out,
-            this._overloads[0],
-            context,
-            this.simplifiedKind,
+            buildApiItemAnchor(
+                this._overloads[0],
+                context,
+                this.simplifiedKind,
+            ),
         );
         const baseDocContainer = ContainerNode<DeepCoreNode>({});
-        writeUtil.writeBaseDoc(
+        addChild(
             baseDocContainer,
-            this._overloads[0],
-            context,
-            ts.SyntaxKind.FunctionDeclaration,
+            buildApiItemBaseDoc(
+                this._overloads[0],
+                context,
+                ts.SyntaxKind.FunctionDeclaration,
+            ),
         );
-        writeUtil.writeSourceLocation(
+        addChild(
             baseDocContainer,
-            this._overloads[0],
-            context,
-            ts.SyntaxKind.FunctionDeclaration,
+            buildApiItemSourceLocationLink(
+                this._overloads[0],
+                context,
+                ts.SyntaxKind.FunctionDeclaration,
+            ),
         );
 
         let didNotOnlyWriteSignature = true;
@@ -111,43 +159,25 @@ class ExportFunctionImplementation
         for (const fn of this._overloads) {
             const _didNotOnlyWriteSignature = didNotOnlyWriteSignature;
             const overloadContainer = ContainerNode<DeepCoreNode>({});
-            const didWriteSummary = writeUtil.writeSummary(
+            didNotOnlyWriteSignature = addChildren(
                 overloadContainer,
-                fn,
-                context,
+                buildApiItemSummary(fn, context),
+                buildApiItemParameters(fn, context),
+                buildApiItemExamples(fn, context),
+                buildApiItemSeeBlocks(fn, context),
             );
-            const didWriteParameters = writeUtil.writeParameters(
-                overloadContainer,
-                fn,
-                context,
-            );
-            const didWriteExamples = writeUtil.writeExamples(
-                overloadContainer,
-                fn,
-                context,
-            );
-            const didWriteSeeBlocks = writeUtil.writeSeeBlocks(
-                overloadContainer,
-                fn,
-                context,
-            );
-            didNotOnlyWriteSignature =
-                didWriteSummary ||
-                didWriteParameters ||
-                didWriteExamples ||
-                didWriteSeeBlocks;
             if (_didNotOnlyWriteSignature || didNotOnlyWriteSignature) {
-                writeUtil.writeSignature(overloadsContainer, fn, context);
+                addChild(
+                    overloadsContainer,
+                    buildApiItemSignature(fn, context),
+                );
                 if (didNotOnlyWriteSignature) {
-                    overloadsContainer.children.push(
-                        ...overloadContainer.children,
-                    );
+                    overloadsContainer.children.push(overloadContainer);
                 }
             } else {
-                writeUtil.writeSignatureExcerpt(
+                addChild(
                     overloadsContainer,
-                    fn,
-                    context,
+                    buildApiItemSignatureExcerpt(fn, context),
                 );
             }
         }
@@ -163,11 +193,11 @@ class ExportInterfaceImplementation
     public readonly simplifiedKind = 'Interface';
     private _apiInterface?: aeModel.ApiInterface;
 
-    constructor(private _context: writeUtil.Context) {}
+    constructor(private _context: AnalyzeContext) {}
 
     public addImplementation(apiInterface: aeModel.ApiInterface) {
         if (this._apiInterface) {
-            throw new writeUtil.UnsupportedApiItemError(
+            throw new UnsupportedApiItemError(
                 apiInterface,
                 'Duplicate api interface.',
             );
@@ -188,28 +218,19 @@ class ExportInterfaceImplementation
 
         const context = this._context;
 
-        writeUtil.writeApiItemAnchor(
+        addChildren(
             output,
-            interface_,
-            context,
-            this.simplifiedKind,
+            buildApiItemAnchor(interface_, context, this.simplifiedKind),
+            buildApiItemSourceLocationLink(
+                interface_,
+                context,
+                ts.SyntaxKind.InterfaceDeclaration,
+            ),
+            buildApiItemSignature(interface_, context),
+            buildApiItemSummary(interface_, context),
+            buildApiItemExamples(interface_, context),
+            buildApiItemSeeBlocks(interface_, context),
         );
-        writeUtil.writeBaseDoc(
-            output,
-            interface_,
-            context,
-            ts.SyntaxKind.InterfaceDeclaration,
-        );
-        writeUtil.writeSourceLocation(
-            output,
-            interface_,
-            context,
-            ts.SyntaxKind.InterfaceDeclaration,
-        );
-        writeUtil.writeSignature(output, interface_, context);
-        writeUtil.writeSummary(output, interface_, context);
-        writeUtil.writeExamples(output, interface_, context);
-        writeUtil.writeSeeBlocks(output, interface_, context);
     }
 }
 
@@ -219,11 +240,11 @@ class ExportTypeAliasImplementation
     public readonly simplifiedKind = 'Type';
     private _apiTypeAlias?: aeModel.ApiTypeAlias;
 
-    constructor(private _context: writeUtil.Context) {}
+    constructor(private _context: AnalyzeContext) {}
 
     public addImplementation(apiTypeAlias: aeModel.ApiTypeAlias) {
         if (this._apiTypeAlias) {
-            throw new writeUtil.UnsupportedApiItemError(
+            throw new UnsupportedApiItemError(
                 apiTypeAlias,
                 'Duplicate api type alias.',
             );
@@ -244,28 +265,19 @@ class ExportTypeAliasImplementation
 
         const context = this._context;
 
-        writeUtil.writeApiItemAnchor(
+        addChildren(
             output,
-            typeAlias,
-            context,
-            this.simplifiedKind,
+            buildApiItemAnchor(typeAlias, context, this.simplifiedKind),
+            buildApiItemSourceLocationLink(
+                typeAlias,
+                context,
+                ts.SyntaxKind.TypeAliasDeclaration,
+            ),
+            buildApiItemSignature(typeAlias, context),
+            buildApiItemSummary(typeAlias, context),
+            buildApiItemExamples(typeAlias, context),
+            buildApiItemSeeBlocks(typeAlias, context),
         );
-        writeUtil.writeBaseDoc(
-            output,
-            typeAlias,
-            context,
-            ts.SyntaxKind.TypeAliasDeclaration,
-        );
-        writeUtil.writeSourceLocation(
-            output,
-            typeAlias,
-            context,
-            ts.SyntaxKind.TypeAliasDeclaration,
-        );
-        writeUtil.writeSignature(output, typeAlias, context);
-        writeUtil.writeSummary(output, typeAlias, context);
-        writeUtil.writeExamples(output, typeAlias, context);
-        writeUtil.writeSeeBlocks(output, typeAlias, context);
     }
 }
 
@@ -275,11 +287,11 @@ class ExportVariableImplementation
     public readonly simplifiedKind = 'Variable';
     private _apiVariable?: aeModel.ApiVariable;
 
-    constructor(private _context: writeUtil.Context) {}
+    constructor(private _context: AnalyzeContext) {}
 
     public addImplementation(apiVariable: aeModel.ApiVariable) {
         if (this._apiVariable) {
-            throw new writeUtil.UnsupportedApiItemError(
+            throw new UnsupportedApiItemError(
                 apiVariable,
                 'Duplicate api variable.',
             );
@@ -300,33 +312,24 @@ class ExportVariableImplementation
 
         const context = this._context;
 
-        writeUtil.writeApiItemAnchor(
+        addChildren(
             output,
-            variable,
-            context,
-            this.simplifiedKind,
+            buildApiItemAnchor(variable, context, this.simplifiedKind),
+            buildApiItemSourceLocationLink(
+                variable,
+                context,
+                ts.SyntaxKind.VariableDeclaration,
+            ),
+            buildApiItemSignature(variable, context),
+            buildApiItemSummary(variable, context),
+            buildApiItemExamples(variable, context),
+            buildApiItemSeeBlocks(variable, context),
         );
-        writeUtil.writeBaseDoc(
-            output,
-            variable,
-            context,
-            ts.SyntaxKind.VariableDeclaration,
-        );
-        writeUtil.writeSourceLocation(
-            output,
-            variable,
-            context,
-            ts.SyntaxKind.VariableDeclaration,
-        );
-        writeUtil.writeSignature(output, variable, context);
-        writeUtil.writeSummary(output, variable, context);
-        writeUtil.writeExamples(output, variable, context);
-        writeUtil.writeSeeBlocks(output, variable, context);
     }
 }
 
 class ExportImplementationGroup {
-    private _displayName?: string;
+    private _identifier?: ExportIdentifier;
     private _implementations = new Map<
         aeModel.ApiItemKind,
         ExportImplementation<aeModel.ApiItem>
@@ -349,25 +352,32 @@ class ExportImplementationGroup {
         ],
     ]);
 
-    constructor(private _context: writeUtil.Context) {}
+    constructor(private _context: AnalyzeContext) {}
 
     public addImplementation(apiItem: aeModel.ApiItem): void {
         const impl = this._implementations.get(apiItem.kind);
 
         if (!impl) {
-            throw new writeUtil.UnsupportedApiItemError(
+            throw new UnsupportedApiItemError(
                 apiItem,
                 `Invalid kind ${apiItem.kind}`,
             );
         }
 
-        if (this._displayName === undefined) {
-            this._displayName = writeUtil.getApiItemName(apiItem);
-        } else if (this._displayName !== writeUtil.getApiItemName(apiItem)) {
-            throw new writeUtil.UnsupportedApiItemError(
-                apiItem,
-                `Expected displayName property equal to ${this._displayName}.`,
+        const identifier = getApiItemIdentifier(apiItem);
+        const identifierKey = getUniqueExportIdentifierKey(identifier);
+        if (this._identifier === undefined) {
+            this._identifier = identifier;
+        } else {
+            const existingIdentifierKey = getUniqueExportIdentifierKey(
+                this._identifier,
             );
+            if (existingIdentifierKey !== identifierKey) {
+                throw new UnsupportedApiItemError(
+                    apiItem,
+                    `Expected identifier key equal to ${existingIdentifierKey}.`,
+                );
+            }
         }
 
         impl.addImplementation(apiItem);
@@ -398,7 +408,7 @@ class ExportImplementationGroup {
 
     public writeAsMarkdown(container: ContainerBase<DeepCoreNode>): void {
         if (
-            this._displayName === undefined ||
+            this._identifier === undefined ||
             [...this._implementations].every(
                 ([, impl]) => !impl.hasImplementation(),
             )
@@ -409,7 +419,11 @@ class ExportImplementationGroup {
             HeadingNode({
                 children: [
                     CodeSpanNode({
-                        children: [PlainTextNode({ text: this._displayName })],
+                        children: [
+                            PlainTextNode({
+                                text: this._identifier.exportName,
+                            }),
+                        ],
                     }),
                 ],
             }),
@@ -424,7 +438,7 @@ class ExportImplementationGroup {
 
 function getReleaseTag(apiItem: aeModel.ApiItem): aeModel.ReleaseTag {
     if (!aeModel.ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
-        throw new writeUtil.UnsupportedApiItemError(apiItem, 'No release tag.');
+        throw new UnsupportedApiItemError(apiItem, 'No release tag.');
     }
 
     return apiItem.releaseTag;
@@ -434,26 +448,34 @@ class ApiPage {
     private _nameToImplGroup = new Map<string, ExportImplementationGroup>();
 
     constructor(
-        private _context: writeUtil.Context,
+        private _context: AnalyzeContext,
         private _pageData: APIPageData,
+        private _packageName: string,
     ) {
         for (const item of _pageData.items) {
-            this._addApiItemName(item.main);
+            this._addExportIdentifier({
+                packageName: _packageName,
+                exportName: item.main,
+            });
             if (item.nested) {
                 for (const name of item.nested) {
-                    this._addApiItemName(name);
+                    this._addExportIdentifier({
+                        packageName: _packageName,
+                        exportName: name,
+                    });
                 }
             }
         }
     }
 
-    private _addApiItemName(name: string): void {
+    private _addExportIdentifier(identifier: ExportIdentifier): void {
         const implGroup = new ExportImplementationGroup(this._context);
-        this._nameToImplGroup.set(name, implGroup);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        for (const apiItem of this._context.apiItemsByMemberName.get(name)!) {
+        this._nameToImplGroup.set(identifier.exportName, implGroup);
+        for (const apiItem of this._context.getApiItemsByExportIdentifier(
+            identifier,
+        )) {
             if (getReleaseTag(apiItem) !== aeModel.ReleaseTag.Public) {
-                throw new writeUtil.UnsupportedApiItemError(
+                throw new UnsupportedApiItemError(
                     apiItem,
                     'Non public api items are not supported.',
                 );
@@ -476,8 +498,11 @@ class ApiPage {
             references.push({
                 text: impl.simplifiedKind,
                 // eslint-disable-next-line max-len
-                url_hash_text: writeUtil.getMultiKindApiItemAnchorNameFromNameAndKind(
-                    name,
+                url_hash_text: getMultiKindApiItemAnchorNameFromIdentifierAndKind(
+                    {
+                        packageName: this._packageName,
+                        exportName: name,
+                    },
                     impl.actualKind,
                 ),
             });
@@ -520,7 +545,7 @@ class ApiPage {
 
         const page = PageNode<DeepCoreNode>({
             metadata: {
-                title: this._pageData.title,
+                title: this._pageData.pageTitle,
                 tableOfContents: tableOfContents,
             },
         });
@@ -535,20 +560,15 @@ class ApiPage {
 
 export class ApiPageMap {
     private _pathToPage = new Map<string, ApiPage>();
-    private _context: writeUtil.Context;
+    private _context: AnalyzeContext;
 
     constructor(apiModel: aeModel.ApiModel, sourceMetadata: SourceMetadata) {
-        const apiItemsByMemberName = new Map<string, aeModel.ApiItem[]>();
-
-        this._context = {
-            sourceMetadata,
-            apiModel,
-            apiItemsByMemberName,
-        };
+        const memberIdentifierKeys = new Set<string>();
+        this._context = new AnalyzeContext(sourceMetadata, apiModel);
 
         for (const package_ of apiModel.members) {
             if (package_.kind !== aeModel.ApiItemKind.Package) {
-                throw new writeUtil.UnsupportedApiItemError(
+                throw new UnsupportedApiItemError(
                     package_,
                     'Expected to be a package.',
                 );
@@ -556,39 +576,43 @@ export class ApiPageMap {
 
             const members = (package_ as aeModel.ApiPackage).entryPoints[0]
                 .members;
-            const apiItemsByMemberName_ = new Map<string, aeModel.ApiItem[]>();
 
             for (const apiItem of members) {
-                const memberName = writeUtil.getApiItemName(apiItem);
-
-                if (apiItemsByMemberName.has(memberName)) {
-                    throw new writeUtil.UnsupportedApiItemError(
-                        apiItem,
-                        `Duplicate api item name ${memberName} between packages.`,
-                    );
-                }
-
-                let apiItems = apiItemsByMemberName_.get(memberName);
-                if (!apiItems) {
-                    apiItems = [];
-                    apiItemsByMemberName_.set(memberName, apiItems);
-                }
+                const memberIdentifier = getApiItemIdentifier(apiItem);
+                memberIdentifierKeys.add(
+                    getUniqueExportIdentifierKey(memberIdentifier),
+                );
+                const apiItems = this._context.getApiItemsByExportIdentifier(
+                    memberIdentifier,
+                    [],
+                );
                 apiItems.push(apiItem);
-            }
-
-            for (const [k, v] of apiItemsByMemberName_) {
-                apiItemsByMemberName.set(k, v);
             }
         }
 
-        assertMappedApiItemNames(apiItemsByMemberName.keys());
-
-        forEachPackageWithPages((packageName, pages) => {
-            for (const [pageName, pageData] of pages) {
-                const page = new ApiPage(this._context, pageData);
-                this._pathToPage.set(`${packageName}/${pageName}`, page);
+        for (const memberIdentifier of memberIdentifierKeys) {
+            if (!packageIdentifierToPath.has(memberIdentifier)) {
+                throw new Error(`${memberIdentifier} not mapped.`);
             }
-        });
+        }
+
+        if (memberIdentifierKeys.size !== packageIdentifierToPath.size) {
+            throw new Error('Not same number of names mapped.');
+        }
+
+        for (const apiPackageData of packageDataList) {
+            for (const pageData of apiPackageData.pages) {
+                const page = new ApiPage(
+                    this._context,
+                    pageData,
+                    apiPackageData.packageName,
+                );
+                this._pathToPage.set(
+                    `${apiPackageData.packageDirectory}/${pageData.pageDirectory}`,
+                    page,
+                );
+            }
+        }
     }
 
     public build(): Map<string, PageNode<DeepCoreNode>> {
@@ -621,7 +645,7 @@ export function renderPageNodeMapToFolder(
         }[];
     }
 
-    const packageNameToPageSummaryMap = new Map<
+    const packageDirectoryToPageSummaryMap = new Map<
         string,
         {
             isOneIndexPagePackage: boolean;
@@ -630,35 +654,38 @@ export function renderPageNodeMapToFolder(
         }
     >();
 
-    forEachPackageWithPages((packageName, pages) => {
+    for (const packageData of packageDataList) {
+        const { pages } = packageData;
         const isOneIndexPagePackage =
-            pages.length === 1 && pages[0][0] === '_index';
+            pages.length === 1 && pages[0].pageDirectory === '_index';
         const pageTitleTextNode = PlainTextNode({
-            text: `API Reference - ${_.upperFirst(_.camelCase(packageName))}`,
+            text: `API Reference - ${packageData.packageName}`,
         });
         const getPageLinks: GetPageLinksFunction = (inBase) =>
-            pages.map(([pageName_, page]) => {
-                const pageName = isOneIndexPagePackage ? 'README' : pageName_;
+            pages.map((pageData) => {
+                const pageName = isOneIndexPagePackage
+                    ? 'README'
+                    : pageData.pageDirectory;
                 const pagePath = inBase
-                    ? `${packageName}/${pageName}`
+                    ? `${packageData.packageDirectory}/${pageName}`
                     : pageName;
                 return {
                     headingLink: LocalPageLinkNode({
                         destination: pagePath,
-                        children: [PlainTextNode({ text: page.title })],
+                        children: [PlainTextNode({ text: pageData.pageTitle })],
                     }),
                     tableOfContents: TableOfContentsNode({
                         // eslint-disable-next-line max-len
                         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                         tableOfContents: pageNodeMap.get(
-                            `${packageName}/${pageName_}`,
+                            `${packageData.packageDirectory}/${pageData.pageDirectory}`,
                         )!.metadata.tableOfContents,
                         relativePagePath: pagePath,
                     }),
                 };
             });
 
-        packageNameToPageSummaryMap.set(packageName, {
+        packageDirectoryToPageSummaryMap.set(packageData.packageDirectory, {
             isOneIndexPagePackage,
             pageTitleTextNode,
             getPageLinks,
@@ -667,10 +694,10 @@ export function renderPageNodeMapToFolder(
         if (isOneIndexPagePackage) {
             folderUtil.moveFileInFolder(
                 outFolder,
-                `${packageName}/_index.md`,
-                `${packageName}/README.md`,
+                `${packageData.packageDirectory}/_index.md`,
+                `${packageData.packageDirectory}/README.md`,
             );
-            return;
+            continue;
         }
 
         const contents = ContainerNode({
@@ -692,54 +719,51 @@ export function renderPageNodeMapToFolder(
 
         folderUtil.addFileToFolder(
             outFolder,
-            `${packageName}/README.md`,
+            `${packageData.packageDirectory}/README.md`,
             renderDeepCoreNodeAsMarkdown(contents),
         );
-    });
+    }
 
-    const packageNameAndSummaries = packageNameToPageSummaryMap.entries();
-    const packageSummaries = [...packageNameAndSummaries].flatMap<DeepCoreNode>(
-        ([packageName, packageSummary]) => {
-            const {
-                isOneIndexPagePackage,
-                pageTitleTextNode,
-                getPageLinks,
-            } = packageSummary;
+    const packageSummaries = [
+        ...packageDirectoryToPageSummaryMap.entries(),
+    ].flatMap<DeepCoreNode>(([packageDirectory, packageSummary]) => {
+        const {
+            isOneIndexPagePackage,
+            pageTitleTextNode,
+            getPageLinks,
+        } = packageSummary;
 
-            const heading = HeadingNode({
-                children: [
-                    LocalPageLinkNode({
-                        destination: `${packageName}/README`,
-                        children: [pageTitleTextNode],
-                    }),
-                ],
-            });
-
-            if (isOneIndexPagePackage) {
-                const { tableOfContents } = getPageLinks(true)[0];
-                return [heading, tableOfContents];
-            }
-
-            return [
-                heading,
-                CollapsibleSectionNode({
-                    summaryNode: BoldNode({
-                        children: [
-                            PlainTextNode({ text: 'Table of Contents' }),
-                        ],
-                    }),
-                    children: getPageLinks(true).flatMap(
-                        ({ headingLink, tableOfContents }) => [
-                            SubheadingNode({
-                                children: [headingLink],
-                            }),
-                            tableOfContents,
-                        ],
-                    ),
+        const heading = HeadingNode({
+            children: [
+                LocalPageLinkNode({
+                    destination: `${packageDirectory}/README`,
+                    children: [pageTitleTextNode],
                 }),
-            ];
-        },
-    );
+            ],
+        });
+
+        if (isOneIndexPagePackage) {
+            const { tableOfContents } = getPageLinks(true)[0];
+            return [heading, tableOfContents];
+        }
+
+        return [
+            heading,
+            CollapsibleSectionNode({
+                summaryNode: BoldNode({
+                    children: [PlainTextNode({ text: 'Table of Contents' })],
+                }),
+                children: getPageLinks(true).flatMap(
+                    ({ headingLink, tableOfContents }) => [
+                        SubheadingNode({
+                            children: [headingLink],
+                        }),
+                        tableOfContents,
+                    ],
+                ),
+            }),
+        ];
+    });
 
     const contents = ContainerNode<DeepCoreNode>({
         children: [

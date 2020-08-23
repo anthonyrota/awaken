@@ -294,7 +294,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>ofEvent</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L708](..\/..\/..\/packages\/core\/src\/source.ts#L708)
+> Source Location: [packages\/core\/src\/source.ts#L713](..\/..\/..\/packages\/core\/src\/source.ts#L713)
 
 <b>Signature</b>
 
@@ -304,7 +304,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>ofEventScheduled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L723](..\/..\/..\/packages\/core\/src\/source.ts#L723)
+> Source Location: [packages\/core\/src\/source.ts#L734](..\/..\/..\/packages\/core\/src\/source.ts#L734)
 
 <b>Signature</b>
 

@@ -47,7 +47,7 @@ export function markAsSubject<T>(
 }
 
 /**
- * Determines whether the given value is a {@link Subject}.
+ * Determines whether the given value is a {@link core/Subject#}.
  * @param value - The value to check.
  * @returns Whether the value is a Subject.
  *
@@ -62,9 +62,9 @@ export function markAsSubject<T>(
  * isSubject(null); // false.
  * ```
  *
- * @see {@link isDisposable}
- * @see {@link isSink}
- * @see {@link isSource}
+ * @see {@link core/isDisposable#}
+ * @see {@link core/isSink#}
+ * @see {@link core/isSource#}
  *
  * @public
  */

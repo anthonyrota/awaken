@@ -27,7 +27,7 @@ export interface Disposable {
     remove(child: Disposable): void;
     /**
      * Disposes the Disposable
-     * @throws {@link DisposalError};
+     * @throws {@link core/DisposalError#};
      */
     dispose(): void;
     [$$Disposable]: DisposableImplementationIdentifier;
@@ -337,7 +337,7 @@ export function Disposable(onDispose?: () => void): Disposable {
 }
 
 /**
- * Determines whether the given value is a {@link Disposable}.
+ * Determines whether the given value is a {@link core/Disposable#}.
  * @param value - The value to check.
  * @returns Whether the value is a Disposable.
  *
@@ -352,9 +352,9 @@ export function Disposable(onDispose?: () => void): Disposable {
  * isDisposable(null); // false.
  * ```
  *
- * @see {@link isSink}
- * @see {@link isSource}
- * @see {@link isSubject}
+ * @see {@link core/isSink#}
+ * @see {@link core/isSource#}
+ * @see {@link core/isSubject#}
  *
  * @public
  */

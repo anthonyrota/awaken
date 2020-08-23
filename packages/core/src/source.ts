@@ -72,11 +72,11 @@ export interface End {
 
 /**
  * This is the base construct for distributing values/messages. All things
- * pushed and received to and from {@link Sink|Sinks} will be events.
+ * pushed and received to and from {@link core/Sink#|Sinks} will be events.
  * An event is an object which consists of a `type` field, which determines the
  * type of the event. There are three types of events:
- * {@link Push}, {@link Throw} and
- * {@link End} events:
+ * {@link core/Push#}, {@link core/Throw#} and
+ * {@link core/End#} events:
  *
  * - A Push event represents the "pushing" of a value to a sink, and has a
  *   `value` field equal to the value the event is carrying.
@@ -90,8 +90,8 @@ export interface End {
  *   will not take any more events.
  *
  * When determining an event's type, you should **always** use either
- * {@link PushType}, {@link ThrowType} or
- * {@link EndType} directly instead of their constant number values.
+ * {@link core/PushType#}, {@link core/ThrowType#} or
+ * {@link core/EndType#} directly instead of their constant number values.
  *
  * @example
  * ```ts
@@ -109,8 +109,8 @@ export interface End {
  * sink(Throw(new Error('...'))); // `${ThrowType}`, Error(...).
  * ```
  *
- * @see {@link Source}
- * @see {@link Sink}
+ * @see {@link core/Source#}
+ * @see {@link core/Sink#}
  *
  * @public
  */
@@ -118,7 +118,7 @@ export type Event<T> = Push<T> | Throw | End;
 
 /**
  * A Push event represents the "pushing" of a value to a
- * {@link Sink}, and has a `value` field equal to the value the event
+ * {@link core/Sink#}, and has a `value` field equal to the value the event
  * is carrying.
  *
  * @returns The created Push event.
@@ -130,7 +130,7 @@ export type Event<T> = Push<T> | Throw | End;
  * console.log(event.value); // [1, 2, 3].
  * ```
  *
- * @see {@link Event}
+ * @see {@link core/Event#}
  */
 
 /**
@@ -149,7 +149,7 @@ export function Push<T>(value?: T): Push<T | undefined> {
 
 /**
  * A Throw represents the "throwing" of an error, and has an `error` field equal
- * to the error the event is carrying. After a {@link Sink} receives
+ * to the error the event is carrying. After a {@link core/Sink#} receives
  * an Error event, it will be disposed and will not take any more events.
  *
  * @param error - The error to be thrown.
@@ -162,7 +162,7 @@ export function Push<T>(value?: T): Push<T | undefined> {
  * console.log(event.value); // Error(...).
  * ```
  *
- * @see {@link Event}
+ * @see {@link core/Event#}
  *
  * @public
  */
@@ -171,7 +171,7 @@ export function Throw(error: unknown): Throw {
 }
 
 /**
- * An End event represents the "end" of a {@link Source}, and has no
+ * An End event represents the "end" of a {@link core/Source#}, and has no
  * additional properties. After a Sink receives an End event, it will be
  * disposed and will not take any more events.
  *
@@ -186,7 +186,7 @@ export function Throw(error: unknown): Throw {
  * // `${EndType}`
  * ```
  *
- * @see {@link Event}
+ * @see {@link core/Event#}
  *
  * @public
  */
@@ -201,12 +201,12 @@ export interface Sink<T> extends Disposable {
 }
 
 /**
- * A Sink is what a {@link Source} subscribes to. All events emitted
+ * A Sink is what a {@link core/Source#} subscribes to. All events emitted
  * by the source will be passed to the sink that has been given to the source.
  *
- * The shape of a Sink is a function which takes an {@link Event} and
+ * The shape of a Sink is a function which takes an {@link core/Event#} and
  * distributes it to the `onEvent` function as described below. Sinks also
- * implement the {@link Disposable} construct, and has all of the
+ * implement the {@link core/Disposable#} construct, and has all of the
  * methods of the Disposable type, and can be treated as a Disposable. This is
  * important as the way to stop a sink (and also unsubscribe the sources
  * subscribed to the sink) is to dispose the sink itself. This also means that
@@ -264,10 +264,10 @@ export interface Sink<T> extends Disposable {
  * // { type: ThrowType, error: Error }
  * ```
  *
- * @see {@link Disposable}
- * @see {@link Event}
- * @see {@link Source}
- * @see {@link Subject}
+ * @see {@link core/Disposable#}
+ * @see {@link core/Event#}
+ * @see {@link core/Source#}
+ * @see {@link core/Subject#}
  *
  * @public
  */
@@ -304,7 +304,7 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
 }
 
 /**
- * Determines whether the given value is a {@link Sink}.
+ * Determines whether the given value is a {@link core/Sink#}.
  * @param value - The value to check.
  * @returns Whether the value is a Sink.
  *
@@ -319,9 +319,9 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
  * isSink(null); // false.
  * ```
  *
- * @see {@link isDisposable}
- * @see {@link isSource}
- * @see {@link isSubject}
+ * @see {@link core/isDisposable#}
+ * @see {@link core/isSource#}
+ * @see {@link core/isSubject#}
  *
  * @public
  */
@@ -340,7 +340,7 @@ export interface Source<T> {
 
 /**
  * A Source is a function which can be subscribed to with a
- * {@link Sink}. This construct is the basis of all reactive
+ * {@link core/Sink#}. This construct is the basis of all reactive
  * programming done with this library. Sources are by default essentially a lazy
  * push-style stream/observable which will produce new values every
  * subscription. The "lazy" part can be thought of as follows:
@@ -469,10 +469,10 @@ export interface Source<T> {
  * });
  * ```
  *
- * @see {@link Disposable}
- * @see {@link Event}
- * @see {@link Sink}
- * @see {@link Subject}
+ * @see {@link core/Disposable#}
+ * @see {@link core/Event#}
+ * @see {@link core/Sink#}
+ * @see {@link core/Subject#}
  *
  * @public
  */
@@ -511,7 +511,7 @@ export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
 }
 
 /**
- * Determines whether the given value is a {@link Source}.
+ * Determines whether the given value is a {@link core/Source#}.
  * @param value - The value to check.
  * @returns Whether the value is a Source.
  *
@@ -526,9 +526,9 @@ export function Source<T>(produce: (sink: Sink<T>) => void): Source<T> {
  * isSource(null); // false.
  * ```
  *
- * @see {@link isDisposable}
- * @see {@link isSink}
- * @see {@link isSubject}
+ * @see {@link core/isDisposable#}
+ * @see {@link core/isSink#}
+ * @see {@link core/isSubject#}
  *
  * @public
  */
@@ -570,8 +570,8 @@ export function isSource(value: unknown): value is Source<unknown> {
  * );
  * ```
  *
- * @see {@link Source}
- * @see {@link Sink}
+ * @see {@link core/Source#}
+ * @see {@link core/Sink#}
  *
  * @public
  */
@@ -616,8 +616,8 @@ function pushArrayItemsToSink<T>(array: ArrayLike<T>, sink: Sink<T>): void {
  * // End
  * ```
  *
- * @see {@link fromArrayScheduled}
- * @see {@link of}
+ * @see {@link core/fromArrayScheduled#}
+ * @see {@link core/of#}
  *
  * @public
  */
@@ -683,8 +683,8 @@ export function fromArrayScheduled<T>(
  * // End
  * ```
  *
- * @see {@link fromArray}
- * @see {@link ofScheduled}
+ * @see {@link core/fromArray#}
+ * @see {@link core/ofScheduled#}
  *
  * @public
  */

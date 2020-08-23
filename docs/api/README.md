@@ -2,7 +2,7 @@
 
 # Awaken API Reference
 
-## [API Reference - Core](core\/README.md#readme)
+## [API Reference - @awaken\/core](core\/README.md#readme)
 
 <details><summary><b>Table of Contents</b></summary>
 
@@ -234,7 +234,7 @@
 4. [<code>asyncReportError</code>](core\/util.md#asyncreporterror)
 5. [<code>TimeProvider</code>](core\/util.md#timeprovider)</details></details>
 
-## [API Reference - Testing](testing\/README.md#readme)
+## [API Reference - @awaken\/testing](testing\/README.md#readme)
 
 <details><summary><b>Table of Contents</b></summary><br>
 

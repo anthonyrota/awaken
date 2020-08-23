@@ -1,10 +1,10 @@
 import { ApiModel } from '@microsoft/api-extractor-model';
 import * as fs from 'fs-extra';
 import { getAbsolutePath } from '../../util/fileUtil';
+import { generateSourceMetadata } from './analyze/sourceMetadata';
 import { ApiPageMap, renderPageNodeMapToFolder } from './apiUtil';
 import { DeepCoreNode } from './nodes';
-import { outDir } from './paths';
-import { generateSourceMetadata } from './sourceMetadata';
+import { outDir, packageScope } from './paths';
 import {
     addFileToFolder,
     Folder,
@@ -18,8 +18,17 @@ import { createProgram } from './util/ts';
 const sourceFilePaths = globAbsolute('packages/*/src/**');
 const program = createProgram(sourceFilePaths);
 
-const sourceExportFiles = globAbsolute('packages/*/src/index.ts');
-const sourceMetadata = generateSourceMetadata(program, sourceExportFiles);
+const packages = fs.readdirSync(getAbsolutePath('packages'));
+const packageNameToExportFilePath = new Map<string, string>(
+    packages.map((packageName) => [
+        `${packageScope}/${packageName}`,
+        `packages/${packageName}/src/index.ts`,
+    ]),
+);
+const sourceMetadata = generateSourceMetadata(
+    program,
+    packageNameToExportFilePath,
+);
 
 const apiModel = new ApiModel();
 const apiModelFilePaths = globAbsolute('temp/*.api.json');

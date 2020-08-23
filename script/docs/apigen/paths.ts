@@ -1,24 +1,36 @@
-function nullObj<T>(obj: T): T {
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    return Object.assign(Object.create(null) as {}, obj);
-}
+import {
+    ExportIdentifier,
+    getUniqueExportIdentifierKey,
+} from './analyze/Identifier';
 
-interface APIPageDataItem {
+export const packageScope = '@awaken';
+export const outDir = 'docs/api';
+
+export interface APIPageDataItem {
     main: string;
     nested?: string[];
 }
 
 export interface APIPageData {
-    title: string;
+    pageDirectory: string;
+    pageTitle: string;
     items: APIPageDataItem[];
 }
 
-const mainPaths: Record<string, [string, APIPageData][]> = nullObj({
-    core: [
-        [
-            'basics',
+export interface APIPackageData {
+    packageDirectory: string;
+    packageName: string;
+    pages: APIPageData[];
+}
+
+export const packageDataList: APIPackageData[] = [
+    {
+        packageDirectory: 'core',
+        packageName: `${packageScope}/core`,
+        pages: [
             {
-                title: 'API Reference - Basics',
+                pageDirectory: 'basics',
+                pageTitle: 'API Reference - Basics',
                 items: [
                     {
                         main: 'Disposable',
@@ -61,11 +73,9 @@ const mainPaths: Record<string, [string, APIPageData][]> = nullObj({
                     { main: 'ScheduleFunction' },
                 ],
             },
-        ],
-        [
-            'sources',
             {
-                title: 'API Reference - Sources',
+                pageDirectory: 'sources',
+                pageTitle: 'API Reference - Sources',
                 items: [
                     { main: 'all' },
                     { main: 'animationFrames' },
@@ -101,11 +111,9 @@ const mainPaths: Record<string, [string, APIPageData][]> = nullObj({
                     { main: 'zipSources' },
                 ],
             },
-        ],
-        [
-            'operators',
             {
-                title: 'API Reference - Operators',
+                pageDirectory: 'operators',
+                pageTitle: 'API Reference - Operators',
                 items: [
                     { main: 'at' },
                     { main: 'catchError' },
@@ -184,7 +192,10 @@ const mainPaths: Record<string, [string, APIPageData][]> = nullObj({
                     { main: 'schedulePushEvents' },
                     { main: 'scheduleSubscription' },
                     { main: 'share' },
-                    { main: 'shareControlled', nested: ['ControllableSource'] },
+                    {
+                        main: 'shareControlled',
+                        nested: ['ControllableSource'],
+                    },
                     { main: 'shareOnce' },
                     { main: 'sharePersist' },
                     { main: 'shareTransform' },
@@ -232,11 +243,9 @@ const mainPaths: Record<string, [string, APIPageData][]> = nullObj({
                     { main: 'zipWith' },
                 ],
             },
-        ],
-        [
-            'subjects',
             {
-                title: 'API Reference - Subjects',
+                pageDirectory: 'subjects',
+                pageTitle: 'API Reference - Subjects',
                 items: [
                     { main: 'CurrentValueSubject' },
                     { main: 'FinalValueSubject' },
@@ -247,11 +256,9 @@ const mainPaths: Record<string, [string, APIPageData][]> = nullObj({
                     { main: 'SubjectBase' },
                 ],
             },
-        ],
-        [
-            'schedule-functions',
             {
-                title: 'API Reference - Schedule Functions',
+                pageDirectory: 'schedule-functions',
+                pageTitle: 'API Reference - Schedule Functions',
                 items: [
                     { main: 'ScheduleAnimationFrameQueued' },
                     { main: 'ScheduleInterval' },
@@ -264,11 +271,9 @@ const mainPaths: Record<string, [string, APIPageData][]> = nullObj({
                     { main: 'scheduleSync' },
                 ],
             },
-        ],
-        [
-            'util',
             {
-                title: 'API Reference - Utils',
+                pageDirectory: 'util',
+                pageTitle: 'API Reference - Utils',
                 items: [
                     { main: 'setTimeout' },
                     { main: 'setInterval' },
@@ -278,12 +283,14 @@ const mainPaths: Record<string, [string, APIPageData][]> = nullObj({
                 ],
             },
         ],
-    ],
-    testing: [
-        [
-            '_index',
+    },
+    {
+        packageDirectory: 'testing',
+        packageName: `${packageScope}/testing`,
+        pages: [
             {
-                title: 'API Reference',
+                pageDirectory: '_index',
+                pageTitle: 'API Reference',
                 items: [
                     { main: 'TestSource' },
                     { main: 'SharedTestSource' },
@@ -298,59 +305,68 @@ const mainPaths: Record<string, [string, APIPageData][]> = nullObj({
                 ],
             },
         ],
-    ],
-});
+    },
+];
 
-export const outDir = 'docs/api';
+export const packageIdentifierToPath = new Map<string, string>();
 
-const nameToPath: Record<string, string> = {};
-const mainPathEntries = Object.entries(mainPaths);
-for (const [packageName, pages] of mainPathEntries) {
-    for (const [pageName, page] of pages) {
-        const pathName = `${packageName}/${pageName}`;
+for (const packageData of packageDataList) {
+    for (const page of packageData.pages) {
+        const path = `${packageData.packageDirectory}/${page.pageDirectory}`;
         for (const item of page.items) {
-            if (item.main in nameToPath) {
-                throw new Error(`Duplicate name: ${item.main}`);
-            }
-            nameToPath[item.main] = pathName;
-            if (item.nested) {
-                for (const name of item.nested) {
-                    if (name in nameToPath) {
-                        throw new Error(`Duplicate name: ${name}`);
-                    }
-                    nameToPath[name] = pathName;
-                }
-            }
+            registerIdentifier(
+                {
+                    packageName: packageData.packageName,
+                    exportName: item.main,
+                },
+                path,
+            );
+            item.nested?.forEach((name) => {
+                registerIdentifier(
+                    {
+                        packageName: packageData.packageName,
+                        exportName: name,
+                    },
+                    path,
+                );
+            });
         }
     }
 }
 
-export function forEachPackageWithPages(
-    callback: (packageName: string, pages: [string, APIPageData][]) => void,
+function registerIdentifier(identifier: ExportIdentifier, path: string): void {
+    const identifierKey = getUniqueExportIdentifierKey(identifier);
+    if (identifierKey in packageIdentifierToPath) {
+        throw new Error(`Duplicate name: ${identifierKey}`);
+    }
+    packageIdentifierToPath.set(identifierKey, path);
+}
+
+export function getPathOfExportIdentifier(
+    identifier: ExportIdentifier,
+): string {
+    const identifierKey = getUniqueExportIdentifierKey(identifier);
+    const path = packageIdentifierToPath.get(identifierKey);
+    if (path === undefined) {
+        throw new Error(`${identifierKey} has no path.`);
+    }
+    return path;
+}
+
+export function assertMappedApiItemIdentifiers(
+    identifiers: Iterable<ExportIdentifier>,
 ): void {
-    for (const [packageName, pages] of mainPathEntries) {
-        callback(packageName, pages);
-    }
-}
-
-export function getMainPathOfApiItemName(apiItemName: string): string {
-    if (!(apiItemName in nameToPath)) {
-        throw new Error(`${apiItemName} has no path.`);
-    }
-    return nameToPath[apiItemName];
-}
-
-export function assertMappedApiItemNames(names: Iterable<string>): void {
     let len = 0;
 
-    for (const name of names) {
-        if (!(name in nameToPath)) {
-            throw new Error(`${name} not mapped.`);
+    for (const identifier of identifiers) {
+        const identifierKey = getUniqueExportIdentifierKey(identifier);
+        if (!packageIdentifierToPath.has(identifierKey)) {
+            throw new Error(`${identifierKey} not mapped.`);
         }
         len++;
     }
 
-    if (len !== Object.keys(nameToPath).length) {
+    if (len !== Object.keys(packageIdentifierToPath).length) {
         throw new Error('Not same number of names mapped.');
     }
 }

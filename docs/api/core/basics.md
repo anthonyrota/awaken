@@ -228,7 +228,7 @@ console.log(event.value); // [1, 2, 3].
 
 - <code>[Event](#event)</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L139](..\/..\/..\/packages\/core\/src\/source.ts#L139)
+> Source Location: [packages\/core\/src\/source.ts#L146](..\/..\/..\/packages\/core\/src\/source.ts#L146)
 
 <b>Signature</b>
 
@@ -781,7 +781,7 @@ Calls the value accumulatively against all of the functions given left-to-right.
 
 The result of accumulatively calling the given value against all of the functions given left-to-right.
 
-> Source Location: [packages\/core\/src\/util.ts#L19](..\/..\/..\/packages\/core\/src\/util.ts#L19)
+> Source Location: [packages\/core\/src\/util.ts#L53](..\/..\/..\/packages\/core\/src\/util.ts#L53)
 
 <b>Signature</b>
 
@@ -909,7 +909,7 @@ Combines all of the functions given into a single function. This function takes 
 
 A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right.
 
-> Source Location: [packages\/core\/src\/util.ts#L71](..\/..\/..\/packages\/core\/src\/util.ts#L71)
+> Source Location: [packages\/core\/src\/util.ts#L105](..\/..\/..\/packages\/core\/src\/util.ts#L105)
 
 <b>Signature</b>
 
