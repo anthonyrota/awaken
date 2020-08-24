@@ -9,20 +9,20 @@ import {
     ExcerptToken,
 } from '@microsoft/api-extractor-model';
 import { CodeBlockNode } from '../../nodes/CodeBlock';
+import { ContainerNode } from '../../nodes/Container';
+import { DeepCoreNode } from '../../nodes/index';
 import { LocalPageLinkNode } from '../../nodes/LocalPageLink';
 import { PlainTextNode } from '../../nodes/PlainText';
 import { RichCodeBlockNode } from '../../nodes/RichCodeBlock';
 import { TitleNode } from '../../nodes/Title';
 import { format, Language } from '../../util/prettier';
+import { AnalyzeContext } from '../Context';
 import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
 import {
     FoundExcerptTokenReferenceResultType,
     getExcerptTokenReference,
 } from '../util/getExcerptTokenReference';
 import { getLinkToApiItem } from '../util/getExportLinks';
-import { ContainerNode } from './../../nodes/Container';
-import { DeepCoreNode } from './../../nodes/index';
-import { AnalyzeContext } from './../Context';
 
 export function buildApiItemSignatureExcerpt(
     apiItem: ApiFunction | ApiInterface | ApiVariable | ApiTypeAlias,

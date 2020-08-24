@@ -1,15 +1,15 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
 import * as ts from 'typescript';
+import { BlockQuoteNode } from '../../nodes/BlockQuote';
+import { GithubSourceLinkNode } from '../../nodes/GithubSourceLink';
+import { DeepCoreNode } from '../../nodes/index';
 import { PlainTextNode } from '../../nodes/PlainText';
 import { getPathOfExportIdentifier, outDir } from '../../paths';
 import { getRelativePath } from '../../util/getRelativePath';
+import { AnalyzeContext } from '../Context';
 import { getUniqueExportIdentifierKey } from '../Identifier';
 import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
-import { BlockQuoteNode } from './../../nodes/BlockQuote';
-import { GithubSourceLinkNode } from './../../nodes/GithubSourceLink';
-import { DeepCoreNode } from './../../nodes/index';
-import { AnalyzeContext } from './../Context';
-import { UnsupportedApiItemError } from './../util/UnsupportedApiItemError';
+import { UnsupportedApiItemError } from '../util/UnsupportedApiItemError';
 
 export function buildApiItemSourceLocationLink(
     apiItem: ApiItem,

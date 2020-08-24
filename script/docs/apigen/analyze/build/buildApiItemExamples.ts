@@ -1,10 +1,10 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
+import { ContainerNode } from '../../nodes/Container';
+import { DeepCoreNode } from '../../nodes/index';
+import { PlainTextNode } from '../../nodes/PlainText';
 import { TitleNode } from '../../nodes/Title';
 import { AnalyzeContext } from '../Context';
 import { getDocComment, getExampleBlocks } from '../util/tsdocConfiguration';
-import { ContainerNode } from './../../nodes/Container';
-import { DeepCoreNode } from './../../nodes/index';
-import { PlainTextNode } from './../../nodes/PlainText';
 import { buildApiItemDocNode } from './buildApiItemDocNode';
 
 export function buildApiItemExamples(

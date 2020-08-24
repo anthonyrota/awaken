@@ -20,13 +20,13 @@ import { LinkNode } from '../../nodes/Link';
 import { LocalPageLinkNode } from '../../nodes/LocalPageLink';
 import { ParagraphNode } from '../../nodes/Paragraph';
 import { PlainTextNode } from '../../nodes/PlainText';
+import { packageScope } from '../../paths';
 import { Iter } from '../../util/Iter';
 import { StringBuilder } from '../../util/StringBuilder';
 import { AnalyzeContext } from '../Context';
 import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
 import { getLinkToExportIdentifier } from '../util/getExportLinks';
 import { parseMarkdown } from '../util/parseMarkdown';
-import { packageScope } from './../../paths';
 
 interface TSDocNodeWriteContext {
     context: AnalyzeContext;

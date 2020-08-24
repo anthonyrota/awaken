@@ -7,12 +7,14 @@ import {
 } from '@microsoft/api-extractor-model';
 import { CodeBlockNode } from '../../nodes/CodeBlock';
 import { ContainerNode } from '../../nodes/Container';
+import { DeepCoreNode } from '../../nodes/index';
 import { LocalPageLinkNode } from '../../nodes/LocalPageLink';
 import { PlainTextNode } from '../../nodes/PlainText';
 import { RichCodeBlockNode } from '../../nodes/RichCodeBlock';
 import { TableNode, TableRow } from '../../nodes/Table';
 import { TitleNode } from '../../nodes/Title';
 import { format, Language } from '../../util/prettier';
+import { AnalyzeContext } from '../Context';
 import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
 import {
     FoundExcerptTokenReferenceResultType,
@@ -20,8 +22,6 @@ import {
 } from '../util/getExcerptTokenReference';
 import { getLinkToApiItem } from '../util/getExportLinks';
 import { getDocComment } from '../util/tsdocConfiguration';
-import { DeepCoreNode } from './../../nodes/index';
-import { AnalyzeContext } from './../Context';
 import { buildApiItemDocNode } from './buildApiItemDocNode';
 
 export function buildApiItemParameters(

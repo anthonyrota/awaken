@@ -43,6 +43,7 @@ import { SubheadingNode } from './nodes/Subheading';
 import { TableOfContentsNode } from './nodes/TableOfContents';
 import { APIPageData, packageIdentifierToPath, packageDataList } from './paths';
 import { renderDeepCoreNodeAsMarkdown } from './render/markdown';
+import { simplifyDeepCoreNode } from './simplify';
 import * as folderUtil from './util/Folder';
 
 interface ExportImplementation<T extends aeModel.ApiItem> {
@@ -617,10 +618,11 @@ export class ApiPageMap {
 
     public build(): Map<string, PageNode<DeepCoreNode>> {
         return new Map(
-            Array.from(this._pathToPage, ([path, page]) => [
-                path,
-                page.build(),
-            ]),
+            Array.from(this._pathToPage, ([path, page]) => {
+                const pageNode = page.build();
+                simplifyDeepCoreNode(pageNode);
+                return [path, pageNode];
+            }),
         );
     }
 }

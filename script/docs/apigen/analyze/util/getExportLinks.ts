@@ -2,8 +2,8 @@ import { ApiItem } from '@microsoft/api-extractor-model';
 import { getPathOfExportIdentifier } from '../../paths';
 import { getRelativePath } from '../../util/getRelativePath';
 import { getApiItemAnchorName } from '../build/buildApiItemAnchor';
+import { AnalyzeContext } from '../Context';
 import { ExportIdentifier } from '../Identifier';
-import { AnalyzeContext } from './../Context';
 import { getApiItemIdentifier } from './getApiItemIdentifier';
 
 // TODO: handle lowercase collisions.

@@ -1,11 +1,11 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
 import { CodeSpanNode } from '../../nodes/CodeSpan';
+import { DeepCoreNode } from '../../nodes/index';
+import { PlainTextNode } from '../../nodes/PlainText';
+import { SubheadingNode } from '../../nodes/Subheading';
 import { AnalyzeContext } from '../Context';
 import { ExportIdentifier } from '../Identifier';
 import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
-import { DeepCoreNode } from './../../nodes/index';
-import { PlainTextNode } from './../../nodes/PlainText';
-import { SubheadingNode } from './../../nodes/Subheading';
 
 function areMultipleKindsInApiItemList(apiItems: ApiItem[]): boolean {
     if (apiItems.length === 0) {
