@@ -1,4 +1,4 @@
-import { TableOfContents } from '../../pageMetadata';
+import { TableOfContents } from '../../../pageMetadata';
 import { Node, CoreNodeType } from '.';
 
 export interface TableOfContentsParameters {

@@ -1,7 +1,7 @@
 import {
     TableOfContentsInlineReference,
     TableOfContentsNestedReference,
-} from '../../../pageMetadata';
+} from '../../../../pageMetadata';
 import { DeepCoreNode } from '../../nodes';
 import { CodeSpanNode } from '../../nodes/CodeSpan';
 import { ContainerNode } from '../../nodes/Container';

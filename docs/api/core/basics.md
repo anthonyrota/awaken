@@ -210,6 +210,8 @@ sink(Throw(new Error('...'))); // `${ThrowType}`, Error(...).
 
 ### <a name="push-function"></a><code>Push - Function</code>
 
+> Source Location: [packages\/core\/src\/source.ts#L146](..\/..\/..\/packages\/core\/src\/source.ts#L146)
+
 A Push event represents the &quot;pushing&quot; of a value to a <code>[Sink](#sink)</code>, and has a <code>value</code> field equal to the value the event is carrying.
 
 <b>Returns</b>
@@ -227,8 +229,6 @@ console.log(event.value); // [1, 2, 3].
 <b>See Also</b>
 
 - <code>[Event](#event)</code>
-
-> Source Location: [packages\/core\/src\/source.ts#L146](..\/..\/..\/packages\/core\/src\/source.ts#L146)
 
 <b>Signature</b>
 
@@ -775,13 +775,13 @@ interface IdentityOperator
 
 ## <code>pipe</code>
 
+> Source Location: [packages\/core\/src\/util.ts#L53](..\/..\/..\/packages\/core\/src\/util.ts#L53)
+
 Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
 
 <b>Returns</b>
 
 The result of accumulatively calling the given value against all of the functions given left-to-right.
-
-> Source Location: [packages\/core\/src\/util.ts#L53](..\/..\/..\/packages\/core\/src\/util.ts#L53)
 
 <b>Signature</b>
 
@@ -903,13 +903,13 @@ function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T;
 
 ## <code>flow</code>
 
+> Source Location: [packages\/core\/src\/util.ts#L105](..\/..\/..\/packages\/core\/src\/util.ts#L105)
+
 Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
 
 <b>Returns</b>
 
 A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right.
-
-> Source Location: [packages\/core\/src\/util.ts#L105](..\/..\/..\/packages\/core\/src\/util.ts#L105)
 
 <b>Signature</b>
 

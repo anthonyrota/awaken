@@ -11,22 +11,26 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
 import * as tsdoc from '@microsoft/tsdoc';
 import * as uuid from 'uuid';
-import { Node, CoreNode, DeepCoreNode, CoreNodeType } from '../../nodes';
-import { CodeBlockNode } from '../../nodes/CodeBlock';
-import { CodeSpanNode } from '../../nodes/CodeSpan';
-import { ContainerBase, ContainerNode } from '../../nodes/Container';
-import { HtmlElementNode } from '../../nodes/HtmlElement';
-import { LinkNode } from '../../nodes/Link';
-import { LocalPageLinkNode } from '../../nodes/LocalPageLink';
-import { ParagraphNode } from '../../nodes/Paragraph';
-import { PlainTextNode } from '../../nodes/PlainText';
-import { packageScope } from '../../paths';
-import { Iter } from '../../util/Iter';
-import { StringBuilder } from '../../util/StringBuilder';
-import { AnalyzeContext } from '../Context';
-import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
-import { getLinkToExportIdentifier } from '../util/getExportLinks';
-import { parseMarkdown } from '../util/parseMarkdown';
+import {
+    Node,
+    CoreNode,
+    DeepCoreNode,
+    CoreNodeType,
+} from '../../../core/nodes';
+import { CodeBlockNode } from '../../../core/nodes/CodeBlock';
+import { CodeSpanNode } from '../../../core/nodes/CodeSpan';
+import { ContainerBase, ContainerNode } from '../../../core/nodes/Container';
+import { HtmlElementNode } from '../../../core/nodes/HtmlElement';
+import { LinkNode } from '../../../core/nodes/Link';
+import { LocalPageLinkNode } from '../../../core/nodes/LocalPageLink';
+import { ParagraphNode } from '../../../core/nodes/Paragraph';
+import { PlainTextNode } from '../../../core/nodes/PlainText';
+import { Iter } from '../../../util/Iter';
+import { StringBuilder } from '../../../util/StringBuilder';
+import { AnalyzeContext } from '../../Context';
+import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
+import { getLinkToExportIdentifier } from '../../util/getExportLinks';
+import { parseMarkdown } from '../../util/parseMarkdown';
 
 interface TSDocNodeWriteContext {
     context: AnalyzeContext;
@@ -37,11 +41,16 @@ interface TSDocNodeWriteContext {
     apiItem: ApiItem;
 }
 
+export interface BuildApiItemDocNodeParameters {
+    apiItem: ApiItem;
+    docNode: tsdoc.DocNode;
+    context: AnalyzeContext;
+}
+
 export function buildApiItemDocNode(
-    apiItem: ApiItem,
-    docNode: tsdoc.DocNode,
-    context: AnalyzeContext,
+    parameters: BuildApiItemDocNodeParameters,
 ): DeepCoreNode | undefined {
+    const { apiItem, docNode, context } = parameters;
     const nodeIter = Iter([docNode]);
     nodeIter.next();
     const container_ = ContainerNode<MarkdownParsingNode>({});
@@ -128,7 +137,7 @@ function EmbeddedNode(parameters: EmbeddedNodeParameters): EmbeddedNode {
     return embeddedNode;
 }
 
-interface RawText extends Node {
+interface RawTextNode extends Node {
     type: MarkdownParsingNodeType.RawText;
     text: string;
 }
@@ -137,17 +146,17 @@ interface RawTextParameters {
     text: string;
 }
 
-function RawText(parameters: RawTextParameters): RawText {
+function RawTextNode(parameters: RawTextParameters): RawTextNode {
     return {
         type: MarkdownParsingNodeType.RawText,
         text: parameters.text,
     };
 }
 
-type MarkdownParsingNode = EmbeddedNode | RawText;
+type MarkdownParsingNode = EmbeddedNode | RawTextNode;
 
 function writeMarkdownParsingNode(
-    node: EmbeddedNode | RawText,
+    node: EmbeddedNode | RawTextNode,
     output: StringBuilder,
 ): void {
     if (node.type === MarkdownParsingNodeType.EmbeddedNode) {
@@ -211,7 +220,7 @@ function writeNode(
     switch (docNode.kind) {
         case tsdoc.DocNodeKind.PlainText: {
             const docPlainText = docNode as tsdoc.DocPlainText;
-            const textNode = RawText({ text: docPlainText.text });
+            const textNode = RawTextNode({ text: docPlainText.text });
             container.children.push(textNode);
             let node: tsdoc.DocNode | undefined;
             let foundSoftBreak = false;
@@ -354,7 +363,7 @@ function writeNode(
             break;
         }
         case tsdoc.DocNodeKind.SoftBreak: {
-            container.children.push(RawText({ text: ' ' }));
+            container.children.push(RawTextNode({ text: ' ' }));
             break;
         }
         case tsdoc.DocNodeKind.EscapedText: {
@@ -421,7 +430,10 @@ function writeLinkTagWithCodeDestination(
     );
     const memberIdentifier =
         codeDestination.packageName + codeDestination.importPath;
-    const packageParts = [packageScope, ...memberIdentifier.split('/')];
+    const packageParts = [
+        context.context.packageScope,
+        ...memberIdentifier.split('/'),
+    ];
     if (packageParts.length !== 3) {
         throw new Error(`Invalid code destination ${memberIdentifier}`);
     }
@@ -433,6 +445,7 @@ function writeLinkTagWithCodeDestination(
             packageName: packageParts.join('/'),
             exportName,
         },
+        context.context,
     );
     codeSpan.children.push(
         EmbeddedNode({

@@ -5,29 +5,34 @@ import {
     Excerpt,
     ExcerptToken,
 } from '@microsoft/api-extractor-model';
-import { CodeBlockNode } from '../../nodes/CodeBlock';
-import { ContainerNode } from '../../nodes/Container';
-import { DeepCoreNode } from '../../nodes/index';
-import { LocalPageLinkNode } from '../../nodes/LocalPageLink';
-import { PlainTextNode } from '../../nodes/PlainText';
-import { RichCodeBlockNode } from '../../nodes/RichCodeBlock';
-import { TableNode, TableRow } from '../../nodes/Table';
-import { TitleNode } from '../../nodes/Title';
-import { format, Language } from '../../util/prettier';
-import { AnalyzeContext } from '../Context';
-import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
+import { CodeBlockNode } from '../../../core/nodes/CodeBlock';
+import { ContainerNode } from '../../../core/nodes/Container';
+import { DeepCoreNode } from '../../../core/nodes/index';
+import { LocalPageLinkNode } from '../../../core/nodes/LocalPageLink';
+import { PlainTextNode } from '../../../core/nodes/PlainText';
+import { RichCodeBlockNode } from '../../../core/nodes/RichCodeBlock';
+import { TableNode, TableRow } from '../../../core/nodes/Table';
+import { TitleNode } from '../../../core/nodes/Title';
+import { format, Language } from '../../../util/prettier';
+import { AnalyzeContext } from '../../Context';
+import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
 import {
     FoundExcerptTokenReferenceResultType,
     getExcerptTokenReference,
-} from '../util/getExcerptTokenReference';
-import { getLinkToApiItem } from '../util/getExportLinks';
-import { getDocComment } from '../util/tsdocConfiguration';
+} from '../../util/getExcerptTokenReference';
+import { getLinkToApiItem } from '../../util/getExportLinks';
+import { getDocComment } from '../../util/tsdocConfiguration';
 import { buildApiItemDocNode } from './buildApiItemDocNode';
 
+export interface BuildApiItemParametersParameters {
+    apiItem: ApiFunction;
+    context: AnalyzeContext;
+}
+
 export function buildApiItemParameters(
-    apiItem: ApiFunction,
-    context: AnalyzeContext,
+    parameters: BuildApiItemParametersParameters,
 ): DeepCoreNode | undefined {
+    const { apiItem, context } = parameters;
     const parametersTable = TableNode<DeepCoreNode, DeepCoreNode>({
         header: TableRow({
             children: [
@@ -55,7 +60,11 @@ export function buildApiItemParameters(
             parameterRow.children.push(cell);
             if (apiParameter.tsdocParamBlock) {
                 for (const node of apiParameter.tsdocParamBlock.content.nodes) {
-                    const built = buildApiItemDocNode(apiItem, node, context);
+                    const built = buildApiItemDocNode({
+                        apiItem,
+                        docNode: node,
+                        context,
+                    });
                     if (built) {
                         cell.children.push(built);
                     }
@@ -92,7 +101,11 @@ export function buildApiItemParameters(
         const cell = ContainerNode<DeepCoreNode>({});
         returnsRow.children.push(cell);
         for (const node of docComment.returnsBlock.content.nodes) {
-            const built = buildApiItemDocNode(apiItem, node, context);
+            const built = buildApiItemDocNode({
+                apiItem,
+                docNode: node,
+                context,
+            });
             if (built) {
                 cell.children.push(built);
             }

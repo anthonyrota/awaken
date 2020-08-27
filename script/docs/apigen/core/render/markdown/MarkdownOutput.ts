@@ -1,4 +1,4 @@
-import { IndentedWriter } from '../../util/IndentedWriter';
+import { IndentedWriter } from '../../../util/IndentedWriter';
 
 export class MarkdownOutput extends IndentedWriter {
     private _inSingleLineCodeBlock = false;

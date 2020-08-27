@@ -8,48 +8,68 @@ import {
     Excerpt,
     ExcerptToken,
 } from '@microsoft/api-extractor-model';
-import { CodeBlockNode } from '../../nodes/CodeBlock';
-import { ContainerNode } from '../../nodes/Container';
-import { DeepCoreNode } from '../../nodes/index';
-import { LocalPageLinkNode } from '../../nodes/LocalPageLink';
-import { PlainTextNode } from '../../nodes/PlainText';
-import { RichCodeBlockNode } from '../../nodes/RichCodeBlock';
-import { TitleNode } from '../../nodes/Title';
-import { format, Language } from '../../util/prettier';
-import { AnalyzeContext } from '../Context';
-import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
+import { CodeBlockNode } from '../../../core/nodes/CodeBlock';
+import { ContainerNode } from '../../../core/nodes/Container';
+import { DeepCoreNode } from '../../../core/nodes/index';
+import { LocalPageLinkNode } from '../../../core/nodes/LocalPageLink';
+import { PlainTextNode } from '../../../core/nodes/PlainText';
+import { RichCodeBlockNode } from '../../../core/nodes/RichCodeBlock';
+import { TitleNode } from '../../../core/nodes/Title';
+import { format, Language } from '../../../util/prettier';
+import { AnalyzeContext } from '../../Context';
+import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
 import {
     FoundExcerptTokenReferenceResultType,
     getExcerptTokenReference,
-} from '../util/getExcerptTokenReference';
-import { getLinkToApiItem } from '../util/getExportLinks';
+} from '../../util/getExcerptTokenReference';
+import { getLinkToApiItem } from '../../util/getExportLinks';
 
-export function buildApiItemSignatureExcerpt(
-    apiItem: ApiFunction | ApiInterface | ApiVariable | ApiTypeAlias,
-    context: AnalyzeContext,
-): DeepCoreNode {
-    return buildApiItemExcerpt(apiItem, apiItem.excerpt, context);
+export interface BuildApiItemSignatureExcerptParameters {
+    apiItem: ApiFunction | ApiInterface | ApiVariable | ApiTypeAlias;
+    context: AnalyzeContext;
 }
 
-export function buildApiItemSignature(
-    apiItem: ApiFunction | ApiInterface | ApiVariable | ApiTypeAlias,
-    context: AnalyzeContext,
+export function buildApiItemSignatureExcerpt(
+    parameters: BuildApiItemSignatureExcerptParameters,
 ): DeepCoreNode {
+    const { apiItem, context } = parameters;
+    return buildApiItemExcerpt({
+        apiItem,
+        excerpt: apiItem.excerpt,
+        context,
+    });
+}
+
+export interface BuildApiItemSignatureParameters
+    extends BuildApiItemSignatureExcerptParameters {}
+
+export function buildApiItemSignature(
+    parameters: BuildApiItemSignatureParameters,
+): DeepCoreNode {
+    const { apiItem, context } = parameters;
     return ContainerNode<DeepCoreNode>({
         children: [
             TitleNode({
                 children: [PlainTextNode({ text: 'Signature' })],
             }),
-            buildApiItemSignatureExcerpt(apiItem, context),
+            buildApiItemSignatureExcerpt({
+                apiItem,
+                context,
+            }),
         ],
     });
 }
 
+export interface BuildApiItemExcerptParameters {
+    apiItem: ApiItem;
+    excerpt: Excerpt;
+    context: AnalyzeContext;
+}
+
 function buildApiItemExcerpt(
-    apiItem: ApiItem,
-    excerpt: Excerpt,
-    context: AnalyzeContext,
+    parameters: BuildApiItemExcerptParameters,
 ): DeepCoreNode {
+    const { apiItem, excerpt, context } = parameters;
     if (!excerpt.text.trim()) {
         throw new Error(`Received excerpt with no declaration.`);
     }

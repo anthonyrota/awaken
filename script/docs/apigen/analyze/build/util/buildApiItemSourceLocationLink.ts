@@ -1,21 +1,25 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
 import * as ts from 'typescript';
-import { BlockQuoteNode } from '../../nodes/BlockQuote';
-import { GithubSourceLinkNode } from '../../nodes/GithubSourceLink';
-import { DeepCoreNode } from '../../nodes/index';
-import { PlainTextNode } from '../../nodes/PlainText';
-import { getPathOfExportIdentifier, outDir } from '../../paths';
-import { getRelativePath } from '../../util/getRelativePath';
-import { AnalyzeContext } from '../Context';
-import { getUniqueExportIdentifierKey } from '../Identifier';
-import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
-import { UnsupportedApiItemError } from '../util/UnsupportedApiItemError';
+import { BlockQuoteNode } from '../../../core/nodes/BlockQuote';
+import { GithubSourceLinkNode } from '../../../core/nodes/GithubSourceLink';
+import { DeepCoreNode } from '../../../core/nodes/index';
+import { PlainTextNode } from '../../../core/nodes/PlainText';
+import { getRelativePath } from '../../../util/getRelativePath';
+import { AnalyzeContext } from '../../Context';
+import { getUniqueExportIdentifierKey } from '../../Identifier';
+import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
+import { UnsupportedApiItemError } from '../../util/UnsupportedApiItemError';
+
+export interface BuildApiItemSourceLocationLinkParameters {
+    apiItem: ApiItem;
+    context: AnalyzeContext;
+    syntaxKind: ts.SyntaxKind;
+}
 
 export function buildApiItemSourceLocationLink(
-    apiItem: ApiItem,
-    context: AnalyzeContext,
-    syntaxKind: ts.SyntaxKind,
+    parameters: BuildApiItemSourceLocationLinkParameters,
 ): DeepCoreNode {
+    const { apiItem, context, syntaxKind } = parameters;
     const identifier = getApiItemIdentifier(apiItem);
     const identifierKey = getUniqueExportIdentifierKey(identifier);
     // eslint-disable-next-line max-len
@@ -40,9 +44,9 @@ export function buildApiItemSourceLocationLink(
     }
 
     const { sourceLocation } = exportMetadata;
-    const currentApiItemPath = `${outDir}/${getPathOfExportIdentifier(
-        identifier,
-    )}`;
+    const currentApiItemPath = `${
+        context.outDir
+    }/${context.getPathOfExportIdentifier(identifier)}`;
     const sourceGithubPath = `${sourceLocation.filePath}#L${sourceLocation.lineNumber}`;
     const relativePath = getRelativePath(currentApiItemPath, sourceGithubPath);
 

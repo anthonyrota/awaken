@@ -1,8 +1,8 @@
+import { noop } from '../../../util/noop';
 import { Node } from '../../nodes';
 import { ContainerNode } from '../../nodes/Container';
 import { Heading123456Base } from '../../nodes/Heading123456';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
-import { noop } from '../../util/noop';
 import {
     MarkdownFunctionalNode,
     writeMarkdownFunctionalNode,

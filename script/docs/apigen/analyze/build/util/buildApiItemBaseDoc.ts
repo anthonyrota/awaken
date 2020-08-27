@@ -2,24 +2,29 @@ import { AedocDefinitions, ApiItem } from '@microsoft/api-extractor-model';
 import { DocComment, TSDocParser } from '@microsoft/tsdoc';
 import * as colors from 'colors';
 import * as ts from 'typescript';
-import { ContainerNode } from '../../nodes/Container';
-import { DeepCoreNode } from '../../nodes/index';
-import { PlainTextNode } from '../../nodes/PlainText';
-import { TitleNode } from '../../nodes/Title';
-import { AnalyzeContext } from '../Context';
-import { getUniqueExportIdentifierKey } from '../Identifier';
-import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
-import { UnsupportedApiItemError } from '../util/UnsupportedApiItemError';
+import { ContainerNode } from '../../../core/nodes/Container';
+import { DeepCoreNode } from '../../../core/nodes/index';
+import { PlainTextNode } from '../../../core/nodes/PlainText';
+import { TitleNode } from '../../../core/nodes/Title';
+import { AnalyzeContext } from '../../Context';
+import { getUniqueExportIdentifierKey } from '../../Identifier';
+import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
+import { UnsupportedApiItemError } from '../../util/UnsupportedApiItemError';
 import { buildApiItemDocNode } from './buildApiItemDocNode';
 import { buildApiItemExamples } from './buildApiItemExamples';
 import { buildApiItemSeeBlocks } from './buildApiItemSeeBlocks';
 import { buildApiItemSummary } from './buildApiItemSummary';
 
+export interface BuildApiItemBaseDocParameters {
+    apiItem: ApiItem;
+    context: AnalyzeContext;
+    syntaxKind: ts.SyntaxKind;
+}
+
 export function buildApiItemBaseDoc(
-    apiItem: ApiItem,
-    context: AnalyzeContext,
-    syntaxKind: ts.SyntaxKind,
+    parameters: BuildApiItemBaseDocParameters,
 ): DeepCoreNode | undefined {
+    const { apiItem, context, syntaxKind } = parameters;
     const identifier = getApiItemIdentifier(apiItem);
     const identifierKey = getUniqueExportIdentifierKey(identifier);
     // eslint-disable-next-line max-len
@@ -74,19 +79,24 @@ export function buildApiItemBaseDoc(
 
     return ContainerNode<DeepCoreNode>({
         children: [
-            buildApiItemSummary(apiItem, context, docComment),
-            buildReturnsBlockWithoutType(apiItem, context, docComment),
-            buildApiItemExamples(apiItem, context, docComment),
-            buildApiItemSeeBlocks(apiItem, context, docComment),
+            buildApiItemSummary({ apiItem, context, docComment }),
+            buildReturnsBlockWithoutType({ apiItem, context, docComment }),
+            buildApiItemExamples({ apiItem, context, docComment }),
+            buildApiItemSeeBlocks({ apiItem, context, docComment }),
         ].filter((value): value is DeepCoreNode => value !== undefined),
     });
 }
 
+interface BuildReturnsBlockWithoutTypeParameters {
+    apiItem: ApiItem;
+    context: AnalyzeContext;
+    docComment: DocComment;
+}
+
 function buildReturnsBlockWithoutType(
-    apiItem: ApiItem,
-    context: AnalyzeContext,
-    docComment: DocComment,
+    parameters: BuildReturnsBlockWithoutTypeParameters,
 ): DeepCoreNode | undefined {
+    const { apiItem, context, docComment } = parameters;
     if (!docComment.returnsBlock) {
         return;
     }
@@ -100,7 +110,7 @@ function buildReturnsBlockWithoutType(
     });
 
     for (const node of docComment.returnsBlock.content.nodes) {
-        const built = buildApiItemDocNode(apiItem, node, context);
+        const built = buildApiItemDocNode({ apiItem, docNode: node, context });
         if (built) {
             container.children.push(built);
         }

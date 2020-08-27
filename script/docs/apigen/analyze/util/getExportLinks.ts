@@ -1,7 +1,6 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
-import { getPathOfExportIdentifier } from '../../paths';
 import { getRelativePath } from '../../util/getRelativePath';
-import { getApiItemAnchorName } from '../build/buildApiItemAnchor';
+import { getApiItemAnchorName } from '../build/util/buildApiItemAnchor';
 import { AnalyzeContext } from '../Context';
 import { ExportIdentifier } from '../Identifier';
 import { getApiItemIdentifier } from './getApiItemIdentifier';
@@ -10,11 +9,12 @@ import { getApiItemIdentifier } from './getApiItemIdentifier';
 export function getLinkToExportIdentifier(
     currentExportIdentifier: ExportIdentifier,
     exportIdentifier: ExportIdentifier,
+    context: AnalyzeContext,
 ): string {
-    const currentApiItemPath = getPathOfExportIdentifier(
+    const currentApiItemPath = context.getPathOfExportIdentifier(
         currentExportIdentifier,
     );
-    const apiItemPath = getPathOfExportIdentifier(exportIdentifier);
+    const apiItemPath = context.getPathOfExportIdentifier(exportIdentifier);
     if (!currentApiItemPath || !apiItemPath) {
         throw new Error('No more coding today.');
     }
@@ -29,17 +29,17 @@ export function getLinkToApiItem(
     apiItem: ApiItem,
     context: AnalyzeContext,
 ): string {
-    const currentApiItemPath = getPathOfExportIdentifier(
+    const currentApiItemPath = context.getPathOfExportIdentifier(
         currentExportIdentifier,
     );
-    const apiItemPath = getPathOfExportIdentifier(
+    const apiItemPath = context.getPathOfExportIdentifier(
         getApiItemIdentifier(apiItem),
     );
     if (!currentApiItemPath || !apiItemPath) {
         throw new Error('No more coding today.');
     }
     const relativePath = getRelativePath(currentApiItemPath, apiItemPath);
-    const titleHash = getApiItemAnchorName(apiItem, context);
+    const titleHash = getApiItemAnchorName({ apiItem, context });
 
     return relativePath ? `${relativePath}#${titleHash}` : `#${titleHash}`;
 }
