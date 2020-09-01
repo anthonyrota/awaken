@@ -124,39 +124,39 @@
 
 ## <code>at</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1678](..\/..\/..\/packages\/core\/src\/source.ts#L1678)
+> Source Location: [packages\/core\/src\/source.ts#L1677](..\/..\/..\/packages\/core\/src\/source.ts#L1677)
 
 <b>Signature</b>
 
-<pre>function at(index: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function at(index: number): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>catchError</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3064](..\/..\/..\/packages\/core\/src\/source.ts#L3064)
+> Source Location: [packages\/core\/src\/source.ts#L3061](..\/..\/..\/packages\/core\/src\/source.ts#L3061)
 
 <b>Signature</b>
 
-<pre>function catchError&lt;T&gt;(<br>    getNewSource: (error: unknown) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function catchError&lt;T&gt;(<br>    getNewSource: (error: unknown) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>collect</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3288](..\/..\/..\/packages\/core\/src\/source.ts#L3288)
+> Source Location: [packages\/core\/src\/source.ts#L3285](..\/..\/..\/packages\/core\/src\/source.ts#L3285)
 
 <b>Signature</b>
 
-<pre>function collect&lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T[]&gt;;</pre>
+<pre>function collect&lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;T[]&gt;</pre>
 
 ## <code>combineWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1320](..\/..\/..\/packages\/core\/src\/source.ts#L1320)
+> Source Location: [packages\/core\/src\/source.ts#L1309](..\/..\/..\/packages\/core\/src\/source.ts#L1309)
 
 <b>Signature</b>
 
-<pre>function combineWith&lt;T extends unknown[]&gt;(<br>    ...sources: WrapValuesInSource&lt;T&gt;<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
+<pre>function combineWith&lt;T extends unknown[]&gt;(<br>    sources: {<br>        [K in keyof T]: <a href="basics.md#source-interface">Source</a>&lt;T[K]&gt;<br>    },<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;[U, ...T]&gt;</pre>
 
 ## <code>concat</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2143](..\/..\/..\/packages\/core\/src\/source.ts#L2143)
+> Source Location: [packages\/core\/src\/source.ts#L2142](..\/..\/..\/packages\/core\/src\/source.ts#L2142)
 
 <b>Signature</b>
 
@@ -164,7 +164,7 @@
 
 ## <code>concatDrop</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2073](..\/..\/..\/packages\/core\/src\/source.ts#L2073)
+> Source Location: [packages\/core\/src\/source.ts#L2072](..\/..\/..\/packages\/core\/src\/source.ts#L2072)
 
 <b>Signature</b>
 
@@ -172,31 +172,31 @@
 
 ## <code>concatDropMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2157](..\/..\/..\/packages\/core\/src\/source.ts#L2157)
+> Source Location: [packages\/core\/src\/source.ts#L2156](..\/..\/..\/packages\/core\/src\/source.ts#L2156)
 
 <b>Signature</b>
 
-<pre>function concatDropMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function concatDropMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
 
 ## <code>concatMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2134](..\/..\/..\/packages\/core\/src\/source.ts#L2134)
+> Source Location: [packages\/core\/src\/source.ts#L2133](..\/..\/..\/packages\/core\/src\/source.ts#L2133)
 
 <b>Signature</b>
 
-<pre>function concatMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function concatMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
 
 ## <code>concatWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2116](..\/..\/..\/packages\/core\/src\/source.ts#L2116)
+> Source Location: [packages\/core\/src\/source.ts#L2115](..\/..\/..\/packages\/core\/src\/source.ts#L2115)
 
 <b>Signature</b>
 
-<pre>function concatWith&lt;T&gt;(<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function concatWith&lt;T&gt;(<br>    sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[],<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>count</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2778](..\/..\/..\/packages\/core\/src\/source.ts#L2778)
+> Source Location: [packages\/core\/src\/source.ts#L2775](..\/..\/..\/packages\/core\/src\/source.ts#L2775)
 
 <b>Signature</b>
 
@@ -204,17 +204,17 @@
 
 ## <code>debounce</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3369](..\/..\/..\/packages\/core\/src\/source.ts#L3369)
+> Source Location: [packages\/core\/src\/source.ts#L3366](..\/..\/..\/packages\/core\/src\/source.ts#L3366)
 
 <b>Signature</b>
 
-<pre>function debounce&lt;T&gt;(<br>    getDurationSource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    getInitialDurationRange?:<br>        | ((firstDebouncedValue: T, index: number) =&gt; <a href="#initialdurationinfo">InitialDurationInfo</a>)<br>        | null,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function debounce&lt;T&gt;(<br>    getDurationSource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    getInitialDurationRange?:<br>        | ((firstDebouncedValue: T, index: number) =&gt; <a href="#initialdurationinfo">InitialDurationInfo</a>)<br>        | null,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
-<pre>function debounce&lt;T&gt;(<br>    getDurationSource: undefined | null,<br>    getInitialDurationRange: (<br>        firstDebouncedValue: T,<br>        index: number,<br>    ) =&gt; <a href="#initialdurationinfo">InitialDurationInfo</a>,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function debounce&lt;T&gt;(<br>    getDurationSource: undefined | null,<br>    getInitialDurationRange: (<br>        firstDebouncedValue: T,<br>        index: number,<br>    ) =&gt; <a href="#initialdurationinfo">InitialDurationInfo</a>,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>DebounceConfig</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3320](..\/..\/..\/packages\/core\/src\/source.ts#L3320)
+> Source Location: [packages\/core\/src\/source.ts#L3317](..\/..\/..\/packages\/core\/src\/source.ts#L3317)
 
 <b>Signature</b>
 
@@ -224,7 +224,7 @@ interface DebounceConfig
 
 ## <code>defaultDebounceConfig</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3329](..\/..\/..\/packages\/core\/src\/source.ts#L3329)
+> Source Location: [packages\/core\/src\/source.ts#L3326](..\/..\/..\/packages\/core\/src\/source.ts#L3326)
 
 <b>Signature</b>
 
@@ -232,27 +232,27 @@ interface DebounceConfig
 
 ## <code>InitialDurationInfo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3338](..\/..\/..\/packages\/core\/src\/source.ts#L3338)
+> Source Location: [packages\/core\/src\/source.ts#L3335](..\/..\/..\/packages\/core\/src\/source.ts#L3335)
 
 <b>Signature</b>
 
-<pre>type InitialDurationInfo =<br>    | [<a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, (<a href="basics.md#source-interface">Source</a>&lt;unknown&gt; | undefined | null)?]<br>    | [undefined | null, <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;];</pre>
+<pre>type InitialDurationInfo =<br>    | [<a href="basics.md#source-interface">Source</a>&lt;unknown&gt;, (<a href="basics.md#source-interface">Source</a>&lt;unknown&gt; | undefined | null)?]<br>    | [undefined | null, <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;]</pre>
 
 ## <code>DebounceTrailingRestart</code>
 
 ### <a name="debouncetrailingrestart-typealias"></a><code>DebounceTrailingRestart - Type</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3311](..\/..\/..\/packages\/core\/src\/source.ts#L3311)
+> Source Location: [packages\/core\/src\/source.ts#L3308](..\/..\/..\/packages\/core\/src\/source.ts#L3308)
 
 <b>Signature</b>
 
 ```ts
-type DebounceTrailingRestart = 'restart';
+type DebounceTrailingRestart = 'restart'
 ```
 
 ### <a name="debouncetrailingrestart-variable"></a><code>DebounceTrailingRestart - Variable</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3315](..\/..\/..\/packages\/core\/src\/source.ts#L3315)
+> Source Location: [packages\/core\/src\/source.ts#L3312](..\/..\/..\/packages\/core\/src\/source.ts#L3312)
 
 <b>Signature</b>
 
@@ -260,89 +260,89 @@ type DebounceTrailingRestart = 'restart';
 
 ## <code>debounceMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3553](..\/..\/..\/packages\/core\/src\/source.ts#L3553)
+> Source Location: [packages\/core\/src\/source.ts#L3550](..\/..\/..\/packages\/core\/src\/source.ts#L3550)
 
 <b>Signature</b>
 
-<pre>function debounceMs(<br>    durationMs: number,<br>    maxDurationMs?: number | null,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function debounceMs(<br>    durationMs: number,<br>    maxDurationMs?: number | null,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
-<pre>function debounceMs(<br>    durationMs: null | undefined,<br>    maxDurationMs: number,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function debounceMs(<br>    durationMs: null | undefined,<br>    maxDurationMs: number,<br>    config?: <a href="#debounceconfig">DebounceConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>defaultIfEmpty</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2333](..\/..\/..\/packages\/core\/src\/source.ts#L2333)
+> Source Location: [packages\/core\/src\/source.ts#L2332](..\/..\/..\/packages\/core\/src\/source.ts#L2332)
 
 <b>Signature</b>
 
-<pre>function defaultIfEmpty&lt;T&gt;(<br>    getDefaultValue: () =&gt; T,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function defaultIfEmpty&lt;T&gt;(<br>    getDefaultValue: () =&gt; T,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>defaultIfEmptyTo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2364](..\/..\/..\/packages\/core\/src\/source.ts#L2364)
+> Source Location: [packages\/core\/src\/source.ts#L2363](..\/..\/..\/packages\/core\/src\/source.ts#L2363)
 
 <b>Signature</b>
 
-<pre>function defaultIfEmptyTo&lt;T&gt;(<br>    value: T,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function defaultIfEmptyTo&lt;T&gt;(value: T): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>delay</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3661](..\/..\/..\/packages\/core\/src\/source.ts#L3661)
+> Source Location: [packages\/core\/src\/source.ts#L3658](..\/..\/..\/packages\/core\/src\/source.ts#L3658)
 
 <b>Signature</b>
 
-<pre>function delay&lt;T&gt;(<br>    getDelaySource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function delay&lt;T&gt;(<br>    getDelaySource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
-<pre>function delay(<br>    getDelaySource: &lt;T&gt;(value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function delay(<br>    getDelaySource: &lt;T&gt;(value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>delayMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3717](..\/..\/..\/packages\/core\/src\/source.ts#L3717)
+> Source Location: [packages\/core\/src\/source.ts#L3714](..\/..\/..\/packages\/core\/src\/source.ts#L3714)
 
 <b>Signature</b>
 
-<pre>function delayMs(ms: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function delayMs(ms: number): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>distinct</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2389](..\/..\/..\/packages\/core\/src\/source.ts#L2389)
+> Source Location: [packages\/core\/src\/source.ts#L2388](..\/..\/..\/packages\/core\/src\/source.ts#L2388)
 
 <b>Signature</b>
 
-<pre>function distinct(): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function distinct(): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
-<pre>function distinct&lt;T, K&gt;(<br>    getKey: (value: T, index: number) =&gt; K,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function distinct&lt;T, K&gt;(getKey: (value: T, index: number) =&gt; K): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>distinctFromLast</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2462](..\/..\/..\/packages\/core\/src\/source.ts#L2462)
+> Source Location: [packages\/core\/src\/source.ts#L2461](..\/..\/..\/packages\/core\/src\/source.ts#L2461)
 
 <b>Signature</b>
 
-<pre>function distinctFromLast(): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function distinctFromLast(): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
-<pre>function distinctFromLast&lt;T&gt;(<br>    isDifferent: (keyA: T, keyB: T, currentIndex: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function distinctFromLast&lt;T&gt;(<br>    isDifferent: (keyA: T, keyB: T, currentIndex: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
-<pre>function distinctFromLast&lt;T, K&gt;(<br>    isDifferent:<br>        | ((keyA: K, keyB: K, currentIndex: number) =&gt; unknown)<br>        | undefined,<br>    getKey: (value: T) =&gt; K,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function distinctFromLast&lt;T, K&gt;(<br>    isDifferent:<br>        | ((keyA: K, keyB: K, currentIndex: number) =&gt; unknown)<br>        | undefined,<br>    getKey: (value: T) =&gt; K,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>endWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2179](..\/..\/..\/packages\/core\/src\/source.ts#L2179)
+> Source Location: [packages\/core\/src\/source.ts#L2178](..\/..\/..\/packages\/core\/src\/source.ts#L2178)
 
 <b>Signature</b>
 
-<pre>function endWith&lt;T&gt;(<br>    ...values: T[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function endWith&lt;T&gt;(...values: T[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>every</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1688](..\/..\/..\/packages\/core\/src\/source.ts#L1688)
+> Source Location: [packages\/core\/src\/source.ts#L1687](..\/..\/..\/packages\/core\/src\/source.ts#L1687)
 
 <b>Signature</b>
 
-<pre>function every&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
+<pre>function every&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;</pre>
 
 ## <code>expandMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2003](..\/..\/..\/packages\/core\/src\/source.ts#L2003)
+> Source Location: [packages\/core\/src\/source.ts#L2002](..\/..\/..\/packages\/core\/src\/source.ts#L2002)
 
 <b>Signature</b>
 
@@ -350,11 +350,11 @@ type DebounceTrailingRestart = 'restart';
 
 ## <code>filter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1585](..\/..\/..\/packages\/core\/src\/source.ts#L1585)
+> Source Location: [packages\/core\/src\/source.ts#L1571](..\/..\/..\/packages\/core\/src\/source.ts#L1571)
 
 <b>Signature</b>
 
-<pre>function filter&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; false,<br>): <a href="basics.md#operator">Operator</a>&lt;T, never&gt;;</pre>
+<pre>function filter&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; false,<br>): <a href="basics.md#operator">Operator</a>&lt;T, never&gt;</pre>
 
 Calls the predicate function for each Push event of the given source, only passing through events whose value meet the condition specified by the predicate function.
 
@@ -362,53 +362,53 @@ Calls the predicate function for each Push event of the given source, only passi
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| predicate | <pre lang="ts">(value: T, index: number) =&gt; false;</pre> | A function that accepts a value and an index. The filter method calls this function one time for each Push event of the given source. If and only if the function returns a truthy value, then the event will pass through. |
+| predicate | <pre lang="ts">(value: T, index: number) =&gt; false</pre> | A function that accepts a value and an index. The filter method calls this function one time for each Push event of the given source. If and only if the function returns a truthy value, then the event will pass through. |
 
 <b>Signature</b>
 
-<pre>function filter&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;;</pre>
+<pre>function filter&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;</pre>
 
-<pre>function filter&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function filter&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>finalize</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1709](..\/..\/..\/packages\/core\/src\/source.ts#L1709)
+> Source Location: [packages\/core\/src\/source.ts#L1708](..\/..\/..\/packages\/core\/src\/source.ts#L1708)
 
 <b>Signature</b>
 
-<pre>function finalize(callback: () =&gt; void): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function finalize(callback: () =&gt; void): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>find</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1660](..\/..\/..\/packages\/core\/src\/source.ts#L1660)
+> Source Location: [packages\/core\/src\/source.ts#L1659](..\/..\/..\/packages\/core\/src\/source.ts#L1659)
 
 <b>Signature</b>
 
-<pre>function find&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;;</pre>
+<pre>function find&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;</pre>
 
-<pre>function find&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function find&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>findIndex</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1669](..\/..\/..\/packages\/core\/src\/source.ts#L1669)
+> Source Location: [packages\/core\/src\/source.ts#L1668](..\/..\/..\/packages\/core\/src\/source.ts#L1668)
 
 <b>Signature</b>
 
-<pre>function findIndex&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, number&gt;;</pre>
+<pre>function findIndex&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, number&gt;</pre>
 
 ## <code>findWithIndex</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1630](..\/..\/..\/packages\/core\/src\/source.ts#L1630)
+> Source Location: [packages\/core\/src\/source.ts#L1623](..\/..\/..\/packages\/core\/src\/source.ts#L1623)
 
 <b>Signature</b>
 
-<pre>function findWithIndex&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, WithIndex&lt;S&gt;&gt;;</pre>
+<pre>function findWithIndex&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;<br>    T,<br>    {<br>        value: S<br>        index: number<br>    }<br>&gt;</pre>
 
-<pre>function findWithIndex&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, WithIndex&lt;T&gt;&gt;;</pre>
+<pre>function findWithIndex&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;<br>    T,<br>    {<br>        value: T<br>        index: number<br>    }<br>&gt;</pre>
 
 ## <code>first</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2675](..\/..\/..\/packages\/core\/src\/source.ts#L2675)
+> Source Location: [packages\/core\/src\/source.ts#L2672](..\/..\/..\/packages\/core\/src\/source.ts#L2672)
 
 <b>Signature</b>
 
@@ -416,67 +416,63 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>flat</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1889](..\/..\/..\/packages\/core\/src\/source.ts#L1889)
+> Source Location: [packages\/core\/src\/source.ts#L1888](..\/..\/..\/packages\/core\/src\/source.ts#L1888)
 
 <b>Signature</b>
 
-<pre>function flat&lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function flat&lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;): <a href="basics.md#source-interface">Source</a>&lt;T&gt;</pre>
 
 ## <code>flatMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2125](..\/..\/..\/packages\/core\/src\/source.ts#L2125)
+> Source Location: [packages\/core\/src\/source.ts#L2124](..\/..\/..\/packages\/core\/src\/source.ts#L2124)
 
 <b>Signature</b>
 
-<pre>function flatMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function flatMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
 
 ## <code>flatWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2078](..\/..\/..\/packages\/core\/src\/source.ts#L2078)
+> Source Location: [packages\/core\/src\/source.ts#L2077](..\/..\/..\/packages\/core\/src\/source.ts#L2077)
 
 <b>Signature</b>
 
-<pre>function flatWith&lt;T&gt;(<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function flatWith&lt;T&gt;(<br>    sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[],<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>groupBy</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2499](..\/..\/..\/packages\/core\/src\/source.ts#L2499)
+> Source Location: [packages\/core\/src\/source.ts#L2498](..\/..\/..\/packages\/core\/src\/source.ts#L2498)
 
 <b>Signature</b>
 
-<pre>function groupBy&lt;T, K&gt;(<br>    getKey: (value: T, index: number) =&gt; K,<br>    Subject_?: typeof <a href="basics.md#subject-function">Subject</a>,<br>    removeGroupWhenNoSubscribers?: boolean,<br>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#groupsource">GroupSource</a>&lt;T, K&gt;&gt;;</pre>
+<pre>function groupBy&lt;T, K&gt;(<br>    getKey: (value: T, index: number) =&gt; K,<br>    Subject_?: typeof <a href="basics.md#subject-function">Subject</a>,<br>    removeGroupWhenNoSubscribers?: boolean,<br>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#groupsource">GroupSource</a>&lt;T, K&gt;&gt;</pre>
 
 ## <code>GroupSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2588](..\/..\/..\/packages\/core\/src\/source.ts#L2588)
+> Source Location: [packages\/core\/src\/source.ts#L2585](..\/..\/..\/packages\/core\/src\/source.ts#L2585)
 
 <b>Signature</b>
 
-<pre>type GroupSource&lt;T, K&gt; =<br>    | <a href="#activegroupsource">ActiveGroupSource</a>&lt;T, K&gt;<br>    | <a href="#removedgroupsource">RemovedGroupSource</a>&lt;T&gt;;</pre>
+<pre>type GroupSource&lt;T, K&gt; = <a href="#activegroupsource">ActiveGroupSource</a>&lt;T, K&gt; | <a href="#removedgroupsource">RemovedGroupSource</a>&lt;T&gt;</pre>
 
 ## <code>ActiveGroupSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2572](..\/..\/..\/packages\/core\/src\/source.ts#L2572)
+> Source Location: [packages\/core\/src\/source.ts#L2567](..\/..\/..\/packages\/core\/src\/source.ts#L2567)
 
 <b>Signature</b>
 
-```ts
-interface ActiveGroupSource<T, K> extends GroupSourceBase<T> 
-```
+<pre>interface ActiveGroupSource&lt;T, K&gt; extends <a href="basics.md#source-interface">Source</a>&lt;T&gt; </pre>
 
 ## <code>RemovedGroupSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2580](..\/..\/..\/packages\/core\/src\/source.ts#L2580)
+> Source Location: [packages\/core\/src\/source.ts#L2576](..\/..\/..\/packages\/core\/src\/source.ts#L2576)
 
 <b>Signature</b>
 
-```ts
-interface RemovedGroupSource<T> extends GroupSourceBase<T> 
-```
+<pre>interface RemovedGroupSource&lt;T&gt; extends <a href="basics.md#source-interface">Source</a>&lt;T&gt; </pre>
 
 ## <code>ignorePushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1721](..\/..\/..\/packages\/core\/src\/source.ts#L1721)
+> Source Location: [packages\/core\/src\/source.ts#L1720](..\/..\/..\/packages\/core\/src\/source.ts#L1720)
 
 <b>Signature</b>
 
@@ -484,23 +480,23 @@ interface RemovedGroupSource<T> extends GroupSourceBase<T>
 
 ## <code>isEmpty</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2314](..\/..\/..\/packages\/core\/src\/source.ts#L2314)
+> Source Location: [packages\/core\/src\/source.ts#L2313](..\/..\/..\/packages\/core\/src\/source.ts#L2313)
 
 <b>Signature</b>
 
-<pre>function isEmpty(source: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#source-interface">Source</a>&lt;boolean&gt;;</pre>
+<pre>function isEmpty(source: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#source-interface">Source</a>&lt;boolean&gt;</pre>
 
 ## <code>isEqualTo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1879](..\/..\/..\/packages\/core\/src\/source.ts#L1879)
+> Source Location: [packages\/core\/src\/source.ts#L1878](..\/..\/..\/packages\/core\/src\/source.ts#L1878)
 
 <b>Signature</b>
 
-<pre>function isEqualTo&lt;T, U&gt;(<br>    otherSource: <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>    areValuesEqual: (a: T, b: U, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
+<pre>function isEqualTo&lt;T, U&gt;(<br>    otherSource: <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>    areValuesEqual: (a: T, b: U, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;</pre>
 
 ## <code>last</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2773](..\/..\/..\/packages\/core\/src\/source.ts#L2773)
+> Source Location: [packages\/core\/src\/source.ts#L2770](..\/..\/..\/packages\/core\/src\/source.ts#L2770)
 
 <b>Signature</b>
 
@@ -508,7 +504,7 @@ interface RemovedGroupSource<T> extends GroupSourceBase<T>
 
 ## <code>loop</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2960](..\/..\/..\/packages\/core\/src\/source.ts#L2960)
+> Source Location: [packages\/core\/src\/source.ts#L2957](..\/..\/..\/packages\/core\/src\/source.ts#L2957)
 
 <b>Signature</b>
 
@@ -516,11 +512,11 @@ interface RemovedGroupSource<T> extends GroupSourceBase<T>
 
 ## <code>map</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1440](..\/..\/..\/packages\/core\/src\/source.ts#L1440)
+> Source Location: [packages\/core\/src\/source.ts#L1426](..\/..\/..\/packages\/core\/src\/source.ts#L1426)
 
 <b>Signature</b>
 
-<pre>function map&lt;U&gt;(<br>    transform: &lt;T&gt;(value: T, index: number) =&gt; U,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;;</pre>
+<pre>function map&lt;U&gt;(<br>    transform: &lt;T&gt;(value: T, index: number) =&gt; U,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;</pre>
 
 Calls the given transform function for each Push event of the given source and passes through the result.
 
@@ -528,37 +524,37 @@ Calls the given transform function for each Push event of the given source and p
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <pre lang="ts">&lt;T&gt;(value: T, index: number) =&gt; U;</pre> | A function which accepts a value and an index. The map method calls the transform function one time for each Push event of the given source and passes through the result. |
+| transform | <pre lang="ts">&lt;T&gt;(value: T, index: number) =&gt; U</pre> | A function which accepts a value and an index. The map method calls the transform function one time for each Push event of the given source and passes through the result. |
 
 <b>Signature</b>
 
-<pre>function map&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; U,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function map&lt;T, U&gt;(transform: (value: T, index: number) =&gt; U): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
 
 ## <code>mapEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1481](..\/..\/..\/packages\/core\/src\/source.ts#L1481)
+> Source Location: [packages\/core\/src\/source.ts#L1467](..\/..\/..\/packages\/core\/src\/source.ts#L1467)
 
 <b>Signature</b>
 
-<pre>function mapEvents&lt;T, U&gt;(<br>    transform: (event: Event&lt;T&gt;, index: number) =&gt; Event&lt;U&gt; | undefined | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function mapEvents&lt;T, U&gt;(<br>    transform: (event: <a href="basics.md#event">Event</a>&lt;T&gt;, index: number) =&gt; <a href="basics.md#event">Event</a>&lt;U&gt; | undefined | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
 
 ## <code>mapPushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1524](..\/..\/..\/packages\/core\/src\/source.ts#L1524)
+> Source Location: [packages\/core\/src\/source.ts#L1510](..\/..\/..\/packages\/core\/src\/source.ts#L1510)
 
 <b>Signature</b>
 
-<pre>function mapPushEvents&lt;T&gt;(<br>    transform: (pushEvents: <a href="basics.md#push-interface">Push</a>&lt;T&gt;, index: number) =&gt; <a href="basics.md#throw-interface">Throw</a> | <a href="basics.md#end-interface">End</a>,<br>): <a href="basics.md#operator">Operator</a>&lt;T, never&gt;;</pre>
+<pre>function mapPushEvents&lt;T&gt;(<br>    transform: (pushEvents: <a href="basics.md#push-interface">Push</a>&lt;T&gt;, index: number) =&gt; <a href="basics.md#throw-interface">Throw</a> | <a href="basics.md#end-interface">End</a>,<br>): <a href="basics.md#operator">Operator</a>&lt;T, never&gt;</pre>
 
-<pre>function mapPushEvents&lt;T, U&gt;(<br>    transform: (<br>        pushEvent: <a href="basics.md#push-interface">Push</a>&lt;T&gt;,<br>        index: number,<br>    ) =&gt; Event&lt;U&gt; | undefined | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function mapPushEvents&lt;T, U&gt;(<br>    transform: (<br>        pushEvent: <a href="basics.md#push-interface">Push</a>&lt;T&gt;,<br>        index: number,<br>    ) =&gt; <a href="basics.md#event">Event</a>&lt;U&gt; | undefined | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
 
 ## <code>mapTo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1474](..\/..\/..\/packages\/core\/src\/source.ts#L1474)
+> Source Location: [packages\/core\/src\/source.ts#L1460](..\/..\/..\/packages\/core\/src\/source.ts#L1460)
 
 <b>Signature</b>
 
-<pre>function mapTo&lt;U&gt;(value: U): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;;</pre>
+<pre>function mapTo&lt;U&gt;(value: U): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;</pre>
 
 Replaces the value of each received Push event with the given value.
 
@@ -566,11 +562,11 @@ Replaces the value of each received Push event with the given value.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| value | <pre lang="ts">U;</pre> | The value to push. |
+| value | <pre lang="ts">U</pre> | The value to push. |
 
 ## <code>max</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1854](..\/..\/..\/packages\/core\/src\/source.ts#L1854)
+> Source Location: [packages\/core\/src\/source.ts#L1853](..\/..\/..\/packages\/core\/src\/source.ts#L1853)
 
 <b>Signature</b>
 
@@ -578,15 +574,15 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>maxCompare</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1830](..\/..\/..\/packages\/core\/src\/source.ts#L1830)
+> Source Location: [packages\/core\/src\/source.ts#L1829](..\/..\/..\/packages\/core\/src\/source.ts#L1829)
 
 <b>Signature</b>
 
-<pre>function maxCompare&lt;T&gt;(<br>    compare: (<br>        currentValue: T,<br>        lastValue: T,<br>        currentValueIndex: number,<br>    ) =&gt; number,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function maxCompare&lt;T&gt;(<br>    compare: (<br>        currentValue: T,<br>        lastValue: T,<br>        currentValueIndex: number,<br>    ) =&gt; number,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>merge</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2017](..\/..\/..\/packages\/core\/src\/source.ts#L2017)
+> Source Location: [packages\/core\/src\/source.ts#L2016](..\/..\/..\/packages\/core\/src\/source.ts#L2016)
 
 <b>Signature</b>
 
@@ -594,15 +590,15 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>mergeConcurrent</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2008](..\/..\/..\/packages\/core\/src\/source.ts#L2008)
+> Source Location: [packages\/core\/src\/source.ts#L2007](..\/..\/..\/packages\/core\/src\/source.ts#L2007)
 
 <b>Signature</b>
 
-<pre>function mergeConcurrent(<br>    maxConcurrent: number,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;;</pre>
+<pre>function mergeConcurrent(<br>    maxConcurrent: number,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;</pre>
 
 ## <code>mergeMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1998](..\/..\/..\/packages\/core\/src\/source.ts#L1998)
+> Source Location: [packages\/core\/src\/source.ts#L1997](..\/..\/..\/packages\/core\/src\/source.ts#L1997)
 
 <b>Signature</b>
 
@@ -610,23 +606,23 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>mergeWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2098](..\/..\/..\/packages\/core\/src\/source.ts#L2098)
+> Source Location: [packages\/core\/src\/source.ts#L2097](..\/..\/..\/packages\/core\/src\/source.ts#L2097)
 
 <b>Signature</b>
 
-<pre>function mergeWith&lt;T&gt;(<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function mergeWith&lt;T&gt;(<br>    sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[],<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>mergeWithConcurrent</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2087](..\/..\/..\/packages\/core\/src\/source.ts#L2087)
+> Source Location: [packages\/core\/src\/source.ts#L2086](..\/..\/..\/packages\/core\/src\/source.ts#L2086)
 
 <b>Signature</b>
 
-<pre>function mergeWithConcurrent&lt;T&gt;(<br>    max: number,<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function mergeWithConcurrent&lt;T&gt;(<br>    max: number,<br>    sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[],<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>min</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1874](..\/..\/..\/packages\/core\/src\/source.ts#L1874)
+> Source Location: [packages\/core\/src\/source.ts#L1873](..\/..\/..\/packages\/core\/src\/source.ts#L1873)
 
 <b>Signature</b>
 
@@ -634,35 +630,35 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>minCompare</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1859](..\/..\/..\/packages\/core\/src\/source.ts#L1859)
+> Source Location: [packages\/core\/src\/source.ts#L1858](..\/..\/..\/packages\/core\/src\/source.ts#L1858)
 
 <b>Signature</b>
 
-<pre>function minCompare&lt;T&gt;(<br>    compare: (<br>        currentValue: T,<br>        lastValue: T,<br>        currentValueIndex: number,<br>    ) =&gt; number,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function minCompare&lt;T&gt;(<br>    compare: (<br>        currentValue: T,<br>        lastValue: T,<br>        currentValueIndex: number,<br>    ) =&gt; number,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>pluck</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1554](..\/..\/..\/packages\/core\/src\/source.ts#L1554)
+> Source Location: [packages\/core\/src\/source.ts#L1540](..\/..\/..\/packages\/core\/src\/source.ts#L1540)
 
 <b>Signature</b>
 
-<pre>function pluck&lt;T, K extends keyof T&gt;(key: K): <a href="basics.md#operator">Operator</a>&lt;T, T[K]&gt;;</pre>
+<pre>function pluck&lt;T, K extends keyof T&gt;(key: K): <a href="basics.md#operator">Operator</a>&lt;T, T[K]&gt;</pre>
 
 ## <code>raceWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1330](..\/..\/..\/packages\/core\/src\/source.ts#L1330)
+> Source Location: [packages\/core\/src\/source.ts#L1319](..\/..\/..\/packages\/core\/src\/source.ts#L1319)
 
 <b>Signature</b>
 
-<pre>function raceWith&lt;T&gt;(<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function raceWith&lt;T&gt;(<br>    sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[],<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>reduce</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1812](..\/..\/..\/packages\/core\/src\/source.ts#L1812)
+> Source Location: [packages\/core\/src\/source.ts#L1811](..\/..\/..\/packages\/core\/src\/source.ts#L1811)
 
 <b>Signature</b>
 
-<pre>function reduce&lt;T, R, I&gt;(<br>    transform: (<br>        previousAccumulatedResult: R | I,<br>        currentValue: T,<br>        currentIndex: number,<br>    ) =&gt; R,<br>    initialValue: I,<br>): <a href="basics.md#operator">Operator</a>&lt;T, R&gt;;</pre>
+<pre>function reduce&lt;T, R, I&gt;(<br>    transform: (<br>        previousAccumulatedResult: R | I,<br>        currentValue: T,<br>        currentIndex: number,<br>    ) =&gt; R,<br>    initialValue: I,<br>): <a href="basics.md#operator">Operator</a>&lt;T, R&gt;</pre>
 
 Calls the specified transform function for all the values pushed by the given source. The return value of the transform function is the accumulated result, and is provided as an argument in the next call to the transform function. The accumulated result will be emitted as a Push event once the given source ends.
 
@@ -670,12 +666,12 @@ Calls the specified transform function for all the values pushed by the given so
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <pre>(<br>    previousAccumulatedResult: R &#124; I,<br>    currentValue: T,<br>    currentIndex: number,<br>) =&gt; R;</pre> | A function that transforms the previousAccumulatedResult \(last value returned by this function\), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result. |
-| initialValue | <pre lang="ts">I;</pre> | This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult. |
+| transform | <pre>(<br>    previousAccumulatedResult: R &#124; I,<br>    currentValue: T,<br>    currentIndex: number,<br>) =&gt; R</pre> | A function that transforms the previousAccumulatedResult \(last value returned by this function\), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result. |
+| initialValue | <pre lang="ts">I</pre> | This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult. |
 
 ## <code>repeat</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2950](..\/..\/..\/packages\/core\/src\/source.ts#L2950)
+> Source Location: [packages\/core\/src\/source.ts#L2947](..\/..\/..\/packages\/core\/src\/source.ts#L2947)
 
 <b>Signature</b>
 
@@ -683,15 +679,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>repeatWhen</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2970](..\/..\/..\/packages\/core\/src\/source.ts#L2970)
+> Source Location: [packages\/core\/src\/source.ts#L2967](..\/..\/..\/packages\/core\/src\/source.ts#L2967)
 
 <b>Signature</b>
 
-<pre>function repeatWhen&lt;T&gt;(<br>    getRepeatSource: (sourceEvents: <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function repeatWhen&lt;T&gt;(<br>    getRepeatSource: (sourceEvents: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#event">Event</a>&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>retry</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2955](..\/..\/..\/packages\/core\/src\/source.ts#L2955)
+> Source Location: [packages\/core\/src\/source.ts#L2952](..\/..\/..\/packages\/core\/src\/source.ts#L2952)
 
 <b>Signature</b>
 
@@ -699,7 +695,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>retryAlways</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2965](..\/..\/..\/packages\/core\/src\/source.ts#L2965)
+> Source Location: [packages\/core\/src\/source.ts#L2962](..\/..\/..\/packages\/core\/src\/source.ts#L2962)
 
 <b>Signature</b>
 
@@ -707,27 +703,27 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>sample</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3725](..\/..\/..\/packages\/core\/src\/source.ts#L3725)
+> Source Location: [packages\/core\/src\/source.ts#L3722](..\/..\/..\/packages\/core\/src\/source.ts#L3722)
 
 <b>Signature</b>
 
-<pre>function sample(<br>    scheduleSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function sample(scheduleSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>sampleMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3758](..\/..\/..\/packages\/core\/src\/source.ts#L3758)
+> Source Location: [packages\/core\/src\/source.ts#L3755](..\/..\/..\/packages\/core\/src\/source.ts#L3755)
 
 <b>Signature</b>
 
-<pre>function sampleMs(ms: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function sampleMs(ms: number): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>scan</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1758](..\/..\/..\/packages\/core\/src\/source.ts#L1758)
+> Source Location: [packages\/core\/src\/source.ts#L1757](..\/..\/..\/packages\/core\/src\/source.ts#L1757)
 
 <b>Signature</b>
 
-<pre>function scan&lt;T, R, I&gt;(<br>    transform: (<br>        previousAccumulatedResult: R | I,<br>        currentValue: T,<br>        currentIndex: number,<br>    ) =&gt; R,<br>    initialValue: I,<br>): <a href="basics.md#operator">Operator</a>&lt;T, R&gt;;</pre>
+<pre>function scan&lt;T, R, I&gt;(<br>    transform: (<br>        previousAccumulatedResult: R | I,<br>        currentValue: T,<br>        currentIndex: number,<br>    ) =&gt; R,<br>    initialValue: I,<br>): <a href="basics.md#operator">Operator</a>&lt;T, R&gt;</pre>
 
 Calls the specified transform function for all the values pushed by the given source. The return value of the transform function is the accumulated result, and is provided as an argument in the next call to the transform function. The accumulated will be emitted after each Push event.
 
@@ -735,48 +731,48 @@ Calls the specified transform function for all the values pushed by the given so
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| transform | <pre>(<br>    previousAccumulatedResult: R &#124; I,<br>    currentValue: T,<br>    currentIndex: number,<br>) =&gt; R;</pre> | A function that transforms the previousAccumulatedResult \(last value returned by this function\), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result. |
-| initialValue | <pre lang="ts">I;</pre> | This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult. |
+| transform | <pre>(<br>    previousAccumulatedResult: R &#124; I,<br>    currentValue: T,<br>    currentIndex: number,<br>) =&gt; R</pre> | A function that transforms the previousAccumulatedResult \(last value returned by this function\), the currentValue of the emitted Push event and the currentIndex, and returns an accumulated result. |
+| initialValue | <pre lang="ts">I</pre> | This is used as the initial value to start the accumulation. The first call to the transform function provides this as the previousAccumulatedResult. |
 
 ## <code>schedulePushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3828](..\/..\/..\/packages\/core\/src\/source.ts#L3828)
+> Source Location: [packages\/core\/src\/source.ts#L3825](..\/..\/..\/packages\/core\/src\/source.ts#L3825)
 
 <b>Signature</b>
 
-<pre>function schedulePushEvents(<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function schedulePushEvents(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>scheduleSubscription</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3838](..\/..\/..\/packages\/core\/src\/source.ts#L3838)
+> Source Location: [packages\/core\/src\/source.ts#L3835](..\/..\/..\/packages\/core\/src\/source.ts#L3835)
 
 <b>Signature</b>
 
-<pre>function scheduleSubscription(<br>    schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function scheduleSubscription(schedule: <a href="basics.md#schedulefunction">ScheduleFunction</a>): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>share</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3898](..\/..\/..\/packages\/core\/src\/source.ts#L3898)
+> Source Location: [packages\/core\/src\/source.ts#L3895](..\/..\/..\/packages\/core\/src\/source.ts#L3895)
 
 <b>Signature</b>
 
-<pre>function share&lt;T&gt;(Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function share&lt;T&gt;(Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
-<pre>function share(Subject_?: typeof <a href="basics.md#subject-function">Subject</a>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function share(Subject_?: typeof <a href="basics.md#subject-function">Subject</a>): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>shareControlled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3864](..\/..\/..\/packages\/core\/src\/source.ts#L3864)
+> Source Location: [packages\/core\/src\/source.ts#L3861](..\/..\/..\/packages\/core\/src\/source.ts#L3861)
 
 <b>Signature</b>
 
-<pre>function shareControlled&lt;T&gt;(<br>    Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;,<br>): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="#controllablesource">ControllableSource</a>&lt;T&gt;;</pre>
+<pre>function shareControlled&lt;T&gt;(<br>    Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;,<br>): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="#controllablesource">ControllableSource</a>&lt;T&gt;</pre>
 
-<pre>function shareControlled(<br>    Subject_?: typeof <a href="basics.md#subject-function">Subject</a>,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="#controllablesource">ControllableSource</a>&lt;T&gt;;</pre>
+<pre>function shareControlled(<br>    Subject_?: typeof <a href="basics.md#subject-function">Subject</a>,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="#controllablesource">ControllableSource</a>&lt;T&gt;</pre>
 
 ## <code>ControllableSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3848](..\/..\/..\/packages\/core\/src\/source.ts#L3848)
+> Source Location: [packages\/core\/src\/source.ts#L3845](..\/..\/..\/packages\/core\/src\/source.ts#L3845)
 
 <b>Signature</b>
 
@@ -784,93 +780,93 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>shareOnce</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3937](..\/..\/..\/packages\/core\/src\/source.ts#L3937)
+> Source Location: [packages\/core\/src\/source.ts#L3934](..\/..\/..\/packages\/core\/src\/source.ts#L3934)
 
 <b>Signature</b>
 
-<pre>function shareOnce&lt;T&gt;(<br>    Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function shareOnce&lt;T&gt;(Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
-<pre>function shareOnce(Subject_?: typeof <a href="basics.md#subject-function">Subject</a>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function shareOnce(Subject_?: typeof <a href="basics.md#subject-function">Subject</a>): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>sharePersist</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3955](..\/..\/..\/packages\/core\/src\/source.ts#L3955)
+> Source Location: [packages\/core\/src\/source.ts#L3952](..\/..\/..\/packages\/core\/src\/source.ts#L3952)
 
 <b>Signature</b>
 
-<pre>function sharePersist&lt;T&gt;(<br>    Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function sharePersist&lt;T&gt;(Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
-<pre>function sharePersist(<br>    Subject_?: typeof <a href="basics.md#subject-function">Subject</a>,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function sharePersist(Subject_?: typeof <a href="basics.md#subject-function">Subject</a>): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>shareTransform</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3988](..\/..\/..\/packages\/core\/src\/source.ts#L3988)
+> Source Location: [packages\/core\/src\/source.ts#L3985](..\/..\/..\/packages\/core\/src\/source.ts#L3985)
 
 <b>Signature</b>
 
-<pre>function shareTransform&lt;T, U&gt;(<br>    Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;,<br>    transform: (shared: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function shareTransform&lt;T, U&gt;(<br>    Subject_: () =&gt; <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;,<br>    transform: (shared: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
 
-<pre>function shareTransform&lt;U&gt;(<br>    Subject_: typeof <a href="basics.md#subject-function">Subject</a>,<br>    transform: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): &lt;T&gt;(shared: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;;</pre>
+<pre>function shareTransform&lt;U&gt;(<br>    Subject_: typeof <a href="basics.md#subject-function">Subject</a>,<br>    transform: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): &lt;T&gt;(shared: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;</pre>
 
 ## <code>skip</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2802](..\/..\/..\/packages\/core\/src\/source.ts#L2802)
+> Source Location: [packages\/core\/src\/source.ts#L2799](..\/..\/..\/packages\/core\/src\/source.ts#L2799)
 
 <b>Signature</b>
 
-<pre>function skip(amount: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function skip(amount: number): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>skipLast</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2854](..\/..\/..\/packages\/core\/src\/source.ts#L2854)
+> Source Location: [packages\/core\/src\/source.ts#L2851](..\/..\/..\/packages\/core\/src\/source.ts#L2851)
 
 <b>Signature</b>
 
-<pre>function skipLast(amount: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function skipLast(amount: number): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>skipUntil</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2887](..\/..\/..\/packages\/core\/src\/source.ts#L2887)
+> Source Location: [packages\/core\/src\/source.ts#L2884](..\/..\/..\/packages\/core\/src\/source.ts#L2884)
 
 <b>Signature</b>
 
-<pre>function skipUntil(<br>    stopSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function skipUntil(stopSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>skipWhile</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2822](..\/..\/..\/packages\/core\/src\/source.ts#L2822)
+> Source Location: [packages\/core\/src\/source.ts#L2819](..\/..\/..\/packages\/core\/src\/source.ts#L2819)
 
 <b>Signature</b>
 
-<pre>function skipWhile&lt;T&gt;(<br>    shouldContinueSkipping: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function skipWhile&lt;T&gt;(<br>    shouldContinueSkipping: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>some</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1700](..\/..\/..\/packages\/core\/src\/source.ts#L1700)
+> Source Location: [packages\/core\/src\/source.ts#L1699](..\/..\/..\/packages\/core\/src\/source.ts#L1699)
 
 <b>Signature</b>
 
-<pre>function some&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;;</pre>
+<pre>function some&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, boolean&gt;</pre>
 
 ## <code>spyAfter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2294](..\/..\/..\/packages\/core\/src\/source.ts#L2294)
+> Source Location: [packages\/core\/src\/source.ts#L2293](..\/..\/..\/packages\/core\/src\/source.ts#L2293)
 
 <b>Signature</b>
 
-<pre>var spyAfter: &lt;T&gt;(<br>    onEvent: (event: Event&lt;T&gt;) =&gt; void,<br>) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
+<pre>var spyAfter: &lt;T&gt;(onEvent: (event: <a href="basics.md#event">Event</a>&lt;T&gt;) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>spyBefore</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2274](..\/..\/..\/packages\/core\/src\/source.ts#L2274)
+> Source Location: [packages\/core\/src\/source.ts#L2273](..\/..\/..\/packages\/core\/src\/source.ts#L2273)
 
 <b>Signature</b>
 
-<pre>var spyBefore: &lt;T&gt;(<br>    onEvent: (event: Event&lt;T&gt;) =&gt; void,<br>) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
+<pre>var spyBefore: &lt;T&gt;(onEvent: (event: <a href="basics.md#event">Event</a>&lt;T&gt;) =&gt; void) =&gt; <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>spyEndAfter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2309](..\/..\/..\/packages\/core\/src\/source.ts#L2309)
+> Source Location: [packages\/core\/src\/source.ts#L2308](..\/..\/..\/packages\/core\/src\/source.ts#L2308)
 
 <b>Signature</b>
 
@@ -878,7 +874,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyEndBefore</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2289](..\/..\/..\/packages\/core\/src\/source.ts#L2289)
+> Source Location: [packages\/core\/src\/source.ts#L2288](..\/..\/..\/packages\/core\/src\/source.ts#L2288)
 
 <b>Signature</b>
 
@@ -886,7 +882,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyPushAfter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2299](..\/..\/..\/packages\/core\/src\/source.ts#L2299)
+> Source Location: [packages\/core\/src\/source.ts#L2298](..\/..\/..\/packages\/core\/src\/source.ts#L2298)
 
 <b>Signature</b>
 
@@ -894,7 +890,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyPushBefore</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2279](..\/..\/..\/packages\/core\/src\/source.ts#L2279)
+> Source Location: [packages\/core\/src\/source.ts#L2278](..\/..\/..\/packages\/core\/src\/source.ts#L2278)
 
 <b>Signature</b>
 
@@ -902,39 +898,39 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyThrowAfter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2304](..\/..\/..\/packages\/core\/src\/source.ts#L2304)
+> Source Location: [packages\/core\/src\/source.ts#L2303](..\/..\/..\/packages\/core\/src\/source.ts#L2303)
 
 <b>Signature</b>
 
-<pre>var spyThrowAfter: (<br>    onThrow: (error: unknown) =&gt; void,<br>) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
+<pre>var spyThrowAfter: (onThrow: (error: unknown) =&gt; void) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>spyThrowBefore</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2284](..\/..\/..\/packages\/core\/src\/source.ts#L2284)
+> Source Location: [packages\/core\/src\/source.ts#L2283](..\/..\/..\/packages\/core\/src\/source.ts#L2283)
 
 <b>Signature</b>
 
-<pre>var spyThrowBefore: (<br>    onThrow: (error: unknown) =&gt; void,<br>) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
+<pre>var spyThrowBefore: (onThrow: (error: unknown) =&gt; void) =&gt; <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>startWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2166](..\/..\/..\/packages\/core\/src\/source.ts#L2166)
+> Source Location: [packages\/core\/src\/source.ts#L2165](..\/..\/..\/packages\/core\/src\/source.ts#L2165)
 
 <b>Signature</b>
 
-<pre>function startWith&lt;T&gt;(<br>    ...values: T[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function startWith&lt;T&gt;(...values: T[]): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>startWithSources</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2107](..\/..\/..\/packages\/core\/src\/source.ts#L2107)
+> Source Location: [packages\/core\/src\/source.ts#L2106](..\/..\/..\/packages\/core\/src\/source.ts#L2106)
 
 <b>Signature</b>
 
-<pre>function startWithSources&lt;T&gt;(<br>    ...sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[]<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function startWithSources&lt;T&gt;(<br>    sources: <a href="basics.md#source-interface">Source</a>&lt;T&gt;[],<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>switchEach</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2068](..\/..\/..\/packages\/core\/src\/source.ts#L2068)
+> Source Location: [packages\/core\/src\/source.ts#L2067](..\/..\/..\/packages\/core\/src\/source.ts#L2067)
 
 <b>Signature</b>
 
@@ -942,27 +938,27 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>switchMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2148](..\/..\/..\/packages\/core\/src\/source.ts#L2148)
+> Source Location: [packages\/core\/src\/source.ts#L2147](..\/..\/..\/packages\/core\/src\/source.ts#L2147)
 
 <b>Signature</b>
 
-<pre>function switchMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;;</pre>
+<pre>function switchMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;U&gt;,<br>): <a href="basics.md#operator">Operator</a>&lt;T, U&gt;</pre>
 
 ## <code>take</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2645](..\/..\/..\/packages\/core\/src\/source.ts#L2645)
+> Source Location: [packages\/core\/src\/source.ts#L2642](..\/..\/..\/packages\/core\/src\/source.ts#L2642)
 
 <b>Signature</b>
 
-<pre>function take(amount: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function take(amount: number): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>takeLast</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2734](..\/..\/..\/packages\/core\/src\/source.ts#L2734)
+> Source Location: [packages\/core\/src\/source.ts#L2731](..\/..\/..\/packages\/core\/src\/source.ts#L2731)
 
 <b>Signature</b>
 
-<pre>function takeLast(amount: number): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function takeLast(amount: number): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 Ignores all received Push events. When the source emits an End event, the last N=amount received Push event will be emitted along with the End event.
 
@@ -970,23 +966,23 @@ Ignores all received Push events. When the source emits an End event, the last N
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| amount | <pre lang="ts">number;</pre> | The amount of events to keep and distribute at the end. |
+| amount | <pre lang="ts">number</pre> | The amount of events to keep and distribute at the end. |
 
 ## <code>takeUntil</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2786](..\/..\/..\/packages\/core\/src\/source.ts#L2786)
+> Source Location: [packages\/core\/src\/source.ts#L2783](..\/..\/..\/packages\/core\/src\/source.ts#L2783)
 
 <b>Signature</b>
 
-<pre>function takeUntil(<br>    stopSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function takeUntil(stopSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>takeWhile</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2697](..\/..\/..\/packages\/core\/src\/source.ts#L2697)
+> Source Location: [packages\/core\/src\/source.ts#L2694](..\/..\/..\/packages\/core\/src\/source.ts#L2694)
 
 <b>Signature</b>
 
-<pre>function takeWhile&lt;T, S extends T&gt;(<br>    shouldContinue: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;;</pre>
+<pre>function takeWhile&lt;T, S extends T&gt;(<br>    shouldContinue: (value: T, index: number) =&gt; value is S,<br>): <a href="basics.md#operator">Operator</a>&lt;T, S&gt;</pre>
 
 Calls the shouldContinue function for each Push event of the given source. The returned source will emit an End event instead of the received Push event when the given shouldContinue function returns a falsy value.
 
@@ -994,25 +990,25 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| shouldContinue | <pre lang="ts">(value: T, index: number) =&gt; value is S;</pre> | A function that accepts a value and an index. The takeWhile method calls this function one time for each Push event of the given source. |
+| shouldContinue | <pre lang="ts">(value: T, index: number) =&gt; value is S</pre> | A function that accepts a value and an index. The takeWhile method calls this function one time for each Push event of the given source. |
 
 <b>Signature</b>
 
-<pre>function takeWhile&lt;T&gt;(<br>    shouldContinue: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function takeWhile&lt;T&gt;(<br>    shouldContinue: (value: T, index: number) =&gt; unknown,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>throttle</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3608](..\/..\/..\/packages\/core\/src\/source.ts#L3608)
+> Source Location: [packages\/core\/src\/source.ts#L3605](..\/..\/..\/packages\/core\/src\/source.ts#L3605)
 
 <b>Signature</b>
 
-<pre>function throttle(<br>    getDurationSource: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    config?: <a href="#throttleconfig">ThrottleConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function throttle(<br>    getDurationSource: () =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    config?: <a href="#throttleconfig">ThrottleConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
-<pre>function throttle&lt;T&gt;(<br>    getDurationSource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    config?: <a href="#throttleconfig">ThrottleConfig</a> | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;;</pre>
+<pre>function throttle&lt;T&gt;(<br>    getDurationSource: (value: T, index: number) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    config?: <a href="#throttleconfig">ThrottleConfig</a> | null,<br>): <a href="basics.md#operator">Operator</a>&lt;T, T&gt;</pre>
 
 ## <code>ThrottleConfig</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3579](..\/..\/..\/packages\/core\/src\/source.ts#L3579)
+> Source Location: [packages\/core\/src\/source.ts#L3576](..\/..\/..\/packages\/core\/src\/source.ts#L3576)
 
 <b>Signature</b>
 
@@ -1022,7 +1018,7 @@ interface ThrottleConfig
 
 ## <code>defaultThrottleConfig</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3588](..\/..\/..\/packages\/core\/src\/source.ts#L3588)
+> Source Location: [packages\/core\/src\/source.ts#L3585](..\/..\/..\/packages\/core\/src\/source.ts#L3585)
 
 <b>Signature</b>
 
@@ -1030,123 +1026,123 @@ interface ThrottleConfig
 
 ## <code>throttleMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3641](..\/..\/..\/packages\/core\/src\/source.ts#L3641)
+> Source Location: [packages\/core\/src\/source.ts#L3638](..\/..\/..\/packages\/core\/src\/source.ts#L3638)
 
 <b>Signature</b>
 
-<pre>function throttleMs(<br>    durationMs: number,<br>    config?: <a href="#throttleconfig">ThrottleConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function throttleMs(<br>    durationMs: number,<br>    config?: <a href="#throttleconfig">ThrottleConfig</a> | null,<br>): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>throwIfEmpty</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2373](..\/..\/..\/packages\/core\/src\/source.ts#L2373)
+> Source Location: [packages\/core\/src\/source.ts#L2372](..\/..\/..\/packages\/core\/src\/source.ts#L2372)
 
 <b>Signature</b>
 
-<pre>function throwIfEmpty(getError: () =&gt; unknown): <a href="basics.md#identityoperator">IdentityOperator</a>;</pre>
+<pre>function throwIfEmpty(getError: () =&gt; unknown): <a href="basics.md#identityoperator">IdentityOperator</a></pre>
 
 ## <code>timeout</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3035](..\/..\/..\/packages\/core\/src\/source.ts#L3035)
+> Source Location: [packages\/core\/src\/source.ts#L3032](..\/..\/..\/packages\/core\/src\/source.ts#L3032)
 
 <b>Signature</b>
 
-<pre>function timeout&lt;T&gt;(<br>    timeoutSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    replacementSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function timeout&lt;T&gt;(<br>    timeoutSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    replacementSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>timeoutMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3054](..\/..\/..\/packages\/core\/src\/source.ts#L3054)
+> Source Location: [packages\/core\/src\/source.ts#L3051](..\/..\/..\/packages\/core\/src\/source.ts#L3051)
 
 <b>Signature</b>
 
-<pre>function timeoutMs&lt;T&gt;(<br>    ms: number,<br>    replacementSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;;</pre>
+<pre>function timeoutMs&lt;T&gt;(<br>    ms: number,<br>    replacementSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T | U&gt;</pre>
 
 ## <code>unwrapFromWrappedPushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1545](..\/..\/..\/packages\/core\/src\/source.ts#L1545)
+> Source Location: [packages\/core\/src\/source.ts#L1531](..\/..\/..\/packages\/core\/src\/source.ts#L1531)
 
 <b>Signature</b>
 
-<pre>var unwrapFromWrappedPushEvents: &lt;T&gt;(<br>    source: <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;,<br>) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;</pre>
+<pre>var unwrapFromWrappedPushEvents: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#event">Event</a>&lt;T&gt;&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;T&gt;</pre>
 
 ## <code>windowControlled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3144](..\/..\/..\/packages\/core\/src\/source.ts#L3144)
+> Source Location: [packages\/core\/src\/source.ts#L3141](..\/..\/..\/packages\/core\/src\/source.ts#L3141)
 
 <b>Signature</b>
 
-<pre>function windowControlled(<br>    getWindowOpeningsSource: &lt;T&gt;(sharedSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    getWindowClosingSource: &lt;T&gt;(currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowControlled(<br>    getWindowOpeningsSource: &lt;T&gt;(sharedSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    getWindowClosingSource: &lt;T&gt;(currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;</pre>
 
-<pre>function windowControlled&lt;T&gt;(<br>    getWindowOpeningsSource: (sharedSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    getWindowClosingSource: (currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowControlled&lt;T&gt;(<br>    getWindowOpeningsSource: (sharedSource: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>    getWindowClosingSource: (currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;</pre>
 
 ## <code>windowCount</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3246](..\/..\/..\/packages\/core\/src\/source.ts#L3246)
+> Source Location: [packages\/core\/src\/source.ts#L3243](..\/..\/..\/packages\/core\/src\/source.ts#L3243)
 
 <b>Signature</b>
 
-<pre>function windowCount(<br>    maxWindowLength: number,<br>    createEvery?: number,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowCount(<br>    maxWindowLength: number,<br>    createEvery?: number,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;</pre>
 
 ## <code>windowEach</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3222](..\/..\/..\/packages\/core\/src\/source.ts#L3222)
+> Source Location: [packages\/core\/src\/source.ts#L3219](..\/..\/..\/packages\/core\/src\/source.ts#L3219)
 
 <b>Signature</b>
 
-<pre>function windowEach(<br>    getWindowClosingSource: &lt;T&gt;(currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowEach(<br>    getWindowClosingSource: &lt;T&gt;(currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;</pre>
 
-<pre>function windowEach&lt;T&gt;(<br>    getWindowClosingSource: (currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowEach&lt;T&gt;(<br>    getWindowClosingSource: (currentWindow: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): (source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;</pre>
 
 ## <code>windowEvery</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3095](..\/..\/..\/packages\/core\/src\/source.ts#L3095)
+> Source Location: [packages\/core\/src\/source.ts#L3092](..\/..\/..\/packages\/core\/src\/source.ts#L3092)
 
 <b>Signature</b>
 
-<pre>function windowEvery(<br>    boundariesSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowEvery(<br>    boundariesSource: <a href="basics.md#source-interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;</pre>
 
 ## <code>windowTime</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3266](..\/..\/..\/packages\/core\/src\/source.ts#L3266)
+> Source Location: [packages\/core\/src\/source.ts#L3263](..\/..\/..\/packages\/core\/src\/source.ts#L3263)
 
 <b>Signature</b>
 
-<pre>function windowTime(<br>    maxWindowDuration?: number | null,<br>    creationInterval?: number | null,<br>    maxWindowLength?: number,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;;</pre>
+<pre>function windowTime(<br>    maxWindowDuration?: number | null,<br>    creationInterval?: number | null,<br>    maxWindowLength?: number,<br>): &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#source-interface">Source</a>&lt;T&gt;&gt;</pre>
 
 ## <code>withLatestFrom</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1367](..\/..\/..\/packages\/core\/src\/source.ts#L1367)
+> Source Location: [packages\/core\/src\/source.ts#L1356](..\/..\/..\/packages\/core\/src\/source.ts#L1356)
 
 <b>Signature</b>
 
-<pre>function withLatestFrom&lt;T extends unknown[]&gt;(<br>    ...sources: WrapValuesInSource&lt;T&gt;<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
+<pre>function withLatestFrom&lt;T extends unknown[]&gt;(<br>    sources: {<br>        [K in keyof T]: <a href="basics.md#source-interface">Source</a>&lt;T[K]&gt;<br>    },<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;[U, ...T]&gt;</pre>
 
 ## <code>withLatestFromLazy</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1353](..\/..\/..\/packages\/core\/src\/source.ts#L1353)
+> Source Location: [packages\/core\/src\/source.ts#L1342](..\/..\/..\/packages\/core\/src\/source.ts#L1342)
 
 <b>Signature</b>
 
-<pre>function withLatestFromLazy&lt;T extends unknown[]&gt;(<br>    getSources: () =&gt; WrapValuesInSource&lt;T&gt;,<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
+<pre>function withLatestFromLazy&lt;T extends unknown[]&gt;(<br>    getSources: () =&gt; {<br>        [K in keyof T]: <a href="basics.md#source-interface">Source</a>&lt;T[K]&gt;<br>    },<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;[U, ...T]&gt;</pre>
 
 ## <code>withPrevious</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1726](..\/..\/..\/packages\/core\/src\/source.ts#L1726)
+> Source Location: [packages\/core\/src\/source.ts#L1725](..\/..\/..\/packages\/core\/src\/source.ts#L1725)
 
 <b>Signature</b>
 
-<pre>function withPrevious&lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;[T, T]&gt;;</pre>
+<pre>function withPrevious&lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;): <a href="basics.md#source-interface">Source</a>&lt;[T, T]&gt;</pre>
 
 ## <code>withTime</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3773](..\/..\/..\/packages\/core\/src\/source.ts#L3773)
+> Source Location: [packages\/core\/src\/source.ts#L3770](..\/..\/..\/packages\/core\/src\/source.ts#L3770)
 
 <b>Signature</b>
 
-<pre>function withTime&lt;T&gt;(<br>    provideTime: <a href="util.md#timeprovider">TimeProvider</a>,<br>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#withtime">WithTime</a>&lt;T&gt;&gt;;</pre>
+<pre>function withTime&lt;T&gt;(provideTime: <a href="util.md#timeprovider">TimeProvider</a>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#withtime">WithTime</a>&lt;T&gt;&gt;</pre>
 
 ## <code>WithTime</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3765](..\/..\/..\/packages\/core\/src\/source.ts#L3765)
+> Source Location: [packages\/core\/src\/source.ts#L3762](..\/..\/..\/packages\/core\/src\/source.ts#L3762)
 
 <b>Signature</b>
 
@@ -1156,15 +1152,15 @@ interface WithTime<T>
 
 ## <code>withTimeInterval</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3794](..\/..\/..\/packages\/core\/src\/source.ts#L3794)
+> Source Location: [packages\/core\/src\/source.ts#L3791](..\/..\/..\/packages\/core\/src\/source.ts#L3791)
 
 <b>Signature</b>
 
-<pre>function withTimeInterval&lt;T&gt;(<br>    provideTime: <a href="util.md#timeprovider">TimeProvider</a>,<br>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#timeinterval">TimeInterval</a>&lt;T&gt;&gt;;</pre>
+<pre>function withTimeInterval&lt;T&gt;(<br>    provideTime: <a href="util.md#timeprovider">TimeProvider</a>,<br>): <a href="basics.md#operator">Operator</a>&lt;T, <a href="#timeinterval">TimeInterval</a>&lt;T&gt;&gt;</pre>
 
 ## <code>TimeInterval</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3782](..\/..\/..\/packages\/core\/src\/source.ts#L3782)
+> Source Location: [packages\/core\/src\/source.ts#L3779](..\/..\/..\/packages\/core\/src\/source.ts#L3779)
 
 <b>Signature</b>
 
@@ -1174,16 +1170,16 @@ interface TimeInterval<T>
 
 ## <code>wrapInPushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1538](..\/..\/..\/packages\/core\/src\/source.ts#L1538)
+> Source Location: [packages\/core\/src\/source.ts#L1524](..\/..\/..\/packages\/core\/src\/source.ts#L1524)
 
 <b>Signature</b>
 
-<pre>var wrapInPushEvents: &lt;T&gt;(<br>    source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;,<br>) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Event&lt;T&gt;&gt;</pre>
+<pre>var wrapInPushEvents: &lt;T&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;T&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;<a href="basics.md#event">Event</a>&lt;T&gt;&gt;</pre>
 
 ## <code>zipWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1339](..\/..\/..\/packages\/core\/src\/source.ts#L1339)
+> Source Location: [packages\/core\/src\/source.ts#L1328](..\/..\/..\/packages\/core\/src\/source.ts#L1328)
 
 <b>Signature</b>
 
-<pre>function zipWith&lt;T extends unknown[]&gt;(<br>    ...sources: WrapValuesInSource&lt;T&gt;<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;Unshift&lt;T, U&gt;&gt;;</pre>
+<pre>function zipWith&lt;T extends unknown[]&gt;(<br>    sources: {<br>        [K in keyof T]: <a href="basics.md#source-interface">Source</a>&lt;T[K]&gt;<br>    },<br>): &lt;U&gt;(source: <a href="basics.md#source-interface">Source</a>&lt;U&gt;) =&gt; <a href="basics.md#source-interface">Source</a>&lt;[U, ...T]&gt;</pre>

@@ -1,5 +1,5 @@
 import { ApiItemKind, ApiPackage } from '@microsoft/api-extractor-model';
-import { DeepCoreNode } from '../../core/nodes/index';
+import { DeepCoreNode } from '../../core/nodes';
 import { PageNode } from '../../core/nodes/Page';
 import { simplifyDeepCoreNode } from '../../core/simplify';
 import { AnalyzeContext, getApiItemsByExportIdentifier } from '../Context';

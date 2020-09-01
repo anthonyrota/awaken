@@ -294,8 +294,7 @@ interface SubjectDistributionSinkDisposalErrorImplementation extends Error {
 /**
  * @public
  */
-export interface SubjectDistributionSinkDisposalError
-    extends SubjectDistributionSinkDisposalErrorImplementation {
+export interface SubjectDistributionSinkDisposalError {
     /**
      * The list of errors caught.
      */

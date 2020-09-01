@@ -36,6 +36,11 @@ const getJSDocCommentRanges = (ts as any).getJSDocCommentRanges as (
     text: string,
 ) => ts.CommentRange[] | undefined;
 
+type ExportMap = {
+    exportSymbolToIdentifier: Map<ts.Symbol, ExportIdentifier>;
+    exportDeclarationToIdentifier: Map<ts.Declaration, ExportIdentifier>;
+};
+
 export function generateSourceMetadata(
     program: ts.Program,
     packageNameToExportFilePath: Map<string, string>,
@@ -47,42 +52,69 @@ export function generateSourceMetadata(
         >(),
     };
 
+    const typeChecker = program.getTypeChecker();
+    const exportSymbolToIdentifier = new Map<ts.Symbol, ExportIdentifier>();
+
     for (const [packageName, exportFilePath] of packageNameToExportFilePath) {
-        analyzeExportFile(program, sourceMetadata, packageName, exportFilePath);
+        const sourceFile = program.getSourceFile(exportFilePath);
+
+        if (!sourceFile) {
+            throw new Error('Error retrieving source file.');
+        }
+
+        const exports = typeChecker.getExportsOfModule(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            typeChecker.getSymbolAtLocation(sourceFile)!,
+        );
+
+        for (const exportSymbol of exports) {
+            const identifier: ExportIdentifier = {
+                packageName,
+                exportName: exportSymbol.name,
+            };
+
+            exportSymbolToIdentifier.set(exportSymbol, identifier);
+        }
     }
+
+    const exportDeclarationToIdentifier = new Map<
+        ts.Declaration,
+        ExportIdentifier
+    >(
+        Array.from(exportSymbolToIdentifier).flatMap(
+            ([exportSymbol, identifier]) => {
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                return exportSymbol
+                    .getDeclarations()!
+                    .map((declaration) => [declaration, identifier] as const);
+            },
+        ),
+    );
+
+    analyzeExportMap(program, sourceMetadata, {
+        exportSymbolToIdentifier,
+        exportDeclarationToIdentifier,
+    });
 
     return sourceMetadata;
 }
 
-function analyzeExportFile(
+function analyzeExportMap(
     program: ts.Program,
     sourceMetadata: SourceMetadata,
-    packageName: string,
-    exportFilePath: string,
+    exportMap: ExportMap,
 ): void {
     const typeChecker = program.getTypeChecker();
-    const sourceFile = program.getSourceFile(exportFilePath);
 
-    if (!sourceFile) {
-        throw new Error('Error retrieving source file.');
-    }
-
-    const exports = typeChecker.getExportsOfModule(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        typeChecker.getSymbolAtLocation(sourceFile)!,
-    );
-
-    for (const exportSymbol of exports) {
-        let implementationSymbol = exportSymbol;
-
-        if (exportSymbol.flags & ts.SymbolFlags.Alias) {
-            implementationSymbol = typeChecker.getAliasedSymbol(exportSymbol);
-        }
-
-        const identifier: ExportIdentifier = {
-            packageName,
-            exportName: exportSymbol.name,
-        };
+    for (const [
+        exportSymbol,
+        identifier,
+    ] of exportMap.exportSymbolToIdentifier) {
+        const implementationSymbol =
+            exportSymbol.flags & ts.SymbolFlags.Alias
+                ? typeChecker.getAliasedSymbol(exportSymbol)
+                : exportSymbol;
 
         const identifierKey = getUniqueExportIdentifierKey(identifier);
         // eslint-disable-next-line max-len
@@ -103,47 +135,55 @@ function analyzeExportFile(
             );
         }
 
-        analyzeExport(
-            exportIdentifierMetadata,
-            packageName,
-            exportSymbol,
-            implementationSymbol,
-        );
+        let interfaceDeclaration: ts.InterfaceDeclaration | undefined;
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        for (const declaration of implementationSymbol.getDeclarations()!) {
+            if (
+                !interfaceDeclaration &&
+                ts.isInterfaceDeclaration(declaration)
+            ) {
+                interfaceDeclaration = declaration;
+            }
+
+            analyzeDeclaration(
+                exportIdentifierMetadata,
+                identifier.packageName,
+                exportSymbol,
+                declaration,
+            );
+        }
     }
 }
 
-function analyzeExport(
+function analyzeDeclaration(
     exportIdentifierMetadata: ExportIdentifierMetadata,
     packageName: string,
     exportSymbol: ts.Symbol,
-    implementationSymbol: ts.Symbol,
+    declaration: ts.Declaration,
 ): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    for (const declaration of implementationSymbol.getDeclarations()!) {
-        const syntaxKind = declaration.kind;
-        const sourceLocation = getDeclarationSourceLocation(declaration);
-        const baseDocComment = getDeclarationBaseDocComment(declaration);
+    const syntaxKind = declaration.kind;
+    const sourceLocation = getDeclarationSourceLocation(declaration);
+    const baseDocComment = getDeclarationBaseDocComment(declaration);
+    const { syntaxKindToExportMetadata } = exportIdentifierMetadata;
+    const exportIdentifier = syntaxKindToExportMetadata.get(syntaxKind);
 
-        const { syntaxKindToExportMetadata } = exportIdentifierMetadata;
-        const exportIdentifier = syntaxKindToExportMetadata.get(syntaxKind);
-
-        if (exportIdentifier) {
-            exportIdentifier.sourceLocation = sourceLocation;
-            if (baseDocComment) {
-                throw new Error(
-                    `Base doc comments are not allowed after the first declaration. Export: ${getUniqueExportIdentifierKey(
-                        { packageName, exportName: exportSymbol.name },
-                    )}.`,
-                );
-            }
-            continue;
+    if (exportIdentifier) {
+        exportIdentifier.sourceLocation = sourceLocation;
+        if (baseDocComment) {
+            throw new Error(
+                `Base doc comments are not allowed after the first declaration. Export: ${getUniqueExportIdentifierKey(
+                    { packageName, exportName: exportSymbol.name },
+                )}.`,
+            );
         }
-
-        exportIdentifierMetadata.syntaxKindToExportMetadata.set(syntaxKind, {
-            sourceLocation,
-            baseDocComment,
-        });
+        return;
     }
+
+    exportIdentifierMetadata.syntaxKindToExportMetadata.set(syntaxKind, {
+        sourceLocation,
+        baseDocComment,
+    });
 }
 
 function getDeclarationSourceLocation(
@@ -170,7 +210,7 @@ function getDeclarationBaseDocComment(
         if (commentRanges.length !== 2) {
             throw new Error("Can't have multiple base comments.");
         }
-        if (declaration.kind !== ts.SyntaxKind.FunctionDeclaration) {
+        if (!ts.isFunctionDeclaration(declaration)) {
             throw new Error(
                 "Can't have a base comment for a non function declaration.",
             );

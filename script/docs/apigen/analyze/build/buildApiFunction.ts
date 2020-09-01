@@ -1,7 +1,7 @@
 import { ApiFunction } from '@microsoft/api-extractor-model';
 import * as ts from 'typescript';
+import { DeepCoreNode } from '../../core/nodes';
 import { ContainerNode } from '../../core/nodes/Container';
-import { DeepCoreNode } from '../../core/nodes/index';
 import { AnalyzeContext } from '../Context';
 import { getApiItemTextKind } from '../util/getApiItemTextKind';
 import { buildApiItemAnchor } from './util/buildApiItemAnchor';
@@ -24,12 +24,12 @@ export interface BuildApiFunctionParameters {
 export function buildApiFunction(
     parameters: BuildApiFunctionParameters,
 ): DeepCoreNode {
-    const { context } = parameters;
-    const overloads = parameters.overloads.slice();
-
     if (parameters.overloads.length === 0) {
         throw new Error('No implementation.');
     }
+
+    const { context } = parameters;
+    const overloads = parameters.overloads.slice();
 
     overloads.sort((a, b) => a.overloadIndex - b.overloadIndex);
 

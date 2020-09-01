@@ -1,6 +1,6 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
+import { DeepCoreNode } from '../../../core/nodes';
 import { CodeSpanNode } from '../../../core/nodes/CodeSpan';
-import { DeepCoreNode } from '../../../core/nodes/index';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
 import { SubheadingNode } from '../../../core/nodes/Subheading';
 import { AnalyzeContext, getApiItemsByExportIdentifier } from '../../Context';

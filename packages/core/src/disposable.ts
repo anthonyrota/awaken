@@ -35,9 +35,10 @@ export interface Disposable {
 
 interface DisposableImplementationBase {
     readonly active: boolean;
-    add(child: DisposableImplementation): void;
-    remove(child: DisposableImplementation): void;
+    add(child: DisposableImplementationBase): void;
+    remove(child: DisposableImplementationBase): void;
     dispose(): void;
+    [$$Disposable]: DisposableImplementationIdentifier;
     __children_: () => DisposableImplementationBase[] | null;
     __prepareForDisposal: () => void;
 }
@@ -277,7 +278,7 @@ interface DisposalErrorImplementation extends Error {
 /**
  * @public
  */
-export interface DisposalError extends DisposalErrorImplementation {
+export interface DisposalError extends Error {
     /**
      * The flattened list of errors thrown during disposal.
      */

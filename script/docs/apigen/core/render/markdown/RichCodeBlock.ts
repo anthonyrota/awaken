@@ -12,7 +12,6 @@ export function writeRichCodeBlock<ChildNode extends Node>(
 ): void {
     if (output.constrainedToSingleLine) {
         writeCoreNode(
-            // TODO: fix breaking inside nested blocks.
             HtmlElementNode<ChildNode>({
                 tagName: 'pre',
                 children: richCodeBlock.children,

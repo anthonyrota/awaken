@@ -1,7 +1,7 @@
 import { Node } from '../../nodes';
 import { ContainerBase } from '../../nodes/Container';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteCoreNode, ParamWriteChildNode } from './index';
+import { ParamWriteCoreNode, ParamWriteChildNode } from '.';
 
 export function writeContainer<ChildNode extends Node>(
     container: ContainerBase<ChildNode>,

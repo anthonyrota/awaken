@@ -31,6 +31,8 @@ function findLocalReferenceTokens(
     return (null as unknown) as FoundLocalSignatureReference;
 }
 
+const eventRegexp = /core!~?Event(_2)?:type$/;
+
 export function getExcerptTokenReference(
     token: ExcerptToken,
     debugTokenText: string,
@@ -44,8 +46,10 @@ export function getExcerptTokenReference(
         token.canonicalReference.toString().startsWith('!')
     ) {
         return null;
-    }
-    if (token.canonicalReference.toString().includes('!~')) {
+    } else if (
+        token.canonicalReference.toString().includes('!~') &&
+        !eventRegexp.test(token.canonicalReference.toString())
+    ) {
         if (token.canonicalReference.toString().endsWith('!~value')) {
             // I don't know why this is a thing.
             return null;
@@ -53,20 +57,19 @@ export function getExcerptTokenReference(
         // Local reference.
         return findLocalReferenceTokens(token.canonicalReference, context);
     }
-    // Should be a exported reference now.
-    let canonicalReference = token.canonicalReference;
+    // Event type shadows the global type so api-extractor replaces it with
+    // Event_2, but doesn't bother changing the references to the updated name.
+    // Also, for some reason Event is declared to be a local reference in the
+    // testing package.
+    let canonicalReference = DeclarationReference.parse(
+        token.canonicalReference
+            .toString()
+            .replace(eventRegexp, 'core!Event_2:type'),
+    );
     if (canonicalReference.toString().endsWith(':function')) {
         // Requires (overloadIndex) at the end if a function.
         canonicalReference = canonicalReference.withOverloadIndex(1);
     }
-    // if (canonicalReference.toString().includes('!Event')) {
-    //     // Event type shadows the global type so api-extractor replaces it
-    //     // with Event_2, but doesn't bother changing the references to
-    //     // the updated name.
-    //     canonicalReference = DeclarationReference.parse(
-    //         canonicalReference.toString().replace('!Event', '!Event_2'),
-    //     );
-    // }
     const result = context.apiModel.resolveDeclarationReference(
         canonicalReference,
         undefined,

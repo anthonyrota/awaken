@@ -16,7 +16,7 @@
 
 <b>Signature</b>
 
-<pre>declare function setTimeoutImplementation&lt;T extends any[]&gt;(<br>    callback: (...args: T) =&gt; void,<br>    delayMs?: number,<br>    subscription?: <a href="basics.md#disposable-interface">Disposable</a>,<br>    ...args: T<br>): void;</pre>
+<pre>declare function setTimeoutImplementation&lt;T extends any[]&gt;(<br>    callback: (...args: T) =&gt; void,<br>    delayMs?: number,<br>    subscription?: <a href="basics.md#disposable-interface">Disposable</a>,<br>    ...args: T<br>): void</pre>
 
 Disposable-based alternative to built-in <code>setTimeout</code>.
 
@@ -24,10 +24,10 @@ Disposable-based alternative to built-in <code>setTimeout</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| callback | <pre lang="ts">(...args: T) =&gt; void;</pre> | The callback to schedule. |
-| delayMs | <pre lang="ts">number;</pre> | The amount of delay. |
+| callback | <pre lang="ts">(...args: T) =&gt; void</pre> | The callback to schedule. |
+| delayMs | <pre lang="ts">number</pre> | The amount of delay. |
 | subscription | <pre>[Disposable](basics.md#disposable-interface)</pre> | If this is disposed then the request will be cancelled. |
-| args | <pre lang="ts">T;</pre> | The arguments to send to the callback. |
+| args | <pre lang="ts">T</pre> | The arguments to send to the callback. |
 
 ## <code>setInterval</code>
 
@@ -35,7 +35,7 @@ Disposable-based alternative to built-in <code>setTimeout</code>.
 
 <b>Signature</b>
 
-<pre>declare function setIntervalImplementation&lt;T extends any[]&gt;(<br>    callback: (...args: T) =&gt; void,<br>    delayMs?: number,<br>    subscription?: <a href="basics.md#disposable-interface">Disposable</a>,<br>    ...args: T<br>): void;</pre>
+<pre>declare function setIntervalImplementation&lt;T extends any[]&gt;(<br>    callback: (...args: T) =&gt; void,<br>    delayMs?: number,<br>    subscription?: <a href="basics.md#disposable-interface">Disposable</a>,<br>    ...args: T<br>): void</pre>
 
 Disposable-based alternative to built-in <code>setInterval</code>.
 
@@ -43,10 +43,10 @@ Disposable-based alternative to built-in <code>setInterval</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| callback | <pre lang="ts">(...args: T) =&gt; void;</pre> | The callback to schedule. |
-| delayMs | <pre lang="ts">number;</pre> | The amount of delay. |
+| callback | <pre lang="ts">(...args: T) =&gt; void</pre> | The callback to schedule. |
+| delayMs | <pre lang="ts">number</pre> | The amount of delay. |
 | subscription | <pre>[Disposable](basics.md#disposable-interface)</pre> | If this is disposed then the request will be cancelled. |
-| args | <pre lang="ts">T;</pre> | The arguments to send to the callback. |
+| args | <pre lang="ts">T</pre> | The arguments to send to the callback. |
 
 ## <code>requestAnimationFrame</code>
 
@@ -54,7 +54,7 @@ Disposable-based alternative to built-in <code>setInterval</code>.
 
 <b>Signature</b>
 
-<pre>declare function requestAnimationFrameImplementation(<br>    callback: (time: number) =&gt; void,<br>    subscription?: <a href="basics.md#disposable-interface">Disposable</a>,<br>): void;</pre>
+<pre>declare function requestAnimationFrameImplementation(<br>    callback: (time: number) =&gt; void,<br>    subscription?: <a href="basics.md#disposable-interface">Disposable</a>,<br>): void</pre>
 
 Disposable-based alternative to built-in <code>requestAnimationFrame</code>.
 
@@ -62,7 +62,7 @@ Disposable-based alternative to built-in <code>requestAnimationFrame</code>.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| callback | <pre lang="ts">(time: number) =&gt; void;</pre> | The callback to schedule. This will be called with a <code>time</code> parameter. |
+| callback | <pre lang="ts">(time: number) =&gt; void</pre> | The callback to schedule. This will be called with a <code>time</code> parameter. |
 | subscription | <pre>[Disposable](basics.md#disposable-interface)</pre> | If this is disposed then the request will be cancelled. |
 
 ## <code>asyncReportError</code>
@@ -72,7 +72,7 @@ Disposable-based alternative to built-in <code>requestAnimationFrame</code>.
 <b>Signature</b>
 
 ```ts
-function asyncReportError(error: unknown): void;
+function asyncReportError(error: unknown): void
 ```
 
 Reports the given error asynchronously.
@@ -81,7 +81,7 @@ Reports the given error asynchronously.
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| error | <pre lang="ts">unknown;</pre> | The error to report. |
+| error | <pre lang="ts">unknown</pre> | The error to report. |
 
 ## <code>TimeProvider</code>
 

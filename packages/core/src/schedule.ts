@@ -223,18 +223,18 @@ export function ScheduleSyncQueued(): ScheduleFunction {
     return ScheduleQueued(ScheduleSyncQueuedInner);
 }
 
-type ScheduleAnimationFrameFunction = ScheduleFunction<[number]>;
-
 /**
  * @public
  */
 // eslint-disable-next-line max-len
-export const scheduleAnimationFrame: ScheduleAnimationFrameFunction = requestAnimationFrame;
+export const scheduleAnimationFrame: ScheduleFunction<[
+    number,
+]> = requestAnimationFrame;
 
 /**
  * @public
  */
-export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction {
+export function ScheduleAnimationFrameQueued(): ScheduleFunction<[number]> {
     return ScheduleQueuedDiscrete(scheduleAnimationFrame);
 }
 

@@ -5,15 +5,16 @@ import {
     Excerpt,
     ExcerptToken,
 } from '@microsoft/api-extractor-model';
+import { CoreNodeType, DeepCoreNode } from '../../../core/nodes';
 import { CodeBlockNode } from '../../../core/nodes/CodeBlock';
 import { ContainerNode } from '../../../core/nodes/Container';
-import { DeepCoreNode } from '../../../core/nodes/index';
 import { LocalPageLinkNode } from '../../../core/nodes/LocalPageLink';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
 import { RichCodeBlockNode } from '../../../core/nodes/RichCodeBlock';
 import { TableNode, TableRow } from '../../../core/nodes/Table';
 import { TitleNode } from '../../../core/nodes/Title';
-import { format, Language } from '../../../util/prettier';
+import { formatCodeContainer } from '../../../core/nodes/util/formatCodeContainer';
+import { simplifyDeepCoreNode } from '../../../core/simplify';
 import { AnalyzeContext } from '../../Context';
 import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
 import {
@@ -51,6 +52,8 @@ export function buildApiItemParameters(
                     createNodeForTypeExcerpt(
                         apiParameter.parameterTypeExcerpt,
                         apiItem,
+                        'type X=',
+                        '',
                         context,
                     ),
                 ],
@@ -93,6 +96,8 @@ export function buildApiItemParameters(
                 createNodeForTypeExcerpt(
                     apiItem.returnTypeExcerpt,
                     apiItem,
+                    'function _():',
+                    ' {}',
                     context,
                 ),
             ],
@@ -137,6 +142,8 @@ export function buildApiItemParameters(
 function createNodeForTypeExcerpt(
     excerpt: Excerpt,
     apiItem: ApiItem,
+    prefixText: string,
+    suffixText: string,
     context: AnalyzeContext,
 ): DeepCoreNode {
     if (!excerpt.text.trim()) {
@@ -149,7 +156,6 @@ function createNodeForTypeExcerpt(
 
     const spannedTokens = excerpt.spannedTokens.slice();
     let token: ExcerptToken | undefined;
-    let isOnlyText = true;
 
     while ((token = spannedTokens.shift())) {
         const tokenText = token.text;
@@ -165,7 +171,6 @@ function createNodeForTypeExcerpt(
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
-            isOnlyText = false;
             richCodeBlock.children.push(
                 LocalPageLinkNode({
                     destination: getLinkToApiItem(
@@ -182,23 +187,21 @@ function createNodeForTypeExcerpt(
         }
     }
 
-    if (isOnlyText) {
-        let formattedText: string;
-        try {
-            formattedText = format(
-                `type X = ${excerpt.text}`,
-                Language.TypeScript,
-            )
-                .replace(/^type X =/, '')
-                .trim();
-        } catch (error) {
-            console.error(error);
-            formattedText = excerpt.text;
+    richCodeBlock.children.unshift(PlainTextNode({ text: prefixText }));
+    richCodeBlock.children.push(PlainTextNode({ text: suffixText }));
+    formatCodeContainer(richCodeBlock);
+    richCodeBlock.children.shift();
+    richCodeBlock.children.pop();
+
+    simplifyDeepCoreNode(richCodeBlock);
+    if (richCodeBlock.children.length === 1) {
+        const onlyChild = richCodeBlock.children[0];
+        if (onlyChild.type === CoreNodeType.PlainText) {
+            return CodeBlockNode({
+                language: 'ts',
+                code: onlyChild.text,
+            });
         }
-        return CodeBlockNode({
-            language: 'ts',
-            code: formattedText,
-        });
     }
 
     return richCodeBlock;

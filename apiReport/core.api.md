@@ -4,22 +4,20 @@
 
 ```ts
 
-// Warning: (ae-forgotten-export) The symbol "GroupSourceBase" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export interface ActiveGroupSource<T, K> extends GroupSourceBase<T> {
+export interface ActiveGroupSource<T, K> extends Source<T> {
     // (undocumented)
     key: K;
+    // (undocumented)
+    remove(): void;
     // (undocumented)
     removed: false;
 }
 
-// Warning: (ae-forgotten-export) The symbol "WrapValuesInSource" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export function all<T extends unknown[]>(
-    sources: WrapValuesInSource<T>,
-): Source<T>;
+export function all<T extends unknown[]>(sources: {
+    [K in keyof T]: Source<T[K]>;
+}): Source<T>;
 
 // @public (undocumented)
 export const animationFrames: Source<number>;
@@ -31,32 +29,23 @@ export function asyncReportError(error: unknown): void;
 export function at(index: number): IdentityOperator;
 
 // @internal (undocumented)
-export function _b<T>(
-    items: T[],
-    getValue: (item: T) => number,
-    value: number,
-    offset?: number,
-): number;
+export function _b<T>(items: T[], getValue: (item: T) => number, value: number, offset?: number): number;
 
 // @public (undocumented)
-export function catchError<T>(
-    getNewSource: (error: unknown) => Source<T>,
-): Operator<T, T>;
+export function catchError<T>(getNewSource: (error: unknown) => Source<T>): Operator<T, T>;
 
 // @public (undocumented)
 export function collect<T>(source: Source<T>): Source<T[]>;
 
 // @public (undocumented)
-export function combineSources<T extends unknown[]>(
-    ...sources: WrapValuesInSource<T>
-): Source<T>;
+export function combineSources<T extends unknown[]>(sources: {
+    [K in keyof T]: Source<T[K]>;
+}): Source<T>;
 
-// Warning: (ae-forgotten-export) The symbol "Unshift" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export function combineWith<T extends unknown[]>(
-    ...sources: WrapValuesInSource<T>
-): <U>(source: Source<U>) => Source<Unshift<T, U>>;
+export function combineWith<T extends unknown[]>(sources: {
+    [K in keyof T]: Source<T[K]>;
+}): <U>(source: Source<U>) => Source<[U, ...T]>;
 
 // @public (undocumented)
 export const concat: <T>(source: Source<Source<T>>) => Source<T>;
@@ -65,22 +54,16 @@ export const concat: <T>(source: Source<Source<T>>) => Source<T>;
 export const concatDrop: <T>(source: Source<Source<T>>) => Source<T>;
 
 // @public (undocumented)
-export function concatDropMap<T, U>(
-    transform: (value: T, index: number) => Source<U>,
-): Operator<T, U>;
+export function concatDropMap<T, U>(transform: (value: T, index: number) => Source<U>): Operator<T, U>;
 
 // @public (undocumented)
-export function concatMap<T, U>(
-    transform: (value: T, index: number) => Source<U>,
-): Operator<T, U>;
+export function concatMap<T, U>(transform: (value: T, index: number) => Source<U>): Operator<T, U>;
 
 // @public (undocumented)
-export function concatSources<T>(...sources: Source<T>[]): Source<T>;
+export function concatSources<T>(sources: Source<T>[]): Source<T>;
 
 // @public (undocumented)
-export function concatWith<T>(
-    ...sources: Source<T>[]
-): <U>(source: Source<U>) => Source<T | U>;
+export function concatWith<T>(sources: Source<T>[]): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
 export interface ControllableSource<T> extends Source<T> {
@@ -101,23 +84,10 @@ export interface CurrentValueSubject<T> extends Subject<T> {
 }
 
 // @public (undocumented)
-export function debounce<T>(
-    getDurationSource: (value: T, index: number) => Source<unknown>,
-    getInitialDurationRange?:
-        | ((firstDebouncedValue: T, index: number) => InitialDurationInfo)
-        | null,
-    config?: DebounceConfig | null,
-): Operator<T, T>;
+export function debounce<T>(getDurationSource: (value: T, index: number) => Source<unknown>, getInitialDurationRange?: ((firstDebouncedValue: T, index: number) => InitialDurationInfo) | null, config?: DebounceConfig | null): Operator<T, T>;
 
 // @public (undocumented)
-export function debounce<T>(
-    getDurationSource: undefined | null,
-    getInitialDurationRange: (
-        firstDebouncedValue: T,
-        index: number,
-    ) => InitialDurationInfo,
-    config?: DebounceConfig | null,
-): Operator<T, T>;
+export function debounce<T>(getDurationSource: undefined | null, getInitialDurationRange: (firstDebouncedValue: T, index: number) => InitialDurationInfo, config?: DebounceConfig | null): Operator<T, T>;
 
 // @public (undocumented)
 export interface DebounceConfig {
@@ -130,18 +100,10 @@ export interface DebounceConfig {
 }
 
 // @public (undocumented)
-export function debounceMs(
-    durationMs: number,
-    maxDurationMs?: number | null,
-    config?: DebounceConfig | null,
-): IdentityOperator;
+export function debounceMs(durationMs: number, maxDurationMs?: number | null, config?: DebounceConfig | null): IdentityOperator;
 
 // @public (undocumented)
-export function debounceMs(
-    durationMs: null | undefined,
-    maxDurationMs: number,
-    config?: DebounceConfig | null,
-): IdentityOperator;
+export function debounceMs(durationMs: null | undefined, maxDurationMs: number, config?: DebounceConfig | null): IdentityOperator;
 
 // @public (undocumented)
 export type DebounceTrailingRestart = 'restart';
@@ -153,27 +115,19 @@ export const DebounceTrailingRestart: DebounceTrailingRestart;
 export const defaultDebounceConfig: DebounceConfig;
 
 // @public (undocumented)
-export function defaultIfEmpty<T>(
-    getDefaultValue: () => T,
-): <U>(source: Source<U>) => Source<T | U>;
+export function defaultIfEmpty<T>(getDefaultValue: () => T): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
-export function defaultIfEmptyTo<T>(
-    value: T,
-): <U>(source: Source<U>) => Source<T | U>;
+export function defaultIfEmptyTo<T>(value: T): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
 export const defaultThrottleConfig: ThrottleConfig;
 
 // @public (undocumented)
-export function delay<T>(
-    getDelaySource: (value: T, index: number) => Source<unknown>,
-): Operator<T, T>;
+export function delay<T>(getDelaySource: (value: T, index: number) => Source<unknown>): Operator<T, T>;
 
 // @public (undocumented)
-export function delay(
-    getDelaySource: <T>(value: T, index: number) => Source<unknown>,
-): IdentityOperator;
+export function delay(getDelaySource: <T>(value: T, index: number) => Source<unknown>): IdentityOperator;
 
 // @public (undocumented)
 export function delayMs(ms: number): IdentityOperator;
@@ -193,10 +147,8 @@ export interface Disposable {
     remove(child: Disposable): void;
 }
 
-// Warning: (ae-forgotten-export) The symbol "DisposalErrorImplementation" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export interface DisposalError extends DisposalErrorImplementation {
+export interface DisposalError extends Error {
     readonly errors: unknown[];
 }
 
@@ -218,33 +170,22 @@ export const DISPOSED: Disposable;
 export function distinct(): IdentityOperator;
 
 // @public (undocumented)
-export function distinct<T, K>(
-    getKey: (value: T, index: number) => K,
-): Operator<T, T>;
+export function distinct<T, K>(getKey: (value: T, index: number) => K): Operator<T, T>;
 
 // @public (undocumented)
 export function distinctFromLast(): IdentityOperator;
 
 // @public (undocumented)
-export function distinctFromLast<T>(
-    isDifferent: (keyA: T, keyB: T, currentIndex: number) => unknown,
-): Operator<T, T>;
+export function distinctFromLast<T>(isDifferent: (keyA: T, keyB: T, currentIndex: number) => unknown): Operator<T, T>;
 
 // @public (undocumented)
-export function distinctFromLast<T, K>(
-    isDifferent:
-        | ((keyA: K, keyB: K, currentIndex: number) => unknown)
-        | undefined,
-    getKey: (value: T) => K,
-): Operator<T, T>;
+export function distinctFromLast<T, K>(isDifferent: ((keyA: K, keyB: K, currentIndex: number) => unknown) | undefined, getKey: (value: T) => K): Operator<T, T>;
 
 // @public (undocumented)
 export const empty: Source<never>;
 
 // @public (undocumented)
-export function emptyScheduled(
-    schedule: ScheduleFunction,
-): Source<never>;
+export function emptyScheduled(schedule: ScheduleFunction): Source<never>;
 
 // @public (undocumented)
 export interface End {
@@ -262,9 +203,7 @@ export type EndType = 2;
 export const EndType: EndType;
 
 // @public (undocumented)
-export function endWith<T>(
-    ...values: T[]
-): <U>(source: Source<U>) => Source<T | U>;
+export function endWith<T>(...values: T[]): <U>(source: Source<U>) => Source<T | U>;
 
 // @public
 type Event_2<T> = Push<T> | Throw | End;
@@ -275,30 +214,19 @@ export { Event_2 as Event }
 export type EventType = PushType | ThrowType | EndType;
 
 // @public (undocumented)
-export function every<T>(
-    predicate: (value: T, index: number) => unknown,
-): Operator<T, boolean>;
+export function every<T>(predicate: (value: T, index: number) => unknown): Operator<T, boolean>;
 
 // @public (undocumented)
-export const expandMap: <T>(
-    transform: (value: T, index: number) => Source<T>,
-    maxConcurrent?: number | undefined,
-) => Operator<T, T>;
+export const expandMap: <T>(transform: (value: T, index: number) => Source<T>, maxConcurrent?: number | undefined) => Operator<T, T>;
 
 // @public
-export function filter<T>(
-    predicate: (value: T, index: number) => false,
-): Operator<T, never>;
+export function filter<T>(predicate: (value: T, index: number) => false): Operator<T, never>;
 
 // @public (undocumented)
-export function filter<T, S extends T>(
-    predicate: (value: T, index: number) => value is S,
-): Operator<T, S>;
+export function filter<T, S extends T>(predicate: (value: T, index: number) => value is S): Operator<T, S>;
 
 // @public (undocumented)
-export function filter<T>(
-    predicate: (value: T, index: number) => unknown,
-): Operator<T, T>;
+export function filter<T>(predicate: (value: T, index: number) => unknown): Operator<T, T>;
 
 // @public (undocumented)
 export function finalize(callback: () => void): IdentityOperator;
@@ -307,31 +235,25 @@ export function finalize(callback: () => void): IdentityOperator;
 export function FinalValueSubject<T>(): Subject<T>;
 
 // @public (undocumented)
-export function find<T, S extends T>(
-    predicate: (value: T, index: number) => value is S,
-): Operator<T, S>;
+export function find<T, S extends T>(predicate: (value: T, index: number) => value is S): Operator<T, S>;
 
 // @public (undocumented)
-export function find<T>(
-    predicate: (value: T, index: number) => unknown,
-): Operator<T, T>;
+export function find<T>(predicate: (value: T, index: number) => unknown): Operator<T, T>;
 
 // @public (undocumented)
-export function findIndex<T>(
-    predicate: (value: T, index: number) => unknown,
-): Operator<T, number>;
-
-// Warning: (ae-forgotten-export) The symbol "WithIndex" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export function findWithIndex<T, S extends T>(
-    predicate: (value: T, index: number) => value is S,
-): Operator<T, WithIndex<S>>;
+export function findIndex<T>(predicate: (value: T, index: number) => unknown): Operator<T, number>;
 
 // @public (undocumented)
-export function findWithIndex<T>(
-    predicate: (value: T, index: number) => unknown,
-): Operator<T, WithIndex<T>>;
+export function findWithIndex<T, S extends T>(predicate: (value: T, index: number) => value is S): Operator<T, {
+    value: S;
+    index: number;
+}>;
+
+// @public (undocumented)
+export function findWithIndex<T>(predicate: (value: T, index: number) => unknown): Operator<T, {
+    value: T;
+    index: number;
+}>;
 
 // @public (undocumented)
 export const first: IdentityOperator;
@@ -340,17 +262,13 @@ export const first: IdentityOperator;
 export function flat<T>(source: Source<Source<T>>): Source<T>;
 
 // @public (undocumented)
-export function flatMap<T, U>(
-    transform: (value: T, index: number) => Source<U>,
-): Operator<T, U>;
+export function flatMap<T, U>(transform: (value: T, index: number) => Source<U>): Operator<T, U>;
 
 // @public (undocumented)
-export function flatSources<T>(...sources: Source<T>[]): Source<T>;
+export function flatSources<T>(sources: Source<T>[]): Source<T>;
 
 // @public (undocumented)
-export function flatWith<T>(
-    ...sources: Source<T>[]
-): <U>(source: Source<U>) => Source<T | U>;
+export function flatWith<T>(sources: Source<T>[]): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
 export function flow(): <T>(x: T) => T;
@@ -359,94 +277,31 @@ export function flow(): <T>(x: T) => T;
 export function flow<T, R>(f1: (x: T) => R): (x: T) => R;
 
 // @public (undocumented)
-export function flow<T, A, R>(
-    f1: (x: T) => A,
-    f2: (x: A) => R,
-): (x: T) => R;
+export function flow<T, A, R>(f1: (x: T) => A, f2: (x: A) => R): (x: T) => R;
 
 // @public (undocumented)
-export function flow<T, A, B, R>(
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => R,
-): (x: T) => R;
+export function flow<T, A, B, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => R): (x: T) => R;
 
 // @public (undocumented)
-export function flow<T, A, B, C, R>(
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => R,
-): (x: T) => R;
+export function flow<T, A, B, C, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => R): (x: T) => R;
 
 // @public (undocumented)
-export function flow<T, A, B, C, D, R>(
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => R,
-): (x: T) => R;
+export function flow<T, A, B, C, D, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => R): (x: T) => R;
 
 // @public (undocumented)
-export function flow<T, A, B, C, D, E, R>(
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => E,
-    f6: (x: E) => R,
-): (x: T) => R;
+export function flow<T, A, B, C, D, E, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => R): (x: T) => R;
 
 // @public (undocumented)
-export function flow<T, A, B, C, D, E, F, R>(
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => E,
-    f6: (x: E) => F,
-    f7: (x: F) => R,
-): (x: T) => R;
+export function flow<T, A, B, C, D, E, F, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => R): (x: T) => R;
 
 // @public (undocumented)
-export function flow<T, A, B, C, D, E, F, G, R>(
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => E,
-    f6: (x: E) => F,
-    f7: (x: F) => G,
-    f8: (x: G) => R,
-): (x: T) => R;
+export function flow<T, A, B, C, D, E, F, G, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => R): (x: T) => R;
 
 // @public (undocumented)
-export function flow<T, A, B, C, D, E, F, G, H, R>(
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => E,
-    f6: (x: E) => F,
-    f7: (x: F) => G,
-    f8: (x: G) => H,
-    f9: (x: H) => R,
-): (x: T) => R;
+export function flow<T, A, B, C, D, E, F, G, H, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R): (x: T) => R;
 
 // @public (undocumented)
-export function flow<T, A, B, C, D, E, F, G, H, R>(
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => E,
-    f6: (x: E) => F,
-    f7: (x: F) => G,
-    f8: (x: G) => H,
-    f9: (x: H) => R,
-    ...funcs: Array<(x: any) => any>
-): (x: T) => R;
+export function flow<T, A, B, C, D, E, F, G, H, R>(f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R, ...funcs: Array<(x: any) => any>): (x: T) => R;
 
 // @public (undocumented)
 export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T;
@@ -455,15 +310,10 @@ export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T;
 export function fromArray<T>(array: ArrayLike<T>): Source<T>;
 
 // @public (undocumented)
-export function fromArrayScheduled<T>(
-    array: ArrayLike<T>,
-    schedule: ScheduleFunction,
-): Source<T>;
+export function fromArrayScheduled<T>(array: ArrayLike<T>, schedule: ScheduleFunction): Source<T>;
 
 // @public (undocumented)
-export function fromAsyncIterable<T>(
-    iterable: AsyncIterable<T>,
-): Source<T>;
+export function fromAsyncIterable<T>(iterable: AsyncIterable<T>): Source<T>;
 
 // @public (undocumented)
 export function fromIterable<T>(iterable: Iterable<T>): Source<T>;
@@ -472,47 +322,23 @@ export function fromIterable<T>(iterable: Iterable<T>): Source<T>;
 export function fromPromise<T>(promise: PromiseLike<T>): Source<T>;
 
 // @public (undocumented)
-export function fromReactiveValue<T extends unknown[], Signal>(
-    addCallback: (handler: (...args: T) => void) => Signal,
-    removeCallback: (
-        handler: (...args: T) => void,
-        signal:
-            | {
-                  value: Signal;
-              }
-            | undefined,
-    ) => void,
-): Source<T>;
+export function fromReactiveValue<T extends unknown[], Signal>(addCallback: (handler: (...args: T) => void) => Signal, removeCallback: (handler: (...args: T) => void, signal: {
+    value: Signal;
+} | undefined) => void): Source<T>;
 
 // @public (undocumented)
-export function fromScheduleFunction<T extends unknown[]>(
-    schedule: ScheduleFunction<T>,
-): Source<T>;
+export function fromScheduleFunction<T extends unknown[]>(schedule: ScheduleFunction<T>): Source<T>;
 
 // @public (undocumented)
-export function fromSingularReactiveValue<T, Signal>(
-    addCallback: (handler: (value: T) => void) => Signal,
-    removeCallback: (
-        handler: (value: T) => void,
-        signal:
-            | {
-                  value: Signal;
-              }
-            | undefined,
-    ) => void,
-): Source<T>;
+export function fromSingularReactiveValue<T, Signal>(addCallback: (handler: (value: T) => void) => Signal, removeCallback: (handler: (value: T) => void, signal: {
+    value: Signal;
+} | undefined) => void): Source<T>;
 
 // @public (undocumented)
-export function groupBy<T, K>(
-    getKey: (value: T, index: number) => K,
-    Subject_?: typeof Subject,
-    removeGroupWhenNoSubscribers?: boolean,
-): Operator<T, GroupSource<T, K>>;
+export function groupBy<T, K>(getKey: (value: T, index: number) => K, Subject_?: typeof Subject, removeGroupWhenNoSubscribers?: boolean): Operator<T, GroupSource<T, K>>;
 
 // @public (undocumented)
-export type GroupSource<T, K> =
-    | ActiveGroupSource<T, K>
-    | RemovedGroupSource<T>;
+export type GroupSource<T, K> = ActiveGroupSource<T, K> | RemovedGroupSource<T>;
 
 // @public (undocumented)
 export interface IdentityOperator {
@@ -524,22 +350,19 @@ export interface IdentityOperator {
 export const ignorePushEvents: <T>(source: Source<T>) => Source<never>;
 
 // @public (undocumented)
-export function iif<T>(
-    condition: () => unknown,
-    createSourceIfTrue: () => Source<T>,
-    createSourceIfFalse: () => Source<T>,
-): Source<T>;
+export function iif<T>(condition: () => unknown, createSourceIfTrue: () => Source<T>, createSourceIfFalse: () => Source<T>): Source<T>;
 
 // @public
-export function implDisposableMethods<T extends object>(
-    value: T,
-    disposable: Disposable,
-): T & Disposable;
+export function implDisposableMethods<T extends object>(value: T, disposable: Disposable): T & Disposable;
 
 // @public (undocumented)
-export type InitialDurationInfo =
-    | [Source<unknown>, (Source<unknown> | undefined | null)?]
-    | [undefined | null, Source<unknown>];
+export type InitialDurationInfo = [
+    Source<unknown>,
+    (Source<unknown> | undefined | null)?
+] | [
+    undefined | null,
+    Source<unknown>
+];
 
 // @public (undocumented)
 export function interval(delayMs: number): Source<number>;
@@ -551,17 +374,10 @@ export function isDisposable(value: unknown): value is Disposable;
 export function isEmpty(source: Source<unknown>): Source<boolean>;
 
 // @public (undocumented)
-export function isEqual<T, U>(
-    sourceA: Source<T>,
-    sourceB: Source<U>,
-    areValuesEqual: (a: T, b: U, index: number) => unknown,
-): Source<boolean>;
+export function isEqual<T, U>(sourceA: Source<T>, sourceB: Source<U>, areValuesEqual: (a: T, b: U, index: number) => unknown): Source<boolean>;
 
 // @public (undocumented)
-export function isEqualTo<T, U>(
-    otherSource: Source<U>,
-    areValuesEqual: (a: T, b: U, index: number) => unknown,
-): Operator<T, boolean>;
+export function isEqualTo<T, U>(otherSource: Source<U>, areValuesEqual: (a: T, b: U, index: number) => unknown): Operator<T, boolean>;
 
 // @public
 export function isSink(value: unknown): value is Sink<unknown>;
@@ -582,98 +398,58 @@ export function lazy<T>(createSource: () => Source<T>): Source<T>;
 export const loop: IdentityOperator;
 
 // @public
-export function map<U>(
-    transform: <T>(value: T, index: number) => U,
-): <T>(source: Source<T>) => Source<U>;
+export function map<U>(transform: <T>(value: T, index: number) => U): <T>(source: Source<T>) => Source<U>;
 
 // @public (undocumented)
-export function map<T, U>(
-    transform: (value: T, index: number) => U,
-): Operator<T, U>;
+export function map<T, U>(transform: (value: T, index: number) => U): Operator<T, U>;
 
 // @public (undocumented)
-export function mapEvents<T, U>(
-    transform: (event: Event_2<T>, index: number) => Event_2<U> | undefined | null,
-): Operator<T, U>;
+export function mapEvents<T, U>(transform: (event: Event_2<T>, index: number) => Event_2<U> | undefined | null): Operator<T, U>;
 
 // @public (undocumented)
-export function mapPushEvents<T>(
-    transform: (pushEvents: Push<T>, index: number) => Throw | End,
-): Operator<T, never>;
+export function mapPushEvents<T>(transform: (pushEvents: Push<T>, index: number) => Throw | End): Operator<T, never>;
 
 // @public (undocumented)
-export function mapPushEvents<T, U>(
-    transform: (
-        pushEvent: Push<T>,
-        index: number,
-    ) => Event_2<U> | undefined | null,
-): Operator<T, U>;
+export function mapPushEvents<T, U>(transform: (pushEvent: Push<T>, index: number) => Event_2<U> | undefined | null): Operator<T, U>;
 
 // @public
 export function mapTo<U>(value: U): <T>(source: Source<T>) => Source<U>;
 
 // @public (undocumented)
-export function markAsSubject<T>(
-    subjectFunction: NonMarkedSubject<T>,
-): Subject<T>;
+export function markAsSubject<T>(subjectFunction: NonMarkedSubject<T>): Subject<T>;
 
 // @public (undocumented)
 export const max: Operator<number, number>;
 
 // @public (undocumented)
-export function maxCompare<T>(
-    compare: (
-        currentValue: T,
-        lastValue: T,
-        currentValueIndex: number,
-    ) => number,
-): Operator<T, T>;
+export function maxCompare<T>(compare: (currentValue: T, lastValue: T, currentValueIndex: number) => number): Operator<T, T>;
 
 // @public (undocumented)
 export const merge: <T>(source: Source<Source<T>>) => Source<T>;
 
 // @public (undocumented)
-export function mergeConcurrent(
-    maxConcurrent: number,
-): <T>(source: Source<Source<T>>) => Source<T>;
+export function mergeConcurrent(maxConcurrent: number): <T>(source: Source<Source<T>>) => Source<T>;
 
 // @public (undocumented)
-export const mergeMap: <T, U>(
-    transform: (value: T, index: number) => Source<U>,
-    maxConcurrent?: number | undefined,
-) => Operator<T, U>;
+export const mergeMap: <T, U>(transform: (value: T, index: number) => Source<U>, maxConcurrent?: number | undefined) => Operator<T, U>;
 
 // @public (undocumented)
-export function mergeSources<T>(...sources: Source<T>[]): Source<T>;
+export function mergeSources<T>(sources: Source<T>[]): Source<T>;
 
 // @public (undocumented)
-export function mergeSourcesConcurrent<T>(
-    max: number,
-    ...sources: Source<T>[]
-): Source<T>;
+export function mergeSourcesConcurrent<T>(max: number, sources: Source<T>[]): Source<T>;
 
 // @public (undocumented)
-export function mergeWith<T>(
-    ...sources: Source<T>[]
-): <U>(source: Source<U>) => Source<T | U>;
+export function mergeWith<T>(sources: Source<T>[]): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
-export function mergeWithConcurrent<T>(
-    max: number,
-    ...sources: Source<T>[]
-): <U>(source: Source<U>) => Source<T | U>;
+export function mergeWithConcurrent<T>(max: number, sources: Source<T>[]): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
 export const min: Operator<number, number>;
 
 // @public (undocumented)
-export function minCompare<T>(
-    compare: (
-        currentValue: T,
-        lastValue: T,
-        currentValueIndex: number,
-    ) => number,
-): Operator<T, T>;
+export function minCompare<T>(compare: (currentValue: T, lastValue: T, currentValueIndex: number) => number): Operator<T, T>;
 
 // @public (undocumented)
 export const never: Source<unknown>;
@@ -694,22 +470,13 @@ export function ofEvent(event: Throw | End): Source<never>;
 export function ofEvent<T>(event: Event_2<T>): Source<T>;
 
 // @public (undocumented)
-export function ofEventScheduled<T>(
-    event: Throw | End,
-    schedule: ScheduleFunction,
-): Source<never>;
+export function ofEventScheduled<T>(event: Throw | End, schedule: ScheduleFunction): Source<never>;
 
 // @public (undocumented)
-export function ofEventScheduled<T>(
-    event: Event_2<T>,
-    schedule: ScheduleFunction,
-): Source<T>;
+export function ofEventScheduled<T>(event: Event_2<T>, schedule: ScheduleFunction): Source<T>;
 
 // @public (undocumented)
-export function ofScheduled<T>(
-    schedule: ScheduleFunction,
-    ...items: T[]
-): Source<T>;
+export function ofScheduled<T>(schedule: ScheduleFunction, ...items: T[]): Source<T>;
 
 // @public (undocumented)
 export interface Operator<T, U> {
@@ -724,103 +491,31 @@ export function pipe<T>(x: T): T;
 export function pipe<T, R>(x: T, f1: (x: T) => R): R;
 
 // @public (undocumented)
-export function pipe<T, A, R>(
-    x: T,
-    f1: (x: T) => A,
-    f2: (x: A) => R,
-): R;
+export function pipe<T, A, R>(x: T, f1: (x: T) => A, f2: (x: A) => R): R;
 
 // @public (undocumented)
-export function pipe<T, A, B, R>(
-    x: T,
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => R,
-): R;
+export function pipe<T, A, B, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => R): R;
 
 // @public (undocumented)
-export function pipe<T, A, B, C, R>(
-    x: T,
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => R,
-): R;
+export function pipe<T, A, B, C, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => R): R;
 
 // @public (undocumented)
-export function pipe<T, A, B, C, D, R>(
-    x: T,
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => R,
-): R;
+export function pipe<T, A, B, C, D, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => R): R;
 
 // @public (undocumented)
-export function pipe<T, A, B, C, D, E, R>(
-    x: T,
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => E,
-    f6: (x: E) => R,
-): R;
+export function pipe<T, A, B, C, D, E, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => R): R;
 
 // @public (undocumented)
-export function pipe<T, A, B, C, D, E, F, R>(
-    x: T,
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => E,
-    f6: (x: E) => F,
-    f7: (x: F) => R,
-): R;
+export function pipe<T, A, B, C, D, E, F, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => R): R;
 
 // @public (undocumented)
-export function pipe<T, A, B, C, D, E, F, G, R>(
-    x: T,
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => E,
-    f6: (x: E) => F,
-    f7: (x: F) => G,
-    f8: (x: G) => R,
-): R;
+export function pipe<T, A, B, C, D, E, F, G, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => R): R;
 
 // @public (undocumented)
-export function pipe<T, A, B, C, D, E, F, G, H, R>(
-    x: T,
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => E,
-    f6: (x: E) => F,
-    f7: (x: F) => G,
-    f8: (x: G) => H,
-    f9: (x: H) => R,
-): R;
+export function pipe<T, A, B, C, D, E, F, G, H, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R): R;
 
 // @public (undocumented)
-export function pipe<T, A, B, C, D, E, F, G, H, R>(
-    x: T,
-    f1: (x: T) => A,
-    f2: (x: A) => B,
-    f3: (x: B) => C,
-    f4: (x: C) => D,
-    f5: (x: D) => E,
-    f6: (x: E) => F,
-    f7: (x: F) => G,
-    f8: (x: G) => H,
-    f9: (x: H) => R,
-    ...funcs: Array<(x: any) => any>
-): R;
+export function pipe<T, A, B, C, D, E, F, G, H, R>(x: T, f1: (x: T) => A, f2: (x: A) => B, f3: (x: B) => C, f4: (x: C) => D, f5: (x: D) => E, f6: (x: E) => F, f7: (x: F) => G, f8: (x: G) => H, f9: (x: H) => R, ...funcs: Array<(x: any) => any>): R;
 
 // @public (undocumented)
 export function pipe<T>(x: T, ...fns: ((x: T) => T)[]): T;
@@ -849,30 +544,23 @@ export type PushType = 0;
 export const PushType: PushType;
 
 // @public (undocumented)
-export function raceSources<T>(...sources: Source<T>[]): Source<T>;
+export function raceSources<T>(sources: Source<T>[]): Source<T>;
 
 // @public (undocumented)
-export function raceWith<T>(
-    ...sources: Source<T>[]
-): <U>(source: Source<U>) => Source<T | U>;
+export function raceWith<T>(sources: Source<T>[]): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
 export function range(count: number, start?: number): Source<number>;
 
 // @public
-export function reduce<T, R, I>(
-    transform: (
-        previousAccumulatedResult: R | I,
-        currentValue: T,
-        currentIndex: number,
-    ) => R,
-    initialValue: I,
-): Operator<T, R>;
+export function reduce<T, R, I>(transform: (previousAccumulatedResult: R | I, currentValue: T, currentIndex: number) => R, initialValue: I): Operator<T, R>;
 
 // @public (undocumented)
-export interface RemovedGroupSource<T> extends GroupSourceBase<T> {
+export interface RemovedGroupSource<T> extends Source<T> {
     // (undocumented)
     key: null;
+    // (undocumented)
+    remove(): void;
     // (undocumented)
     removed: true;
 }
@@ -881,15 +569,10 @@ export interface RemovedGroupSource<T> extends GroupSourceBase<T> {
 export const repeat: (times: number) => IdentityOperator;
 
 // @public (undocumented)
-export function repeatWhen<T>(
-    getRepeatSource: (sourceEvents: Source<Event_2<T>>) => Source<unknown>,
-): Operator<T, T>;
+export function repeatWhen<T>(getRepeatSource: (sourceEvents: Source<Event_2<T>>) => Source<unknown>): Operator<T, T>;
 
 // @public (undocumented)
-export function ReplaySubject<T>(
-    count_?: number | null,
-    timeoutConfig_?: ReplaySubjectTimeoutConfig | null,
-): Subject<T>;
+export function ReplaySubject<T>(count_?: number | null, timeoutConfig_?: ReplaySubjectTimeoutConfig | null): Subject<T>;
 
 // @public (undocumented)
 export interface ReplaySubjectTimeoutConfig {
@@ -900,10 +583,7 @@ export interface ReplaySubjectTimeoutConfig {
 }
 
 // @public
-function requestAnimationFrame_2(
-    callback: (time: number) => void,
-    subscription?: Disposable,
-): void;
+function requestAnimationFrame_2(callback: (time: number) => void, subscription?: Disposable): void;
 
 export { requestAnimationFrame_2 as requestAnimationFrame }
 
@@ -914,30 +594,21 @@ export const retry: (times: number) => IdentityOperator;
 export const retryAlways: IdentityOperator;
 
 // @public (undocumented)
-export function sample(
-    scheduleSource: Source<unknown>,
-): IdentityOperator;
+export function sample(scheduleSource: Source<unknown>): IdentityOperator;
 
 // @public (undocumented)
 export function sampleMs(ms: number): IdentityOperator;
 
 // @public
-export function scan<T, R, I>(
-    transform: (
-        previousAccumulatedResult: R | I,
-        currentValue: T,
-        currentIndex: number,
-    ) => R,
-    initialValue: I,
-): Operator<T, R>;
-
-// Warning: (ae-forgotten-export) The symbol "ScheduleAnimationFrameFunction" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export const scheduleAnimationFrame: ScheduleAnimationFrameFunction;
+export function scan<T, R, I>(transform: (previousAccumulatedResult: R | I, currentValue: T, currentIndex: number) => R, initialValue: I): Operator<T, R>;
 
 // @public (undocumented)
-export function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;
+export const scheduleAnimationFrame: ScheduleFunction<[
+    number
+]>;
+
+// @public (undocumented)
+export function ScheduleAnimationFrameQueued(): ScheduleFunction<[number]>;
 
 // @public (undocumented)
 export interface ScheduleFunction<T extends any[] = []> {
@@ -949,30 +620,16 @@ export interface ScheduleFunction<T extends any[] = []> {
 export function ScheduleInterval(delayMs: number): ScheduleFunction;
 
 // @public (undocumented)
-export function schedulePushEvents(
-    schedule: ScheduleFunction,
-): IdentityOperator;
+export function schedulePushEvents(schedule: ScheduleFunction): IdentityOperator;
 
 // @public (undocumented)
-export function ScheduleQueued<T extends any[] = []>(
-    schedule: (
-        callNext: (...args: T) => void,
-        subscription: Disposable,
-    ) => void,
-): ScheduleFunction<T>;
+export function ScheduleQueued<T extends any[] = []>(schedule: (callNext: (...args: T) => void, subscription: Disposable) => void): ScheduleFunction<T>;
 
 // @public (undocumented)
-export function ScheduleQueuedDiscrete<T extends any[] = []>(
-    schedule: (
-        callback: (...args: T) => void,
-        subscription: Disposable,
-    ) => void,
-): ScheduleFunction<T>;
+export function ScheduleQueuedDiscrete<T extends any[] = []>(schedule: (callback: (...args: T) => void, subscription: Disposable) => void): ScheduleFunction<T>;
 
 // @public (undocumented)
-export function scheduleSubscription(
-    schedule: ScheduleFunction,
-): IdentityOperator;
+export function scheduleSubscription(schedule: ScheduleFunction): IdentityOperator;
 
 // @public (undocumented)
 export const scheduleSync: ScheduleFunction;
@@ -984,27 +641,15 @@ export function ScheduleSyncQueued(): ScheduleFunction;
 export function ScheduleTimeout(delayMs: number): ScheduleFunction;
 
 // @public (undocumented)
-export function ScheduleTimeoutQueued(
-    delayMs: number,
-): ScheduleFunction;
+export function ScheduleTimeoutQueued(delayMs: number): ScheduleFunction;
 
 // @public
-function setInterval_2<T extends any[]>(
-    callback: (...args: T) => void,
-    delayMs?: number,
-    subscription?: Disposable,
-    ...args: T
-): void;
+function setInterval_2<T extends any[]>(callback: (...args: T) => void, delayMs?: number, subscription?: Disposable, ...args: T): void;
 
 export { setInterval_2 as setInterval }
 
 // @public
-function setTimeout_2<T extends any[]>(
-    callback: (...args: T) => void,
-    delayMs?: number,
-    subscription?: Disposable,
-    ...args: T
-): void;
+function setTimeout_2<T extends any[]>(callback: (...args: T) => void, delayMs?: number, subscription?: Disposable, ...args: T): void;
 
 export { setTimeout_2 as setTimeout }
 
@@ -1015,44 +660,28 @@ export function share<T>(Subject_: () => Subject<T>): Operator<T, T>;
 export function share(Subject_?: typeof Subject): IdentityOperator;
 
 // @public (undocumented)
-export function shareControlled<T>(
-    Subject_: () => Subject<T>,
-): (source: Source<T>) => ControllableSource<T>;
+export function shareControlled<T>(Subject_: () => Subject<T>): (source: Source<T>) => ControllableSource<T>;
 
 // @public (undocumented)
-export function shareControlled(
-    Subject_?: typeof Subject,
-): <T>(source: Source<T>) => ControllableSource<T>;
+export function shareControlled(Subject_?: typeof Subject): <T>(source: Source<T>) => ControllableSource<T>;
 
 // @public (undocumented)
-export function shareOnce<T>(
-    Subject_: () => Subject<T>,
-): Operator<T, T>;
+export function shareOnce<T>(Subject_: () => Subject<T>): Operator<T, T>;
 
 // @public (undocumented)
 export function shareOnce(Subject_?: typeof Subject): IdentityOperator;
 
 // @public (undocumented)
-export function sharePersist<T>(
-    Subject_: () => Subject<T>,
-): Operator<T, T>;
+export function sharePersist<T>(Subject_: () => Subject<T>): Operator<T, T>;
 
 // @public (undocumented)
-export function sharePersist(
-    Subject_?: typeof Subject,
-): IdentityOperator;
+export function sharePersist(Subject_?: typeof Subject): IdentityOperator;
 
 // @public (undocumented)
-export function shareTransform<T, U>(
-    Subject_: () => Subject<T>,
-    transform: (shared: Source<T>) => Source<U>,
-): Operator<T, U>;
+export function shareTransform<T, U>(Subject_: () => Subject<T>, transform: (shared: Source<T>) => Source<U>): Operator<T, U>;
 
 // @public (undocumented)
-export function shareTransform<U>(
-    Subject_: typeof Subject,
-    transform: <T>(source: Source<T>) => Source<U>,
-): <T>(shared: Source<T>) => Source<U>;
+export function shareTransform<U>(Subject_: typeof Subject, transform: <T>(source: Source<T>) => Source<U>): <T>(shared: Source<T>) => Source<U>;
 
 // @public
 export function Sink<T>(onEvent: (event: Event_2<T>) => void): Sink<T>;
@@ -1072,19 +701,13 @@ export function skip(amount: number): IdentityOperator;
 export function skipLast(amount: number): IdentityOperator;
 
 // @public (undocumented)
-export function skipUntil(
-    stopSource: Source<unknown>,
-): IdentityOperator;
+export function skipUntil(stopSource: Source<unknown>): IdentityOperator;
 
 // @public (undocumented)
-export function skipWhile<T>(
-    shouldContinueSkipping: (value: T, index: number) => unknown,
-): Operator<T, T>;
+export function skipWhile<T>(shouldContinueSkipping: (value: T, index: number) => unknown): Operator<T, T>;
 
 // @public (undocumented)
-export function some<T>(
-    predicate: (value: T, index: number) => unknown,
-): Operator<T, boolean>;
+export function some<T>(predicate: (value: T, index: number) => unknown): Operator<T, boolean>;
 
 // @public
 export function Source<T>(produce: (sink: Sink<T>) => void): Source<T>;
@@ -1098,14 +721,10 @@ export interface Source<T> {
 }
 
 // @public (undocumented)
-export const spyAfter: <T>(
-    onEvent: (event: Event_2<T>) => void,
-) => Operator<T, T>;
+export const spyAfter: <T>(onEvent: (event: Event_2<T>) => void) => Operator<T, T>;
 
 // @public (undocumented)
-export const spyBefore: <T>(
-    onEvent: (event: Event_2<T>) => void,
-) => Operator<T, T>;
+export const spyBefore: <T>(onEvent: (event: Event_2<T>) => void) => Operator<T, T>;
 
 // @public (undocumented)
 export const spyEndAfter: (onEnd: () => void) => IdentityOperator;
@@ -1114,49 +733,35 @@ export const spyEndAfter: (onEnd: () => void) => IdentityOperator;
 export const spyEndBefore: (onEnd: () => void) => IdentityOperator;
 
 // @public (undocumented)
-export const spyPushAfter: <T>(
-    onPush: (value: T, index: number) => void,
-) => Operator<T, T>;
+export const spyPushAfter: <T>(onPush: (value: T, index: number) => void) => Operator<T, T>;
 
 // @public (undocumented)
-export const spyPushBefore: <T>(
-    onPush: (value: T, index: number) => void,
-) => Operator<T, T>;
+export const spyPushBefore: <T>(onPush: (value: T, index: number) => void) => Operator<T, T>;
 
 // @public (undocumented)
-export const spyThrowAfter: (
-    onThrow: (error: unknown) => void,
-) => IdentityOperator;
+export const spyThrowAfter: (onThrow: (error: unknown) => void) => IdentityOperator;
 
 // @public (undocumented)
-export const spyThrowBefore: (
-    onThrow: (error: unknown) => void,
-) => IdentityOperator;
+export const spyThrowBefore: (onThrow: (error: unknown) => void) => IdentityOperator;
 
 // @public (undocumented)
-export function startWith<T>(
-    ...values: T[]
-): <U>(source: Source<U>) => Source<T | U>;
+export function startWith<T>(...values: T[]): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
-export function startWithSources<T>(
-    ...sources: Source<T>[]
-): <U>(source: Source<U>) => Source<T | U>;
+export function startWithSources<T>(sources: Source<T>[]): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
 export function Subject<T>(): Subject<T>;
 
 // @public (undocumented)
-export interface Subject<T> extends Source<T>, Sink<T>, NonMarkedSubject<T> {}
+export interface Subject<T> extends Source<T>, Sink<T>, NonMarkedSubject<T> {
+}
 
 // @public (undocumented)
 export function SubjectBase<T>(): Subject<T>;
 
-// Warning: (ae-forgotten-export) The symbol "SubjectDistributionSinkDisposalErrorImplementation" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export interface SubjectDistributionSinkDisposalError
-    extends SubjectDistributionSinkDisposalErrorImplementation {
+export interface SubjectDistributionSinkDisposalError {
     readonly errors: DisposalError[];
 }
 
@@ -1172,17 +777,13 @@ export interface SubjectDistributionSinkDisposalErrorConstructor {
 }
 
 // @public
-export function subscribe<T>(
-    sink?: Sink<T>,
-): (source: Source<T>) => void;
+export function subscribe<T>(sink?: Sink<T>): (source: Source<T>) => void;
 
 // @public (undocumented)
 export const switchEach: <T>(source: Source<Source<T>>) => Source<T>;
 
 // @public (undocumented)
-export function switchMap<T, U>(
-    transform: (value: T, index: number) => Source<U>,
-): Operator<T, U>;
+export function switchMap<T, U>(transform: (value: T, index: number) => Source<U>): Operator<T, U>;
 
 // @public (undocumented)
 export function take(amount: number): IdentityOperator;
@@ -1191,31 +792,19 @@ export function take(amount: number): IdentityOperator;
 export function takeLast(amount: number): IdentityOperator;
 
 // @public (undocumented)
-export function takeUntil(
-    stopSource: Source<unknown>,
-): IdentityOperator;
+export function takeUntil(stopSource: Source<unknown>): IdentityOperator;
 
 // @public
-export function takeWhile<T, S extends T>(
-    shouldContinue: (value: T, index: number) => value is S,
-): Operator<T, S>;
+export function takeWhile<T, S extends T>(shouldContinue: (value: T, index: number) => value is S): Operator<T, S>;
 
 // @public (undocumented)
-export function takeWhile<T>(
-    shouldContinue: (value: T, index: number) => unknown,
-): Operator<T, T>;
+export function takeWhile<T>(shouldContinue: (value: T, index: number) => unknown): Operator<T, T>;
 
 // @public (undocumented)
-export function throttle(
-    getDurationSource: () => Source<unknown>,
-    config?: ThrottleConfig | null,
-): IdentityOperator;
+export function throttle(getDurationSource: () => Source<unknown>, config?: ThrottleConfig | null): IdentityOperator;
 
 // @public (undocumented)
-export function throttle<T>(
-    getDurationSource: (value: T, index: number) => Source<unknown>,
-    config?: ThrottleConfig | null,
-): Operator<T, T>;
+export function throttle<T>(getDurationSource: (value: T, index: number) => Source<unknown>, config?: ThrottleConfig | null): Operator<T, T>;
 
 // @public (undocumented)
 export interface ThrottleConfig {
@@ -1228,10 +817,7 @@ export interface ThrottleConfig {
 }
 
 // @public (undocumented)
-export function throttleMs(
-    durationMs: number,
-    config?: ThrottleConfig | null,
-): IdentityOperator;
+export function throttleMs(durationMs: number, config?: ThrottleConfig | null): IdentityOperator;
 
 // @public
 export function Throw(error: unknown): Throw;
@@ -1248,10 +834,7 @@ export interface Throw {
 export function throwError(getError: () => unknown): Source<never>;
 
 // @public (undocumented)
-export function throwErrorScheduled(
-    getError: () => unknown,
-    schedule: ScheduleFunction,
-): Source<never>;
+export function throwErrorScheduled(getError: () => unknown, schedule: ScheduleFunction): Source<never>;
 
 // @public (undocumented)
 export function throwIfEmpty(getError: () => unknown): IdentityOperator;
@@ -1279,16 +862,10 @@ export interface TimeInterval<T> {
 }
 
 // @public (undocumented)
-export function timeout<T>(
-    timeoutSource: Source<unknown>,
-    replacementSource: Source<T>,
-): <U>(source: Source<U>) => Source<T | U>;
+export function timeout<T>(timeoutSource: Source<unknown>, replacementSource: Source<T>): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
-export function timeoutMs<T>(
-    ms: number,
-    replacementSource: Source<T>,
-): <U>(source: Source<U>) => Source<T | U>;
+export function timeoutMs<T>(ms: number, replacementSource: Source<T>): <U>(source: Source<U>) => Source<T | U>;
 
 // @public (undocumented)
 export interface TimeProvider {
@@ -1300,59 +877,38 @@ export interface TimeProvider {
 export function timer(durationMs: number): Source<never>;
 
 // @public (undocumented)
-export const unwrapFromWrappedPushEvents: <T>(
-    source: Source<Event_2<T>>,
-) => Source<T>;
+export const unwrapFromWrappedPushEvents: <T>(source: Source<Event_2<T>>) => Source<T>;
 
 // @public (undocumented)
-export function windowControlled(
-    getWindowOpeningsSource: <T>(sharedSource: Source<T>) => Source<unknown>,
-    getWindowClosingSource: <T>(currentWindow: Source<T>) => Source<unknown>,
-): <T>(source: Source<T>) => Source<Source<T>>;
+export function windowControlled(getWindowOpeningsSource: <T>(sharedSource: Source<T>) => Source<unknown>, getWindowClosingSource: <T>(currentWindow: Source<T>) => Source<unknown>): <T>(source: Source<T>) => Source<Source<T>>;
 
 // @public (undocumented)
-export function windowControlled<T>(
-    getWindowOpeningsSource: (sharedSource: Source<T>) => Source<unknown>,
-    getWindowClosingSource: (currentWindow: Source<T>) => Source<unknown>,
-): (source: Source<T>) => Source<Source<T>>;
+export function windowControlled<T>(getWindowOpeningsSource: (sharedSource: Source<T>) => Source<unknown>, getWindowClosingSource: (currentWindow: Source<T>) => Source<unknown>): (source: Source<T>) => Source<Source<T>>;
 
 // @public (undocumented)
-export function windowCount(
-    maxWindowLength: number,
-    createEvery?: number,
-): <T>(source: Source<T>) => Source<Source<T>>;
+export function windowCount(maxWindowLength: number, createEvery?: number): <T>(source: Source<T>) => Source<Source<T>>;
 
 // @public (undocumented)
-export function windowEach(
-    getWindowClosingSource: <T>(currentWindow: Source<T>) => Source<unknown>,
-): <T>(source: Source<T>) => Source<Source<T>>;
+export function windowEach(getWindowClosingSource: <T>(currentWindow: Source<T>) => Source<unknown>): <T>(source: Source<T>) => Source<Source<T>>;
 
 // @public (undocumented)
-export function windowEach<T>(
-    getWindowClosingSource: (currentWindow: Source<T>) => Source<unknown>,
-): (source: Source<T>) => Source<Source<T>>;
+export function windowEach<T>(getWindowClosingSource: (currentWindow: Source<T>) => Source<unknown>): (source: Source<T>) => Source<Source<T>>;
 
 // @public (undocumented)
-export function windowEvery(
-    boundariesSource: Source<unknown>,
-): <T>(source: Source<T>) => Source<Source<T>>;
+export function windowEvery(boundariesSource: Source<unknown>): <T>(source: Source<T>) => Source<Source<T>>;
 
 // @public (undocumented)
-export function windowTime(
-    maxWindowDuration?: number | null,
-    creationInterval?: number | null,
-    maxWindowLength?: number,
-): <T>(source: Source<T>) => Source<Source<T>>;
+export function windowTime(maxWindowDuration?: number | null, creationInterval?: number | null, maxWindowLength?: number): <T>(source: Source<T>) => Source<Source<T>>;
 
 // @public (undocumented)
-export function withLatestFrom<T extends unknown[]>(
-    ...sources: WrapValuesInSource<T>
-): <U>(source: Source<U>) => Source<Unshift<T, U>>;
+export function withLatestFrom<T extends unknown[]>(sources: {
+    [K in keyof T]: Source<T[K]>;
+}): <U>(source: Source<U>) => Source<[U, ...T]>;
 
 // @public (undocumented)
-export function withLatestFromLazy<T extends unknown[]>(
-    getSources: () => WrapValuesInSource<T>,
-): <U>(source: Source<U>) => Source<Unshift<T, U>>;
+export function withLatestFromLazy<T extends unknown[]>(getSources: () => {
+    [K in keyof T]: Source<T[K]>;
+}): <U>(source: Source<U>) => Source<[U, ...T]>;
 
 // @public (undocumented)
 export function withPrevious<T>(source: Source<T>): Source<[T, T]>;
@@ -1366,29 +922,23 @@ export interface WithTime<T> {
 }
 
 // @public (undocumented)
-export function withTime<T>(
-    provideTime: TimeProvider,
-): Operator<T, WithTime<T>>;
+export function withTime<T>(provideTime: TimeProvider): Operator<T, WithTime<T>>;
 
 // @public (undocumented)
-export function withTimeInterval<T>(
-    provideTime: TimeProvider,
-): Operator<T, TimeInterval<T>>;
+export function withTimeInterval<T>(provideTime: TimeProvider): Operator<T, TimeInterval<T>>;
 
 // @public (undocumented)
-export const wrapInPushEvents: <T>(
-    source: Source<T>,
-) => Source<Event_2<T>>;
+export const wrapInPushEvents: <T>(source: Source<T>) => Source<Event_2<T>>;
 
 // @public (undocumented)
-export function zipSources<T extends unknown[]>(
-    ...sources: WrapValuesInSource<T>
-): Source<T>;
+export function zipSources<T extends unknown[]>(sources: {
+    [K in keyof T]: Source<T[K]>;
+}): Source<T>;
 
 // @public (undocumented)
-export function zipWith<T extends unknown[]>(
-    ...sources: WrapValuesInSource<T>
-): <U>(source: Source<U>) => Source<Unshift<T, U>>;
+export function zipWith<T extends unknown[]>(sources: {
+    [K in keyof T]: Source<T[K]>;
+}): <U>(source: Source<U>) => Source<[U, ...T]>;
 
 
 // (No @packageDocumentation comment for this package)

@@ -20,9 +20,7 @@
 
 <b>Signature</b>
 
-```ts
-function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;
-```
+<pre>function ScheduleAnimationFrameQueued(): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;[number]&gt;</pre>
 
 ## <code>ScheduleInterval</code>
 
@@ -30,7 +28,7 @@ function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;
 
 <b>Signature</b>
 
-<pre>function ScheduleInterval(delayMs: number): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
+<pre>function ScheduleInterval(delayMs: number): <a href="basics.md#schedulefunction">ScheduleFunction</a></pre>
 
 ## <code>ScheduleQueued</code>
 
@@ -38,7 +36,7 @@ function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;
 
 <b>Signature</b>
 
-<pre>function ScheduleQueued&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callNext: (...args: T) =&gt; void,<br>        subscription: <a href="basics.md#disposable-interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
+<pre>function ScheduleQueued&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callNext: (...args: T) =&gt; void,<br>        subscription: <a href="basics.md#disposable-interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;</pre>
 
 ## <code>ScheduleQueuedDiscrete</code>
 
@@ -46,7 +44,7 @@ function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;
 
 <b>Signature</b>
 
-<pre>function ScheduleQueuedDiscrete&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callback: (...args: T) =&gt; void,<br>        subscription: <a href="basics.md#disposable-interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;;</pre>
+<pre>function ScheduleQueuedDiscrete&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callback: (...args: T) =&gt; void,<br>        subscription: <a href="basics.md#disposable-interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;T&gt;</pre>
 
 ## <code>ScheduleSyncQueued</code>
 
@@ -54,7 +52,7 @@ function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;
 
 <b>Signature</b>
 
-<pre>function ScheduleSyncQueued(): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
+<pre>function ScheduleSyncQueued(): <a href="basics.md#schedulefunction">ScheduleFunction</a></pre>
 
 ## <code>ScheduleTimeout</code>
 
@@ -62,7 +60,7 @@ function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;
 
 <b>Signature</b>
 
-<pre>function ScheduleTimeout(delayMs: number): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
+<pre>function ScheduleTimeout(delayMs: number): <a href="basics.md#schedulefunction">ScheduleFunction</a></pre>
 
 ## <code>ScheduleTimeoutQueued</code>
 
@@ -70,17 +68,15 @@ function ScheduleAnimationFrameQueued(): ScheduleAnimationFrameFunction;
 
 <b>Signature</b>
 
-<pre>function ScheduleTimeoutQueued(<br>    delayMs: number,<br>): <a href="basics.md#schedulefunction">ScheduleFunction</a>;</pre>
+<pre>function ScheduleTimeoutQueued(delayMs: number): <a href="basics.md#schedulefunction">ScheduleFunction</a></pre>
 
 ## <code>scheduleAnimationFrame</code>
 
-> Source Location: [packages\/core\/src\/schedule.ts#L232](..\/..\/..\/packages\/core\/src\/schedule.ts#L232)
+> Source Location: [packages\/core\/src\/schedule.ts#L230](..\/..\/..\/packages\/core\/src\/schedule.ts#L230)
 
 <b>Signature</b>
 
-```ts
-scheduleAnimationFrame: ScheduleAnimationFrameFunction;
-```
+<pre>var scheduleAnimationFrame: <a href="basics.md#schedulefunction">ScheduleFunction</a>&lt;[number]&gt;</pre>
 
 ## <code>scheduleSync</code>
 

@@ -1,9 +1,9 @@
+import { DeepCoreNode } from '../../core/nodes';
 import { BoldNode } from '../../core/nodes/Bold';
 import { CollapsibleSectionNode } from '../../core/nodes/CollapsibleSection';
 import { ContainerNode } from '../../core/nodes/Container';
 import { DoNotEditCommentNode } from '../../core/nodes/DoNotEditComment';
 import { HeadingNode } from '../../core/nodes/Heading';
-import { DeepCoreNode } from '../../core/nodes/index';
 import { LocalPageLinkNode } from '../../core/nodes/LocalPageLink';
 import { PageNode } from '../../core/nodes/Page';
 import { PageTitleNode } from '../../core/nodes/PageTitle';

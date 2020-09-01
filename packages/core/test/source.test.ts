@@ -118,10 +118,10 @@ import {
 describe('zipSources', () => {
     it('works case 1', () => {
         const testSchedule = TestSchedule();
-        const source = zipSources(
+        const source = zipSources([
             TestSource([P('a', 0), P('b', 4), P('c', 21), E(22)], testSchedule),
             TestSource([P('z', 3), P('y', 91), P('x', 102)], testSchedule),
-        );
+        ]);
         const events = watchSourceEvents(source, testSchedule);
         testSchedule.flush();
         expect(events).toEqual([
@@ -134,10 +134,10 @@ describe('zipSources', () => {
 
     it('works case two', () => {
         const testSchedule = TestSchedule();
-        const source = zipSources(
+        const source = zipSources([
             TestSource([P('a', 0), P('b', 4), P('c', 21), E(22)], testSchedule),
             TestSource([P('z', 3), P('y', 91), T('e', 102)], testSchedule),
-        );
+        ]);
         const events = watchSourceEvents(source, testSchedule);
         testSchedule.flush();
         expect(events).toEqual([
@@ -149,12 +149,12 @@ describe('zipSources', () => {
 
     it('works case three', () => {
         const testSchedule = TestSchedule();
-        const source = zipSources(
+        const source = zipSources([
             TestSource([P('a', 0), P('b', 4), P('c', 21), E(22)], testSchedule),
             TestSource([P('z', 3), P('y', 91), P('x', 102)], testSchedule),
             // prettier-ignore
             TestSource([P('1', 0), P('2', 0), E(1)], testSchedule),
-        );
+        ]);
         const events = watchSourceEvents(source, testSchedule);
         testSchedule.flush();
         expect(events).toEqual([

@@ -1,8 +1,8 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
 import * as ts from 'typescript';
+import { DeepCoreNode } from '../../../core/nodes';
 import { BlockQuoteNode } from '../../../core/nodes/BlockQuote';
 import { GithubSourceLinkNode } from '../../../core/nodes/GithubSourceLink';
-import { DeepCoreNode } from '../../../core/nodes/index';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
 import { getRelativePath } from '../../../util/getRelativePath';
 import { AnalyzeContext } from '../../Context';

@@ -23,7 +23,7 @@
 
 <b>Signature</b>
 
-<pre>function TestSource&lt;T&gt;(<br>    events: <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[],<br>    testSchedule: <a href="#testschedule-interface">TestSchedule</a>,<br>): <a href="#testsource-interface">TestSource</a>&lt;T&gt;;</pre>
+<pre>function TestSource&lt;T&gt;(<br>    events: <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[],<br>    testSchedule: <a href="#testschedule-interface">TestSchedule</a>,<br>): <a href="#testsource-interface">TestSource</a>&lt;T&gt;</pre>
 
 ### <a name="testsource-interface"></a><code>TestSource - Interface</code>
 
@@ -41,7 +41,7 @@
 
 <b>Signature</b>
 
-<pre>function SharedTestSource&lt;T&gt;(<br>    events: <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[],<br>    testSchedule: <a href="#testschedule-interface">TestSchedule</a>,<br>): <a href="#sharedtestsource-interface">SharedTestSource</a>&lt;T&gt;;</pre>
+<pre>function SharedTestSource&lt;T&gt;(<br>    events: <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[],<br>    testSchedule: <a href="#testschedule-interface">TestSchedule</a>,<br>): <a href="#sharedtestsource-interface">SharedTestSource</a>&lt;T&gt;</pre>
 
 ### <a name="sharedtestsource-interface"></a><code>SharedTestSource - Interface</code>
 
@@ -57,11 +57,7 @@
 
 <b>Signature</b>
 
-```ts
-type TestSourceEvent<T> = Event<T> & {
-    readonly frame: number;
-};
-```
+<pre>type TestSourceEvent&lt;T&gt; = <a href="../core/basics.md#event">Event</a>&lt;T&gt; & {<br>    readonly frame: number<br>}</pre>
 
 ## <code>TestSubscriptionInfo</code>
 
@@ -71,7 +67,7 @@ type TestSourceEvent<T> = Event<T> & {
 
 <b>Signature</b>
 
-<pre>function TestSubscriptionInfo(<br>    subscriptionStartFrame: number,<br>    subscriptionEndFrame: number,<br>): <a href="#testsubscriptioninfo-interface">TestSubscriptionInfo</a>;</pre>
+<pre>function TestSubscriptionInfo(<br>    subscriptionStartFrame: number,<br>    subscriptionEndFrame: number,<br>): <a href="#testsubscriptioninfo-interface">TestSubscriptionInfo</a></pre>
 
 ### <a name="testsubscriptioninfo-interface"></a><code>TestSubscriptionInfo - Interface</code>
 
@@ -89,7 +85,7 @@ interface TestSubscriptionInfo
 
 <b>Signature</b>
 
-<pre>type TestSourceSubscriptions = ReadonlyArray&lt;<br>    Readonly&lt;<a href="#testsubscriptioninfo-interface">TestSubscriptionInfo</a>&gt;<br>&gt;;</pre>
+<pre>type TestSourceSubscriptions = ReadonlyArray&lt;Readonly&lt;<a href="#testsubscriptioninfo-interface">TestSubscriptionInfo</a>&gt;&gt;</pre>
 
 ## <code>TestSchedule</code>
 
@@ -99,7 +95,7 @@ interface TestSubscriptionInfo
 
 <b>Signature</b>
 
-<pre>function TestSchedule(): <a href="#testschedule-interface">TestSchedule</a>;</pre>
+<pre>function TestSchedule(): <a href="#testschedule-interface">TestSchedule</a></pre>
 
 ### <a name="testschedule-interface"></a><code>TestSchedule - Interface</code>
 
@@ -117,7 +113,7 @@ interface TestSchedule
 
 <b>Signature</b>
 
-<pre>function watchSourceEvents&lt;T&gt;(<br>    source: <a href="../core/basics.md#source-interface">Source</a>&lt;T&gt;,<br>    testSchedule: <a href="#testschedule-interface">TestSchedule</a>,<br>    subscriptionInfo?: <a href="#testsubscriptioninfo-interface">TestSubscriptionInfo</a>,<br>): <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[];</pre>
+<pre>function watchSourceEvents&lt;T&gt;(<br>    source: <a href="../core/basics.md#source-interface">Source</a>&lt;T&gt;,<br>    testSchedule: <a href="#testschedule-interface">TestSchedule</a>,<br>    subscriptionInfo?: <a href="#testsubscriptioninfo-interface">TestSubscriptionInfo</a>,<br>): <a href="#testsourceevent">TestSourceEvent</a>&lt;T&gt;[]</pre>
 
 ## <code>P</code>
 
@@ -125,7 +121,7 @@ interface TestSchedule
 
 <b>Signature</b>
 
-<pre>function P&lt;T&gt;(<br>    value: T,<br>    frame: number,<br>): <a href="../core/basics.md#push-interface">Push</a>&lt;T&gt; & {<br>    readonly frame: number;<br>};</pre>
+<pre>function P&lt;T&gt;(<br>    value: T,<br>    frame: number,<br>): <a href="../core/basics.md#push-interface">Push</a>&lt;T&gt; & {<br>    readonly frame: number<br>}</pre>
 
 ## <code>T</code>
 
@@ -133,7 +129,7 @@ interface TestSchedule
 
 <b>Signature</b>
 
-<pre>function T(<br>    error: unknown,<br>    frame: number,<br>): <a href="../core/basics.md#throw-interface">Throw</a> & {<br>    readonly frame: number;<br>};</pre>
+<pre>function T(<br>    error: unknown,<br>    frame: number,<br>): <a href="../core/basics.md#throw-interface">Throw</a> & {<br>    readonly frame: number<br>}</pre>
 
 ## <code>E</code>
 
@@ -141,4 +137,4 @@ interface TestSchedule
 
 <b>Signature</b>
 
-<pre>function E(<br>    frame: number,<br>): <a href="../core/basics.md#end-interface">End</a> & {<br>    readonly frame: number;<br>};</pre>
+<pre>function E(<br>    frame: number,<br>): <a href="../core/basics.md#end-interface">End</a> & {<br>    readonly frame: number<br>}</pre>

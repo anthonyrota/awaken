@@ -12,25 +12,17 @@ import { Source } from '@awaken/core';
 import { Throw } from '@awaken/core';
 
 // @public (undocumented)
-export function E(
-    frame: number,
-): End & {
+export function E(frame: number): End & {
     readonly frame: number;
 };
 
 // @public (undocumented)
-export function P<T>(
-    value: T,
-    frame: number,
-): Push<T> & {
+export function P<T>(value: T, frame: number): Push<T> & {
     readonly frame: number;
 };
 
 // @public (undocumented)
-export function SharedTestSource<T>(
-    events: TestSourceEvent<T>[],
-    testSchedule: TestSchedule,
-): SharedTestSource<T>;
+export function SharedTestSource<T>(events: TestSourceEvent<T>[], testSchedule: TestSchedule): SharedTestSource<T>;
 
 // @public (undocumented)
 export interface SharedTestSource<T> extends TestSource<T> {
@@ -39,10 +31,7 @@ export interface SharedTestSource<T> extends TestSource<T> {
 }
 
 // @public (undocumented)
-export function T(
-    error: unknown,
-    frame: number,
-): Throw & {
+export function T(error: unknown, frame: number): Throw & {
     readonly frame: number;
 };
 
@@ -52,11 +41,7 @@ export function TestSchedule(): TestSchedule;
 // @public (undocumented)
 export interface TestSchedule {
     // (undocumented)
-    (
-        callback: () => void,
-        delayFrames: number,
-        subscription?: Disposable,
-    ): void;
+    (callback: () => void, delayFrames: number, subscription?: Disposable): void;
     // (undocumented)
     readonly currentFrame: number;
     // (undocumented)
@@ -66,10 +51,7 @@ export interface TestSchedule {
 }
 
 // @public (undocumented)
-export function TestSource<T>(
-    events: TestSourceEvent<T>[],
-    testSchedule: TestSchedule,
-): TestSource<T>;
+export function TestSource<T>(events: TestSourceEvent<T>[], testSchedule: TestSchedule): TestSource<T>;
 
 // @public (undocumented)
 export interface TestSource<T> extends Source<T> {
@@ -83,15 +65,10 @@ export type TestSourceEvent<T> = Event_2<T> & {
 };
 
 // @public (undocumented)
-export type TestSourceSubscriptions = ReadonlyArray<
-    Readonly<TestSubscriptionInfo>
->;
+export type TestSourceSubscriptions = ReadonlyArray<Readonly<TestSubscriptionInfo>>;
 
 // @public (undocumented)
-export function TestSubscriptionInfo(
-    subscriptionStartFrame: number,
-    subscriptionEndFrame: number,
-): TestSubscriptionInfo;
+export function TestSubscriptionInfo(subscriptionStartFrame: number, subscriptionEndFrame: number): TestSubscriptionInfo;
 
 // @public (undocumented)
 export interface TestSubscriptionInfo {
@@ -102,11 +79,7 @@ export interface TestSubscriptionInfo {
 }
 
 // @public (undocumented)
-export function watchSourceEvents<T>(
-    source: Source<T>,
-    testSchedule: TestSchedule,
-    subscriptionInfo?: TestSubscriptionInfo,
-): TestSourceEvent<T>[];
+export function watchSourceEvents<T>(source: Source<T>, testSchedule: TestSchedule, subscriptionInfo?: TestSubscriptionInfo): TestSourceEvent<T>[];
 
 
 // (No @packageDocumentation comment for this package)

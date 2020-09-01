@@ -1,7 +1,7 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
 import { DocComment } from '@microsoft/tsdoc';
+import { DeepCoreNode } from '../../../core/nodes';
 import { ContainerNode } from '../../../core/nodes/Container';
-import { DeepCoreNode } from '../../../core/nodes/index';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
 import { TitleNode } from '../../../core/nodes/Title';
 import { AnalyzeContext } from '../../Context';

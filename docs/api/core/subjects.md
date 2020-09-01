@@ -14,15 +14,15 @@
 
 ### <a name="currentvaluesubject-function"></a><code>CurrentValueSubject - Function</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L376](..\/..\/..\/packages\/core\/src\/subject.ts#L376)
+> Source Location: [packages\/core\/src\/subject.ts#L375](..\/..\/..\/packages\/core\/src\/subject.ts#L375)
 
 <b>Signature</b>
 
-<pre>function CurrentValueSubject&lt;T&gt;(initialValue: T): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
+<pre>function CurrentValueSubject&lt;T&gt;(initialValue: T): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;</pre>
 
 ### <a name="currentvaluesubject-interface"></a><code>CurrentValueSubject - Interface</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L369](..\/..\/..\/packages\/core\/src\/subject.ts#L369)
+> Source Location: [packages\/core\/src\/subject.ts#L368](..\/..\/..\/packages\/core\/src\/subject.ts#L368)
 
 <b>Signature</b>
 
@@ -30,23 +30,23 @@
 
 ## <code>FinalValueSubject</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L530](..\/..\/..\/packages\/core\/src\/subject.ts#L530)
+> Source Location: [packages\/core\/src\/subject.ts#L529](..\/..\/..\/packages\/core\/src\/subject.ts#L529)
 
 <b>Signature</b>
 
-<pre>function FinalValueSubject&lt;T&gt;(): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
+<pre>function FinalValueSubject&lt;T&gt;(): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;</pre>
 
 ## <code>ReplaySubject</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L410](..\/..\/..\/packages\/core\/src\/subject.ts#L410)
+> Source Location: [packages\/core\/src\/subject.ts#L409](..\/..\/..\/packages\/core\/src\/subject.ts#L409)
 
 <b>Signature</b>
 
-<pre>function ReplaySubject&lt;T&gt;(<br>    count_?: number | null,<br>    timeoutConfig_?: <a href="#replaysubjecttimeoutconfig">ReplaySubjectTimeoutConfig</a> | null,<br>): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
+<pre>function ReplaySubject&lt;T&gt;(<br>    count_?: number | null,<br>    timeoutConfig_?: <a href="#replaysubjecttimeoutconfig">ReplaySubjectTimeoutConfig</a> | null,<br>): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;</pre>
 
 ## <code>ReplaySubjectTimeoutConfig</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L402](..\/..\/..\/packages\/core\/src\/subject.ts#L402)
+> Source Location: [packages\/core\/src\/subject.ts#L401](..\/..\/..\/packages\/core\/src\/subject.ts#L401)
 
 <b>Signature</b>
 
@@ -60,4 +60,4 @@ interface ReplaySubjectTimeoutConfig
 
 <b>Signature</b>
 
-<pre>function SubjectBase&lt;T&gt;(): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;;</pre>
+<pre>function SubjectBase&lt;T&gt;(): <a href="basics.md#subject-interface">Subject</a>&lt;T&gt;</pre>

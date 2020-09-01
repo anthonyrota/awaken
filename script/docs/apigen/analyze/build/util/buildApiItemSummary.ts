@@ -1,6 +1,6 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
 import { DocComment } from '@microsoft/tsdoc';
-import { DeepCoreNode } from '../../../core/nodes/index';
+import { DeepCoreNode } from '../../../core/nodes';
 import { AnalyzeContext } from '../../Context';
 import { getDocComment } from '../../util/tsdocConfiguration';
 import { buildApiItemDocNode } from './buildApiItemDocNode';

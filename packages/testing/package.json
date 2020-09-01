@@ -48,7 +48,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "microbundle build --raw --tsconfig ./tsconfig.microbundle.json && prettier --write dist/**/*.d.ts && api-extractor run --local --verbose && node ./postbuild.js && node ../../script/unlink.js",
+        "build": "microbundle build --raw --tsconfig ./tsconfig.microbundle.json && api-extractor run --local --verbose && node ./postbuild.js && node ../../script/unlink.js",
         "clean": "rimraf dist && node ../../script/clearMicrobundleCache.js",
         "clean:prebuild": "rimraf dist"
     },

@@ -4,7 +4,7 @@ import {
     CoreNode,
     DeepCoreNode,
     CoreNodeType,
-} from '../../nodes/index';
+} from '../../nodes';
 import { writeBlockQuote } from './BlockQuote';
 import { writeBold } from './Bold';
 import { writeCodeBlock } from './CodeBlock';

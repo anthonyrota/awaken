@@ -8,14 +8,15 @@ import {
     Excerpt,
     ExcerptToken,
 } from '@microsoft/api-extractor-model';
+import { simplifyDeepCoreNode } from '../../..//core/simplify';
+import { CoreNodeType, DeepCoreNode } from '../../../core/nodes';
 import { CodeBlockNode } from '../../../core/nodes/CodeBlock';
 import { ContainerNode } from '../../../core/nodes/Container';
-import { DeepCoreNode } from '../../../core/nodes/index';
 import { LocalPageLinkNode } from '../../../core/nodes/LocalPageLink';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
 import { RichCodeBlockNode } from '../../../core/nodes/RichCodeBlock';
 import { TitleNode } from '../../../core/nodes/Title';
-import { format, Language } from '../../../util/prettier';
+import { formatCodeContainer } from '../../../core/nodes/util/formatCodeContainer';
 import { AnalyzeContext } from '../../Context';
 import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
 import {
@@ -82,7 +83,6 @@ function buildApiItemExcerpt(
 
     const spannedTokens = excerpt.spannedTokens.slice();
     let token: ExcerptToken | undefined;
-    let isOnlyText = true;
 
     while ((token = spannedTokens.shift())) {
         let tokenText = token.text;
@@ -105,7 +105,6 @@ function buildApiItemExcerpt(
                 result.apiItem,
                 context,
             );
-            isOnlyText = false;
             richCodeBlock.children.push(
                 LocalPageLinkNode({
                     destination,
@@ -118,23 +117,19 @@ function buildApiItemExcerpt(
         }
     }
 
-    if (isOnlyText) {
-        let formattedText = removeExportDeclare(excerpt.text);
-        if (apiItem.kind !== ApiItemKind.Interface) {
-            try {
-                formattedText = format(
-                    removeExportDeclare(excerpt.text),
-                    Language.TypeScript,
-                ).trim();
-            } catch (error) {
-                console.error(error);
-                formattedText = excerpt.text;
-            }
+    if (apiItem.kind !== ApiItemKind.Interface) {
+        formatCodeContainer(richCodeBlock);
+    }
+
+    simplifyDeepCoreNode(richCodeBlock);
+    if (richCodeBlock.children.length === 1) {
+        const onlyChild = richCodeBlock.children[0];
+        if (onlyChild.type === CoreNodeType.PlainText) {
+            return CodeBlockNode({
+                language: 'ts',
+                code: onlyChild.text,
+            });
         }
-        return CodeBlockNode({
-            language: 'ts',
-            code: formattedText,
-        });
     }
 
     return richCodeBlock;

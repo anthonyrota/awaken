@@ -9,7 +9,7 @@ import {
     TableOfContentsMainReference,
     TableOfContentsNestedReference,
 } from '../../../pageMetadata';
-import { DeepCoreNode } from '../../core/nodes/index';
+import { DeepCoreNode } from '../../core/nodes';
 import { PageNode } from '../../core/nodes/Page';
 import {
     AnalyzeContext,

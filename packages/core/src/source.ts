@@ -1107,7 +1107,7 @@ export function isEqual<T, U>(
 /**
  * @public
  */
-export function flatSources<T>(...sources: Source<T>[]): Source<T> {
+export function flatSources<T>(sources: Source<T>[]): Source<T> {
     return flat(fromArray(sources));
 }
 
@@ -1116,7 +1116,7 @@ export function flatSources<T>(...sources: Source<T>[]): Source<T> {
  */
 export function mergeSourcesConcurrent<T>(
     max: number,
-    ...sources: Source<T>[]
+    sources: Source<T>[],
 ): Source<T> {
     return mergeConcurrent(max)(fromArray(sources));
 }
@@ -1124,14 +1124,14 @@ export function mergeSourcesConcurrent<T>(
 /**
  * @public
  */
-export function mergeSources<T>(...sources: Source<T>[]): Source<T> {
+export function mergeSources<T>(sources: Source<T>[]): Source<T> {
     return merge(fromArray(sources));
 }
 
 /**
  * @public
  */
-export function concatSources<T>(...sources: Source<T>[]): Source<T> {
+export function concatSources<T>(sources: Source<T>[]): Source<T> {
     return concat(fromArray(sources));
 }
 
@@ -1139,13 +1139,11 @@ export function concatSources<T>(...sources: Source<T>[]): Source<T> {
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
 const noValue: unique symbol = {} as any;
 
-type WrapValuesInSource<T> = { [K in keyof T]: Source<T[K]> };
-
 /**
  * @public
  */
 export function combineSources<T extends unknown[]>(
-    ...sources: WrapValuesInSource<T>
+    sources: { [K in keyof T]: Source<T[K]> },
 ): Source<T> {
     return sources.length === 0
         ? empty
@@ -1178,14 +1176,11 @@ export function combineSources<T extends unknown[]>(
  * @public
  */
 export function all<T extends unknown[]>(
-    sources: WrapValuesInSource<T>,
+    sources: { [K in keyof T]: Source<T[K]> },
 ): Source<T> {
     return pipe(
         // eslint-disable-next-line prefer-spread
-        combineSources.apply<null, WrapValuesInSource<T>, Source<T>>(
-            null,
-            sources,
-        ),
+        combineSources<T>(sources),
         last,
     );
 }
@@ -1193,7 +1188,7 @@ export function all<T extends unknown[]>(
 /**
  * @public
  */
-export function raceSources<T>(...sources: Source<T>[]): Source<T> {
+export function raceSources<T>(sources: Source<T>[]): Source<T> {
     return sources.length === 0
         ? empty
         : Source((sink) => {
@@ -1222,7 +1217,7 @@ export function raceSources<T>(...sources: Source<T>[]): Source<T> {
  * @public
  */
 export function zipSources<T extends unknown[]>(
-    ...sources: WrapValuesInSource<T>
+    sources: { [K in keyof T]: Source<T[K]> },
 ): Source<T> {
     return sources.length === 0
         ? empty
@@ -1308,39 +1303,33 @@ export interface IdentityOperator {
     <T>(source: Source<T>): Source<T>;
 }
 
-type Unshift<T extends unknown[], U> = ((head: U, ...tail: T) => void) extends (
-    ...args: infer A
-) => void
-    ? A
-    : never;
-
 /**
  * @public
  */
 export function combineWith<T extends unknown[]>(
-    ...sources: WrapValuesInSource<T>
-): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    sources: { [K in keyof T]: Source<T[K]> },
+): <U>(source: Source<U>) => Source<[U, ...T]> {
     return <U>(source: Source<U>) =>
-        combineSources(source, ...sources) as Source<Unshift<T, U>>;
+        combineSources<[U, ...T]>([source, ...sources]);
 }
 
 /**
  * @public
  */
 export function raceWith<T>(
-    ...sources: Source<T>[]
+    sources: Source<T>[],
 ): <U>(source: Source<U>) => Source<T | U> {
-    return <U>(source: Source<U>) => raceSources<T | U>(source, ...sources);
+    return <U>(source: Source<U>) => raceSources<T | U>([source, ...sources]);
 }
 
 /**
  * @public
  */
 export function zipWith<T extends unknown[]>(
-    ...sources: WrapValuesInSource<T>
-): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    sources: { [K in keyof T]: Source<T[K]> },
+): <U>(source: Source<U>) => Source<[U, ...T]> {
     return <U>(source: Source<U>) =>
-        zipSources(source, ...sources) as Source<Unshift<T, U>>;
+        zipSources<[U, ...T]>([source, ...sources]);
 }
 
 function _pluckValue<T>(event: { value: T }): T {
@@ -1351,8 +1340,8 @@ function _pluckValue<T>(event: { value: T }): T {
  * @public
  */
 export function withLatestFromLazy<T extends unknown[]>(
-    getSources: () => WrapValuesInSource<T>,
-): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    getSources: () => { [K in keyof T]: Source<T[K]> },
+): <U>(source: Source<U>) => Source<[U, ...T]> {
     return <U>(source: Source<U>) =>
         lazy(() =>
             // eslint-disable-next-line max-len
@@ -1365,10 +1354,10 @@ export function withLatestFromLazy<T extends unknown[]>(
  * @public
  */
 export function withLatestFrom<T extends unknown[]>(
-    ...sources: WrapValuesInSource<T>
-): <U>(source: Source<U>) => Source<Unshift<T, U>> {
+    sources: { [K in keyof T]: Source<T[K]> },
+): <U>(source: Source<U>) => Source<[U, ...T]> {
     return <U>(source: Source<U>) =>
-        Source<Unshift<T, U>>((sink) => {
+        Source<[U, ...T]>((sink) => {
             const latestPushEvents: Push<unknown>[] = [];
             let responded = 0;
 
@@ -1400,10 +1389,7 @@ export function withLatestFrom<T extends unknown[]>(
                         latestPushEvents[0] = event;
                         sink(
                             Push(
-                                latestPushEvents.map(_pluckValue) as Unshift<
-                                    T,
-                                    U
-                                >,
+                                latestPushEvents.map(_pluckValue) as [U, ...T],
                             ),
                         );
                     }
@@ -1610,26 +1596,39 @@ export function filter<T>(
         });
 }
 
-interface WithIndex<T> {
-    value: T;
-    index: number;
-}
-
 /**
  * @public
  */
 export function findWithIndex<T, S extends T>(
     predicate: (value: T, index: number) => value is S,
-): Operator<T, WithIndex<S>>;
+): Operator<
+    T,
+    {
+        value: S;
+        index: number;
+    }
+>;
 /**
  * @public
  */
 export function findWithIndex<T>(
     predicate: (value: T, index: number) => unknown,
-): Operator<T, WithIndex<T>>;
+): Operator<
+    T,
+    {
+        value: T;
+        index: number;
+    }
+>;
 export function findWithIndex<T>(
     predicate: (value: T, index: number) => unknown,
-): Operator<T, WithIndex<T>> {
+): Operator<
+    T,
+    {
+        value: T;
+        index: number;
+    }
+> {
     return (source) =>
         Source((sink) => {
             let index: number;
@@ -2076,9 +2075,9 @@ export const concatDrop = _createSwitchOperator(false);
  * @public
  */
 export function flatWith<T>(
-    ...sources: Source<T>[]
+    sources: Source<T>[],
 ): <U>(source: Source<U>) => Source<T | U> {
-    return <U>(source: Source<U>) => flatSources<T | U>(source, ...sources);
+    return <U>(source: Source<U>) => flatSources<T | U>([source, ...sources]);
 }
 
 /**
@@ -2086,37 +2085,37 @@ export function flatWith<T>(
  */
 export function mergeWithConcurrent<T>(
     max: number,
-    ...sources: Source<T>[]
+    sources: Source<T>[],
 ): <U>(source: Source<U>) => Source<T | U> {
     return <U>(source: Source<U>) =>
-        mergeSourcesConcurrent<T | U>(max, source, ...sources);
+        mergeSourcesConcurrent<T | U>(max, [source, ...sources]);
 }
 
 /**
  * @public
  */
 export function mergeWith<T>(
-    ...sources: Source<T>[]
+    sources: Source<T>[],
 ): <U>(source: Source<U>) => Source<T | U> {
-    return <U>(source: Source<U>) => mergeSources<T | U>(source, ...sources);
+    return <U>(source: Source<U>) => mergeSources<T | U>([source, ...sources]);
 }
 
 /**
  * @public
  */
 export function startWithSources<T>(
-    ...sources: Source<T>[]
+    sources: Source<T>[],
 ): <U>(source: Source<U>) => Source<T | U> {
-    return <U>(source: Source<U>) => concatSources<T | U>(...sources, source);
+    return <U>(source: Source<U>) => concatSources<T | U>([...sources, source]);
 }
 
 /**
  * @public
  */
 export function concatWith<T>(
-    ...sources: Source<T>[]
+    sources: Source<T>[],
 ): <U>(source: Source<U>) => Source<T | U> {
-    return <U>(source: Source<U>) => concatSources<T | U>(source, ...sources);
+    return <U>(source: Source<U>) => concatSources<T | U>([source, ...sources]);
 }
 
 /**
@@ -2562,14 +2561,11 @@ interface GroupSourceImplementation<T, K> extends Source<T> {
     remove(): void;
 }
 
-interface GroupSourceBase<T> extends Source<T> {
-    remove(): void;
-}
-
 /**
  * @public
  */
-export interface ActiveGroupSource<T, K> extends GroupSourceBase<T> {
+export interface ActiveGroupSource<T, K> extends Source<T> {
+    remove(): void;
     removed: false;
     key: K;
 }
@@ -2577,7 +2573,8 @@ export interface ActiveGroupSource<T, K> extends GroupSourceBase<T> {
 /**
  * @public
  */
-export interface RemovedGroupSource<T> extends GroupSourceBase<T> {
+export interface RemovedGroupSource<T> extends Source<T> {
+    remove(): void;
     removed: true;
     key: null;
 }
@@ -3839,7 +3836,7 @@ export function scheduleSubscription(
     schedule: ScheduleFunction,
 ): IdentityOperator {
     return <T>(source: Source<T>) =>
-        concatSources(emptyScheduled(schedule), source);
+        concatSources([emptyScheduled(schedule), source]);
 }
 
 /**

@@ -6,10 +6,10 @@ import {
     ApiTypeAlias,
     ApiItemKind,
 } from '@microsoft/api-extractor-model';
+import { DeepCoreNode } from '../../core/nodes';
 import { CodeSpanNode } from '../../core/nodes/CodeSpan';
 import { ContainerNode } from '../../core/nodes/Container';
 import { HeadingNode } from '../../core/nodes/Heading';
-import { DeepCoreNode } from '../../core/nodes/index';
 import { PlainTextNode } from '../../core/nodes/PlainText';
 import { AnalyzeContext } from '../Context';
 import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
