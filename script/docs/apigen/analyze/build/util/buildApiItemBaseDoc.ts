@@ -1,5 +1,5 @@
 import { AedocDefinitions, ApiItem } from '@microsoft/api-extractor-model';
-import { DocComment, TSDocParser } from '@microsoft/tsdoc';
+import { DocComment, TSDocConfiguration, TSDocParser } from '@microsoft/tsdoc';
 import * as colors from 'colors';
 import * as ts from 'typescript';
 import { DeepCoreNode } from '../../../core/nodes';
@@ -8,6 +8,7 @@ import { PlainTextNode } from '../../../core/nodes/PlainText';
 import { TitleNode } from '../../../core/nodes/Title';
 import { AnalyzeContext } from '../../Context';
 import { getUniqueExportIdentifierKey } from '../../Identifier';
+import { BaseDocComment } from '../../sourceMetadata';
 import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
 import { UnsupportedApiItemError } from '../../util/UnsupportedApiItemError';
 import { buildApiItemDocNode } from './buildApiItemDocNode';
@@ -32,10 +33,6 @@ export function buildApiItemBaseDoc(
         identifierKey,
     );
     if (!exportIdentifierMetadata) {
-        console.log(
-            identifierKey,
-            context.sourceMetadata.exportIdentifierToExportIdentifierMetadata,
-        );
         throw new UnsupportedApiItemError(
             apiItem,
             'No export identifier metadata.',
@@ -54,7 +51,31 @@ export function buildApiItemBaseDoc(
         return;
     }
 
-    const tsdocParser = new TSDocParser(AedocDefinitions.tsdocConfiguration);
+    const docComment = parseBaseDocComment({ baseDocComment });
+
+    return ContainerNode({
+        children: [
+            buildApiItemSummary({ apiItem, context, docComment }),
+            buildReturnsBlockWithoutType({ apiItem, context, docComment }),
+            buildApiItemExamples({ apiItem, context, docComment }),
+            buildApiItemSeeBlocks({ apiItem, context, docComment }),
+        ].filter((value): value is DeepCoreNode => value !== undefined),
+    });
+}
+
+export interface ParseBaseDocCommentParameters {
+    baseDocComment: BaseDocComment;
+    configuration?: TSDocConfiguration;
+}
+
+export function parseBaseDocComment(
+    parameters: ParseBaseDocCommentParameters,
+): DocComment {
+    const { baseDocComment } = parameters;
+
+    const tsdocParser = new TSDocParser(
+        parameters.configuration || AedocDefinitions.tsdocConfiguration,
+    );
     const parserContext = tsdocParser.parseRange(baseDocComment.textRange);
     const docComment = parserContext.docComment;
 
@@ -77,14 +98,7 @@ export function buildApiItemBaseDoc(
         }
     }
 
-    return ContainerNode<DeepCoreNode>({
-        children: [
-            buildApiItemSummary({ apiItem, context, docComment }),
-            buildReturnsBlockWithoutType({ apiItem, context, docComment }),
-            buildApiItemExamples({ apiItem, context, docComment }),
-            buildApiItemSeeBlocks({ apiItem, context, docComment }),
-        ].filter((value): value is DeepCoreNode => value !== undefined),
-    });
+    return docComment;
 }
 
 interface BuildReturnsBlockWithoutTypeParameters {

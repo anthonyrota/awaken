@@ -39,7 +39,7 @@
 
 ## <code>all</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1178](..\/..\/..\/packages\/core\/src\/source.ts#L1178)
+> Source Location: [packages\/core\/src\/source.ts#L1199](..\/..\/..\/packages\/core\/src\/source.ts#L1199)
 
 <b>Signature</b>
 
@@ -47,7 +47,7 @@
 
 ## <code>animationFrames</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L960](..\/..\/..\/packages\/core\/src\/source.ts#L960)
+> Source Location: [packages\/core\/src\/source.ts#L981](..\/..\/..\/packages\/core\/src\/source.ts#L981)
 
 <b>Signature</b>
 
@@ -55,7 +55,7 @@
 
 ## <code>combineSources</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1145](..\/..\/..\/packages\/core\/src\/source.ts#L1145)
+> Source Location: [packages\/core\/src\/source.ts#L1166](..\/..\/..\/packages\/core\/src\/source.ts#L1166)
 
 <b>Signature</b>
 
@@ -63,7 +63,7 @@
 
 ## <code>concatSources</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1134](..\/..\/..\/packages\/core\/src\/source.ts#L1134)
+> Source Location: [packages\/core\/src\/source.ts#L1155](..\/..\/..\/packages\/core\/src\/source.ts#L1155)
 
 <b>Signature</b>
 
@@ -71,7 +71,7 @@
 
 ## <code>empty</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L766](..\/..\/..\/packages\/core\/src\/source.ts#L766)
+> Source Location: [packages\/core\/src\/source.ts#L787](..\/..\/..\/packages\/core\/src\/source.ts#L787)
 
 <b>Signature</b>
 
@@ -79,7 +79,7 @@
 
 ## <code>emptyScheduled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L771](..\/..\/..\/packages\/core\/src\/source.ts#L771)
+> Source Location: [packages\/core\/src\/source.ts#L792](..\/..\/..\/packages\/core\/src\/source.ts#L792)
 
 <b>Signature</b>
 
@@ -87,7 +87,7 @@
 
 ## <code>flatSources</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1110](..\/..\/..\/packages\/core\/src\/source.ts#L1110)
+> Source Location: [packages\/core\/src\/source.ts#L1131](..\/..\/..\/packages\/core\/src\/source.ts#L1131)
 
 <b>Signature</b>
 
@@ -95,7 +95,7 @@
 
 ## <code>fromArray</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L624](..\/..\/..\/packages\/core\/src\/source.ts#L624)
+> Source Location: [packages\/core\/src\/source.ts#L645](..\/..\/..\/packages\/core\/src\/source.ts#L645)
 
 <b>Signature</b>
 
@@ -144,7 +144,7 @@ pipe(
 
 ## <code>fromArrayScheduled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L634](..\/..\/..\/packages\/core\/src\/source.ts#L634)
+> Source Location: [packages\/core\/src\/source.ts#L655](..\/..\/..\/packages\/core\/src\/source.ts#L655)
 
 <b>Signature</b>
 
@@ -152,7 +152,7 @@ pipe(
 
 ## <code>fromAsyncIterable</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L856](..\/..\/..\/packages\/core\/src\/source.ts#L856)
+> Source Location: [packages\/core\/src\/source.ts#L877](..\/..\/..\/packages\/core\/src\/source.ts#L877)
 
 <b>Signature</b>
 
@@ -160,7 +160,7 @@ pipe(
 
 ## <code>fromIterable</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L790](..\/..\/..\/packages\/core\/src\/source.ts#L790)
+> Source Location: [packages\/core\/src\/source.ts#L811](..\/..\/..\/packages\/core\/src\/source.ts#L811)
 
 <b>Signature</b>
 
@@ -168,7 +168,7 @@ pipe(
 
 ## <code>fromPromise</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L865](..\/..\/..\/packages\/core\/src\/source.ts#L865)
+> Source Location: [packages\/core\/src\/source.ts#L886](..\/..\/..\/packages\/core\/src\/source.ts#L886)
 
 <b>Signature</b>
 
@@ -176,7 +176,7 @@ pipe(
 
 ## <code>fromReactiveValue</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L905](..\/..\/..\/packages\/core\/src\/source.ts#L905)
+> Source Location: [packages\/core\/src\/source.ts#L926](..\/..\/..\/packages\/core\/src\/source.ts#L926)
 
 <b>Signature</b>
 
@@ -184,7 +184,7 @@ pipe(
 
 ## <code>fromScheduleFunction</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L884](..\/..\/..\/packages\/core\/src\/source.ts#L884)
+> Source Location: [packages\/core\/src\/source.ts#L905](..\/..\/..\/packages\/core\/src\/source.ts#L905)
 
 <b>Signature</b>
 
@@ -192,7 +192,7 @@ pipe(
 
 ## <code>fromSingularReactiveValue</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L936](..\/..\/..\/packages\/core\/src\/source.ts#L936)
+> Source Location: [packages\/core\/src\/source.ts#L957](..\/..\/..\/packages\/core\/src\/source.ts#L957)
 
 <b>Signature</b>
 
@@ -200,7 +200,7 @@ pipe(
 
 ## <code>iif</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L984](..\/..\/..\/packages\/core\/src\/source.ts#L984)
+> Source Location: [packages\/core\/src\/source.ts#L1005](..\/..\/..\/packages\/core\/src\/source.ts#L1005)
 
 <b>Signature</b>
 
@@ -208,7 +208,7 @@ pipe(
 
 ## <code>interval</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L951](..\/..\/..\/packages\/core\/src\/source.ts#L951)
+> Source Location: [packages\/core\/src\/source.ts#L972](..\/..\/..\/packages\/core\/src\/source.ts#L972)
 
 <b>Signature</b>
 
@@ -216,7 +216,7 @@ pipe(
 
 ## <code>isEqual</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1009](..\/..\/..\/packages\/core\/src\/source.ts#L1009)
+> Source Location: [packages\/core\/src\/source.ts#L1030](..\/..\/..\/packages\/core\/src\/source.ts#L1030)
 
 <b>Signature</b>
 
@@ -224,7 +224,7 @@ pipe(
 
 ## <code>lazy</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L968](..\/..\/..\/packages\/core\/src\/source.ts#L968)
+> Source Location: [packages\/core\/src\/source.ts#L989](..\/..\/..\/packages\/core\/src\/source.ts#L989)
 
 <b>Signature</b>
 
@@ -232,7 +232,7 @@ pipe(
 
 ## <code>mergeSources</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1127](..\/..\/..\/packages\/core\/src\/source.ts#L1127)
+> Source Location: [packages\/core\/src\/source.ts#L1148](..\/..\/..\/packages\/core\/src\/source.ts#L1148)
 
 <b>Signature</b>
 
@@ -240,7 +240,7 @@ pipe(
 
 ## <code>mergeSourcesConcurrent</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1117](..\/..\/..\/packages\/core\/src\/source.ts#L1117)
+> Source Location: [packages\/core\/src\/source.ts#L1138](..\/..\/..\/packages\/core\/src\/source.ts#L1138)
 
 <b>Signature</b>
 
@@ -248,7 +248,7 @@ pipe(
 
 ## <code>never</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L785](..\/..\/..\/packages\/core\/src\/source.ts#L785)
+> Source Location: [packages\/core\/src\/source.ts#L806](..\/..\/..\/packages\/core\/src\/source.ts#L806)
 
 <b>Signature</b>
 
@@ -256,7 +256,7 @@ pipe(
 
 ## <code>of</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L691](..\/..\/..\/packages\/core\/src\/source.ts#L691)
+> Source Location: [packages\/core\/src\/source.ts#L712](..\/..\/..\/packages\/core\/src\/source.ts#L712)
 
 <b>Signature</b>
 
@@ -294,7 +294,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>ofEvent</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L713](..\/..\/..\/packages\/core\/src\/source.ts#L713)
+> Source Location: [packages\/core\/src\/source.ts#L734](..\/..\/..\/packages\/core\/src\/source.ts#L734)
 
 <b>Signature</b>
 
@@ -304,7 +304,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>ofEventScheduled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L734](..\/..\/..\/packages\/core\/src\/source.ts#L734)
+> Source Location: [packages\/core\/src\/source.ts#L755](..\/..\/..\/packages\/core\/src\/source.ts#L755)
 
 <b>Signature</b>
 
@@ -314,7 +314,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>ofScheduled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L698](..\/..\/..\/packages\/core\/src\/source.ts#L698)
+> Source Location: [packages\/core\/src\/source.ts#L719](..\/..\/..\/packages\/core\/src\/source.ts#L719)
 
 <b>Signature</b>
 
@@ -322,7 +322,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>raceSources</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1191](..\/..\/..\/packages\/core\/src\/source.ts#L1191)
+> Source Location: [packages\/core\/src\/source.ts#L1212](..\/..\/..\/packages\/core\/src\/source.ts#L1212)
 
 <b>Signature</b>
 
@@ -330,7 +330,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>range</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L997](..\/..\/..\/packages\/core\/src\/source.ts#L997)
+> Source Location: [packages\/core\/src\/source.ts#L1018](..\/..\/..\/packages\/core\/src\/source.ts#L1018)
 
 <b>Signature</b>
 
@@ -338,7 +338,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>throwError</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L749](..\/..\/..\/packages\/core\/src\/source.ts#L749)
+> Source Location: [packages\/core\/src\/source.ts#L770](..\/..\/..\/packages\/core\/src\/source.ts#L770)
 
 <b>Signature</b>
 
@@ -346,7 +346,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>throwErrorScheduled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L756](..\/..\/..\/packages\/core\/src\/source.ts#L756)
+> Source Location: [packages\/core\/src\/source.ts#L777](..\/..\/..\/packages\/core\/src\/source.ts#L777)
 
 <b>Signature</b>
 
@@ -354,7 +354,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>timer</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L778](..\/..\/..\/packages\/core\/src\/source.ts#L778)
+> Source Location: [packages\/core\/src\/source.ts#L799](..\/..\/..\/packages\/core\/src\/source.ts#L799)
 
 <b>Signature</b>
 
@@ -362,7 +362,7 @@ pipe(of(), subscribe(Sink(console.log)));
 
 ## <code>zipSources</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1219](..\/..\/..\/packages\/core\/src\/source.ts#L1219)
+> Source Location: [packages\/core\/src\/source.ts#L1240](..\/..\/..\/packages\/core\/src\/source.ts#L1240)
 
 <b>Signature</b>
 

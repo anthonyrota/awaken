@@ -12,13 +12,14 @@ export interface BaseDocComment {
     textRange: tsdoc.TextRange;
 }
 
-export interface ExportMetadata {
+export interface ExportDeclarationMetadata {
     sourceLocation: SourceLocation;
     baseDocComment?: BaseDocComment;
 }
 
 export interface ExportIdentifierMetadata {
-    syntaxKindToExportMetadata: Map<ts.SyntaxKind, ExportMetadata>;
+    baseDocComment?: BaseDocComment;
+    syntaxKindToExportMetadata: Map<ts.SyntaxKind, ExportDeclarationMetadata>;
 }
 
 export interface SourceMetadata {
@@ -126,7 +127,7 @@ function analyzeExportMap(
             exportIdentifierMetadata = {
                 syntaxKindToExportMetadata: new Map<
                     ts.SyntaxKind,
-                    ExportMetadata
+                    ExportDeclarationMetadata
                 >(),
             };
             sourceMetadata.exportIdentifierToExportIdentifierMetadata.set(
@@ -135,17 +136,8 @@ function analyzeExportMap(
             );
         }
 
-        let interfaceDeclaration: ts.InterfaceDeclaration | undefined;
-
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         for (const declaration of implementationSymbol.getDeclarations()!) {
-            if (
-                !interfaceDeclaration &&
-                ts.isInterfaceDeclaration(declaration)
-            ) {
-                interfaceDeclaration = declaration;
-            }
-
             analyzeDeclaration(
                 exportIdentifierMetadata,
                 identifier.packageName,
@@ -164,13 +156,16 @@ function analyzeDeclaration(
 ): void {
     const syntaxKind = declaration.kind;
     const sourceLocation = getDeclarationSourceLocation(declaration);
-    const baseDocComment = getDeclarationBaseDocComment(declaration);
+    const baseDocComments = getDeclarationBaseDocComments(declaration);
     const { syntaxKindToExportMetadata } = exportIdentifierMetadata;
     const exportIdentifier = syntaxKindToExportMetadata.get(syntaxKind);
 
     if (exportIdentifier) {
         exportIdentifier.sourceLocation = sourceLocation;
-        if (baseDocComment) {
+        if (
+            baseDocComments.declarationBaseDocComment ||
+            baseDocComments.exportBaseDocComment
+        ) {
             throw new Error(
                 `Base doc comments are not allowed after the first declaration. Export: ${getUniqueExportIdentifierKey(
                     { packageName, exportName: exportSymbol.name },
@@ -182,8 +177,16 @@ function analyzeDeclaration(
 
     exportIdentifierMetadata.syntaxKindToExportMetadata.set(syntaxKind, {
         sourceLocation,
-        baseDocComment,
+        baseDocComment: baseDocComments.declarationBaseDocComment,
     });
+
+    if (baseDocComments.exportBaseDocComment) {
+        if (exportIdentifierMetadata.baseDocComment) {
+            throw new Error('Duplicate base doc comments');
+        }
+        exportIdentifierMetadata.baseDocComment =
+            baseDocComments.exportBaseDocComment;
+    }
 }
 
 function getDeclarationSourceLocation(
@@ -199,31 +202,135 @@ function getDeclarationSourceLocation(
     };
 }
 
-function getDeclarationBaseDocComment(
-    declaration: ts.Declaration,
-): BaseDocComment | undefined {
+interface BaseDocComments {
+    exportBaseDocComment?: BaseDocComment;
+    declarationBaseDocComment?: BaseDocComment;
+}
+
+// eslint-disable-next-line max-len
+// https://github.com/microsoft/rushstack/blob/f2c373e49937b1ebdd639c0e9fcc5ca0075c5533/apps/api-extractor/src/analyzer/TypeScriptHelpers.ts#L183
+function findFirstParentOfKind(
+    node: ts.Node,
+    kindToMatch: ts.SyntaxKind,
+): ts.Node | undefined {
+    let current: ts.Node | undefined = node.parent;
+
+    while (current) {
+        if (current.kind === kindToMatch) {
+            return current;
+        }
+        current = current.parent;
+    }
+
+    return undefined;
+}
+
+function getCommentDeclarationNode(node: ts.Node): ts.Node {
+    // eslint-disable-next-line max-len
+    // https://github.com/microsoft/rushstack/blob/f2c373e49937b1ebdd639c0e9fcc5ca0075c5533/apps/api-extractor/src/collector/Collector.ts#L801
+    if (ts.isVariableDeclaration(node)) {
+        /* eslint-disable max-len */
+        // Variable declarations are special because they can be combined into a list.  For example:
+        //
+        // /** A */ export /** B */ const /** C */ x = 1, /** D **/ [ /** E */ y, z] = [3, 4];
+        //
+        // The compiler will only emit comments A and C in the .d.ts file, so in general there isn't a well-defined
+        // way to document these parts.  API Extractor requires you to break them into separate exports like this:
+        //
+        // /** A */ export const x = 1;
+        //
+        // But _getReleaseTagForDeclaration() still receives a node corresponding to "x", so we need to walk upwards
+        // and find the containing statement in order for getJSDocCommentRanges() to read the comment that we expect.
+        /* eslint-enable max-len */
+
+        const statement = findFirstParentOfKind(
+            node,
+            ts.SyntaxKind.VariableStatement,
+        );
+        if (statement !== undefined) {
+            // eslint-disable-next-line max-len
+            // For a compound declaration, fall back to looking for C instead of A
+            if (
+                (statement as ts.VariableStatement).declarationList.declarations
+                    .length === 1
+            ) {
+                return statement;
+            }
+        }
+    }
+
+    return node;
+}
+
+function getDeclarationBaseDocComments(
+    declaration_: ts.Declaration,
+): BaseDocComments {
+    const declaration = getCommentDeclarationNode(declaration_);
     const sourceFile = declaration.getSourceFile();
     const sourceFileText = sourceFile.getFullText();
     const commentRanges = getJSDocCommentRanges(declaration, sourceFileText);
 
-    if (commentRanges && commentRanges.length > 1) {
-        if (commentRanges.length !== 2) {
-            throw new Error("Can't have multiple base comments.");
+    if (!commentRanges || commentRanges.length <= 1) {
+        return {};
+    }
+
+    const declarationCommentRanges = commentRanges.slice();
+    let exportBaseDocCommentRange: ts.CommentRange | undefined;
+
+    for (let i = 0; i < declarationCommentRanges.length; i++) {
+        const commentRange = declarationCommentRanges[i];
+        if (hasExportBaseDocCommentTag(sourceFileText, commentRange)) {
+            if (exportBaseDocCommentRange) {
+                throw new Error('Multiple export base doc comments.');
+            }
+            exportBaseDocCommentRange = commentRange;
+            declarationCommentRanges.splice(i, 1);
         }
-        if (!ts.isFunctionDeclaration(declaration)) {
-            throw new Error(
-                "Can't have a base comment for a non function declaration.",
-            );
-        }
-        const firstCommentRange = commentRanges[0];
-        return {
+    }
+
+    const exportBaseDocComment:
+        | BaseDocComment
+        | undefined = exportBaseDocCommentRange && {
+        textRange: tsdoc.TextRange.fromStringRange(
+            sourceFileText,
+            exportBaseDocCommentRange.pos,
+            exportBaseDocCommentRange.end,
+        ),
+    };
+
+    if (declarationCommentRanges.length < 2) {
+        return { exportBaseDocComment };
+    }
+
+    if (declarationCommentRanges.length > 2) {
+        throw new Error("Can't have multiple base comments.");
+    }
+
+    if (!ts.isFunctionDeclaration(declaration)) {
+        throw new Error(
+            "Can't have a base comment for a non function declaration.",
+        );
+    }
+
+    const firstCommentRange = declarationCommentRanges[0];
+
+    return {
+        exportBaseDocComment,
+        declarationBaseDocComment: {
             textRange: tsdoc.TextRange.fromStringRange(
                 sourceFileText,
                 firstCommentRange.pos,
                 firstCommentRange.end,
             ),
-        };
-    }
+        },
+    };
+}
 
-    return;
+function hasExportBaseDocCommentTag(
+    sourceFileText: string,
+    commentRange: ts.CommentRange,
+): boolean {
+    return /@baseDoc/i.test(
+        sourceFileText.slice(commentRange.pos, commentRange.end),
+    );
 }

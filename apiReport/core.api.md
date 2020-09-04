@@ -193,7 +193,7 @@ export interface End {
     readonly type: EndType;
 }
 
-// @public
+// @public (undocumented)
 export const End: End;
 
 // @public (undocumented)
@@ -683,7 +683,7 @@ export function shareTransform<T, U>(Subject_: () => Subject<T>, transform: (sha
 // @public (undocumented)
 export function shareTransform<U>(Subject_: typeof Subject, transform: <T>(source: Source<T>) => Source<U>): <T>(shared: Source<T>) => Source<U>;
 
-// @public
+// @public (undocumented)
 export function Sink<T>(onEvent: (event: Event_2<T>) => void): Sink<T>;
 
 // @public (undocumented)
@@ -709,7 +709,7 @@ export function skipWhile<T>(shouldContinueSkipping: (value: T, index: number) =
 // @public (undocumented)
 export function some<T>(predicate: (value: T, index: number) => unknown): Operator<T, boolean>;
 
-// @public
+// @public (undocumented)
 export function Source<T>(produce: (sink: Sink<T>) => void): Source<T>;
 
 // @public (undocumented)
@@ -819,7 +819,7 @@ export interface ThrottleConfig {
 // @public (undocumented)
 export function throttleMs(durationMs: number, config?: ThrottleConfig | null): IdentityOperator;
 
-// @public
+// @public (undocumented)
 export function Throw(error: unknown): Throw;
 
 // @public (undocumented)

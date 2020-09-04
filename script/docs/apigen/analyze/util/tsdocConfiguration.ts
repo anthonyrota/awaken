@@ -12,6 +12,7 @@ const seeTag = new tsdoc.TSDocTagDefinition({
 });
 
 AedocDefinitions.tsdocConfiguration.addTagDefinition(seeTag);
+AedocDefinitions.tsdocConfiguration.setSupportForTag(seeTag, true);
 
 export function getDocComment(apiItem: ApiItem): tsdoc.DocComment {
     if (!(apiItem instanceof ApiDocumentedItem)) {

@@ -208,11 +208,15 @@ sink(Throw(new Error('...'))); // `${ThrowType}`, Error(...).
 
 ## <code>Push</code>
 
+A Push event represents the &quot;pushing&quot; of a value to a <code>[Sink](#sink)</code>, and has a <code>value</code> field equal to the value the event is carrying.
+
+<b>See Also</b>
+
+- <code>[Event](#event)</code>
+
 ### <a name="push-function"></a><code>Push - Function</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L146](..\/..\/..\/packages\/core\/src\/source.ts#L146)
-
-A Push event represents the &quot;pushing&quot; of a value to a <code>[Sink](#sink)</code>, and has a <code>value</code> field equal to the value the event is carrying.
+> Source Location: [packages\/core\/src\/source.ts#L150](..\/..\/..\/packages\/core\/src\/source.ts#L150)
 
 <b>Returns</b>
 
@@ -225,10 +229,6 @@ const event = Push([1, 2, 3]);
 console.log(event.type); // `${PushType}`.
 console.log(event.value); // [1, 2, 3].
 ```
-
-<b>See Also</b>
-
-- <code>[Event](#event)</code>
 
 <b>Signature</b>
 
@@ -276,15 +276,19 @@ type PushType = 0
 
 ## <code>Throw</code>
 
+A Throw event represents the &quot;throwing&quot; of an error, and has an <code>error</code> field equal to the error the event is carrying. After a <code>[Sink](#sink)</code> receives an Error event, it will be disposed and will not take any more events.
+
+<b>See Also</b>
+
+- <code>[Event](#event)</code>
+
 ### <a name="throw-function"></a><code>Throw - Function</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L169](..\/..\/..\/packages\/core\/src\/source.ts#L169)
+> Source Location: [packages\/core\/src\/source.ts#L177](..\/..\/..\/packages\/core\/src\/source.ts#L177)
 
 <b>Signature</b>
 
 <pre>function Throw(error: unknown): <a href="#throw-interface">Throw</a></pre>
-
-A Throw represents the &quot;throwing&quot; of an error, and has an <code>error</code> field equal to the error the event is carrying. After a <code>[Sink](#sink)</code> receives an Error event, it will be disposed and will not take any more events.
 
 <b>Parameters</b>
 
@@ -305,10 +309,6 @@ const event = Throw(new Error(...));
 console.log(event.type); // `${ThrowType}`.
 console.log(event.value); // Error(...).
 ```
-
-<b>See Also</b>
-
-- <code>[Event](#event)</code>
 
 ### <a name="throw-interface"></a><code>Throw - Interface</code>
 
@@ -342,6 +342,12 @@ type ThrowType = 1
 
 ## <code>End</code>
 
+An End event represents the &quot;end&quot; of a <code>[Source](#source)</code>, and has no additional properties. After a Sink receives an End event, it will be disposed and will not take any more events.
+
+<b>See Also</b>
+
+- <code>[Event](#event)</code>
+
 ### <a name="end-interface"></a><code>End - Interface</code>
 
 > Source Location: [packages\/core\/src\/source.ts#L69](..\/..\/..\/packages\/core\/src\/source.ts#L69)
@@ -354,13 +360,11 @@ interface End
 
 ### <a name="end-variable"></a><code>End - Variable</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L193](..\/..\/..\/packages\/core\/src\/source.ts#L193)
+> Source Location: [packages\/core\/src\/source.ts#L205](..\/..\/..\/packages\/core\/src\/source.ts#L205)
 
 <b>Signature</b>
 
 <pre>var End: <a href="#end-interface">End</a></pre>
-
-An End event represents the &quot;end&quot; of a <code>[Source](#source)</code>, and has no additional properties. After a Sink receives an End event, it will be disposed and will not take any more events.
 
 <b>Example Usage</b>
 
@@ -373,10 +377,6 @@ sink(End); // This disposes the sink, then calls `onEvent` above.
 // Logs:
 // `${EndType}`
 ```
-
-<b>See Also</b>
-
-- <code>[Event](#event)</code>
 
 ## <code>EndType</code>
 
@@ -400,19 +400,26 @@ type EndType = 2
 
 ## <code>Sink</code>
 
-### <a name="sink-function"></a><code>Sink - Function</code>
-
-> Source Location: [packages\/core\/src\/source.ts#L274](..\/..\/..\/packages\/core\/src\/source.ts#L274)
-
-<b>Signature</b>
-
-<pre>function Sink&lt;T&gt;(onEvent: (event: <a href="#event">Event</a>&lt;T&gt;) =&gt; void): <a href="#sink-interface">Sink</a>&lt;T&gt;</pre>
-
 A Sink is what a <code>[Source](#source)</code> subscribes to. All events emitted by the source will be passed to the sink that has been given to the source.
 
 The shape of a Sink is a function which takes an <code>[Event](#event)</code> and distributes it to the <code>onEvent</code> function as described below. Sinks also implement the <code>[Disposable](#disposable)</code> construct, and has all of the methods of the Disposable type, and can be treated as a Disposable. This is important as the way to stop a sink \(and also unsubscribe the sources subscribed to the sink\) is to dispose the sink itself. This also means that the way to cleanup or cancel some process when a Sink stops taking values \(for example, when creating a custom Source\), is to add a child to the Sink \(as done on a disposable\), which will then be called when the Sink is disposed. An example of this cancellation ability is say, cancelling a http request.
 
 The sink constructor takes an <code>onEvent</code> function, which is called every time an event is received. When a sink is disposed, it will stop taking values and will ignore all subsequent events received. As well as this, when the sink is active and when the event received is a ThrowEvent or an EndEvent, then the sink will be disposed and then <i>after</i> this the <code>onEvent</code> function will called with the given event. If the <code>onEvent</code> function throws upon receiving an event, then the sink will immediately be disposed and the error will be thrown asynchronously in a <code>setTimeout</code> with delay zero.
+
+<b>See Also</b>
+
+- <code>[Disposable](#disposable)</code>
+- <code>[Event](#event)</code>
+- <code>[Source](#source)</code>
+- <code>[Subject](#subject)</code>
+
+### <a name="sink-function"></a><code>Sink - Function</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L290](..\/..\/..\/packages\/core\/src\/source.ts#L290)
+
+<b>Signature</b>
+
+<pre>function Sink&lt;T&gt;(onEvent: (event: <a href="#event">Event</a>&lt;T&gt;) =&gt; void): <a href="#sink-interface">Sink</a>&lt;T&gt;</pre>
 
 <b>Parameters</b>
 
@@ -464,16 +471,9 @@ sink(Throw(...)); // Ignored.
 // { type: ThrowType, error: Error }
 ```
 
-<b>See Also</b>
-
-- <code>[Disposable](#disposable)</code>
-- <code>[Event](#event)</code>
-- <code>[Source](#source)</code>
-- <code>[Subject](#subject)</code>
-
 ### <a name="sink-interface"></a><code>Sink - Interface</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L198](..\/..\/..\/packages\/core\/src\/source.ts#L198)
+> Source Location: [packages\/core\/src\/source.ts#L243](..\/..\/..\/packages\/core\/src\/source.ts#L243)
 
 <b>Signature</b>
 
@@ -481,7 +481,7 @@ sink(Throw(...)); // Ignored.
 
 ## <code>isSink</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L328](..\/..\/..\/packages\/core\/src\/source.ts#L328)
+> Source Location: [packages\/core\/src\/source.ts#L344](..\/..\/..\/packages\/core\/src\/source.ts#L344)
 
 <b>Signature</b>
 
@@ -520,14 +520,6 @@ isSink(null); // false.
 - <code>[isSubject](#issubject)</code>
 
 ## <code>Source</code>
-
-### <a name="source-function"></a><code>Source - Function</code>
-
-> Source Location: [packages\/core\/src\/source.ts#L479](..\/..\/..\/packages\/core\/src\/source.ts#L479)
-
-<b>Signature</b>
-
-<pre>function Source&lt;T&gt;(produce: (sink: <a href="#sink-interface">Sink</a>&lt;T&gt;) =&gt; void): <a href="#source-interface">Source</a>&lt;T&gt;</pre>
 
 A Source is a function which can be subscribed to with a <code>[Sink](#sink)</code>. This construct is the basis of all reactive programming done with this library. Sources are by default essentially a lazy push-style stream\/observable which will produce new values every subscription. The &quot;lazy&quot; part can be thought of as follows:
 
@@ -572,6 +564,14 @@ const Source = produce => sink => {
     }
 }
 ```
+
+### <a name="source-function"></a><code>Source - Function</code>
+
+> Source Location: [packages\/core\/src\/source.ts#L500](..\/..\/..\/packages\/core\/src\/source.ts#L500)
+
+<b>Signature</b>
+
+<pre>function Source&lt;T&gt;(produce: (sink: <a href="#sink-interface">Sink</a>&lt;T&gt;) =&gt; void): <a href="#source-interface">Source</a>&lt;T&gt;</pre>
 
 <b>Parameters</b>
 
@@ -653,7 +653,7 @@ const source = Source(sink => {
 
 ### <a name="source-interface"></a><code>Source - Interface</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L336](..\/..\/..\/packages\/core\/src\/source.ts#L336)
+> Source Location: [packages\/core\/src\/source.ts#L424](..\/..\/..\/packages\/core\/src\/source.ts#L424)
 
 <b>Signature</b>
 
@@ -663,7 +663,7 @@ interface Source<T>
 
 ## <code>isSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L535](..\/..\/..\/packages\/core\/src\/source.ts#L535)
+> Source Location: [packages\/core\/src\/source.ts#L556](..\/..\/..\/packages\/core\/src\/source.ts#L556)
 
 <b>Signature</b>
 
@@ -703,7 +703,7 @@ isSource(null); // false.
 
 ## <code>subscribe</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L578](..\/..\/..\/packages\/core\/src\/source.ts#L578)
+> Source Location: [packages\/core\/src\/source.ts#L599](..\/..\/..\/packages\/core\/src\/source.ts#L599)
 
 <b>Signature</b>
 
@@ -755,7 +755,7 @@ pipe(
 
 ## <code>Operator</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1295](..\/..\/..\/packages\/core\/src\/source.ts#L1295)
+> Source Location: [packages\/core\/src\/source.ts#L1316](..\/..\/..\/packages\/core\/src\/source.ts#L1316)
 
 <b>Signature</b>
 
@@ -765,7 +765,7 @@ interface Operator<T, U>
 
 ## <code>IdentityOperator</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1302](..\/..\/..\/packages\/core\/src\/source.ts#L1302)
+> Source Location: [packages\/core\/src\/source.ts#L1323](..\/..\/..\/packages\/core\/src\/source.ts#L1323)
 
 <b>Signature</b>
 

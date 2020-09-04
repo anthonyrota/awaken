@@ -121,6 +121,12 @@ export type Event<T> = Push<T> | Throw | End;
  * {@link core/Sink#}, and has a `value` field equal to the value the event
  * is carrying.
  *
+ * @see {@link core/Event#}
+ *
+ * @baseDoc
+ */
+
+/**
  * @returns The created Push event.
  *
  * @example
@@ -129,8 +135,6 @@ export type Event<T> = Push<T> | Throw | End;
  * console.log(event.type); // `${PushType}`.
  * console.log(event.value); // [1, 2, 3].
  * ```
- *
- * @see {@link core/Event#}
  */
 
 /**
@@ -148,10 +152,16 @@ export function Push<T>(value?: T): Push<T | undefined> {
 }
 
 /**
- * A Throw represents the "throwing" of an error, and has an `error` field equal
- * to the error the event is carrying. After a {@link core/Sink#} receives
+ * A Throw event represents the "throwing" of an error, and has an `error` field
+ * equal to the error the event is carrying. After a {@link core/Sink#} receives
  * an Error event, it will be disposed and will not take any more events.
  *
+ * @see {@link core/Event#}
+ *
+ * @baseDoc
+ */
+
+/**
  * @param error - The error to be thrown.
  * @returns The created Throw event.
  *
@@ -161,8 +171,6 @@ export function Push<T>(value?: T): Push<T | undefined> {
  * console.log(event.type); // `${ThrowType}`.
  * console.log(event.value); // Error(...).
  * ```
- *
- * @see {@link core/Event#}
  *
  * @public
  */
@@ -175,6 +183,12 @@ export function Throw(error: unknown): Throw {
  * additional properties. After a Sink receives an End event, it will be
  * disposed and will not take any more events.
  *
+ * @see {@link core/Event#}
+ *
+ * @baseDoc
+ */
+
+/**
  * @example
  * ```ts
  * function onEvent(event: Event<unknown>): void {
@@ -186,19 +200,9 @@ export function Throw(error: unknown): Throw {
  * // `${EndType}`
  * ```
  *
- * @see {@link core/Event#}
- *
  * @public
  */
 export const End: End = { type: EndType };
-
-/**
- * @public
- */
-export interface Sink<T> extends Disposable {
-    [$$Sink]: undefined;
-    (event: Event<T>): void;
-}
 
 /**
  * A Sink is what a {@link core/Source#} subscribes to. All events emitted
@@ -225,6 +229,23 @@ export interface Sink<T> extends Disposable {
  * an event, then the sink will immediately be disposed and the error will be
  * thrown asynchronously in a `setTimeout` with delay zero.
  *
+ * @see {@link core/Disposable#}
+ * @see {@link core/Event#}
+ * @see {@link core/Source#}
+ * @see {@link core/Subject#}
+ *
+ * @baseDoc
+ */
+
+/**
+ * @public
+ */
+export interface Sink<T> extends Disposable {
+    [$$Sink]: undefined;
+    (event: Event<T>): void;
+}
+
+/**
  * @param onEvent - The callback for when an event is received.
  * @returns The created Sink.
  *
@@ -263,11 +284,6 @@ export interface Sink<T> extends Disposable {
  * // { type: PushType, value: 1 }
  * // { type: ThrowType, error: Error }
  * ```
- *
- * @see {@link core/Disposable#}
- * @see {@link core/Event#}
- * @see {@link core/Source#}
- * @see {@link core/Subject#}
  *
  * @public
  */
@@ -328,14 +344,6 @@ export function Sink<T>(onEvent: (event: Event<T>) => void): Sink<T> {
 export function isSink(value: unknown): value is Sink<unknown> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return value != null && $$Sink in (value as any);
-}
-
-/**
- * @public
- */
-export interface Source<T> {
-    [$$Source]: undefined;
-    (sink: Sink<T>): void;
 }
 
 /**
@@ -406,6 +414,19 @@ export interface Source<T> {
  *     }
  * }
  * ```
+ *
+ * @baseDoc
+ */
+
+/**
+ * @public
+ */
+export interface Source<T> {
+    [$$Source]: undefined;
+    (sink: Sink<T>): void;
+}
+
+/**
  *
  * @param produce - This will be called with the given sink each subscription.
  *     When the sink is disposed this function should stop trying to emit
