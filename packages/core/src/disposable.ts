@@ -1,6 +1,6 @@
 import { createCustomError, joinErrors } from './errorBase';
 import { $$Disposable } from './symbols';
-import { removeOnce, forEach } from './util';
+import { removeOnce } from './util';
 
 const enum DisposableImplementationIdentifier {
     RealDisposable,
@@ -30,6 +30,9 @@ export interface Disposable {
      * @throws {@link core/DisposalError#};
      */
     dispose(): void;
+    /**
+     * @hideDoc
+     */
     [$$Disposable]: DisposableImplementationIdentifier;
 }
 
@@ -47,7 +50,6 @@ class RealDisposableImplementation implements DisposableImplementationBase {
     private __children: DisposableImplementationBase[] | null = [];
     private __parents: DisposableImplementationBase[] | null = [];
     private __markedForDisposal = false;
-    // eslint-disable-next-line max-len
     public [$$Disposable]: DisposableImplementationIdentifier.RealDisposable =
         DisposableImplementationIdentifier.RealDisposable;
 
@@ -221,7 +223,6 @@ export function implDisposableMethods<T extends object>(
     // eslint-disable-next-line max-len
     const disposableImplementation = (disposable as unknown) as DisposableImplementation;
 
-    // eslint-disable-next-line max-len
     fakeDisposable[$$Disposable] =
         DisposableImplementationIdentifier.FakeDisposable;
 
@@ -316,14 +317,15 @@ export const DisposalError: DisposalErrorConstructor = createCustomError(
 function flattenDisposalErrors(errors: unknown[]): unknown[] {
     const flattened: unknown[] = [];
 
-    forEach(errors, (error) => {
+    for (let i = 0; i < errors.length; i++) {
+        const error = errors[i];
         if (error instanceof DisposalError) {
             // eslint-disable-next-line prefer-spread
             flattened.push.apply(flattened, error.errors);
         } else {
             flattened.push(error);
         }
-    });
+    }
 
     return flattened;
 }

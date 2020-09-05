@@ -1,7 +1,12 @@
 import * as path from 'path';
-import * as tsdoc from '@microsoft/tsdoc';
+import { TextRange } from '@microsoft/tsdoc';
 import * as ts from 'typescript';
 import { ExportIdentifier, getUniqueExportIdentifierKey } from './Identifier';
+import {
+    parseDocComment,
+    baseDocTag,
+    exportBaseDocCommentConfiguration,
+} from './util/tsdocUtil';
 
 export interface SourceLocation {
     filePath: string;
@@ -9,7 +14,7 @@ export interface SourceLocation {
 }
 
 export interface BaseDocComment {
-    textRange: tsdoc.TextRange;
+    textRange: TextRange;
 }
 
 export interface ExportDeclarationMetadata {
@@ -291,7 +296,7 @@ function getDeclarationBaseDocComments(
     const exportBaseDocComment:
         | BaseDocComment
         | undefined = exportBaseDocCommentRange && {
-        textRange: tsdoc.TextRange.fromStringRange(
+        textRange: TextRange.fromStringRange(
             sourceFileText,
             exportBaseDocCommentRange.pos,
             exportBaseDocCommentRange.end,
@@ -317,7 +322,7 @@ function getDeclarationBaseDocComments(
     return {
         exportBaseDocComment,
         declarationBaseDocComment: {
-            textRange: tsdoc.TextRange.fromStringRange(
+            textRange: TextRange.fromStringRange(
                 sourceFileText,
                 firstCommentRange.pos,
                 firstCommentRange.end,
@@ -330,7 +335,14 @@ function hasExportBaseDocCommentTag(
     sourceFileText: string,
     commentRange: ts.CommentRange,
 ): boolean {
-    return /@baseDoc/i.test(
-        sourceFileText.slice(commentRange.pos, commentRange.end),
+    const textRange = TextRange.fromStringRange(
+        sourceFileText,
+        commentRange.pos,
+        commentRange.end,
     );
+    const docComment = parseDocComment({
+        textRange,
+        configuration: exportBaseDocCommentConfiguration,
+    });
+    return docComment.modifierTagSet.hasTag(baseDocTag);
 }

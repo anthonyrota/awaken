@@ -40,6 +40,9 @@ export function buildApiInterface(
     container.children.push(sourceLocationLink);
     container.children.push(signature);
     if (summary) container.children.push(summary);
+
+    // interface_.
+
     if (examples) container.children.push(examples);
     if (seeBlocks) container.children.push(seeBlocks);
 

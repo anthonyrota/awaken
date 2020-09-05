@@ -5,7 +5,7 @@ import { ContainerNode } from '../../../core/nodes/Container';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
 import { TitleNode } from '../../../core/nodes/Title';
 import { AnalyzeContext } from '../../Context';
-import { getDocComment, getExampleBlocks } from '../../util/tsdocConfiguration';
+import { getDocComment, getExampleBlocks } from '../../util/tsdocUtil';
 import { buildApiItemDocNode } from './buildApiItemDocNode';
 
 export interface BuildApiItemExamplesParameters {

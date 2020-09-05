@@ -6,7 +6,7 @@ import { ListNode, ListType } from '../../../core/nodes/List';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
 import { TitleNode } from '../../../core/nodes/Title';
 import { AnalyzeContext } from '../../Context';
-import { getDocComment, getSeeBlocks } from '../../util/tsdocConfiguration';
+import { getDocComment, getSeeBlocks } from '../../util/tsdocUtil';
 import { buildApiItemDocNode } from './buildApiItemDocNode';
 
 export interface BuildApiItemSeeBlocksParameters {

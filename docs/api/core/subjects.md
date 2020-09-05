@@ -14,7 +14,7 @@
 
 ### <a name="currentvaluesubject-function"></a><code>CurrentValueSubject - Function</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L375](..\/..\/..\/packages\/core\/src\/subject.ts#L375)
+> Source Location: [packages\/core\/src\/subject.ts#L370](..\/..\/..\/packages\/core\/src\/subject.ts#L370)
 
 <b>Signature</b>
 
@@ -22,15 +22,15 @@
 
 ### <a name="currentvaluesubject-interface"></a><code>CurrentValueSubject - Interface</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L368](..\/..\/..\/packages\/core\/src\/subject.ts#L368)
+> Source Location: [packages\/core\/src\/subject.ts#L363](..\/..\/..\/packages\/core\/src\/subject.ts#L363)
 
 <b>Signature</b>
 
-<pre>interface CurrentValueSubject&lt;T&gt; extends <a href="basics.md#subject-interface">Subject</a>&lt;T&gt; </pre>
+<pre>interface CurrentValueSubject&lt;T&gt; extends <a href="basics.md#subject-interface">Subject</a>&lt;T&gt; {<br>    currentValue: T<br>}</pre>
 
 ## <code>FinalValueSubject</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L529](..\/..\/..\/packages\/core\/src\/subject.ts#L529)
+> Source Location: [packages\/core\/src\/subject.ts#L524](..\/..\/..\/packages\/core\/src\/subject.ts#L524)
 
 <b>Signature</b>
 
@@ -38,7 +38,7 @@
 
 ## <code>ReplaySubject</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L409](..\/..\/..\/packages\/core\/src\/subject.ts#L409)
+> Source Location: [packages\/core\/src\/subject.ts#L404](..\/..\/..\/packages\/core\/src\/subject.ts#L404)
 
 <b>Signature</b>
 
@@ -46,17 +46,15 @@
 
 ## <code>ReplaySubjectTimeoutConfig</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L401](..\/..\/..\/packages\/core\/src\/subject.ts#L401)
+> Source Location: [packages\/core\/src\/subject.ts#L396](..\/..\/..\/packages\/core\/src\/subject.ts#L396)
 
 <b>Signature</b>
 
-```ts
-interface ReplaySubjectTimeoutConfig 
-```
+<pre>interface ReplaySubjectTimeoutConfig {<br>    maxDuration: number<br>    provideTime?: <a href="util.md#timeprovider">TimeProvider</a> | null<br>}</pre>
 
 ## <code>SubjectBase</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L90](..\/..\/..\/packages\/core\/src\/subject.ts#L90)
+> Source Location: [packages\/core\/src\/subject.ts#L85](..\/..\/..\/packages\/core\/src\/subject.ts#L85)
 
 <b>Signature</b>
 

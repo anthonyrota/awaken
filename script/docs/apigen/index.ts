@@ -66,7 +66,6 @@ const packageDataList: APIPackageData[] = [
                             'SubjectDistributionSinkDisposalError',
                             'SubjectDistributionSinkDisposalErrorConstructor',
                             'markAsSubject',
-                            'NonMarkedSubject',
                         ],
                     },
                     { main: 'ScheduleFunction' },

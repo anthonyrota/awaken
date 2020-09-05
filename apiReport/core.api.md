@@ -416,7 +416,7 @@ export function mapPushEvents<T, U>(transform: (pushEvent: Push<T>, index: numbe
 export function mapTo<U>(value: U): <T>(source: Source<T>) => Source<U>;
 
 // @public (undocumented)
-export function markAsSubject<T>(subjectFunction: NonMarkedSubject<T>): Subject<T>;
+export function markAsSubject<T>(subjectFunction: ((eventOrSink: Event_2<T> | Sink<T>) => void) & Disposable): Subject<T>;
 
 // @public (undocumented)
 export const max: Operator<number, number>;
@@ -453,12 +453,6 @@ export function minCompare<T>(compare: (currentValue: T, lastValue: T, currentVa
 
 // @public (undocumented)
 export const never: Source<unknown>;
-
-// @public (undocumented)
-export interface NonMarkedSubject<T> extends Disposable {
-    // (undocumented)
-    (eventOrSink: Event_2<T> | Sink<T>): void;
-}
 
 // @public
 export function of<T>(...items: T[]): Source<T>;
@@ -754,7 +748,9 @@ export function startWithSources<T>(sources: Source<T>[]): <U>(source: Source<U>
 export function Subject<T>(): Subject<T>;
 
 // @public (undocumented)
-export interface Subject<T> extends Source<T>, Sink<T>, NonMarkedSubject<T> {
+export interface Subject<T> extends Source<T>, Sink<T> {
+    // (undocumented)
+    (eventOrSink: Event_2<T> | Sink<T>): void;
 }
 
 // @public (undocumented)

@@ -25,21 +25,16 @@ import {
 /**
  * @public
  */
-export interface NonMarkedSubject<T> extends Disposable {
+export interface Subject<T> extends Source<T>, Sink<T> {
     (eventOrSink: Event<T> | Sink<T>): void;
 }
 
 /**
  * @public
  */
-export interface Subject<T> extends Source<T>, Sink<T>, NonMarkedSubject<T> {}
-
-/**
- * @public
- */
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function markAsSubject<T>(
-    subjectFunction: NonMarkedSubject<T>,
+    subjectFunction: ((eventOrSink: Event<T> | Sink<T>) => void) & Disposable,
 ): Subject<T> {
     subjectFunction[$$Sink] = undefined;
     subjectFunction[$$Source] = undefined;

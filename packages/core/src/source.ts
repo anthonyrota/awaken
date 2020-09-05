@@ -241,6 +241,9 @@ export const End: End = { type: EndType };
  * @public
  */
 export interface Sink<T> extends Disposable {
+    /**
+     * @hideDoc
+     */
     [$$Sink]: undefined;
     (event: Event<T>): void;
 }
@@ -422,6 +425,9 @@ export function isSink(value: unknown): value is Sink<unknown> {
  * @public
  */
 export interface Source<T> {
+    /**
+     * @hideDoc
+     */
     [$$Source]: undefined;
     (sink: Sink<T>): void;
 }

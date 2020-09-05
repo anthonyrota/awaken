@@ -5,13 +5,7 @@ import {
     ApiVariable,
     ApiTypeAlias,
     ApiItemKind,
-    AedocDefinitions,
 } from '@microsoft/api-extractor-model';
-import {
-    TSDocConfiguration,
-    TSDocTagDefinition,
-    TSDocTagSyntaxKind,
-} from '@microsoft/tsdoc';
 import { DeepCoreNode } from '../../core/nodes';
 import { CodeSpanNode } from '../../core/nodes/CodeSpan';
 import { ContainerNode } from '../../core/nodes/Container';
@@ -20,12 +14,15 @@ import { PlainTextNode } from '../../core/nodes/PlainText';
 import { AnalyzeContext } from '../Context';
 import { getUniqueExportIdentifierKey } from '../Identifier';
 import { getApiItemIdentifier } from '../util/getApiItemIdentifier';
+import {
+    exportBaseDocCommentConfiguration,
+    parseDocComment,
+} from '../util/tsdocUtil';
 import { UnsupportedApiItemError } from '../util/UnsupportedApiItemError';
 import { buildApiFunction } from './buildApiFunction';
 import { buildApiInterface } from './buildApiInterface';
 import { buildApiTypeAlias } from './buildApiTypeAlias';
 import { buildApiVariable } from './buildApiVariable';
-import { parseBaseDocComment } from './util/buildApiItemBaseDoc';
 import { buildApiItemExamples } from './util/buildApiItemExamples';
 import { buildApiItemSeeBlocks } from './util/buildApiItemSeeBlocks';
 import { buildApiItemSummary } from './util/buildApiItemSummary';
@@ -104,32 +101,8 @@ export function buildApiItemImplementationGroup(
     }
     const { baseDocComment } = exportIdentifierMetadata;
     if (baseDocComment) {
-        const exportBaseDocCommentConfiguration = new TSDocConfiguration();
-        for (const tagDefinition of AedocDefinitions.tsdocConfiguration
-            .tagDefinitions) {
-            exportBaseDocCommentConfiguration.addTagDefinition(tagDefinition);
-            if (
-                AedocDefinitions.tsdocConfiguration.isTagSupported(
-                    tagDefinition,
-                )
-            ) {
-                exportBaseDocCommentConfiguration.setSupportForTag(
-                    tagDefinition,
-                    true,
-                );
-            }
-        }
-
-        const baseDoc = new TSDocTagDefinition({
-            tagName: '@baseDoc',
-            syntaxKind: TSDocTagSyntaxKind.ModifierTag,
-        });
-
-        exportBaseDocCommentConfiguration.addTagDefinition(baseDoc);
-        exportBaseDocCommentConfiguration.setSupportForTag(baseDoc, true);
-
-        const docComment = parseBaseDocComment({
-            baseDocComment,
+        const docComment = parseDocComment({
+            textRange: baseDocComment.textRange,
             configuration: exportBaseDocCommentConfiguration,
         });
         const apiItem = apiItems[0];

@@ -90,5 +90,7 @@ Reports the given error asynchronously.
 <b>Signature</b>
 
 ```ts
-interface TimeProvider 
+interface TimeProvider {
+    (): number
+}
 ```

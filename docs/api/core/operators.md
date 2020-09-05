@@ -124,7 +124,7 @@
 
 ## <code>at</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1698](..\/..\/..\/packages\/core\/src\/source.ts#L1698)
+> Source Location: [packages\/core\/src\/source.ts#L1704](..\/..\/..\/packages\/core\/src\/source.ts#L1704)
 
 <b>Signature</b>
 
@@ -132,7 +132,7 @@
 
 ## <code>catchError</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3082](..\/..\/..\/packages\/core\/src\/source.ts#L3082)
+> Source Location: [packages\/core\/src\/source.ts#L3088](..\/..\/..\/packages\/core\/src\/source.ts#L3088)
 
 <b>Signature</b>
 
@@ -140,7 +140,7 @@
 
 ## <code>collect</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3306](..\/..\/..\/packages\/core\/src\/source.ts#L3306)
+> Source Location: [packages\/core\/src\/source.ts#L3312](..\/..\/..\/packages\/core\/src\/source.ts#L3312)
 
 <b>Signature</b>
 
@@ -148,7 +148,7 @@
 
 ## <code>combineWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1330](..\/..\/..\/packages\/core\/src\/source.ts#L1330)
+> Source Location: [packages\/core\/src\/source.ts#L1336](..\/..\/..\/packages\/core\/src\/source.ts#L1336)
 
 <b>Signature</b>
 
@@ -156,7 +156,7 @@
 
 ## <code>concat</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2163](..\/..\/..\/packages\/core\/src\/source.ts#L2163)
+> Source Location: [packages\/core\/src\/source.ts#L2169](..\/..\/..\/packages\/core\/src\/source.ts#L2169)
 
 <b>Signature</b>
 
@@ -164,7 +164,7 @@
 
 ## <code>concatDrop</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2093](..\/..\/..\/packages\/core\/src\/source.ts#L2093)
+> Source Location: [packages\/core\/src\/source.ts#L2099](..\/..\/..\/packages\/core\/src\/source.ts#L2099)
 
 <b>Signature</b>
 
@@ -172,7 +172,7 @@
 
 ## <code>concatDropMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2177](..\/..\/..\/packages\/core\/src\/source.ts#L2177)
+> Source Location: [packages\/core\/src\/source.ts#L2183](..\/..\/..\/packages\/core\/src\/source.ts#L2183)
 
 <b>Signature</b>
 
@@ -180,7 +180,7 @@
 
 ## <code>concatMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2154](..\/..\/..\/packages\/core\/src\/source.ts#L2154)
+> Source Location: [packages\/core\/src\/source.ts#L2160](..\/..\/..\/packages\/core\/src\/source.ts#L2160)
 
 <b>Signature</b>
 
@@ -188,7 +188,7 @@
 
 ## <code>concatWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2136](..\/..\/..\/packages\/core\/src\/source.ts#L2136)
+> Source Location: [packages\/core\/src\/source.ts#L2142](..\/..\/..\/packages\/core\/src\/source.ts#L2142)
 
 <b>Signature</b>
 
@@ -196,7 +196,7 @@
 
 ## <code>count</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2796](..\/..\/..\/packages\/core\/src\/source.ts#L2796)
+> Source Location: [packages\/core\/src\/source.ts#L2802](..\/..\/..\/packages\/core\/src\/source.ts#L2802)
 
 <b>Signature</b>
 
@@ -204,7 +204,7 @@
 
 ## <code>debounce</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3387](..\/..\/..\/packages\/core\/src\/source.ts#L3387)
+> Source Location: [packages\/core\/src\/source.ts#L3393](..\/..\/..\/packages\/core\/src\/source.ts#L3393)
 
 <b>Signature</b>
 
@@ -214,17 +214,15 @@
 
 ## <code>DebounceConfig</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3338](..\/..\/..\/packages\/core\/src\/source.ts#L3338)
+> Source Location: [packages\/core\/src\/source.ts#L3344](..\/..\/..\/packages\/core\/src\/source.ts#L3344)
 
 <b>Signature</b>
 
-```ts
-interface DebounceConfig 
-```
+<pre>interface DebounceConfig {<br>    emitPendingOnEnd?: boolean | null<br>    leading?: boolean | null<br>    trailing?: boolean | <a href="#debouncetrailingrestart-typealias">DebounceTrailingRestart</a> | null<br>}</pre>
 
 ## <code>defaultDebounceConfig</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3347](..\/..\/..\/packages\/core\/src\/source.ts#L3347)
+> Source Location: [packages\/core\/src\/source.ts#L3353](..\/..\/..\/packages\/core\/src\/source.ts#L3353)
 
 <b>Signature</b>
 
@@ -232,7 +230,7 @@ interface DebounceConfig
 
 ## <code>InitialDurationInfo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3356](..\/..\/..\/packages\/core\/src\/source.ts#L3356)
+> Source Location: [packages\/core\/src\/source.ts#L3362](..\/..\/..\/packages\/core\/src\/source.ts#L3362)
 
 <b>Signature</b>
 
@@ -242,7 +240,7 @@ interface DebounceConfig
 
 ### <a name="debouncetrailingrestart-typealias"></a><code>DebounceTrailingRestart - Type</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3329](..\/..\/..\/packages\/core\/src\/source.ts#L3329)
+> Source Location: [packages\/core\/src\/source.ts#L3335](..\/..\/..\/packages\/core\/src\/source.ts#L3335)
 
 <b>Signature</b>
 
@@ -252,7 +250,7 @@ type DebounceTrailingRestart = 'restart'
 
 ### <a name="debouncetrailingrestart-variable"></a><code>DebounceTrailingRestart - Variable</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3333](..\/..\/..\/packages\/core\/src\/source.ts#L3333)
+> Source Location: [packages\/core\/src\/source.ts#L3339](..\/..\/..\/packages\/core\/src\/source.ts#L3339)
 
 <b>Signature</b>
 
@@ -260,7 +258,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>debounceMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3571](..\/..\/..\/packages\/core\/src\/source.ts#L3571)
+> Source Location: [packages\/core\/src\/source.ts#L3577](..\/..\/..\/packages\/core\/src\/source.ts#L3577)
 
 <b>Signature</b>
 
@@ -270,7 +268,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>defaultIfEmpty</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2353](..\/..\/..\/packages\/core\/src\/source.ts#L2353)
+> Source Location: [packages\/core\/src\/source.ts#L2359](..\/..\/..\/packages\/core\/src\/source.ts#L2359)
 
 <b>Signature</b>
 
@@ -278,7 +276,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>defaultIfEmptyTo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2384](..\/..\/..\/packages\/core\/src\/source.ts#L2384)
+> Source Location: [packages\/core\/src\/source.ts#L2390](..\/..\/..\/packages\/core\/src\/source.ts#L2390)
 
 <b>Signature</b>
 
@@ -286,7 +284,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>delay</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3679](..\/..\/..\/packages\/core\/src\/source.ts#L3679)
+> Source Location: [packages\/core\/src\/source.ts#L3685](..\/..\/..\/packages\/core\/src\/source.ts#L3685)
 
 <b>Signature</b>
 
@@ -296,7 +294,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>delayMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3735](..\/..\/..\/packages\/core\/src\/source.ts#L3735)
+> Source Location: [packages\/core\/src\/source.ts#L3741](..\/..\/..\/packages\/core\/src\/source.ts#L3741)
 
 <b>Signature</b>
 
@@ -304,7 +302,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>distinct</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2409](..\/..\/..\/packages\/core\/src\/source.ts#L2409)
+> Source Location: [packages\/core\/src\/source.ts#L2415](..\/..\/..\/packages\/core\/src\/source.ts#L2415)
 
 <b>Signature</b>
 
@@ -314,7 +312,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>distinctFromLast</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2482](..\/..\/..\/packages\/core\/src\/source.ts#L2482)
+> Source Location: [packages\/core\/src\/source.ts#L2488](..\/..\/..\/packages\/core\/src\/source.ts#L2488)
 
 <b>Signature</b>
 
@@ -326,7 +324,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>endWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2199](..\/..\/..\/packages\/core\/src\/source.ts#L2199)
+> Source Location: [packages\/core\/src\/source.ts#L2205](..\/..\/..\/packages\/core\/src\/source.ts#L2205)
 
 <b>Signature</b>
 
@@ -334,7 +332,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>every</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1708](..\/..\/..\/packages\/core\/src\/source.ts#L1708)
+> Source Location: [packages\/core\/src\/source.ts#L1714](..\/..\/..\/packages\/core\/src\/source.ts#L1714)
 
 <b>Signature</b>
 
@@ -342,7 +340,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>expandMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2023](..\/..\/..\/packages\/core\/src\/source.ts#L2023)
+> Source Location: [packages\/core\/src\/source.ts#L2029](..\/..\/..\/packages\/core\/src\/source.ts#L2029)
 
 <b>Signature</b>
 
@@ -350,7 +348,7 @@ type DebounceTrailingRestart = 'restart'
 
 ## <code>filter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1592](..\/..\/..\/packages\/core\/src\/source.ts#L1592)
+> Source Location: [packages\/core\/src\/source.ts#L1598](..\/..\/..\/packages\/core\/src\/source.ts#L1598)
 
 <b>Signature</b>
 
@@ -372,7 +370,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>finalize</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1729](..\/..\/..\/packages\/core\/src\/source.ts#L1729)
+> Source Location: [packages\/core\/src\/source.ts#L1735](..\/..\/..\/packages\/core\/src\/source.ts#L1735)
 
 <b>Signature</b>
 
@@ -380,7 +378,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>find</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1680](..\/..\/..\/packages\/core\/src\/source.ts#L1680)
+> Source Location: [packages\/core\/src\/source.ts#L1686](..\/..\/..\/packages\/core\/src\/source.ts#L1686)
 
 <b>Signature</b>
 
@@ -390,7 +388,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>findIndex</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1689](..\/..\/..\/packages\/core\/src\/source.ts#L1689)
+> Source Location: [packages\/core\/src\/source.ts#L1695](..\/..\/..\/packages\/core\/src\/source.ts#L1695)
 
 <b>Signature</b>
 
@@ -398,7 +396,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>findWithIndex</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1644](..\/..\/..\/packages\/core\/src\/source.ts#L1644)
+> Source Location: [packages\/core\/src\/source.ts#L1650](..\/..\/..\/packages\/core\/src\/source.ts#L1650)
 
 <b>Signature</b>
 
@@ -408,7 +406,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>first</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2693](..\/..\/..\/packages\/core\/src\/source.ts#L2693)
+> Source Location: [packages\/core\/src\/source.ts#L2699](..\/..\/..\/packages\/core\/src\/source.ts#L2699)
 
 <b>Signature</b>
 
@@ -416,7 +414,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>flat</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1909](..\/..\/..\/packages\/core\/src\/source.ts#L1909)
+> Source Location: [packages\/core\/src\/source.ts#L1915](..\/..\/..\/packages\/core\/src\/source.ts#L1915)
 
 <b>Signature</b>
 
@@ -424,7 +422,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>flatMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2145](..\/..\/..\/packages\/core\/src\/source.ts#L2145)
+> Source Location: [packages\/core\/src\/source.ts#L2151](..\/..\/..\/packages\/core\/src\/source.ts#L2151)
 
 <b>Signature</b>
 
@@ -432,7 +430,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>flatWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2098](..\/..\/..\/packages\/core\/src\/source.ts#L2098)
+> Source Location: [packages\/core\/src\/source.ts#L2104](..\/..\/..\/packages\/core\/src\/source.ts#L2104)
 
 <b>Signature</b>
 
@@ -440,7 +438,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>groupBy</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2519](..\/..\/..\/packages\/core\/src\/source.ts#L2519)
+> Source Location: [packages\/core\/src\/source.ts#L2525](..\/..\/..\/packages\/core\/src\/source.ts#L2525)
 
 <b>Signature</b>
 
@@ -448,7 +446,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>GroupSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2606](..\/..\/..\/packages\/core\/src\/source.ts#L2606)
+> Source Location: [packages\/core\/src\/source.ts#L2612](..\/..\/..\/packages\/core\/src\/source.ts#L2612)
 
 <b>Signature</b>
 
@@ -456,23 +454,23 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>ActiveGroupSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2588](..\/..\/..\/packages\/core\/src\/source.ts#L2588)
+> Source Location: [packages\/core\/src\/source.ts#L2594](..\/..\/..\/packages\/core\/src\/source.ts#L2594)
 
 <b>Signature</b>
 
-<pre>interface ActiveGroupSource&lt;T, K&gt; extends <a href="basics.md#source-interface">Source</a>&lt;T&gt; </pre>
+<pre>interface ActiveGroupSource&lt;T, K&gt; extends <a href="basics.md#source-interface">Source</a>&lt;T&gt; {<br>    key: K<br>    remove(): void<br>    removed: false<br>}</pre>
 
 ## <code>RemovedGroupSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2597](..\/..\/..\/packages\/core\/src\/source.ts#L2597)
+> Source Location: [packages\/core\/src\/source.ts#L2603](..\/..\/..\/packages\/core\/src\/source.ts#L2603)
 
 <b>Signature</b>
 
-<pre>interface RemovedGroupSource&lt;T&gt; extends <a href="basics.md#source-interface">Source</a>&lt;T&gt; </pre>
+<pre>interface RemovedGroupSource&lt;T&gt; extends <a href="basics.md#source-interface">Source</a>&lt;T&gt; {<br>    key: null<br>    remove(): void<br>    removed: true<br>}</pre>
 
 ## <code>ignorePushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1741](..\/..\/..\/packages\/core\/src\/source.ts#L1741)
+> Source Location: [packages\/core\/src\/source.ts#L1747](..\/..\/..\/packages\/core\/src\/source.ts#L1747)
 
 <b>Signature</b>
 
@@ -480,7 +478,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>isEmpty</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2334](..\/..\/..\/packages\/core\/src\/source.ts#L2334)
+> Source Location: [packages\/core\/src\/source.ts#L2340](..\/..\/..\/packages\/core\/src\/source.ts#L2340)
 
 <b>Signature</b>
 
@@ -488,7 +486,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>isEqualTo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1899](..\/..\/..\/packages\/core\/src\/source.ts#L1899)
+> Source Location: [packages\/core\/src\/source.ts#L1905](..\/..\/..\/packages\/core\/src\/source.ts#L1905)
 
 <b>Signature</b>
 
@@ -496,7 +494,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>last</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2791](..\/..\/..\/packages\/core\/src\/source.ts#L2791)
+> Source Location: [packages\/core\/src\/source.ts#L2797](..\/..\/..\/packages\/core\/src\/source.ts#L2797)
 
 <b>Signature</b>
 
@@ -504,7 +502,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>loop</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2978](..\/..\/..\/packages\/core\/src\/source.ts#L2978)
+> Source Location: [packages\/core\/src\/source.ts#L2984](..\/..\/..\/packages\/core\/src\/source.ts#L2984)
 
 <b>Signature</b>
 
@@ -512,7 +510,7 @@ Calls the predicate function for each Push event of the given source, only passi
 
 ## <code>map</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1447](..\/..\/..\/packages\/core\/src\/source.ts#L1447)
+> Source Location: [packages\/core\/src\/source.ts#L1453](..\/..\/..\/packages\/core\/src\/source.ts#L1453)
 
 <b>Signature</b>
 
@@ -532,7 +530,7 @@ Calls the given transform function for each Push event of the given source and p
 
 ## <code>mapEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1488](..\/..\/..\/packages\/core\/src\/source.ts#L1488)
+> Source Location: [packages\/core\/src\/source.ts#L1494](..\/..\/..\/packages\/core\/src\/source.ts#L1494)
 
 <b>Signature</b>
 
@@ -540,7 +538,7 @@ Calls the given transform function for each Push event of the given source and p
 
 ## <code>mapPushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1531](..\/..\/..\/packages\/core\/src\/source.ts#L1531)
+> Source Location: [packages\/core\/src\/source.ts#L1537](..\/..\/..\/packages\/core\/src\/source.ts#L1537)
 
 <b>Signature</b>
 
@@ -550,7 +548,7 @@ Calls the given transform function for each Push event of the given source and p
 
 ## <code>mapTo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1481](..\/..\/..\/packages\/core\/src\/source.ts#L1481)
+> Source Location: [packages\/core\/src\/source.ts#L1487](..\/..\/..\/packages\/core\/src\/source.ts#L1487)
 
 <b>Signature</b>
 
@@ -566,7 +564,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>max</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1874](..\/..\/..\/packages\/core\/src\/source.ts#L1874)
+> Source Location: [packages\/core\/src\/source.ts#L1880](..\/..\/..\/packages\/core\/src\/source.ts#L1880)
 
 <b>Signature</b>
 
@@ -574,7 +572,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>maxCompare</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1850](..\/..\/..\/packages\/core\/src\/source.ts#L1850)
+> Source Location: [packages\/core\/src\/source.ts#L1856](..\/..\/..\/packages\/core\/src\/source.ts#L1856)
 
 <b>Signature</b>
 
@@ -582,7 +580,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>merge</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2037](..\/..\/..\/packages\/core\/src\/source.ts#L2037)
+> Source Location: [packages\/core\/src\/source.ts#L2043](..\/..\/..\/packages\/core\/src\/source.ts#L2043)
 
 <b>Signature</b>
 
@@ -590,7 +588,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>mergeConcurrent</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2028](..\/..\/..\/packages\/core\/src\/source.ts#L2028)
+> Source Location: [packages\/core\/src\/source.ts#L2034](..\/..\/..\/packages\/core\/src\/source.ts#L2034)
 
 <b>Signature</b>
 
@@ -598,7 +596,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>mergeMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2018](..\/..\/..\/packages\/core\/src\/source.ts#L2018)
+> Source Location: [packages\/core\/src\/source.ts#L2024](..\/..\/..\/packages\/core\/src\/source.ts#L2024)
 
 <b>Signature</b>
 
@@ -606,7 +604,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>mergeWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2118](..\/..\/..\/packages\/core\/src\/source.ts#L2118)
+> Source Location: [packages\/core\/src\/source.ts#L2124](..\/..\/..\/packages\/core\/src\/source.ts#L2124)
 
 <b>Signature</b>
 
@@ -614,7 +612,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>mergeWithConcurrent</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2107](..\/..\/..\/packages\/core\/src\/source.ts#L2107)
+> Source Location: [packages\/core\/src\/source.ts#L2113](..\/..\/..\/packages\/core\/src\/source.ts#L2113)
 
 <b>Signature</b>
 
@@ -622,7 +620,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>min</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1894](..\/..\/..\/packages\/core\/src\/source.ts#L1894)
+> Source Location: [packages\/core\/src\/source.ts#L1900](..\/..\/..\/packages\/core\/src\/source.ts#L1900)
 
 <b>Signature</b>
 
@@ -630,7 +628,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>minCompare</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1879](..\/..\/..\/packages\/core\/src\/source.ts#L1879)
+> Source Location: [packages\/core\/src\/source.ts#L1885](..\/..\/..\/packages\/core\/src\/source.ts#L1885)
 
 <b>Signature</b>
 
@@ -638,7 +636,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>pluck</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1561](..\/..\/..\/packages\/core\/src\/source.ts#L1561)
+> Source Location: [packages\/core\/src\/source.ts#L1567](..\/..\/..\/packages\/core\/src\/source.ts#L1567)
 
 <b>Signature</b>
 
@@ -646,7 +644,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>raceWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1340](..\/..\/..\/packages\/core\/src\/source.ts#L1340)
+> Source Location: [packages\/core\/src\/source.ts#L1346](..\/..\/..\/packages\/core\/src\/source.ts#L1346)
 
 <b>Signature</b>
 
@@ -654,7 +652,7 @@ Replaces the value of each received Push event with the given value.
 
 ## <code>reduce</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1832](..\/..\/..\/packages\/core\/src\/source.ts#L1832)
+> Source Location: [packages\/core\/src\/source.ts#L1838](..\/..\/..\/packages\/core\/src\/source.ts#L1838)
 
 <b>Signature</b>
 
@@ -671,7 +669,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>repeat</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2968](..\/..\/..\/packages\/core\/src\/source.ts#L2968)
+> Source Location: [packages\/core\/src\/source.ts#L2974](..\/..\/..\/packages\/core\/src\/source.ts#L2974)
 
 <b>Signature</b>
 
@@ -679,7 +677,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>repeatWhen</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2988](..\/..\/..\/packages\/core\/src\/source.ts#L2988)
+> Source Location: [packages\/core\/src\/source.ts#L2994](..\/..\/..\/packages\/core\/src\/source.ts#L2994)
 
 <b>Signature</b>
 
@@ -687,7 +685,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>retry</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2973](..\/..\/..\/packages\/core\/src\/source.ts#L2973)
+> Source Location: [packages\/core\/src\/source.ts#L2979](..\/..\/..\/packages\/core\/src\/source.ts#L2979)
 
 <b>Signature</b>
 
@@ -695,7 +693,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>retryAlways</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2983](..\/..\/..\/packages\/core\/src\/source.ts#L2983)
+> Source Location: [packages\/core\/src\/source.ts#L2989](..\/..\/..\/packages\/core\/src\/source.ts#L2989)
 
 <b>Signature</b>
 
@@ -703,7 +701,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>sample</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3743](..\/..\/..\/packages\/core\/src\/source.ts#L3743)
+> Source Location: [packages\/core\/src\/source.ts#L3749](..\/..\/..\/packages\/core\/src\/source.ts#L3749)
 
 <b>Signature</b>
 
@@ -711,7 +709,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>sampleMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3776](..\/..\/..\/packages\/core\/src\/source.ts#L3776)
+> Source Location: [packages\/core\/src\/source.ts#L3782](..\/..\/..\/packages\/core\/src\/source.ts#L3782)
 
 <b>Signature</b>
 
@@ -719,7 +717,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>scan</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1778](..\/..\/..\/packages\/core\/src\/source.ts#L1778)
+> Source Location: [packages\/core\/src\/source.ts#L1784](..\/..\/..\/packages\/core\/src\/source.ts#L1784)
 
 <b>Signature</b>
 
@@ -736,7 +734,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>schedulePushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3846](..\/..\/..\/packages\/core\/src\/source.ts#L3846)
+> Source Location: [packages\/core\/src\/source.ts#L3852](..\/..\/..\/packages\/core\/src\/source.ts#L3852)
 
 <b>Signature</b>
 
@@ -744,7 +742,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>scheduleSubscription</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3856](..\/..\/..\/packages\/core\/src\/source.ts#L3856)
+> Source Location: [packages\/core\/src\/source.ts#L3862](..\/..\/..\/packages\/core\/src\/source.ts#L3862)
 
 <b>Signature</b>
 
@@ -752,7 +750,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>share</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3916](..\/..\/..\/packages\/core\/src\/source.ts#L3916)
+> Source Location: [packages\/core\/src\/source.ts#L3922](..\/..\/..\/packages\/core\/src\/source.ts#L3922)
 
 <b>Signature</b>
 
@@ -762,7 +760,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>shareControlled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3882](..\/..\/..\/packages\/core\/src\/source.ts#L3882)
+> Source Location: [packages\/core\/src\/source.ts#L3888](..\/..\/..\/packages\/core\/src\/source.ts#L3888)
 
 <b>Signature</b>
 
@@ -772,15 +770,15 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>ControllableSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3866](..\/..\/..\/packages\/core\/src\/source.ts#L3866)
+> Source Location: [packages\/core\/src\/source.ts#L3872](..\/..\/..\/packages\/core\/src\/source.ts#L3872)
 
 <b>Signature</b>
 
-<pre>interface ControllableSource&lt;T&gt; extends <a href="basics.md#source-interface">Source</a>&lt;T&gt; </pre>
+<pre>interface ControllableSource&lt;T&gt; extends <a href="basics.md#source-interface">Source</a>&lt;T&gt; {<br>    produce(): void<br>}</pre>
 
 ## <code>shareOnce</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3955](..\/..\/..\/packages\/core\/src\/source.ts#L3955)
+> Source Location: [packages\/core\/src\/source.ts#L3961](..\/..\/..\/packages\/core\/src\/source.ts#L3961)
 
 <b>Signature</b>
 
@@ -790,7 +788,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>sharePersist</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3973](..\/..\/..\/packages\/core\/src\/source.ts#L3973)
+> Source Location: [packages\/core\/src\/source.ts#L3979](..\/..\/..\/packages\/core\/src\/source.ts#L3979)
 
 <b>Signature</b>
 
@@ -800,7 +798,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>shareTransform</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L4006](..\/..\/..\/packages\/core\/src\/source.ts#L4006)
+> Source Location: [packages\/core\/src\/source.ts#L4012](..\/..\/..\/packages\/core\/src\/source.ts#L4012)
 
 <b>Signature</b>
 
@@ -810,7 +808,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>skip</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2820](..\/..\/..\/packages\/core\/src\/source.ts#L2820)
+> Source Location: [packages\/core\/src\/source.ts#L2826](..\/..\/..\/packages\/core\/src\/source.ts#L2826)
 
 <b>Signature</b>
 
@@ -818,7 +816,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>skipLast</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2872](..\/..\/..\/packages\/core\/src\/source.ts#L2872)
+> Source Location: [packages\/core\/src\/source.ts#L2878](..\/..\/..\/packages\/core\/src\/source.ts#L2878)
 
 <b>Signature</b>
 
@@ -826,7 +824,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>skipUntil</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2905](..\/..\/..\/packages\/core\/src\/source.ts#L2905)
+> Source Location: [packages\/core\/src\/source.ts#L2911](..\/..\/..\/packages\/core\/src\/source.ts#L2911)
 
 <b>Signature</b>
 
@@ -834,7 +832,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>skipWhile</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2840](..\/..\/..\/packages\/core\/src\/source.ts#L2840)
+> Source Location: [packages\/core\/src\/source.ts#L2846](..\/..\/..\/packages\/core\/src\/source.ts#L2846)
 
 <b>Signature</b>
 
@@ -842,7 +840,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>some</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1720](..\/..\/..\/packages\/core\/src\/source.ts#L1720)
+> Source Location: [packages\/core\/src\/source.ts#L1726](..\/..\/..\/packages\/core\/src\/source.ts#L1726)
 
 <b>Signature</b>
 
@@ -850,7 +848,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyAfter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2314](..\/..\/..\/packages\/core\/src\/source.ts#L2314)
+> Source Location: [packages\/core\/src\/source.ts#L2320](..\/..\/..\/packages\/core\/src\/source.ts#L2320)
 
 <b>Signature</b>
 
@@ -858,7 +856,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyBefore</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2294](..\/..\/..\/packages\/core\/src\/source.ts#L2294)
+> Source Location: [packages\/core\/src\/source.ts#L2300](..\/..\/..\/packages\/core\/src\/source.ts#L2300)
 
 <b>Signature</b>
 
@@ -866,7 +864,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyEndAfter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2329](..\/..\/..\/packages\/core\/src\/source.ts#L2329)
+> Source Location: [packages\/core\/src\/source.ts#L2335](..\/..\/..\/packages\/core\/src\/source.ts#L2335)
 
 <b>Signature</b>
 
@@ -874,7 +872,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyEndBefore</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2309](..\/..\/..\/packages\/core\/src\/source.ts#L2309)
+> Source Location: [packages\/core\/src\/source.ts#L2315](..\/..\/..\/packages\/core\/src\/source.ts#L2315)
 
 <b>Signature</b>
 
@@ -882,7 +880,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyPushAfter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2319](..\/..\/..\/packages\/core\/src\/source.ts#L2319)
+> Source Location: [packages\/core\/src\/source.ts#L2325](..\/..\/..\/packages\/core\/src\/source.ts#L2325)
 
 <b>Signature</b>
 
@@ -890,7 +888,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyPushBefore</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2299](..\/..\/..\/packages\/core\/src\/source.ts#L2299)
+> Source Location: [packages\/core\/src\/source.ts#L2305](..\/..\/..\/packages\/core\/src\/source.ts#L2305)
 
 <b>Signature</b>
 
@@ -898,7 +896,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyThrowAfter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2324](..\/..\/..\/packages\/core\/src\/source.ts#L2324)
+> Source Location: [packages\/core\/src\/source.ts#L2330](..\/..\/..\/packages\/core\/src\/source.ts#L2330)
 
 <b>Signature</b>
 
@@ -906,7 +904,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>spyThrowBefore</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2304](..\/..\/..\/packages\/core\/src\/source.ts#L2304)
+> Source Location: [packages\/core\/src\/source.ts#L2310](..\/..\/..\/packages\/core\/src\/source.ts#L2310)
 
 <b>Signature</b>
 
@@ -914,7 +912,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>startWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2186](..\/..\/..\/packages\/core\/src\/source.ts#L2186)
+> Source Location: [packages\/core\/src\/source.ts#L2192](..\/..\/..\/packages\/core\/src\/source.ts#L2192)
 
 <b>Signature</b>
 
@@ -922,7 +920,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>startWithSources</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2127](..\/..\/..\/packages\/core\/src\/source.ts#L2127)
+> Source Location: [packages\/core\/src\/source.ts#L2133](..\/..\/..\/packages\/core\/src\/source.ts#L2133)
 
 <b>Signature</b>
 
@@ -930,7 +928,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>switchEach</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2088](..\/..\/..\/packages\/core\/src\/source.ts#L2088)
+> Source Location: [packages\/core\/src\/source.ts#L2094](..\/..\/..\/packages\/core\/src\/source.ts#L2094)
 
 <b>Signature</b>
 
@@ -938,7 +936,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>switchMap</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2168](..\/..\/..\/packages\/core\/src\/source.ts#L2168)
+> Source Location: [packages\/core\/src\/source.ts#L2174](..\/..\/..\/packages\/core\/src\/source.ts#L2174)
 
 <b>Signature</b>
 
@@ -946,7 +944,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>take</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2663](..\/..\/..\/packages\/core\/src\/source.ts#L2663)
+> Source Location: [packages\/core\/src\/source.ts#L2669](..\/..\/..\/packages\/core\/src\/source.ts#L2669)
 
 <b>Signature</b>
 
@@ -954,7 +952,7 @@ Calls the specified transform function for all the values pushed by the given so
 
 ## <code>takeLast</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2752](..\/..\/..\/packages\/core\/src\/source.ts#L2752)
+> Source Location: [packages\/core\/src\/source.ts#L2758](..\/..\/..\/packages\/core\/src\/source.ts#L2758)
 
 <b>Signature</b>
 
@@ -970,7 +968,7 @@ Ignores all received Push events. When the source emits an End event, the last N
 
 ## <code>takeUntil</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2804](..\/..\/..\/packages\/core\/src\/source.ts#L2804)
+> Source Location: [packages\/core\/src\/source.ts#L2810](..\/..\/..\/packages\/core\/src\/source.ts#L2810)
 
 <b>Signature</b>
 
@@ -978,7 +976,7 @@ Ignores all received Push events. When the source emits an End event, the last N
 
 ## <code>takeWhile</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2715](..\/..\/..\/packages\/core\/src\/source.ts#L2715)
+> Source Location: [packages\/core\/src\/source.ts#L2721](..\/..\/..\/packages\/core\/src\/source.ts#L2721)
 
 <b>Signature</b>
 
@@ -998,7 +996,7 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>throttle</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3626](..\/..\/..\/packages\/core\/src\/source.ts#L3626)
+> Source Location: [packages\/core\/src\/source.ts#L3632](..\/..\/..\/packages\/core\/src\/source.ts#L3632)
 
 <b>Signature</b>
 
@@ -1008,17 +1006,21 @@ Calls the shouldContinue function for each Push event of the given source. The r
 
 ## <code>ThrottleConfig</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3597](..\/..\/..\/packages\/core\/src\/source.ts#L3597)
+> Source Location: [packages\/core\/src\/source.ts#L3603](..\/..\/..\/packages\/core\/src\/source.ts#L3603)
 
 <b>Signature</b>
 
 ```ts
-interface ThrottleConfig 
+interface ThrottleConfig {
+    emitPendingOnEnd?: boolean | null
+    leading?: boolean | null
+    trailing?: boolean | null
+}
 ```
 
 ## <code>defaultThrottleConfig</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3606](..\/..\/..\/packages\/core\/src\/source.ts#L3606)
+> Source Location: [packages\/core\/src\/source.ts#L3612](..\/..\/..\/packages\/core\/src\/source.ts#L3612)
 
 <b>Signature</b>
 
@@ -1026,7 +1028,7 @@ interface ThrottleConfig
 
 ## <code>throttleMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3659](..\/..\/..\/packages\/core\/src\/source.ts#L3659)
+> Source Location: [packages\/core\/src\/source.ts#L3665](..\/..\/..\/packages\/core\/src\/source.ts#L3665)
 
 <b>Signature</b>
 
@@ -1034,7 +1036,7 @@ interface ThrottleConfig
 
 ## <code>throwIfEmpty</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2393](..\/..\/..\/packages\/core\/src\/source.ts#L2393)
+> Source Location: [packages\/core\/src\/source.ts#L2399](..\/..\/..\/packages\/core\/src\/source.ts#L2399)
 
 <b>Signature</b>
 
@@ -1042,7 +1044,7 @@ interface ThrottleConfig
 
 ## <code>timeout</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3053](..\/..\/..\/packages\/core\/src\/source.ts#L3053)
+> Source Location: [packages\/core\/src\/source.ts#L3059](..\/..\/..\/packages\/core\/src\/source.ts#L3059)
 
 <b>Signature</b>
 
@@ -1050,7 +1052,7 @@ interface ThrottleConfig
 
 ## <code>timeoutMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3072](..\/..\/..\/packages\/core\/src\/source.ts#L3072)
+> Source Location: [packages\/core\/src\/source.ts#L3078](..\/..\/..\/packages\/core\/src\/source.ts#L3078)
 
 <b>Signature</b>
 
@@ -1058,7 +1060,7 @@ interface ThrottleConfig
 
 ## <code>unwrapFromWrappedPushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1552](..\/..\/..\/packages\/core\/src\/source.ts#L1552)
+> Source Location: [packages\/core\/src\/source.ts#L1558](..\/..\/..\/packages\/core\/src\/source.ts#L1558)
 
 <b>Signature</b>
 
@@ -1066,7 +1068,7 @@ interface ThrottleConfig
 
 ## <code>windowControlled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3162](..\/..\/..\/packages\/core\/src\/source.ts#L3162)
+> Source Location: [packages\/core\/src\/source.ts#L3168](..\/..\/..\/packages\/core\/src\/source.ts#L3168)
 
 <b>Signature</b>
 
@@ -1076,7 +1078,7 @@ interface ThrottleConfig
 
 ## <code>windowCount</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3264](..\/..\/..\/packages\/core\/src\/source.ts#L3264)
+> Source Location: [packages\/core\/src\/source.ts#L3270](..\/..\/..\/packages\/core\/src\/source.ts#L3270)
 
 <b>Signature</b>
 
@@ -1084,7 +1086,7 @@ interface ThrottleConfig
 
 ## <code>windowEach</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3240](..\/..\/..\/packages\/core\/src\/source.ts#L3240)
+> Source Location: [packages\/core\/src\/source.ts#L3246](..\/..\/..\/packages\/core\/src\/source.ts#L3246)
 
 <b>Signature</b>
 
@@ -1094,7 +1096,7 @@ interface ThrottleConfig
 
 ## <code>windowEvery</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3113](..\/..\/..\/packages\/core\/src\/source.ts#L3113)
+> Source Location: [packages\/core\/src\/source.ts#L3119](..\/..\/..\/packages\/core\/src\/source.ts#L3119)
 
 <b>Signature</b>
 
@@ -1102,7 +1104,7 @@ interface ThrottleConfig
 
 ## <code>windowTime</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3284](..\/..\/..\/packages\/core\/src\/source.ts#L3284)
+> Source Location: [packages\/core\/src\/source.ts#L3290](..\/..\/..\/packages\/core\/src\/source.ts#L3290)
 
 <b>Signature</b>
 
@@ -1110,7 +1112,7 @@ interface ThrottleConfig
 
 ## <code>withLatestFrom</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1377](..\/..\/..\/packages\/core\/src\/source.ts#L1377)
+> Source Location: [packages\/core\/src\/source.ts#L1383](..\/..\/..\/packages\/core\/src\/source.ts#L1383)
 
 <b>Signature</b>
 
@@ -1118,7 +1120,7 @@ interface ThrottleConfig
 
 ## <code>withLatestFromLazy</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1363](..\/..\/..\/packages\/core\/src\/source.ts#L1363)
+> Source Location: [packages\/core\/src\/source.ts#L1369](..\/..\/..\/packages\/core\/src\/source.ts#L1369)
 
 <b>Signature</b>
 
@@ -1126,7 +1128,7 @@ interface ThrottleConfig
 
 ## <code>withPrevious</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1746](..\/..\/..\/packages\/core\/src\/source.ts#L1746)
+> Source Location: [packages\/core\/src\/source.ts#L1752](..\/..\/..\/packages\/core\/src\/source.ts#L1752)
 
 <b>Signature</b>
 
@@ -1134,7 +1136,7 @@ interface ThrottleConfig
 
 ## <code>withTime</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3791](..\/..\/..\/packages\/core\/src\/source.ts#L3791)
+> Source Location: [packages\/core\/src\/source.ts#L3797](..\/..\/..\/packages\/core\/src\/source.ts#L3797)
 
 <b>Signature</b>
 
@@ -1142,17 +1144,20 @@ interface ThrottleConfig
 
 ## <code>WithTime</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3783](..\/..\/..\/packages\/core\/src\/source.ts#L3783)
+> Source Location: [packages\/core\/src\/source.ts#L3789](..\/..\/..\/packages\/core\/src\/source.ts#L3789)
 
 <b>Signature</b>
 
 ```ts
-interface WithTime<T> 
+interface WithTime<T> {
+    time: number
+    value: T
+}
 ```
 
 ## <code>withTimeInterval</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3812](..\/..\/..\/packages\/core\/src\/source.ts#L3812)
+> Source Location: [packages\/core\/src\/source.ts#L3818](..\/..\/..\/packages\/core\/src\/source.ts#L3818)
 
 <b>Signature</b>
 
@@ -1160,17 +1165,24 @@ interface WithTime<T>
 
 ## <code>TimeInterval</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3800](..\/..\/..\/packages\/core\/src\/source.ts#L3800)
+> Source Location: [packages\/core\/src\/source.ts#L3806](..\/..\/..\/packages\/core\/src\/source.ts#L3806)
 
 <b>Signature</b>
 
 ```ts
-interface TimeInterval<T> 
+interface TimeInterval<T> {
+    lastTime: number
+    startTime: number
+    time: number
+    timeDifference: number
+    timeSinceStart: number
+    value: T
+}
 ```
 
 ## <code>wrapInPushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1545](..\/..\/..\/packages\/core\/src\/source.ts#L1545)
+> Source Location: [packages\/core\/src\/source.ts#L1551](..\/..\/..\/packages\/core\/src\/source.ts#L1551)
 
 <b>Signature</b>
 
@@ -1178,7 +1190,7 @@ interface TimeInterval<T>
 
 ## <code>zipWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1349](..\/..\/..\/packages\/core\/src\/source.ts#L1349)
+> Source Location: [packages\/core\/src\/source.ts#L1355](..\/..\/..\/packages\/core\/src\/source.ts#L1355)
 
 <b>Signature</b>
 

@@ -31,7 +31,7 @@
 
 <b>Signature</b>
 
-<pre>interface TestSource&lt;T&gt; extends <a href="../core/basics.md#source-interface">Source</a>&lt;T&gt; </pre>
+<pre>interface TestSource&lt;T&gt; extends <a href="../core/basics.md#source-interface">Source</a>&lt;T&gt; {<br>    readonly subscriptions: <a href="#testsourcesubscriptions">TestSourceSubscriptions</a><br>}</pre>
 
 ## <code>SharedTestSource</code>
 
@@ -49,7 +49,7 @@
 
 <b>Signature</b>
 
-<pre>interface SharedTestSource&lt;T&gt; extends <a href="#testsource-interface">TestSource</a>&lt;T&gt; </pre>
+<pre>interface SharedTestSource&lt;T&gt; extends <a href="#testsource-interface">TestSource</a>&lt;T&gt; {<br>    readonly schedule: (subscription?: <a href="../core/basics.md#disposable-interface">Disposable</a>) =&gt; void<br>}</pre>
 
 ## <code>TestSourceEvent</code>
 
@@ -76,7 +76,10 @@
 <b>Signature</b>
 
 ```ts
-interface TestSubscriptionInfo 
+interface TestSubscriptionInfo {
+    subscriptionEndFrame: number
+    subscriptionStartFrame: number
+}
 ```
 
 ## <code>TestSourceSubscriptions</code>
@@ -103,9 +106,7 @@ interface TestSubscriptionInfo
 
 <b>Signature</b>
 
-```ts
-interface TestSchedule 
-```
+<pre>interface TestSchedule {<br>    (callback: () =&gt; void, delayFrames: number, subscription?: <a href="../core/basics.md#disposable-interface">Disposable</a>): void<br>    readonly currentFrame: number<br>    readonly flush: () =&gt; void<br>    readonly reset: () =&gt; void<br>}</pre>
 
 ## <code>watchSourceEvents</code>
 

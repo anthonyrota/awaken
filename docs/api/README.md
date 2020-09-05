@@ -38,7 +38,6 @@
    2. [<code>SubjectDistributionSinkDisposalError</code>](core\/basics.md#subjectdistributionsinkdisposalerror) - [<code>Interface</code>](core\/basics.md#subjectdistributionsinkdisposalerror-interface), [<code>Variable</code>](core\/basics.md#subjectdistributionsinkdisposalerror-variable)
    3. [<code>SubjectDistributionSinkDisposalErrorConstructor</code>](core\/basics.md#subjectdistributionsinkdisposalerrorconstructor)
    4. [<code>markAsSubject</code>](core\/basics.md#markassubject)
-   5. [<code>NonMarkedSubject</code>](core\/basics.md#nonmarkedsubject)
 7. [<code>ScheduleFunction</code>](core\/basics.md#schedulefunction)</details>
 
 ### [API Reference - Sources](core\/sources.md#readme)

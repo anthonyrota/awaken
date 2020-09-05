@@ -22,7 +22,7 @@ import {
     getExcerptTokenReference,
 } from '../../util/getExcerptTokenReference';
 import { getLinkToApiItem } from '../../util/getExportLinks';
-import { getDocComment } from '../../util/tsdocConfiguration';
+import { getDocComment } from '../../util/tsdocUtil';
 import { buildApiItemDocNode } from './buildApiItemDocNode';
 
 export interface BuildApiItemParametersParameters {

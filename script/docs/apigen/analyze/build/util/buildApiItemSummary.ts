@@ -2,7 +2,7 @@ import { ApiItem } from '@microsoft/api-extractor-model';
 import { DocComment } from '@microsoft/tsdoc';
 import { DeepCoreNode } from '../../../core/nodes';
 import { AnalyzeContext } from '../../Context';
-import { getDocComment } from '../../util/tsdocConfiguration';
+import { getDocComment } from '../../util/tsdocUtil';
 import { buildApiItemDocNode } from './buildApiItemDocNode';
 
 export interface BuildApiItemSummaryParameters {
