@@ -1,0 +1,16 @@
+{
+    "extends": "./tsconfig.json",
+    "include": [
+        "packages/*/src/**/*",
+        "packages/*/test/**/*",
+        "packages/*/postbuild.js",
+        "script/**/*",
+        "www/api/**/*",
+        "www/src/**/*/*",
+        "www/script/**/*",
+        "jest.config.js",
+        "jest.config.build.js",
+        "prettier.config.js"
+    ],
+    "exclude": []
+}

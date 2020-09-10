@@ -1,6 +1,18 @@
 {
     "name": "root",
     "private": true,
+    "scripts": {
+        "build": "lerna link && lerna run clean:prebuild && lerna run build",
+        "build:docs": "npx -s sh ts-node --project ./tsconfig.ts-node.json ./www/script/docs/apigen/index.ts",
+        "clean": "npm run clean:coverage && lerna run clean",
+        "clean:coverage": "rimraf coverage",
+        "test": "npm run clean:coverage && jest --runInBand --coverage --watchAll=false",
+        "test:watch": "jest --runInBand --watch",
+        "test:build": "npm run test && npm run build && jest --runInBand --config ./jest.config.build.js",
+        "lint": "eslint . && prettier --list-different . && cspell '**/*.{ts,js,md}' && tsc --noEmit",
+        "cz": "git-cz"
+    },
+    "dependencies": {},
     "devDependencies": {
         "@commitlint/cli": "9.1.2",
         "@commitlint/config-conventional": "9.1.2",
@@ -42,21 +54,9 @@
         "standard-version": "9.0.0",
         "ts-jest": "26.3.0",
         "ts-node": "9.0.0",
-        "typescript": "4.0.2",
+        "typescript": "^4.0.2",
         "unified": "9.2.0",
         "uuid": "8.3.0",
         "yaml": "1.10.0"
-    },
-    "scripts": {
-        "build": "lerna link && lerna run clean:prebuild && lerna run build",
-        "build:docs": "npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
-        "clean": "npm run clean:coverage && lerna run clean",
-        "clean:coverage": "rimraf coverage",
-        "test": "npm run clean:coverage && jest --runInBand --coverage --watchAll=false",
-        "test:watch": "jest --runInBand --watch",
-        "test:build": "npm run test && npm run build && jest --runInBand --config ./jest.config.build.js",
-        "lint": "eslint . && prettier --list-different . && cspell '**/*.{ts,js,md}' && tsc --noEmit",
-        "cz": "git-cz"
-    },
-    "dependencies": {}
+    }
 }

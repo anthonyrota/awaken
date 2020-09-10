@@ -1,16 +1,21 @@
+import * as crypto from 'crypto';
+import * as path from 'path';
 import { ApiModel } from '@microsoft/api-extractor-model';
 import * as fs from 'fs-extra';
-import { getAbsolutePath } from '../../util/fileUtil';
 import { buildApiPageMap } from './analyze/build/buildApiPageMap';
 import { buildApiPageMapToFolder } from './analyze/build/buildApiPageMapToFolder';
 import { AnalyzeContext, APIPackageData } from './analyze/Context';
-
 import {
     ExportIdentifier,
     getUniqueExportIdentifierKey,
 } from './analyze/Identifier';
 import { generateSourceMetadata } from './analyze/sourceMetadata';
-import { DeepCoreNode } from './core/nodes';
+import { rootDir } from './rootDir';
+import {
+    PageNodeMap,
+    PageNodeMapWithMetadata,
+    PageNodeMapMetadata,
+} from './types';
 import {
     addFileToFolder,
     Folder,
@@ -18,7 +23,6 @@ import {
     writeFolderToDirectoryPath,
 } from './util/Folder';
 import { globAbsolute } from './util/glob';
-import { format, Language } from './util/prettier';
 import { createProgram } from './util/ts';
 
 const packageScope = '@awaken';
@@ -352,7 +356,7 @@ function getPathOfExportIdentifier(identifier: ExportIdentifier): string {
 const sourceFilePaths = globAbsolute('packages/*/src/**');
 const program = createProgram(sourceFilePaths);
 
-const packages = fs.readdirSync(getAbsolutePath('packages'));
+const packages = fs.readdirSync(path.join(rootDir, 'packages'));
 const packageNameToExportFilePath = new Map<string, string>(
     packages.map((packageName) => [
         `${packageScope}/${packageName}`,
@@ -381,21 +385,38 @@ const context = AnalyzeContext({
     packageIdentifierToPathMap,
 });
 const pageMap = buildApiPageMap(context);
-const outDirAbsolute = getAbsolutePath(...context.outDir.split('/'));
+const outDirAbsolute = path.join(rootDir, ...context.outDir.split('/'));
 
 fs.removeSync(outDirAbsolute);
-
-type PageNodeObject = Record<string, DeepCoreNode>;
-
-const pageNodeObject: PageNodeObject = Object.fromEntries(pageMap.entries());
 
 const renderedApiFolder = buildApiPageMapToFolder({ pageMap, context });
 
 const outFolder = Folder();
+
+// eslint-disable-next-line max-len
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+const pageNodeMap: PageNodeMap = Object.fromEntries(pageMap.entries());
+const pageNodeMapStringified = JSON.stringify(pageNodeMap);
+const hash = crypto
+    .createHash('md5')
+    .update(pageNodeMapStringified)
+    .digest('hex');
+const pageNodeMapMetadata: PageNodeMapMetadata = { hash, version: 1 };
+const pageNodeMapWithMetadata: PageNodeMapWithMetadata = {
+    metadata: pageNodeMapMetadata,
+    pageNodeMap,
+};
+
+const apiDocFolder = getNestedFolderAtPath(outFolder, 'www/_files/api-doc');
 addFileToFolder(
-    outFolder,
-    'temp/apigen.json',
-    format(JSON.stringify(pageNodeObject), Language.JSON),
+    apiDocFolder,
+    'page-node-map-metadata.json',
+    JSON.stringify(pageNodeMapMetadata),
+);
+addFileToFolder(
+    apiDocFolder,
+    'page-node-map-with-metadata.json',
+    JSON.stringify(pageNodeMapWithMetadata),
 );
 
 const outApiFolder = getNestedFolderAtPath(outFolder, context.outDir);
@@ -403,7 +424,7 @@ for (const [path, fileOrFolder] of renderedApiFolder) {
     outApiFolder.set(path, fileOrFolder);
 }
 
-writeFolderToDirectoryPath(outFolder, getAbsolutePath()).catch((error) => {
+writeFolderToDirectoryPath(outFolder, rootDir).catch((error) => {
     console.error('error writing pages to out directory...');
     throw error;
 });

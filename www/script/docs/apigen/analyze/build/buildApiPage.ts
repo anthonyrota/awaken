@@ -93,7 +93,7 @@ export function buildApiPage(
             references.push({
                 text: getApiItemTextKind(uniqueKind),
                 // eslint-disable-next-line max-len
-                url_hash_text: getMultiKindApiItemAnchorNameFromIdentifierAndKind(
+                urlHashText: getMultiKindApiItemAnchorNameFromIdentifierAndKind(
                     {
                         identifier,
                         kind: uniqueKind,
@@ -108,23 +108,23 @@ export function buildApiPage(
     for (const item of pageData.items) {
         const reference: TableOfContentsMainReference = {
             text: item.main,
-            url_hash_text: item.main.toLowerCase(),
+            urlHashText: item.main.toLowerCase(),
         };
         const inlineReferences = buildInlineReferences(item.main);
         if (inlineReferences) {
-            reference.inline_references = inlineReferences;
+            reference.inlineReferences = inlineReferences;
         }
         if (item.nested) {
             reference.nested_references = [];
             for (const name of item.nested) {
                 const nestedReference: TableOfContentsNestedReference = {
                     text: name,
-                    url_hash_text: name.toLowerCase(),
+                    urlHashText: name.toLowerCase(),
                 };
                 // eslint-disable-next-line max-len
                 const inlineReferences = buildInlineReferences(name);
                 if (inlineReferences) {
-                    nestedReference.inline_references = inlineReferences;
+                    nestedReference.inlineReferences = inlineReferences;
                 }
                 reference.nested_references.push(nestedReference);
             }

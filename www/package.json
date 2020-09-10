@@ -1,0 +1,13 @@
+{
+    "name": "www",
+    "private": true,
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "@vercel/node": "^1.8.1",
+        "preact": "^10.4.8",
+        "typescript": "^4.0.2"
+    },
+    "devDependencies": {}
+}

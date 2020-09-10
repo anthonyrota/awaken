@@ -1,11 +1,11 @@
 export interface TableOfContentsInlineReference {
     text: string;
-    url_hash_text: string;
+    urlHashText: string;
 }
 
 export interface TableOfContentsNestedReference
     extends TableOfContentsInlineReference {
-    inline_references?: TableOfContentsInlineReference[];
+    inlineReferences?: TableOfContentsInlineReference[];
 }
 
 export interface TableOfContentsMainReference

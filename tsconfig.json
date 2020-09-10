@@ -25,21 +25,20 @@
         "declarationMap": true,
         "lib": ["esnext", "dom"],
         "types": ["jest-extended", "node"],
+        "skipLibCheck": true,
         "paths": {
             "@awaken/core": ["packages/core/src/index.ts"],
             "@awaken/testing": ["packages/testing/src/index.ts"]
         }
     },
     "include": [
-        "packages/core/src/**/*",
-        "packages/core/test/**/*",
-        "packages/core/postbuild.js",
-        "packages/testing/src/**/*",
-        "packages/testing/test/**/*",
-        "packages/testing/postbuild.js",
+        "packages/*/src/**/*",
+        "packages/*/test/**/*",
+        "packages/*/postbuild.js",
         "script/**/*",
         "jest.config.js",
         "jest.config.build.js",
         "prettier.config.js"
-    ]
+    ],
+    "exclude": ["www/**/*"]
 }

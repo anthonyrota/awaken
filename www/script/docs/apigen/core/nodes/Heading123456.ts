@@ -3,13 +3,13 @@ import { Node, CoreNodeType } from '.';
 
 export interface Heading123456Parameters<ChildNode extends Node>
     extends ContainerParameters<ChildNode> {
-    level: number;
+    level: 1 | 2 | 3 | 4 | 5 | 6;
     alternateId?: string;
 }
 
 export interface Heading123456Base<ChildNode extends Node>
     extends ContainerBase<ChildNode> {
-    level: number;
+    level: 1 | 2 | 3 | 4 | 5 | 6;
     alternateId?: string;
 }
 

@@ -17,7 +17,7 @@ function buildTableOfContentsLink(
     relativePagePath: string,
 ): DeepCoreNode {
     return LocalPageLinkNode<DeepCoreNode>({
-        destination: `${relativePagePath}#${reference.url_hash_text}`,
+        destination: `${relativePagePath}#${reference.urlHashText}`,
         children: [
             CodeSpanNode<DeepCoreNode>({
                 children: [PlainTextNode({ text: reference.text })],
@@ -33,12 +33,12 @@ function buildTableOfContentsListItem(
     const listItem = ContainerNode<DeepCoreNode>({
         children: [buildTableOfContentsLink(reference, relativePagePath)],
     });
-    if (reference.inline_references && reference.inline_references.length > 0) {
+    if (reference.inlineReferences && reference.inlineReferences.length > 0) {
         listItem.children.push(PlainTextNode({ text: ' - ' }));
         for (const [
             i,
             inlineReference,
-        ] of reference.inline_references.entries()) {
+        ] of reference.inlineReferences.entries()) {
             if (i !== 0) {
                 listItem.children.push(PlainTextNode({ text: ', ' }));
             }

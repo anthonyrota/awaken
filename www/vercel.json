@@ -1,0 +1,10 @@
+{
+    "version": 2,
+    "scope": "ahrota",
+    "functions": {
+        "api/api-doc-map.ts": {
+            "includeFiles": "_files/**/*"
+        }
+    },
+    "trailingSlash": false
+}
