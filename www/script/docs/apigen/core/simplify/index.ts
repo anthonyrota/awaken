@@ -67,7 +67,7 @@ export function removeEmptyChildren<ChildNode extends Node>(
 ): void {
     for (let i = 0; i < children.length; i++) {
         const child = children[i];
-        if (isChildEmpty(child) && child.type !== CoreNodeType.Container) {
+        if (isChildEmpty(child)) {
             children.splice(i--, 1);
         }
     }
