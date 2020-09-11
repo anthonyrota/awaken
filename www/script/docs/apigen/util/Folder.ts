@@ -1,10 +1,11 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
 
-export type Folder = Map<string, string | Folder>;
+export type File = string | Buffer;
+export type Folder = Map<string, File | Folder>;
 
 export function Folder(): Folder {
-    return new Map<string, string | Folder>();
+    return new Map<string, File | Folder>();
 }
 
 export function getNestedFolderAtPath(
@@ -17,7 +18,7 @@ export function getNestedFolderAtPath(
     for (const folderName of folderPath.split('/')) {
         let nestedFolder = currentFolder.get(folderName);
 
-        if (typeof nestedFolder === 'string') {
+        if (nestedFolder !== undefined && !(nestedFolder instanceof Map)) {
             throw new Error(`No folder at path ${folderPath}`);
         }
 
@@ -68,7 +69,7 @@ export function getNestedFolderAndFileNameAtPath(
 export function addFileToFolder(
     folder: Folder,
     filePath: string,
-    fileText: string,
+    file: File,
 ): void {
     const [nestedFolder, fileName] = getNestedFolderAndFileNameAtPath(
         folder,
@@ -79,7 +80,7 @@ export function addFileToFolder(
         throw new Error(`Duplicate path ${filePath}.`);
     }
 
-    nestedFolder.set(fileName, fileText);
+    nestedFolder.set(fileName, file);
 }
 
 export function removeFileFromFolder(folder: Folder, filePath: string): void {
@@ -122,11 +123,11 @@ export async function writeFolderToDirectoryPath(
         Array.from(folder, ([fileOrFolderPath, fileOrFolder]) => {
             const writePath = path.join(directoryPath, fileOrFolderPath);
 
-            if (typeof fileOrFolder === 'string') {
-                return fs.writeFile(writePath, fileOrFolder, 'utf-8');
+            if (fileOrFolder instanceof Map) {
+                return writeFolderToDirectoryPath(fileOrFolder, writePath);
             }
 
-            return writeFolderToDirectoryPath(fileOrFolder, writePath);
+            return fs.writeFile(writePath, fileOrFolder, 'utf-8');
         }),
     );
 }

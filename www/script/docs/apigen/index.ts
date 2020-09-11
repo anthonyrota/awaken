@@ -1,7 +1,12 @@
 import * as crypto from 'crypto';
 import * as path from 'path';
+import * as zlib from 'zlib';
 import { ApiModel } from '@microsoft/api-extractor-model';
 import * as fs from 'fs-extra';
+import {
+    ApiDocMapResponseType,
+    ApiDocMapUpdateResponse,
+} from './../../../types/ApiDocMapResponse';
 import { buildApiPageMap } from './analyze/build/buildApiPageMap';
 import { buildApiPageMapToFolder } from './analyze/build/buildApiPageMapToFolder';
 import { AnalyzeContext, APIPackageData } from './analyze/Context';
@@ -406,6 +411,14 @@ const pageNodeMapWithMetadata: PageNodeMapWithMetadata = {
     metadata: pageNodeMapMetadata,
     pageNodeMap,
 };
+const pageNodeMapUpdateResponse: ApiDocMapUpdateResponse = {
+    type: ApiDocMapResponseType.Update,
+    payload: pageNodeMapWithMetadata,
+};
+const pageNodeMapUpdateResponseBuffer = Buffer.from(
+    JSON.stringify(pageNodeMapUpdateResponse),
+    'utf-8',
+);
 
 const apiDocFolder = getNestedFolderAtPath(outFolder, 'www/_files/api-doc');
 addFileToFolder(
@@ -415,8 +428,20 @@ addFileToFolder(
 );
 addFileToFolder(
     apiDocFolder,
-    'page-node-map-with-metadata.json',
-    JSON.stringify(pageNodeMapWithMetadata),
+    'page-node-map-update-response.json',
+    JSON.stringify(pageNodeMapUpdateResponse),
+);
+addFileToFolder(
+    apiDocFolder,
+    'page-node-map-update-response.br',
+    zlib.brotliCompressSync(pageNodeMapUpdateResponseBuffer),
+);
+addFileToFolder(
+    apiDocFolder,
+    'page-node-map-update-response-metadata.json',
+    JSON.stringify({
+        contentLength: pageNodeMapUpdateResponseBuffer.length,
+    }),
 );
 
 const outApiFolder = getNestedFolderAtPath(outFolder, context.outDir);

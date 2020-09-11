@@ -19,6 +19,7 @@
         "noImplicitThis": false,
         "strictNullChecks": true,
         "downlevelIteration": true,
+        "resolveJsonModule": true,
         "baseUrl": ".",
         "noEmit": true,
         "declaration": true,

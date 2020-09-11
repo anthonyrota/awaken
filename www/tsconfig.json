@@ -4,6 +4,6 @@
         "baseUrl": ".",
         "paths": {}
     },
-    "include": ["src/**/*", "api/**/*", "script/**/*"],
+    "include": ["src/**/*", "api/**/*", "types/**/*", "script/**/*"],
     "exclude": []
 }

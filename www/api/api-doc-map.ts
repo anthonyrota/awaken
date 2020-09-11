@@ -1,86 +1,84 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
+import { encodings as parseEncodingsHeader } from '@hapi/accept';
 import { NowRequest, NowResponse } from '@vercel/node';
+import * as pageNodeMapMetadata from '../_files/api-doc/page-node-map-metadata.json';
+import * as pageNodeMapUpdateResponseMetadata from '../_files/api-doc/page-node-map-update-response-metadata.json';
 import {
-    PageNodeMapWithMetadata,
-    PageNodeMapMetadata,
-} from '../script/docs/apigen/types';
+    ApiDocMapResponseType,
+    ApiDocMapUpToDateResponse,
+    ApiDocMapErrorResponse,
+} from '../types/ApiDocMapResponse';
 
-const metadataPromise = fs
-    .readFile(
-        join(
-            __dirname,
-            '..',
-            '_files',
-            'api-doc',
-            'page-node-map-metadata.json',
-        ),
-        'utf-8',
-    )
-    .then<PageNodeMapMetadata>(JSON.parse);
-const apiMapWithMetadataPromise = fs.readFile(
+const pageNodeMapUpdateResponseJsonPromise = fs.readFile(
     join(
         __dirname,
         '..',
         '_files',
         'api-doc',
-        'page-node-map-with-metadata.json',
+        'page-node-map-update-response.json',
     ),
-    'utf-8',
+);
+const pageNodeMapUpdateResponseBrotliPromise = fs.readFile(
+    join(
+        __dirname,
+        '..',
+        '_files',
+        'api-doc',
+        'page-node-map-update-response.br',
+    ),
 );
 
-export enum ResponseType {
-    Update = 'update',
-    UpToDate = 'up-to-date',
-    Error = 'error',
-}
+async function sendUpdateResponse(
+    req: NowRequest,
+    res: NowResponse,
+): Promise<void> {
+    res.status(200);
 
-export interface UpdateResponse {
-    type: ResponseType.Update;
-    payload: PageNodeMapWithMetadata;
-}
-export interface UpToDateResponse {
-    type: ResponseType.UpToDate;
-}
-export interface ErrorResponse {
-    type: ResponseType.Error;
-    message: string;
-}
-export type Response = UpdateResponse | UpToDateResponse | ErrorResponse;
+    const acceptEncodingHeader = req.headers['accept-encoding'];
+    if (
+        acceptEncodingHeader === undefined ||
+        typeof acceptEncodingHeader === 'string'
+    ) {
+        const encodings = parseEncodingsHeader(acceptEncodingHeader);
+        if (encodings.includes('br')) {
+            res.setHeader('Content-Encoding', 'br');
+            res.setHeader(
+                'Content-Length',
+                pageNodeMapUpdateResponseMetadata.contentLength,
+            );
+            res.send(await pageNodeMapUpdateResponseBrotliPromise);
+            return;
+        }
+    }
 
-const updateResponsePromise = apiMapWithMetadataPromise.then(
-    (payload) => `{"type":"${ResponseType.Update}","payload":${payload}}`,
-);
-const upToDateResponseObject: UpToDateResponse = {
-    type: ResponseType.UpToDate,
-};
-const upToDateResponse = JSON.stringify(upToDateResponseObject);
-const invalidHashResponseObject: ErrorResponse = {
-    type: ResponseType.Error,
-    message: 'Invalid hash',
-};
-const invalidHashResponse = JSON.stringify(invalidHashResponseObject);
+    res.send(await pageNodeMapUpdateResponseJsonPromise);
+}
 
 export default async (req: NowRequest, res: NowResponse) => {
     res.setHeader('Content-Type', 'application/json');
 
     if (!('hash' in req.query)) {
-        res.status(200).send(await updateResponsePromise);
+        await sendUpdateResponse(req, res);
         return;
     }
 
     if (typeof req.query.hash !== 'string') {
-        res.status(400).send(invalidHashResponse);
+        const errorResponse: ApiDocMapErrorResponse = {
+            type: ApiDocMapResponseType.Error,
+            message: 'Non-string hash',
+        };
+        res.status(400).json(errorResponse);
         return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { hash } = await metadataPromise;
-
-    if (req.query.hash === hash) {
-        res.status(200).send(upToDateResponse);
+    if (req.query.hash === pageNodeMapMetadata.hash) {
+        const upToDateResponse: ApiDocMapUpToDateResponse = {
+            type: ApiDocMapResponseType.UpToDate,
+        };
+        res.status(200).json(upToDateResponse);
         return;
     }
 
-    res.status(200).send(await updateResponsePromise);
+    await sendUpdateResponse(req, res);
 };

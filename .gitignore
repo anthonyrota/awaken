@@ -15,6 +15,7 @@ node_modules/
 # Generated
 coverage/
 dist/
+/www/_files/api-doc
 
 # Editor-specific
 !.vscode/tasks.js
