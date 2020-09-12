@@ -421,7 +421,7 @@ function writeLinkTagWithCodeDestination(
     if (!codeDestination.importPath.startsWith('/')) {
         throw new Error('No.');
     }
-    const codeSpan = HtmlElementNode<MarkdownParsingNode>({ tagName: 'code' });
+    const codeSpan = CodeSpanNode<MarkdownParsingNode>({});
     context.container.children.push(
         EmbeddedNode({
             originalNode: codeSpan,
