@@ -45,6 +45,9 @@ export function buildApiPageMap(
     }
 
     if (memberIdentifierKeys.size !== packageIdentifierToPathMap.size) {
+        console.log(memberIdentifierKeys, [
+            ...packageIdentifierToPathMap.keys(),
+        ]);
         throw new Error('Not same number of names mapped.');
     }
 

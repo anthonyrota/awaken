@@ -2,13 +2,17 @@ import { promises as fs } from 'fs';
 import { join } from 'path';
 import { encodings as parseEncodingsHeader } from '@hapi/accept';
 import { NowRequest, NowResponse } from '@vercel/node';
-import * as pageNodeMapMetadata from '../_files/api-doc/page-node-map-metadata.json';
-import * as pageNodeMapUpdateResponseMetadata from '../_files/api-doc/page-node-map-update-response-metadata.json';
 import {
     ApiDocMapResponseType,
     ApiDocMapUpToDateResponse,
     ApiDocMapErrorResponse,
 } from '../types/ApiDocMapResponse';
+// eslint-disable-next-line max-len
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
+const pageNodeMapMetadata = require('../_files/api-doc/page-node-map-metadata.json');
+// eslint-disable-next-line max-len
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
+const pageNodeMapUpdateResponseMetadata = require('../_files/api-doc/page-node-map-update-response-metadata.json');
 
 const pageNodeMapUpdateResponseJsonPromise = fs.readFile(
     join(
@@ -45,6 +49,8 @@ async function sendUpdateResponse(
             res.setHeader('Content-Encoding', 'br');
             res.setHeader(
                 'Content-Length',
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 pageNodeMapUpdateResponseMetadata.contentLength,
             );
             res.send(await pageNodeMapUpdateResponseBrotliPromise);
@@ -72,6 +78,7 @@ export default async (req: NowRequest, res: NowResponse) => {
         return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (req.query.hash === pageNodeMapMetadata.hash) {
         const upToDateResponse: ApiDocMapUpToDateResponse = {
             type: ApiDocMapResponseType.UpToDate,

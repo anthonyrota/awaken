@@ -29,3 +29,5 @@ _ts3.4
 # Other
 tmp/
 temp/
+
+.vercel

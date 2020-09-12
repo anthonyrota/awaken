@@ -4,12 +4,13 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build:docs": "npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
-        "build": "npm run build:docs && rimraf public && mkdir public && echo '<!DOCTYPE html><html><body><h1>AwakenJS</h1><p>Hi!</p></body></html>' > public/index.html"
+        "build": "cd .. && npm install && npm run build && cd www && npm run build:docs && rimraf public && mkdir public && echo '<!DOCTYPE html><html><body><h1><a href=\"https://github.com/anthonyrota/awaken\"><img style=\"margin-right:0.2em;color:#1b1f23\" src=\"https://raw.githubusercontent.com/primer/octicons/master/icons/link-24.svg\"></a>AwakenJS</h1><p>Hi!</p></body></html>' > public/index.html"
     },
     "dependencies": {
         "@hapi/accept": "5.0.1",
         "@vercel/node": "1.8.1",
         "preact": "10.4.8",
+        "tslib": "^2.0.1",
         "typescript": "4.0.2"
     },
     "devDependencies": {
@@ -23,6 +24,7 @@
         "glob": "7.1.6",
         "htmlparser2": "4.1.0",
         "mdast-util-definitions": "3.0.1",
+        "prettier": "^2.1.1",
         "remark-parse": "8.0.3",
         "rimraf": "^3.0.2",
         "ts-node": "9.0.0",
