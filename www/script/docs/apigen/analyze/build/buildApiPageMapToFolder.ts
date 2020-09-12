@@ -11,7 +11,11 @@ import { PlainTextNode } from '../../core/nodes/PlainText';
 import { SubheadingNode } from '../../core/nodes/Subheading';
 import { TableOfContentsNode } from '../../core/nodes/TableOfContents';
 import { renderDeepCoreNodeAsMarkdown } from '../../core/render/markdown';
-import { addFileToFolder, Folder, moveFileInFolder } from '../../util/Folder';
+import {
+    addFileToFolder,
+    removeFileFromFolder,
+    Folder,
+} from '../../util/Folder';
 import { AnalyzeContext } from '../Context';
 
 export interface BuildApiPageMapToFolderParameters {
@@ -27,10 +31,13 @@ export function buildApiPageMapToFolder(
     const outFolder = Folder();
 
     for (const [path, page] of pageNodeMap) {
+        const fileName = `${path}.md`;
         addFileToFolder(
             outFolder,
-            `${path}.md`,
-            renderDeepCoreNodeAsMarkdown(page),
+            fileName,
+            renderDeepCoreNodeAsMarkdown(page, {
+                pagePath: `${context.outDir}/${fileName}`,
+            }),
         );
     }
 
@@ -88,10 +95,17 @@ export function buildApiPageMapToFolder(
         });
 
         if (isOneIndexPagePackage) {
-            moveFileInFolder(
+            const oldPagePathRaw = `${packageData.packageDirectory}/_index`;
+            const newPagePath = `${packageData.packageDirectory}/README.md`;
+            removeFileFromFolder(outFolder, `${oldPagePathRaw}.md`);
+            addFileToFolder(
                 outFolder,
-                `${packageData.packageDirectory}/_index.md`,
-                `${packageData.packageDirectory}/README.md`,
+                newPagePath,
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                renderDeepCoreNodeAsMarkdown(pageNodeMap.get(oldPagePathRaw)!, {
+                    pagePath: `${context.outDir}/${newPagePath}`,
+                }),
             );
             continue;
         }
@@ -113,10 +127,13 @@ export function buildApiPageMapToFolder(
             ],
         });
 
+        const pagePath = `${packageData.packageDirectory}/README.md`;
         addFileToFolder(
             outFolder,
-            `${packageData.packageDirectory}/README.md`,
-            renderDeepCoreNodeAsMarkdown(contents),
+            pagePath,
+            renderDeepCoreNodeAsMarkdown(contents, {
+                pagePath: `${context.outDir}/${pagePath}`,
+            }),
         );
     }
 
@@ -174,10 +191,13 @@ export function buildApiPageMapToFolder(
         ],
     });
 
+    const pagePath = 'README.md';
     addFileToFolder(
         outFolder,
-        'README.md',
-        renderDeepCoreNodeAsMarkdown(contents),
+        pagePath,
+        renderDeepCoreNodeAsMarkdown(contents, {
+            pagePath: `${context.outDir}/${pagePath}`,
+        }),
     );
 
     return outFolder;

@@ -3,13 +3,13 @@ import { Node, CoreNodeType } from '.';
 
 export interface GithubSourceLinkParameters<ChildNode extends Node>
     extends ContainerParameters<ChildNode> {
-    destination: string;
+    pathFromRoot: string;
     title?: string;
 }
 
 export interface GithubSourceLinkBase<ChildNode extends Node>
     extends ContainerBase<ChildNode> {
-    destination: string;
+    pathFromRoot: string;
     title?: string;
 }
 
@@ -17,7 +17,7 @@ export function GithubSourceLinkBase<ChildNode extends Node>(
     parameters: GithubSourceLinkParameters<ChildNode>,
 ): GithubSourceLinkBase<ChildNode> {
     const githubSourceLinkBase: GithubSourceLinkBase<ChildNode> = {
-        destination: parameters.destination,
+        pathFromRoot: parameters.pathFromRoot,
         ...ContainerBase<ChildNode>({ children: parameters.children }),
     };
     if (parameters.title !== undefined) {

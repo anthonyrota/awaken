@@ -4,7 +4,6 @@ import { DeepCoreNode } from '../../../core/nodes';
 import { BlockQuoteNode } from '../../../core/nodes/BlockQuote';
 import { GithubSourceLinkNode } from '../../../core/nodes/GithubSourceLink';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
-import { getRelativePath } from '../../../util/getRelativePath';
 import { AnalyzeContext } from '../../Context';
 import { getUniqueExportIdentifierKey } from '../../Identifier';
 import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
@@ -44,17 +43,16 @@ export function buildApiItemSourceLocationLink(
     }
 
     const { sourceLocation } = exportMetadata;
-    const currentApiItemPath = `${
-        context.outDir
-    }/${context.getPathOfExportIdentifier(identifier)}`;
-    const sourceGithubPath = `${sourceLocation.filePath}#L${sourceLocation.lineNumber}`;
-    const relativePath = getRelativePath(currentApiItemPath, sourceGithubPath);
+    const sourceGithubPath = `${sourceLocation.filePath.replace(
+        /^..\//,
+        '',
+    )}#L${sourceLocation.lineNumber}`;
 
     return BlockQuoteNode({
         children: [
             PlainTextNode({ text: 'Source Location: ' }),
             GithubSourceLinkNode({
-                destination: relativePath,
+                pathFromRoot: sourceGithubPath,
                 children: [PlainTextNode({ text: sourceGithubPath })],
             }),
         ],

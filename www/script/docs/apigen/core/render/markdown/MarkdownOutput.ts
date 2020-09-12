@@ -1,5 +1,9 @@
 import { IndentedWriter } from '../../../util/IndentedWriter';
 
+export interface MarkdownOutputParameters {
+    pagePath: string;
+}
+
 export class MarkdownOutput extends IndentedWriter {
     private _inSingleLineCodeBlock = false;
     private _inTable = false;
@@ -10,6 +14,12 @@ export class MarkdownOutput extends IndentedWriter {
     private _inHtmlAttribute = false;
     private _isMarkedNewParagraph = false;
     private _writingInlineHtmlTag = false;
+    public readonly pagePath: string;
+
+    constructor(parameters: MarkdownOutputParameters) {
+        super();
+        this.pagePath = parameters.pagePath;
+    }
 
     public withInTable(write: () => void): void {
         const before = this._inTable;

@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as colors from 'colors';
-import * as fs from 'fs-extra';
 import * as ts from 'typescript';
+import * as configJson from '../../../../../tsconfig.json';
 
 export function exit(): never {
     throw new Error('exiting...');
@@ -29,28 +29,14 @@ export function logDiagnostic(diagnostic: ts.Diagnostic): void {
 }
 
 function getTypescriptConfig(): ts.CompilerOptions {
-    const configPath = ts.findConfigFile(
-        './',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        ts.sys.fileExists,
-    );
-
-    if (!configPath) {
-        throw new Error('Could not find valid "tsconfig.json".');
-    }
-
     const compilerOptionsConversionResult = ts.convertCompilerOptionsFromJson(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        fs.readJSONSync(configPath).compilerOptions,
+        { ...configJson.compilerOptions, baseUrl: '..' },
         '.',
     );
 
     if (compilerOptionsConversionResult.errors.length) {
-        console.log(
-            colors.red(
-                `The following errors we're received when attempting to read the tsconfig file at ${configPath}`,
-            ),
-        );
+        console.log(colors.red(`TSConfig Compiler Options Conversion Errors:`));
         compilerOptionsConversionResult.errors.forEach(logDiagnostic);
         exit();
     }

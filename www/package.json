@@ -2,13 +2,31 @@
     "name": "www",
     "private": true,
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build:docs": "npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
+        "build": "npm run build:docs && rimraf public && mkdir public && echo '<!DOCTYPE html><html><body><h1>AwakenJS</h1><p>Hi!</p></body></html>' > public/index.html"
     },
     "dependencies": {
-        "@hapi/accept": "^5.0.1",
-        "@vercel/node": "^1.8.1",
-        "preact": "^10.4.8",
-        "typescript": "^4.0.2"
+        "@hapi/accept": "5.0.1",
+        "@vercel/node": "1.8.1",
+        "preact": "10.4.8",
+        "typescript": "4.0.2"
     },
-    "devDependencies": {}
+    "devDependencies": {
+        "@microsoft/api-extractor": "7.9.11",
+        "@microsoft/api-extractor-model": "7.8.19",
+        "@microsoft/tsdoc": "0.12.19",
+        "@types/mdast": "3.0.3",
+        "@types/uuid": "8.3.0",
+        "colors": "1.4.0",
+        "fs-extra": "9.0.1",
+        "glob": "7.1.6",
+        "htmlparser2": "4.1.0",
+        "mdast-util-definitions": "3.0.1",
+        "remark-parse": "8.0.3",
+        "rimraf": "^3.0.2",
+        "ts-node": "9.0.0",
+        "unified": "9.2.0",
+        "uuid": "8.3.0"
+    }
 }

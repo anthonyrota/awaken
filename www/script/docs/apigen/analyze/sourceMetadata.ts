@@ -62,7 +62,7 @@ export function generateSourceMetadata(
     const exportSymbolToIdentifier = new Map<ts.Symbol, ExportIdentifier>();
 
     for (const [packageName, exportFilePath] of packageNameToExportFilePath) {
-        const sourceFile = program.getSourceFile(exportFilePath);
+        const sourceFile = program.getSourceFile('../' + exportFilePath);
 
         if (!sourceFile) {
             throw new Error('Error retrieving source file.');

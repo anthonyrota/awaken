@@ -23,7 +23,7 @@ import { writeItalics } from './Italics';
 import { writeLink } from './Link';
 import { writeList } from './List';
 import { writeLocalPageLink } from './LocalPageLink';
-import { MarkdownOutput } from './MarkdownOutput';
+import { MarkdownOutput, MarkdownOutputParameters } from './MarkdownOutput';
 import { writePage } from './Page';
 import { writePageTitle } from './PageTitle';
 import { writeParagraph } from './Paragraph';
@@ -221,14 +221,18 @@ export function renderCoreNodeAsMarkdown<ChildNode extends Node>(
     node: CoreNode<ChildNode>,
     writeCoreNode_: ParamWriteCoreNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
+    parameters: MarkdownOutputParameters,
 ): string {
-    const output = new MarkdownOutput();
+    const output = new MarkdownOutput(parameters);
     writeCoreNode(node, output, writeCoreNode_, writeChildNode);
     return output.toString();
 }
 
-export function renderDeepCoreNodeAsMarkdown(node: DeepCoreNode): string {
-    const output = new MarkdownOutput();
+export function renderDeepCoreNodeAsMarkdown(
+    node: DeepCoreNode,
+    parameters: MarkdownOutputParameters,
+): string {
+    const output = new MarkdownOutput(parameters);
 
     const writeCoreNode_: ParamWriteCoreNode = <ChildNode extends Node>(
         node: CoreNode<ChildNode>,
