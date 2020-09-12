@@ -33,7 +33,9 @@
         "oncomment",
         "oncdatastart",
         "onprocessinginstruction",
-        "apigen"
+        "apigen",
+        "brotli",
+        "vercel"
     ],
     "overrides": []
 }

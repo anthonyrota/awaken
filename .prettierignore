@@ -1,7 +1,10 @@
 coverage
-**/dist/**
+dist
 *.md
 mangle.json
 extractor
 docs/api
 temp/*.api.json
+.vercel/project.json
+www/_files/api-doc
+www/public
