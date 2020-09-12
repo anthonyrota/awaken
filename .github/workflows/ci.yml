@@ -12,22 +12,21 @@ jobs:
     build:
         runs-on: ubuntu-latest
 
-        strategy:
-            matrix:
-                node-version: [10.x, 11.x, 12.x, 13.x, 14.x]
-
-        name: Node ${{ matrix.node-version }} lint, style, spell and type check
+        name: Lint, style, spell and type check
 
         steps:
             - uses: actions/checkout@v2
-            - name: Use Node.js ${{ matrix.node-version }}
+            - name: Use Node.js 14.x
               uses: actions/setup-node@v1
               with:
-                  node-version: ${{ matrix.node-version }}
+                  node-version: 14.x
             - name: Install dependencies
               run: |
                   npm install -g npm@latest
                   npm ci
+                  cd www
+                  npm ci
+                  cd ..
             - name: Lint, style, spell and type check
               run: npm run lint
 
@@ -36,7 +35,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [10.x, 11.x, 12.x, 13.x]
+                node-version: [10.x, 12.x]
 
         name: Node ${{ matrix.node-version }} tests
 
