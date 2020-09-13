@@ -2,7 +2,9 @@
     "extends": "../tsconfig.json",
     "compilerOptions": {
         "baseUrl": ".",
-        "paths": {}
+        "paths": {},
+        "jsx": "react",
+        "jsxFactory": "h"
     },
     "include": ["src/**/*", "api/**/*", "types/**/*", "script/**/*"],
     "exclude": []

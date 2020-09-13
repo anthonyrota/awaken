@@ -5,7 +5,7 @@
         "packages/*/test/**/*",
         "packages/*/postbuild.js",
         "script/**/*",
-        "www/src/**/*/*",
+        "www/src/**/*",
         "www/api/**/*",
         "www/types/**/*",
         "www/script/**/*",

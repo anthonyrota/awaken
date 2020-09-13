@@ -8,6 +8,8 @@ npm-debug.log*
 *.tgz
 .env
 .next
+.vercel
+.parcel-cache
 
 # Dependencies
 node_modules/
@@ -29,5 +31,3 @@ _ts3.4
 # Other
 tmp/
 temp/
-
-.vercel

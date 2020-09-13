@@ -1,5 +1,6 @@
 coverage
 dist
-testing/dist
-/**/*.d.ts
+*.d.ts
 *config*.js
+*.html
+public

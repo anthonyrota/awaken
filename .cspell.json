@@ -7,7 +7,8 @@
         "**/dist/**",
         "**/**/CHANGELOG.md",
         "**/**/CONTRIBUTORS.md",
-        "docs/api/**"
+        "docs/api/**",
+        "www/public/**"
     ],
     "dictionaries": [
         "typescript",

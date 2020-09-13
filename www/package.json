@@ -3,17 +3,20 @@
     "private": true,
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build:docs": "npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
-        "build": "cd .. && npm install && npm run build && cd www && rimraf public && mkdir public && npm run build:docs && echo '<!DOCTYPE html><html><body><h1><a href=\"https://github.com/anthonyrota/awaken\"><img style=\"margin-right:0.2em;color:#1b1f23\" src=\"https://raw.githubusercontent.com/primer/octicons/master/icons/link-24.svg\"></a>AwakenJS</h1><p>Hi!</p></body></html>' > public/index.html"
+        "build:docs": "cd .. && npm install && npm run build && cd www && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
+        "build:public": "parcel build src/index.html --dist-dir public --detailed-report",
+        "build": "rimraf public && mkdir public && npm run build:docs && npm run build:public",
+        "dev": "parcel serve src/index.html --dist-dir public --detailed-report --port 8080 --open"
     },
     "dependencies": {
         "@hapi/accept": "5.0.1",
         "@vercel/node": "1.8.1",
         "preact": "10.4.8",
-        "tslib": "2.0.1",
-        "typescript": "4.0.2"
+        "tslib": "2.0.1"
     },
     "devDependencies": {
+        "@babel/plugin-transform-react-jsx": "7.10.4",
+        "@babel/preset-typescript": "7.10.4",
         "@microsoft/api-extractor": "7.9.11",
         "@microsoft/api-extractor-model": "7.8.19",
         "@microsoft/tsdoc": "0.12.19",
@@ -24,10 +27,12 @@
         "glob": "7.1.6",
         "htmlparser2": "4.1.0",
         "mdast-util-definitions": "3.0.1",
+        "parcel": "2.0.0-beta.1",
         "prettier": "2.1.1",
         "remark-parse": "8.0.3",
         "rimraf": "3.0.2",
         "ts-node": "9.0.0",
+        "typescript": "4.0.2",
         "unified": "9.2.0",
         "uuid": "8.3.0"
     }
