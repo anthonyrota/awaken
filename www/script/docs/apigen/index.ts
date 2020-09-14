@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import { ApiModel } from '@microsoft/api-extractor-model';
 import * as fs from 'fs-extra';
+import * as parseArgs from 'minimist';
 import { buildApiPageMap } from './analyze/build/buildApiPageMap';
 import { buildApiPageMapToFolder } from './analyze/build/buildApiPageMapToFolder';
 import { AnalyzeContext, APIPackageData } from './analyze/Context';
@@ -401,7 +402,16 @@ const hash = crypto
     .createHash('md5')
     .update(pageNodeMapStringified)
     .digest('hex');
-const pageNodeMapMetadata: PageNodeMapMetadata = { hash, version: 1 };
+
+const args = parseArgs(process.argv.slice(2));
+if (typeof args.commit !== 'string') {
+    throw new Error('No string `commit` argument provided.');
+}
+const pageNodeMapMetadata: PageNodeMapMetadata = {
+    hash,
+    commit: args.commit,
+    version: 1,
+};
 const pageNodeMapWithMetadata: PageNodeMapWithMetadata = {
     metadata: pageNodeMapMetadata,
     pageNodeMap,

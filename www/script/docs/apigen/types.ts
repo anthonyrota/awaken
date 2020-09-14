@@ -4,6 +4,7 @@ export type PageNodeMap = Record<string, DeepCoreNode>;
 
 export interface PageNodeMapMetadata {
     hash: string;
+    commit: string;
     version: number;
 }
 
