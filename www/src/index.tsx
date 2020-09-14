@@ -1,3 +1,5 @@
+import 'promise-polyfill/src/polyfill';
+import 'unfetch/polyfill';
 import { h, Fragment, render, VNode } from 'preact';
 import { useState, useEffect, useMemo } from 'preact/hooks';
 import { PageNodeMapWithMetadata } from '../script/docs/apigen/types';
@@ -64,7 +66,9 @@ function App(): VNode {
             return <p>Loading...</p>;
         }
         case ErrorType: {
-            return <p>Error: {result.error}</p>;
+            // eslint-disable-next-line max-len
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            return <p>Error: {`${result.error}`}</p>;
         }
         case DoneType: {
             const { commit } = result.data.metadata;
