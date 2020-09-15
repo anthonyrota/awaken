@@ -3,13 +3,14 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preload" href="./index.tsx" as="script" />
         <style>
             @import './index.css';
         </style>
     </head>
     <body>
         <div id="root"></div>
-        <script async src="./index.tsx"></script>
+        <script>
+            import './index.tsx';
+        </script>
     </body>
 </html>

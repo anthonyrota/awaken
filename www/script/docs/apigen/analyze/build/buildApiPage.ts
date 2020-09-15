@@ -3,14 +3,14 @@ import {
     ApiReleaseTagMixin,
     ReleaseTag,
 } from '@microsoft/api-extractor-model';
+import { DeepCoreNode } from '../../core/nodes';
+import { PageNode } from '../../core/nodes/Page';
 import {
     TableOfContents,
     TableOfContentsInlineReference,
     TableOfContentsMainReference,
     TableOfContentsNestedReference,
-} from '../../../pageMetadata';
-import { DeepCoreNode } from '../../core/nodes';
-import { PageNode } from '../../core/nodes/Page';
+} from '../../types';
 import {
     AnalyzeContext,
     APIPageData,

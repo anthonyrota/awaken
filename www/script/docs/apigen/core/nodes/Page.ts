@@ -1,4 +1,4 @@
-import { PageMetadata } from '../../../pageMetadata';
+import { PageMetadata } from '../../types';
 import { ContainerParameters, ContainerBase } from './Container';
 import { Node, CoreNodeType } from '.';
 

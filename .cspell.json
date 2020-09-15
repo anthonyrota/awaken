@@ -36,7 +36,8 @@
         "onprocessinginstruction",
         "apigen",
         "brotli",
-        "vercel"
+        "vercel",
+        "preact"
     ],
     "overrides": []
 }
