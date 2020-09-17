@@ -8,7 +8,7 @@ import {
     ResponseJSONParsingErrorType,
     ResponseLoadingType,
     ResponseState,
-} from './loadApiDocMap/types';
+} from './loadApiDocMap';
 
 function useApiDocMapResponseState(): ResponseState {
     const { 0: responseState, 1: setResponseState } = useState<ResponseState>(

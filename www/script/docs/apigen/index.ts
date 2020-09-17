@@ -396,14 +396,7 @@ const outFolder = Folder();
 // eslint-disable-next-line max-len
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
 const pageNodeMap: PageNodeMap = Object.fromEntries(pageMap.entries());
-const pageNodeMapStringified = JSON.stringify(pageNodeMap);
-const hash = crypto
-    .createHash('md5')
-    .update(pageNodeMapStringified)
-    .digest('hex');
-
 const pageNodeMapMetadata: PageNodeMapMetadata = {
-    hash,
     github:
         process.env.VERCEL_GITHUB_DEPLOYMENT === '1'
             ? {
@@ -415,18 +408,26 @@ const pageNodeMapMetadata: PageNodeMapMetadata = {
                   /* eslint-enable @typescript-eslint/no-non-null-assertion */
               }
             : null,
-    version: 1,
 };
 const pageNodeMapWithMetadata: PageNodeMapWithMetadata = {
     metadata: pageNodeMapMetadata,
     pageNodeMap,
 };
+const pageNodeMapWithMetadataStringified = JSON.stringify(
+    pageNodeMapWithMetadata,
+);
+const hash = crypto
+    .createHash('md5')
+    .update(pageNodeMapWithMetadataStringified)
+    .digest('hex')
+    .slice(0, 8);
 
 addFileToFolder(
     outFolder,
-    'www/public/apiDocMap.json',
-    JSON.stringify(pageNodeMapWithMetadata),
+    `www/public/apiDocMap.${hash}.json`,
+    pageNodeMapWithMetadataStringified,
 );
+addFileToFolder(outFolder, 'www/temp/apiDocMapHash', hash);
 
 const outApiFolder = getNestedFolderAtPath(outFolder, context.outDir);
 for (const [path, fileOrFolder] of renderedApiFolder) {

@@ -6,4 +6,4 @@ extractor
 docs/api
 temp/*.api.json
 .vercel/project.json
-# www/public
+www/public

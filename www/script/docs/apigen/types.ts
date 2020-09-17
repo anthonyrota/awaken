@@ -3,14 +3,12 @@ import { DeepCoreNode } from './core/nodes';
 export type PageNodeMap = Record<string, DeepCoreNode>;
 
 export interface PageNodeMapMetadata {
-    hash: string;
     github: null | {
         org: string;
         repo: string;
         ref: string;
         sha: string;
     };
-    version: number;
 }
 
 export interface PageNodeMapWithMetadata {

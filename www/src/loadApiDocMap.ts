@@ -1,0 +1,102 @@
+import * as fs from 'fs';
+import { PageNodeMapWithMetadata } from '../script/docs/apigen/types';
+
+export const ResponseLoadingType = 0;
+export const ResponseHttpStatusErrorType = 1;
+export const ResponseJSONParsingErrorType = 2;
+export const ResponseDoneType = 3;
+
+export type ResponseState =
+    | { type: typeof ResponseLoadingType }
+    | {
+          type: typeof ResponseHttpStatusErrorType;
+          status: number;
+          statusText: string;
+      }
+    | { type: typeof ResponseJSONParsingErrorType; error: unknown }
+    | { type: typeof ResponseDoneType; data: PageNodeMapWithMetadata };
+
+const globalStateKey =
+    process.env.NODE_ENV === 'development' ? '__apiDocMapState' : '_a';
+const globalCallbackKey =
+    process.env.NODE_ENV === 'development' ? globalStateKey + 'Changed' : '_b';
+
+export function getCurrentState(): ResponseState | undefined {
+    return window[globalStateKey] as ResponseState | undefined;
+}
+
+type CallbackList = (readonly [(newState: ResponseState) => void])[];
+
+export function onGlobalStateChange(
+    cb: (newState: ResponseState) => void,
+): () => void {
+    if (!(globalCallbackKey in window)) {
+        window[globalCallbackKey] = [];
+    }
+    // Ensure that adding the same callback twice will call it twice.
+    const cbBox = [cb] as const;
+    (window[globalCallbackKey] as CallbackList).push(cbBox);
+    return () => {
+        const index = (window[globalCallbackKey] as CallbackList).indexOf(
+            cbBox,
+        );
+        if (index !== -1) {
+            (window[globalCallbackKey] as CallbackList).splice(index, 1);
+        }
+    };
+}
+
+function changeGlobalState(newState: ResponseState): void {
+    window[globalStateKey] = newState;
+    if (globalCallbackKey in window) {
+        (window[globalCallbackKey] as CallbackList).forEach((cbBox) => {
+            const cb = cbBox[0];
+            cb(newState);
+        });
+    }
+}
+
+export function makeRequest(): void {
+    changeGlobalState({
+        type: ResponseLoadingType,
+    });
+
+    const request = new XMLHttpRequest();
+
+    request.onreadystatechange = function () {
+        if (request.readyState !== 4) return;
+
+        if (request.status < 200 || request.status >= 300) {
+            changeGlobalState({
+                type: ResponseHttpStatusErrorType,
+                status: request.status,
+                statusText: request.statusText,
+            });
+            return;
+        }
+
+        let data: PageNodeMapWithMetadata;
+
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            data = JSON.parse(request.responseText);
+        } catch (error) {
+            changeGlobalState({
+                type: ResponseJSONParsingErrorType,
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                error,
+            });
+            return;
+        }
+
+        changeGlobalState({
+            type: ResponseDoneType,
+            data,
+        });
+    };
+
+    const hash = fs.readFileSync('temp/apiDocMapHash', 'utf-8');
+    request.open('GET', `/apiDocMap.${hash}.json`);
+    request.send();
+}

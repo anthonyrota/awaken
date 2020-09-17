@@ -1,5 +1,17 @@
 {
     "version": 2,
     "scope": "ahrota",
-    "trailingSlash": false
+    "trailingSlash": false,
+    "cleanUrls": true,
+    "headers": [
+        {
+            "source": "/*.(js|json)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000"
+                }
+            ]
+        }
+    ]
 }
