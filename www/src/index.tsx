@@ -1,79 +1,88 @@
-import { h, Fragment, render, VNode } from 'preact';
-import { useState, useEffect, useMemo } from 'preact/hooks';
+import { h, render } from 'preact';
 import {
-    getCurrentState,
+    apiDocMapPathList,
+    convertApiDocMapPathToUrlPathName,
+} from './apiDocMapPathList';
+import {
+    ApiDocMapResponseContextProvider,
+    ApiDocMapResponseContextValue,
+} from './ApiDocMapResponseContext';
+import { App } from './App';
+import {
+    NonLoadingResponseState,
+    getGlobalState,
     onGlobalStateChange,
     ResponseDoneType,
     ResponseHttpStatusErrorType,
     ResponseJSONParsingErrorType,
     ResponseLoadingType,
-    ResponseState,
 } from './loadApiDocMap';
 
-function useApiDocMapResponseState(): ResponseState {
-    const { 0: responseState, 1: setResponseState } = useState<ResponseState>(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        getCurrentState()!,
-    );
+const apiDocMapResponseContextValue: ApiDocMapResponseContextValue = {
+    getCurrentResponseState: getGlobalState,
+    onResponseStateChange: onGlobalStateChange,
+};
 
-    useEffect(() => {
+function renderApp(): void {
+    render(
+        <ApiDocMapResponseContextProvider value={apiDocMapResponseContextValue}>
+            <App />
+        </ApiDocMapResponseContextProvider>,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const currentResponseState: ResponseState = getCurrentState()!;
-        if (currentResponseState !== responseState) {
-            setResponseState(currentResponseState);
-        }
-        return onGlobalStateChange(setResponseState);
+        document.getElementById('root')!,
+    );
+}
+
+function isApiDocMapPath(path: string): boolean {
+    return apiDocMapPathList.some((apiDocMapPath) => {
+        const otherPath = convertApiDocMapPathToUrlPathName(apiDocMapPath);
+        return (
+            path === otherPath ||
+            path === otherPath + '/' ||
+            path === otherPath + 'index.html' ||
+            path === otherPath + 'index.html/'
+        );
     });
-
-    return responseState;
 }
 
-function App(): VNode {
-    const responseState = useApiDocMapResponseState();
-    const stringifiedNodeMap = useMemo(
-        () =>
-            responseState.type === ResponseDoneType
-                ? JSON.stringify(responseState.data.pageNodeMap)
-                : null,
-        [responseState],
-    );
+if (isApiDocMapPath(window.location.pathname)) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const responseState = getGlobalState()!;
 
-    switch (responseState.type) {
-        case ResponseLoadingType: {
-            return <p>Loading...</p>;
-        }
-        case ResponseHttpStatusErrorType: {
-            console.log(
-                'error fetching api doc map',
-                responseState.status,
-                responseState.statusText,
-            );
-            return <p>Internal Error.</p>;
-        }
-        case ResponseJSONParsingErrorType: {
-            console.log(
-                'error parsing fetched api doc map',
-                responseState.error,
-            );
-            return <p>Internal Error.</p>;
-        }
-        case ResponseDoneType: {
-            const { github } = responseState.data.metadata;
-            let headingContents: VNode | string = 'AwakenJS';
-            if (github) {
-                const githubLink = `https://github.com/${github.org}/${github.repo}/tree/${github.sha}`;
-                headingContents = <a href={githubLink}>{githubLink}</a>;
+    const onNonLoadingResponseState = (
+        responseState: NonLoadingResponseState,
+    ): void => {
+        switch (responseState.type) {
+            case ResponseDoneType: {
+                renderApp();
+                break;
             }
-            return (
-                <Fragment>
-                    <h1>{headingContents}</h1>
-                    <br />
-                    <pre>{stringifiedNodeMap}</pre>
-                </Fragment>
-            );
+            case ResponseHttpStatusErrorType: {
+                throw new Error(
+                    [
+                        'error fetching api doc map',
+                        responseState.status,
+                        responseState.statusText,
+                    ]
+                        .filter(Boolean)
+                        .join(' '),
+                );
+            }
+            case ResponseJSONParsingErrorType: {
+                throw new Error(
+                    // eslint-disable-next-line max-len
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                    `error parsing fetched api doc map ${responseState.error}`,
+                );
+            }
         }
-    }
-}
+    };
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-render(<App />, document.getElementById('root')!);
+    if (responseState.type === ResponseLoadingType) {
+        onGlobalStateChange(onNonLoadingResponseState);
+    } else {
+        onNonLoadingResponseState(responseState);
+    }
+} else {
+    renderApp();
+}

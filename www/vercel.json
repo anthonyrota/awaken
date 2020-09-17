@@ -3,9 +3,14 @@
     "scope": "ahrota",
     "trailingSlash": false,
     "cleanUrls": true,
+    "redirects": [
+        { "source": "/(.*)/index.html(/*)", "destination": "/$1" },
+        { "source": "/(.*).html(/*)", "destination": "/$1" },
+        { "source": "/(.*)(/+)", "destination": "/$1" }
+    ],
     "headers": [
         {
-            "source": "/*.(js|json)",
+            "source": "/(.*).(js|json)",
             "headers": [
                 {
                     "key": "Cache-Control",

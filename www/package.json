@@ -4,15 +4,16 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build:docs": "cd .. && npm install && npm run build && cd www && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
-        "build:public": "parcel build src/index.html --dist-dir public --detailed-report --no-source-maps",
-        "build": "rimraf public && mkdir public && npm run build:docs && npm run build:public",
-        "dev": "parcel serve src/index.html --dist-dir public --detailed-report --port 8080 --open",
+        "build:template": "rimraf template && ncp src template --stopOnErr && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/template/index.tsx",
+        "build:public": "npm run build:template && parcel build 'template/**/*.html' --dist-dir public --detailed-report --no-source-maps",
+        "build": "rimraf public && npm run build:docs && npm run build:public",
         "postinstall": "cpy .browserslistrc node_modules/unfetch"
     },
     "dependencies": {
         "@hapi/accept": "5.0.1",
         "@vercel/node": "1.8.1",
         "preact": "10.4.8",
+        "preact-router": "^3.2.1",
         "tslib": "2.0.1"
     },
     "devDependencies": {
@@ -31,7 +32,9 @@
         "glob": "7.1.6",
         "htmlparser2": "4.1.0",
         "mdast-util-definitions": "3.0.1",
+        "npc": "0.0.1",
         "parcel": "2.0.0-beta.1",
+        "preact-render-to-string": "5.1.10",
         "prettier": "2.1.1",
         "remark-parse": "8.0.3",
         "rimraf": "3.0.2",

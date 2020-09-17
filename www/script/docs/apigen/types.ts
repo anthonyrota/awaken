@@ -16,6 +16,8 @@ export interface PageNodeMapWithMetadata {
     pageNodeMap: PageNodeMap;
 }
 
+export type ApiDocMapPathList = string[];
+
 export interface TableOfContentsInlineReference {
     text: string;
     urlHashText: string;

@@ -15,6 +15,7 @@ import {
     PageNodeMap,
     PageNodeMapWithMetadata,
     PageNodeMapMetadata,
+    ApiDocMapPathList,
 } from './types';
 import {
     addFileToFolder,
@@ -421,13 +422,24 @@ const hash = crypto
     .update(pageNodeMapWithMetadataStringified)
     .digest('hex')
     .slice(0, 8);
+const pathList: ApiDocMapPathList = [...pageMap.keys()];
 
 addFileToFolder(
     outFolder,
     `www/public/apiDocMap.${hash}.json`,
     pageNodeMapWithMetadataStringified,
 );
+addFileToFolder(
+    outFolder,
+    `www/temp/apiDocMap.json`,
+    pageNodeMapWithMetadataStringified,
+);
 addFileToFolder(outFolder, 'www/temp/apiDocMapHash', hash);
+addFileToFolder(
+    outFolder,
+    'www/temp/apiDocMapPathList.json',
+    JSON.stringify(pathList),
+);
 
 const outApiFolder = getNestedFolderAtPath(outFolder, context.outDir);
 for (const [path, fileOrFolder] of renderedApiFolder) {

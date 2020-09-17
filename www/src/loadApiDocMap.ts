@@ -6,8 +6,7 @@ export const ResponseHttpStatusErrorType = 1;
 export const ResponseJSONParsingErrorType = 2;
 export const ResponseDoneType = 3;
 
-export type ResponseState =
-    | { type: typeof ResponseLoadingType }
+export type NonLoadingResponseState =
     | {
           type: typeof ResponseHttpStatusErrorType;
           status: number;
@@ -15,20 +14,30 @@ export type ResponseState =
       }
     | { type: typeof ResponseJSONParsingErrorType; error: unknown }
     | { type: typeof ResponseDoneType; data: PageNodeMapWithMetadata };
+export type ResponseState =
+    | { type: typeof ResponseLoadingType }
+    | NonLoadingResponseState;
 
 const globalStateKey =
     process.env.NODE_ENV === 'development' ? '__apiDocMapState' : '_a';
 const globalCallbackKey =
     process.env.NODE_ENV === 'development' ? globalStateKey + 'Changed' : '_b';
 
-export function getCurrentState(): ResponseState | undefined {
-    return window[globalStateKey] as ResponseState | undefined;
+export function getGlobalState(): ResponseState {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return window[globalStateKey];
 }
 
-type CallbackList = (readonly [(newState: ResponseState) => void])[];
+function setGlobalState(responseState: ResponseState): void {
+    window[globalStateKey] = responseState;
+}
+
+type CallbackList = (readonly [
+    (responseState: NonLoadingResponseState) => void,
+])[];
 
 export function onGlobalStateChange(
-    cb: (newState: ResponseState) => void,
+    cb: (responseState: NonLoadingResponseState) => void,
 ): () => void {
     if (!(globalCallbackKey in window)) {
         window[globalCallbackKey] = [];
@@ -46,18 +55,18 @@ export function onGlobalStateChange(
     };
 }
 
-function changeGlobalState(newState: ResponseState): void {
-    window[globalStateKey] = newState;
+function changeGlobalState(responseState: NonLoadingResponseState): void {
+    setGlobalState(responseState);
     if (globalCallbackKey in window) {
         (window[globalCallbackKey] as CallbackList).forEach((cbBox) => {
             const cb = cbBox[0];
-            cb(newState);
+            cb(responseState);
         });
     }
 }
 
 export function makeRequest(): void {
-    changeGlobalState({
+    setGlobalState({
         type: ResponseLoadingType,
     });
 
