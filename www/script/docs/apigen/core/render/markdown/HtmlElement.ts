@@ -7,15 +7,18 @@ import {
 } from '../../nodes/HtmlElement';
 import { PlainTextNode } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
+import { ParamWriteChildNode, ParamWriteRenderMarkdownNode } from '.';
 
 function writeStartTag(
     htmlElement: HtmlElementBase<Node>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void {
     output.write('<');
-    writeCoreNode(PlainTextNode({ text: htmlElement.tagName }), output);
+    writeRenderMarkdownNode(
+        PlainTextNode({ text: htmlElement.tagName }),
+        output,
+    );
     if (htmlElement.attributes) {
         for (const [attributeName, attributeValue] of Object.entries(
             htmlElement.attributes,
@@ -23,7 +26,10 @@ function writeStartTag(
             output.write(' ');
             output.write(attributeName);
             output.write('="');
-            writeCoreNode(PlainTextNode({ text: attributeValue }), output);
+            writeRenderMarkdownNode(
+                PlainTextNode({ text: attributeValue }),
+                output,
+            );
             output.write('"');
         }
     }
@@ -33,42 +39,45 @@ function writeStartTag(
 function writeEndTag(
     htmlElement: HtmlElementBase<Node>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownMode: ParamWriteRenderMarkdownNode,
 ): void {
     output.write('</');
-    writeCoreNode(PlainTextNode({ text: htmlElement.tagName }), output);
+    writeRenderMarkdownMode(
+        PlainTextNode({ text: htmlElement.tagName }),
+        output,
+    );
     output.write('>');
 }
 
 function writeAsBlockElement<ChildNode extends Node>(
     htmlElement: HtmlElementBase<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeStartTag(htmlElement, output, writeCoreNode);
+    writeStartTag(htmlElement, output, writeRenderMarkdownNode);
     output.markStartOfParagraph();
     output.withInHtmlBlockTag(() => {
-        writeCoreNode(
+        writeRenderMarkdownNode(
             ContainerNode({ children: htmlElement.children }),
             output,
             writeChildNode,
         );
     });
-    writeEndTag(htmlElement, output, writeCoreNode);
+    writeEndTag(htmlElement, output, writeRenderMarkdownNode);
 }
 
 export function writeHtmlElement<ChildNode extends Node>(
     htmlElement: HtmlElementBase<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ) {
     const classification = getHtmlTagClassification(htmlElement.tagName);
     if (classification === HtmlTagClassification.Block) {
         if (htmlElement.tagName === 'p') {
             output.withParagraphBreak(() => {
-                writeCoreNode(
+                writeRenderMarkdownNode(
                     ContainerNode({ children: htmlElement.children }),
                     output,
                     writeChildNode,
@@ -80,7 +89,7 @@ export function writeHtmlElement<ChildNode extends Node>(
             writeAsBlockElement(
                 htmlElement,
                 output,
-                writeCoreNode,
+                writeRenderMarkdownNode,
                 writeChildNode,
             );
         } else {
@@ -88,7 +97,7 @@ export function writeHtmlElement<ChildNode extends Node>(
                 writeAsBlockElement(
                     htmlElement,
                     output,
-                    writeCoreNode,
+                    writeRenderMarkdownNode,
                     writeChildNode,
                 );
             });
@@ -96,17 +105,17 @@ export function writeHtmlElement<ChildNode extends Node>(
         return;
     }
     if (classification === HtmlTagClassification.SelfClosing) {
-        writeStartTag(htmlElement, output, writeCoreNode);
+        writeStartTag(htmlElement, output, writeRenderMarkdownNode);
         return;
     }
     // If marked new paragraph -> opening inline html shouldn't affect.
     output.withWritingInlineHtmlTag(() => {
-        writeStartTag(htmlElement, output, writeCoreNode);
+        writeStartTag(htmlElement, output, writeRenderMarkdownNode);
     });
-    writeCoreNode(
+    writeRenderMarkdownNode(
         ContainerNode({ children: htmlElement.children }),
         output,
         writeChildNode,
     );
-    writeEndTag(htmlElement, output, writeCoreNode);
+    writeEndTag(htmlElement, output, writeRenderMarkdownNode);
 }

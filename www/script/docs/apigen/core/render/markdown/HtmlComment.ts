@@ -1,11 +1,11 @@
-import { HtmlCommentBase } from '../../nodes/HtmlComment';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteCoreNode } from '.';
+import { HtmlCommentBase } from './nodes/HtmlComment';
+import { ParamWriteRenderMarkdownNode } from '.';
 
 export function writeHtmlComment(
     commentNode: HtmlCommentBase,
     output: MarkdownOutput,
-    _writeCoreNode: ParamWriteCoreNode,
+    _writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void {
     if (commentNode.persist) {
         output.write('<!--');

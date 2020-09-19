@@ -2,6 +2,11 @@ export function getRelativePath(from: string, to: string): string {
     if (from === to) {
         return '';
     }
+    const [fromPath] = from.split('#');
+    const [toPath, toHash] = to.split('#');
+    if (fromPath === toPath) {
+        return toHash ? `#${toHash}` : '';
+    }
     const fromSplit = from.split(/[/\\]/g);
     fromSplit.pop();
     const toSplit = to.split(/[/\\]/g);

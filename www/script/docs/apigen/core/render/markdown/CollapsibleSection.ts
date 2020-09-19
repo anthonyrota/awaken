@@ -4,7 +4,7 @@ import { ContainerNode } from '../../nodes/Container';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { writeContainer } from './ContainerBase';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteCoreNode, ParamWriteChildNode } from '.';
+import { ParamWriteRenderMarkdownNode, ParamWriteChildNode } from '.';
 
 export function writeCollapsibleSection<
     SummaryNode extends Node,
@@ -12,7 +12,7 @@ export function writeCollapsibleSection<
 >(
     collapsibleSection: CollapsibleSectionBase<SummaryNode, ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeSummaryNode: ParamWriteChildNode<SummaryNode>,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
@@ -26,11 +26,16 @@ export function writeCollapsibleSection<
             ContainerNode<ChildNode>({ children: collapsibleSection.children }),
         ],
     });
-    writeCoreNode(detailsElement, output, (node) => {
+    writeRenderMarkdownNode(detailsElement, output, (node) => {
         if (node.type === CoreNodeType.Container) {
-            writeContainer(node, output, writeCoreNode, writeChildNode);
+            writeContainer(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode,
+            );
             return;
         }
-        writeCoreNode(node, output, writeSummaryNode);
+        writeRenderMarkdownNode(node, output, writeSummaryNode);
     });
 }

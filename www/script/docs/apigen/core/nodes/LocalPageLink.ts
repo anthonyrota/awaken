@@ -3,13 +3,15 @@ import { Node, CoreNodeType } from '.';
 
 export interface LocalPageLinkParameters<ChildNode extends Node>
     extends ContainerParameters<ChildNode> {
-    destination: string;
+    pagePath: string;
+    pageUrl: string;
     title?: string;
 }
 
 export interface LocalPageLinkBase<ChildNode extends Node>
     extends ContainerBase<ChildNode> {
-    destination: string;
+    pagePath: string;
+    pageUrl: string;
     title?: string;
 }
 
@@ -17,7 +19,8 @@ export function LocalPageLinkBase<ChildNode extends Node>(
     parameters: LocalPageLinkParameters<ChildNode>,
 ): LocalPageLinkBase<ChildNode> {
     const localPageLinkBase: LocalPageLinkBase<ChildNode> = {
-        destination: parameters.destination,
+        pagePath: parameters.pagePath,
+        pageUrl: parameters.pageUrl,
         ...ContainerBase<ChildNode>({ children: parameters.children }),
     };
     if (parameters.title !== undefined) {

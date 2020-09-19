@@ -1,10 +1,4 @@
-import {
-    Node,
-    LeafCoreNode,
-    CoreNode,
-    DeepCoreNode,
-    CoreNodeType,
-} from '../../nodes';
+import { Node, CoreNodeType } from '../../nodes';
 import { writeBlockQuote } from './BlockQuote';
 import { writeBold } from './Bold';
 import { writeCodeBlock } from './CodeBlock';
@@ -24,6 +18,12 @@ import { writeLink } from './Link';
 import { writeList } from './List';
 import { writeLocalPageLink } from './LocalPageLink';
 import { MarkdownOutput, MarkdownOutputParameters } from './MarkdownOutput';
+import {
+    LeafRenderMarkdownNode,
+    RenderMarkdownNode,
+    DeepRenderMarkdownNode,
+    RenderMarkdownNodeType,
+} from './nodes';
 import { writePage } from './Page';
 import { writePageTitle } from './PageTitle';
 import { writeParagraph } from './Paragraph';
@@ -35,142 +35,211 @@ import { writeTable } from './Table';
 import { writeTableOfContents } from './TableOfContents';
 import { writeTableOfContentsList } from './TableOfContentsList';
 import { writeTitle } from './Title';
+import { writeFunctionalNode } from './writeFunctionalNode';
 
 export interface ParamWriteChildNode<ChildNode extends Node> {
     (node: ChildNode, output: MarkdownOutput): void;
 }
 
-export interface ParamWriteCoreNode {
-    (node: LeafCoreNode, output: MarkdownOutput): void;
+export interface ParamWriteRenderMarkdownNode {
+    (node: LeafRenderMarkdownNode, output: MarkdownOutput): void;
     <ChildNode extends Node>(
-        node: CoreNode<ChildNode>,
+        node: RenderMarkdownNode<ChildNode>,
         output: MarkdownOutput,
         writeChildNode: ParamWriteChildNode<ChildNode>,
     ): void;
 }
 
-export function writeDeepCoreNode(
-    node: DeepCoreNode,
+export function writeDeepRenderMarkdownNode(
+    node: DeepRenderMarkdownNode,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void {
-    (function writeChildNode(node: DeepCoreNode, output: MarkdownOutput): void {
-        writeCoreNode(node, output, writeChildNode);
+    (function writeChildNode(
+        node: DeepRenderMarkdownNode,
+        output: MarkdownOutput,
+    ): void {
+        writeRenderMarkdownNode(node, output, writeChildNode);
     })(node, output);
 }
 
-export function writeCoreNode(
-    node: LeafCoreNode,
+export function writeRenderMarkdownNode(
+    node: LeafRenderMarkdownNode,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void;
-export function writeCoreNode<ChildNode extends Node>(
-    node: CoreNode<ChildNode>,
+export function writeRenderMarkdownNode<ChildNode extends Node>(
+    node: RenderMarkdownNode<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void;
-export function writeCoreNode<ChildNode extends Node>(
-    node: CoreNode<ChildNode>,
+export function writeRenderMarkdownNode<ChildNode extends Node>(
+    node: RenderMarkdownNode<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode?: ParamWriteChildNode<ChildNode>,
 ): void {
     /* eslint-disable @typescript-eslint/no-non-null-assertion */
     switch (node.type) {
         case CoreNodeType.Container: {
-            writeContainer(node, output, writeCoreNode, writeChildNode!);
+            writeContainer(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.PlainText: {
-            writePlainText(node, output, writeCoreNode);
+            writePlainText(node, output, writeRenderMarkdownNode);
             break;
         }
         case CoreNodeType.HorizontalRule: {
-            writeHorizontalRule(node, output, writeCoreNode);
+            writeHorizontalRule(node, output, writeRenderMarkdownNode);
             break;
         }
-        case CoreNodeType.HtmlComment: {
-            writeHtmlComment(node, output, writeCoreNode);
+        case RenderMarkdownNodeType.HtmlComment: {
+            writeHtmlComment(node, output, writeRenderMarkdownNode);
             break;
         }
         case CoreNodeType.BlockQuote: {
-            writeBlockQuote(node, output, writeCoreNode, writeChildNode!);
+            writeBlockQuote(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.HtmlElement: {
-            writeHtmlElement(node, output, writeCoreNode, writeChildNode!);
+            writeHtmlElement(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.Italics: {
-            writeItalics(node, output, writeCoreNode, writeChildNode!);
+            writeItalics(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.Bold: {
-            writeBold(node, output, writeCoreNode, writeChildNode!);
+            writeBold(node, output, writeRenderMarkdownNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Strikethrough: {
-            writeStrikethrough(node, output, writeCoreNode, writeChildNode!);
+            writeStrikethrough(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.CodeSpan: {
-            writeCodeSpan(node, output, writeCoreNode, writeChildNode!);
+            writeCodeSpan(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.CodeBlock: {
-            writeCodeBlock(node, output, writeCoreNode);
+            writeCodeBlock(node, output, writeRenderMarkdownNode);
             break;
         }
         case CoreNodeType.RichCodeBlock: {
-            writeRichCodeBlock(node, output, writeCoreNode, writeChildNode!);
+            writeRichCodeBlock(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.Link: {
-            writeLink(node, output, writeCoreNode, writeChildNode!);
+            writeLink(node, output, writeRenderMarkdownNode, writeChildNode!);
             break;
         }
         case CoreNodeType.LocalPageLink: {
-            writeLocalPageLink(node, output, writeCoreNode, writeChildNode!);
+            writeLocalPageLink(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.GithubSourceLink: {
-            writeGithubSourceLink(node, output, writeCoreNode, writeChildNode!);
+            writeGithubSourceLink(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.Image: {
-            writeImage(node, output, writeCoreNode);
+            writeImage(node, output, writeRenderMarkdownNode);
             break;
         }
         case CoreNodeType.Paragraph: {
-            writeParagraph(node, output, writeCoreNode, writeChildNode!);
+            writeParagraph(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.Heading123456: {
-            writeHeading123456(node, output, writeCoreNode, writeChildNode!);
+            writeHeading123456(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.Heading: {
-            writeHeading(node, output, writeCoreNode, writeChildNode!);
+            writeHeading(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.Subheading: {
-            writeSubheading(node, output, writeCoreNode, writeChildNode!);
+            writeSubheading(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
         case CoreNodeType.Title: {
-            writeTitle(node, output, writeCoreNode, writeChildNode!);
+            writeTitle(node, output, writeRenderMarkdownNode, writeChildNode!);
             break;
         }
         case CoreNodeType.List: {
-            writeList(node, output, writeCoreNode, writeChildNode!);
+            writeList(node, output, writeRenderMarkdownNode, writeChildNode!);
             break;
         }
         case CoreNodeType.Table: {
             writeTable(
                 node,
                 output,
-                writeCoreNode,
+                writeRenderMarkdownNode,
                 writeChildNode!,
                 writeChildNode!,
             );
@@ -180,30 +249,39 @@ export function writeCoreNode<ChildNode extends Node>(
             writeCollapsibleSection(
                 node,
                 output,
-                writeCoreNode,
+                writeRenderMarkdownNode,
                 writeChildNode!,
                 writeChildNode!,
             );
             break;
         }
         case CoreNodeType.PageTitle: {
-            writePageTitle(node, output, writeCoreNode, writeChildNode!);
+            writePageTitle(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
             break;
         }
-        case CoreNodeType.TableOfContentsList: {
-            writeTableOfContentsList(node, output, writeCoreNode);
+        case RenderMarkdownNodeType.TableOfContentsList: {
+            writeTableOfContentsList(node, output, writeRenderMarkdownNode);
             break;
         }
-        case CoreNodeType.TableOfContents: {
-            writeTableOfContents(node, output, writeCoreNode);
+        case RenderMarkdownNodeType.TableOfContents: {
+            writeTableOfContents(node, output, writeRenderMarkdownNode);
             break;
         }
-        case CoreNodeType.DoNotEditComment: {
-            writeDoNotEditComment(node, output, writeCoreNode);
+        case RenderMarkdownNodeType.DoNotEditComment: {
+            writeDoNotEditComment(node, output, writeRenderMarkdownNode);
             break;
         }
         case CoreNodeType.Page: {
-            writePage(node, output, writeCoreNode, writeChildNode!);
+            writePage(node, output, writeRenderMarkdownNode, writeChildNode!);
+            break;
+        }
+        case RenderMarkdownNodeType.FunctionalNode: {
+            writeFunctionalNode(node, output, writeRenderMarkdownNode);
             break;
         }
         default: {
@@ -217,36 +295,61 @@ export function writeCoreNode<ChildNode extends Node>(
     /* eslint-enable @typescript-eslint/no-non-null-assertion */
 }
 
-export function renderCoreNodeAsMarkdown<ChildNode extends Node>(
-    node: CoreNode<ChildNode>,
-    writeCoreNode_: ParamWriteCoreNode,
+export function renderRenderMarkdownNodeAsMarkdown<ChildNode extends Node>(
+    node: RenderMarkdownNode<ChildNode>,
+    writeRenderMarkdownNode_: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
     parameters: MarkdownOutputParameters,
 ): string {
     const output = new MarkdownOutput(parameters);
-    writeCoreNode(node, output, writeCoreNode_, writeChildNode);
+    writeRenderMarkdownNode(
+        node,
+        output,
+        writeRenderMarkdownNode_,
+        writeChildNode,
+    );
     return output.toString();
 }
 
-export function renderDeepCoreNodeAsMarkdown(
-    node: DeepCoreNode,
+export function renderDeepRenderMarkdownNodeAsMarkdown(
+    node: DeepRenderMarkdownNode,
     parameters: MarkdownOutputParameters,
 ): string {
     const output = new MarkdownOutput(parameters);
 
-    const writeCoreNode_: ParamWriteCoreNode = <ChildNode extends Node>(
-        node: CoreNode<ChildNode>,
+    const writeRenderMarkdownNode_: ParamWriteRenderMarkdownNode = <
+        ChildNode extends Node
+    >(
+        node: RenderMarkdownNode<ChildNode>,
         output: MarkdownOutput,
         writeChildNode?: ParamWriteChildNode<ChildNode>,
     ) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        writeCoreNode(node, output, writeCoreNode_, writeChildNode!);
+        writeRenderMarkdownNode(
+            node,
+            output,
+            writeRenderMarkdownNode_,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            writeChildNode!,
+        );
     };
 
-    function writeChildNode(node: DeepCoreNode, output: MarkdownOutput): void {
-        writeCoreNode(node, output, writeCoreNode_, writeChildNode);
+    function writeChildNode(
+        node: DeepRenderMarkdownNode,
+        output: MarkdownOutput,
+    ): void {
+        writeRenderMarkdownNode(
+            node,
+            output,
+            writeRenderMarkdownNode_,
+            writeChildNode,
+        );
     }
 
-    writeCoreNode(node, output, writeCoreNode_, writeChildNode);
+    writeRenderMarkdownNode(
+        node,
+        output,
+        writeRenderMarkdownNode_,
+        writeChildNode,
+    );
     return output.toString();
 }

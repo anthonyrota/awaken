@@ -11,12 +11,7 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
 import * as tsdoc from '@microsoft/tsdoc';
 import * as uuid from 'uuid';
-import {
-    Node,
-    CoreNode,
-    DeepCoreNode,
-    CoreNodeType,
-} from '../../../core/nodes';
+import { Node, CoreNode, DeepCoreNode } from '../../../core/nodes';
 import { CodeBlockNode } from '../../../core/nodes/CodeBlock';
 import { CodeSpanNode } from '../../../core/nodes/CodeSpan';
 import { ContainerBase, ContainerNode } from '../../../core/nodes/Container';
@@ -25,11 +20,14 @@ import { LinkNode } from '../../../core/nodes/Link';
 import { LocalPageLinkNode } from '../../../core/nodes/LocalPageLink';
 import { ParagraphNode } from '../../../core/nodes/Paragraph';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
+import { RenderMarkdownNodeType } from '../../../core/render/markdown/nodes';
+import { HtmlCommentNode } from '../../../core/render/markdown/nodes/HtmlComment';
 import { Iter } from '../../../util/Iter';
 import { StringBuilder } from '../../../util/StringBuilder';
 import { AnalyzeContext } from '../../Context';
 import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
-import { getLinkToExportIdentifier } from '../../util/getExportLinks';
+import { getPagePathOfExportIdentifier } from '../../util/getExportLinks';
+import { outPagePathToPageUrl } from '../../util/outPagePathToPageUrl';
 import { parseMarkdown } from '../../util/parseMarkdown';
 
 interface TSDocNodeWriteContext {
@@ -199,8 +197,13 @@ function _substituteEmbeddedNodes(
     for (const [i, child] of node.children.entries()) {
         if ('children' in child) {
             _substituteEmbeddedNodes(embeddedNode, context, child);
-        } else if (child.type === CoreNodeType.HtmlComment) {
-            const embeddedNode = context.extractNodeFromComment(child.comment);
+        } else if (
+            ((child.type as unknown) as RenderMarkdownNodeType) ===
+            RenderMarkdownNodeType.HtmlComment
+        ) {
+            const embeddedNode = context.extractNodeFromComment(
+                ((child as unknown) as HtmlCommentNode).comment,
+            );
             if (embeddedNode) {
                 substituteEmbeddedNodes(embeddedNode, context);
                 node.children[
@@ -439,7 +442,7 @@ function writeLinkTagWithCodeDestination(
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const exportName = packageParts.pop()!;
-    const destination = getLinkToExportIdentifier(
+    const outPagePath = getPagePathOfExportIdentifier(
         getApiItemIdentifier(context.apiItem),
         {
             packageName: packageParts.join('/'),
@@ -450,7 +453,8 @@ function writeLinkTagWithCodeDestination(
     codeSpan.children.push(
         EmbeddedNode({
             originalNode: LocalPageLinkNode({
-                destination,
+                pagePath: outPagePath,
+                pageUrl: outPagePathToPageUrl(outPagePath, context.context),
                 children: [
                     EmbeddedNode({
                         originalNode: PlainTextNode({

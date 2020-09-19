@@ -1,4 +1,5 @@
-import { Node, CoreNodeType } from '.';
+import { Node } from '../../../nodes';
+import { RenderMarkdownNodeType } from '.';
 
 export interface DoNotEditCommentParameters {}
 
@@ -11,14 +12,14 @@ export function DoNotEditCommentBase(
 }
 
 export interface DoNotEditCommentNode extends DoNotEditCommentBase, Node {
-    type: CoreNodeType.DoNotEditComment;
+    type: RenderMarkdownNodeType.DoNotEditComment;
 }
 
 export function DoNotEditCommentNode(
     parameters: DoNotEditCommentParameters,
 ): DoNotEditCommentNode {
     return {
-        type: CoreNodeType.DoNotEditComment,
+        type: RenderMarkdownNodeType.DoNotEditComment,
         ...DoNotEditCommentBase(parameters),
     };
 }

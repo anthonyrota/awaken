@@ -2,15 +2,15 @@ import { Node } from '../../nodes';
 import { HeadingBase } from '../../nodes/Heading';
 import { Heading123456Node } from '../../nodes/Heading123456';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
+import { ParamWriteChildNode, ParamWriteRenderMarkdownNode } from '.';
 
 export function writeHeading<ChildNode extends Node>(
     heading: HeadingBase<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeCoreNode(
+    writeRenderMarkdownNode(
         Heading123456Node<ChildNode>({
             level: 2,
             alternateId: heading.alternateId,

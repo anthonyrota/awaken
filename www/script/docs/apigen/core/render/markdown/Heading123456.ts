@@ -3,22 +3,23 @@ import { Node } from '../../nodes';
 import { ContainerNode } from '../../nodes/Container';
 import { Heading123456Base } from '../../nodes/Heading123456';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
-import {
-    MarkdownFunctionalNode,
-    writeMarkdownFunctionalNode,
-} from './MarkdownFunctionalNode';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
+import { FunctionalNode } from './nodes/FunctionalNode';
+import {
+    ParamWriteChildNode,
+    ParamWriteRenderMarkdownNode,
+    writeDeepRenderMarkdownNode,
+} from '.';
 
 function writeInsides<ChildNode extends Node>(
     heading123456: Heading123456Base<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     output.withInSingleLine(() => {
         if (heading123456.alternateId) {
-            writeCoreNode(
+            writeRenderMarkdownNode(
                 HtmlElementNode({
                     tagName: 'a',
                     attributes: { name: heading123456.alternateId },
@@ -27,7 +28,7 @@ function writeInsides<ChildNode extends Node>(
                 noop,
             );
         }
-        writeCoreNode(
+        writeRenderMarkdownNode(
             ContainerNode({ children: heading123456.children }),
             output,
             writeChildNode,
@@ -38,20 +39,20 @@ function writeInsides<ChildNode extends Node>(
 export function writeHeading123456<ChildNode extends Node>(
     heading123456: Heading123456Base<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     if (output.constrainedToSingleLine) {
-        writeCoreNode(
-            HtmlElementNode<MarkdownFunctionalNode>({
+        writeDeepRenderMarkdownNode(
+            HtmlElementNode({
                 tagName: `h${heading123456.level}`,
                 children: [
-                    MarkdownFunctionalNode({
+                    FunctionalNode({
                         write(): void {
                             writeInsides(
                                 heading123456,
                                 output,
-                                writeCoreNode,
+                                writeRenderMarkdownNode,
                                 writeChildNode,
                             );
                         },
@@ -59,12 +60,17 @@ export function writeHeading123456<ChildNode extends Node>(
                 ],
             }),
             output,
-            writeMarkdownFunctionalNode,
+            writeRenderMarkdownNode,
         );
         return;
     }
     output.withParagraphBreak(() => {
         output.write(`${'#'.repeat(heading123456.level)} `);
-        writeInsides(heading123456, output, writeCoreNode, writeChildNode);
+        writeInsides(
+            heading123456,
+            output,
+            writeRenderMarkdownNode,
+            writeChildNode,
+        );
     });
 }

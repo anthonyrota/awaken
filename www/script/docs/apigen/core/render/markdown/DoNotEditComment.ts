@@ -1,16 +1,16 @@
 import { BlockQuoteNode } from '../../nodes/BlockQuote';
-import { DoNotEditCommentBase } from '../../nodes/DoNotEditComment';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { PlainTextNode } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
-import { writeDeepCoreNode, ParamWriteCoreNode } from '.';
+import { DoNotEditCommentBase } from './nodes/DoNotEditComment';
+import { writeDeepRenderMarkdownNode, ParamWriteRenderMarkdownNode } from '.';
 
 export function writeDoNotEditComment(
     _doNotEditComment: DoNotEditCommentBase,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void {
-    writeDeepCoreNode(
+    writeDeepRenderMarkdownNode(
         BlockQuoteNode({
             children: [
                 PlainTextNode({
@@ -25,6 +25,6 @@ export function writeDoNotEditComment(
             ],
         }),
         output,
-        writeCoreNode,
+        writeRenderMarkdownNode,
     );
 }

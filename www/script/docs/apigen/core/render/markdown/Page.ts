@@ -1,34 +1,39 @@
-import { Node, DeepCoreNode } from '../../nodes';
+import { Node } from '../../nodes';
 import { ContainerNode } from '../../nodes/Container';
-import { DoNotEditCommentNode } from '../../nodes/DoNotEditComment';
 import { PageBase } from '../../nodes/Page';
 import { PageTitleNode } from '../../nodes/PageTitle';
 import { PlainTextNode } from '../../nodes/PlainText';
-import { TableOfContentsNode } from '../../nodes/TableOfContents';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteCoreNode, ParamWriteChildNode, writeDeepCoreNode } from '.';
+import { DoNotEditCommentNode } from './nodes/DoNotEditComment';
+import { TableOfContentsNode } from './nodes/TableOfContents';
+import {
+    ParamWriteRenderMarkdownNode,
+    ParamWriteChildNode,
+    writeDeepRenderMarkdownNode,
+} from '.';
 
 export function writePage<ChildNode extends Node>(
     page: PageBase<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeCoreNode(DoNotEditCommentNode({}), output);
-    writeDeepCoreNode(
-        PageTitleNode<DeepCoreNode>({
+    writeRenderMarkdownNode(DoNotEditCommentNode({}), output);
+    writeDeepRenderMarkdownNode(
+        PageTitleNode({
             children: [PlainTextNode({ text: page.metadata.title })],
         }),
         output,
-        writeCoreNode,
+        writeRenderMarkdownNode,
     );
-    writeCoreNode(
+    writeRenderMarkdownNode(
         TableOfContentsNode({
             tableOfContents: page.metadata.tableOfContents,
+            pagePath: page.pagePath,
         }),
         output,
     );
-    writeCoreNode(
+    writeRenderMarkdownNode(
         ContainerNode({ children: page.children }),
         output,
         writeChildNode,

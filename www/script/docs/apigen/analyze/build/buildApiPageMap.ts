@@ -56,6 +56,7 @@ export function buildApiPageMap(
             const path = `${packageData.packageDirectory}/${pageData.pageDirectory}`;
             const pageNode = buildApiPage({
                 packageName: packageData.packageName,
+                packageData,
                 pageData,
                 context,
             });

@@ -2,16 +2,16 @@ import { Node } from '../../nodes';
 import { CodeSpanBase } from '../../nodes/CodeSpan';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteCoreNode, ParamWriteChildNode } from '.';
+import { ParamWriteRenderMarkdownNode, ParamWriteChildNode } from '.';
 
 export function writeCodeSpan<ChildNode extends Node>(
     codeSpan: CodeSpanBase<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     output.withInSingleLine(() => {
-        writeCoreNode(
+        writeRenderMarkdownNode(
             HtmlElementNode({
                 tagName: 'code',
                 children: codeSpan.children,

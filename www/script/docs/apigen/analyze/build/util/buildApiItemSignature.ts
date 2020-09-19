@@ -27,7 +27,8 @@ import {
     FoundExcerptTokenReferenceResultType,
     getExcerptTokenReference,
 } from '../../util/getExcerptTokenReference';
-import { getLinkToApiItem } from '../../util/getExportLinks';
+import { getPagePathOfApiItem } from '../../util/getExportLinks';
+import { outPagePathToPageUrl } from '../../util/outPagePathToPageUrl';
 import { hideDocTag } from '../../util/tsdocUtil';
 import { UnsupportedApiItemError } from '../../util/UnsupportedApiItemError';
 
@@ -92,14 +93,15 @@ function buildExcerpt(
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
-            const destination = getLinkToApiItem(
+            const outPagePath = getPagePathOfApiItem(
                 getApiItemIdentifier(apiItem),
                 result.apiItem,
                 context,
             );
             nodes.push(
                 LocalPageLinkNode({
-                    destination,
+                    pagePath: outPagePath,
+                    pageUrl: outPagePathToPageUrl(outPagePath, context),
                     children: [PlainTextNode({ text: tokenText })],
                 }),
             );

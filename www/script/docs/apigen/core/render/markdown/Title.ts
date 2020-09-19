@@ -3,15 +3,15 @@ import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { ParagraphNode } from '../../nodes/Paragraph';
 import { TitleBase } from '../../nodes/Title';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
+import { ParamWriteChildNode, ParamWriteRenderMarkdownNode } from '.';
 
 export function writeTitle<ChildNode extends Node>(
     title: TitleBase<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    writeCoreNode(
+    writeRenderMarkdownNode(
         ParagraphNode({
             children: [
                 HtmlElementNode({
@@ -21,6 +21,6 @@ export function writeTitle<ChildNode extends Node>(
             ],
         }),
         output,
-        (node) => writeCoreNode(node, output, writeChildNode),
+        (node) => writeRenderMarkdownNode(node, output, writeChildNode),
     );
 }

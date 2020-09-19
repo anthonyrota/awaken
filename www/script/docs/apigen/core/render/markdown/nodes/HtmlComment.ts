@@ -1,4 +1,5 @@
-import { Node, CoreNodeType } from '.';
+import { Node } from '../../../nodes';
+import { RenderMarkdownNodeType } from '.';
 
 export interface HtmlCommentParameters {
     comment: string;
@@ -20,14 +21,14 @@ export function HtmlCommentBase(
 }
 
 export interface HtmlCommentNode extends HtmlCommentBase, Node {
-    type: CoreNodeType.HtmlComment;
+    type: RenderMarkdownNodeType.HtmlComment;
 }
 
 export function HtmlCommentNode(
     parameters: HtmlCommentParameters,
 ): HtmlCommentNode {
     return {
-        type: CoreNodeType.HtmlComment,
+        type: RenderMarkdownNodeType.HtmlComment,
         ...HtmlCommentBase(parameters),
     };
 }

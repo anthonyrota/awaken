@@ -1,32 +1,31 @@
-import { DeepCoreNode } from '../../nodes';
 import { BoldNode } from '../../nodes/Bold';
 import { CollapsibleSectionNode } from '../../nodes/CollapsibleSection';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { PlainTextNode } from '../../nodes/PlainText';
-import { TableOfContentsBase } from '../../nodes/TableOfContents';
-import { TableOfContentsListNode } from '../../nodes/TableOfContentsList';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteCoreNode, writeDeepCoreNode } from '.';
+import { TableOfContentsBase } from './nodes/TableOfContents';
+import { TableOfContentsListNode } from './nodes/TableOfContentsList';
+import { ParamWriteRenderMarkdownNode, writeDeepRenderMarkdownNode } from '.';
 
 export function writeTableOfContents(
     tableOfContents: TableOfContentsBase,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void {
-    writeDeepCoreNode(
-        CollapsibleSectionNode<DeepCoreNode, DeepCoreNode>({
-            summaryNode: BoldNode<DeepCoreNode>({
+    writeDeepRenderMarkdownNode(
+        CollapsibleSectionNode({
+            summaryNode: BoldNode({
                 children: [PlainTextNode({ text: 'Table of Contents' })],
             }),
             children: [
                 HtmlElementNode({ tagName: 'br' }),
                 TableOfContentsListNode({
                     tableOfContents: tableOfContents.tableOfContents,
-                    relativePagePath: tableOfContents.relativePagePath,
+                    pagePath: tableOfContents.pagePath,
                 }),
             ],
         }),
         output,
-        writeCoreNode,
+        writeRenderMarkdownNode,
     );
 }

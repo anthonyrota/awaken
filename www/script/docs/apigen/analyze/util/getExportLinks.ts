@@ -1,12 +1,11 @@
 import { ApiItem } from '@microsoft/api-extractor-model';
-import { getRelativePath } from '../../util/getRelativePath';
 import { getApiItemAnchorName } from '../build/util/buildApiItemAnchor';
 import { AnalyzeContext } from '../Context';
 import { ExportIdentifier } from '../Identifier';
 import { getApiItemIdentifier } from './getApiItemIdentifier';
 
 // TODO: handle lowercase collisions.
-export function getLinkToExportIdentifier(
+export function getPagePathOfExportIdentifier(
     currentExportIdentifier: ExportIdentifier,
     exportIdentifier: ExportIdentifier,
     context: AnalyzeContext,
@@ -18,13 +17,14 @@ export function getLinkToExportIdentifier(
     if (!currentApiItemPath || !apiItemPath) {
         throw new Error('No more coding today.');
     }
-    const relativePath = getRelativePath(currentApiItemPath, apiItemPath);
     const titleHash = exportIdentifier.exportName.toLowerCase();
 
-    return relativePath ? `${relativePath}#${titleHash}` : `#${titleHash}`;
+    return currentApiItemPath === apiItemPath
+        ? `#${titleHash}`
+        : `${apiItemPath}#${titleHash}`;
 }
 
-export function getLinkToApiItem(
+export function getPagePathOfApiItem(
     currentExportIdentifier: ExportIdentifier,
     apiItem: ApiItem,
     context: AnalyzeContext,
@@ -38,8 +38,9 @@ export function getLinkToApiItem(
     if (!currentApiItemPath || !apiItemPath) {
         throw new Error('No more coding today.');
     }
-    const relativePath = getRelativePath(currentApiItemPath, apiItemPath);
     const titleHash = getApiItemAnchorName({ apiItem, context });
 
-    return relativePath ? `${relativePath}#${titleHash}` : `#${titleHash}`;
+    return currentApiItemPath === apiItemPath
+        ? `#${titleHash}`
+        : `${apiItemPath}#${titleHash}`;
 }

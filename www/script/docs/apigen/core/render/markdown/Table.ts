@@ -2,7 +2,7 @@ import { Node } from '../../nodes';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { TableBase, TableRow } from '../../nodes/Table';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
+import { ParamWriteChildNode, ParamWriteRenderMarkdownNode } from '.';
 
 function writeTableRow<CellNode extends Node>(
     tableRow: TableRow<CellNode>,
@@ -67,7 +67,7 @@ export function writeTable<
 >(
     table: TableBase<HeaderCellNode, BodyCellNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeHeaderCellNode: ParamWriteChildNode<HeaderCellNode>,
     writeBodyCellNode: ParamWriteChildNode<BodyCellNode>,
 ) {
@@ -84,27 +84,22 @@ export function writeTable<
             ],
         });
         let isHeader = true;
-        writeCoreNode(tableElement, output, (node) => {
-            writeCoreNode<HtmlElementNode<HeaderCellNode | BodyCellNode>>(
-                node,
-                output,
-                (node) => {
-                    writeCoreNode<HeaderCellNode | BodyCellNode>(
-                        node,
-                        output,
-                        (node) => {
-                            if (isHeader) {
-                                writeHeaderCellNode(
-                                    node as HeaderCellNode,
-                                    output,
-                                );
-                            } else {
-                                writeBodyCellNode(node as BodyCellNode, output);
-                            }
-                        },
-                    );
-                },
-            );
+        writeRenderMarkdownNode(tableElement, output, (node) => {
+            writeRenderMarkdownNode<
+                HtmlElementNode<HeaderCellNode | BodyCellNode>
+            >(node, output, (node) => {
+                writeRenderMarkdownNode<HeaderCellNode | BodyCellNode>(
+                    node,
+                    output,
+                    (node) => {
+                        if (isHeader) {
+                            writeHeaderCellNode(node as HeaderCellNode, output);
+                        } else {
+                            writeBodyCellNode(node as BodyCellNode, output);
+                        }
+                    },
+                );
+            });
             isHeader = false;
         });
     }

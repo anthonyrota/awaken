@@ -2,12 +2,12 @@ import { CodeBlockBase } from '../../nodes/CodeBlock';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { PlainTextNode } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteCoreNode, writeDeepCoreNode } from '.';
+import { ParamWriteRenderMarkdownNode, writeDeepRenderMarkdownNode } from '.';
 
 export function writeCodeBlock(
     codeBlock: CodeBlockBase,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void {
     if (output.constrainedToSingleLine) {
         let attributes: Record<string, string> | undefined = undefined;
@@ -18,14 +18,14 @@ export function writeCodeBlock(
         ) {
             attributes = { lang: codeBlock.language };
         }
-        writeDeepCoreNode(
+        writeDeepRenderMarkdownNode(
             HtmlElementNode({
                 tagName: 'pre',
                 attributes,
                 children: [PlainTextNode({ text: codeBlock.code })],
             }),
             output,
-            writeCoreNode,
+            writeRenderMarkdownNode,
         );
         return;
     }
@@ -34,13 +34,16 @@ export function writeCodeBlock(
         output.withInMarkdownCode(() => {
             output.write('```');
             if (codeBlock.language) {
-                writeCoreNode(
+                writeRenderMarkdownNode(
                     PlainTextNode({ text: codeBlock.language }),
                     output,
                 );
             }
             output.writeLine();
-            writeCoreNode(PlainTextNode({ text: codeBlock.code }), output);
+            writeRenderMarkdownNode(
+                PlainTextNode({ text: codeBlock.code }),
+                output,
+            );
             output.ensureNewLine();
         });
         output.write('```');

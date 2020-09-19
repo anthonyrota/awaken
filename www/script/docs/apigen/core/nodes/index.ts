@@ -4,12 +4,10 @@ import { CodeBlockNode } from './CodeBlock';
 import { CodeSpanNode } from './CodeSpan';
 import { CollapsibleSectionNode } from './CollapsibleSection';
 import { ContainerNode } from './Container';
-import { DoNotEditCommentNode } from './DoNotEditComment';
 import { GithubSourceLinkNode } from './GithubSourceLink';
 import { HeadingNode } from './Heading';
 import { Heading123456Node } from './Heading123456';
 import { HorizontalRuleNode } from './HorizontalRule';
-import { HtmlCommentNode } from './HtmlComment';
 import { HtmlElementNode } from './HtmlElement';
 import { ImageNode } from './Image';
 import { ItalicsNode } from './Italics';
@@ -24,8 +22,6 @@ import { RichCodeBlockNode } from './RichCodeBlock';
 import { StrikethroughNode } from './Strikethrough';
 import { SubheadingNode } from './Subheading';
 import { TableNode } from './Table';
-import { TableOfContentsNode } from './TableOfContents';
-import { TableOfContentsListNode } from './TableOfContentsList';
 import { TitleNode } from './Title';
 
 export interface Node {
@@ -35,12 +31,8 @@ export interface Node {
 export type LeafCoreNode =
     | PlainTextNode
     | HorizontalRuleNode
-    | HtmlCommentNode
     | CodeBlockNode
-    | ImageNode
-    | TableOfContentsListNode
-    | TableOfContentsNode
-    | DoNotEditCommentNode;
+    | ImageNode;
 
 export type ParentCoreNode<ChildType extends Node> =
     | ContainerNode<ChildType>
@@ -97,7 +89,6 @@ export enum CoreNodeType {
     Container = 'core/Container',
     PlainText = 'core/PlainText',
     HorizontalRule = 'core/HorizontalRule',
-    HtmlComment = 'core/HtmlComment',
     HtmlElement = 'core/HtmlElement',
     BlockQuote = 'core/BlockQuote',
     Italics = 'core/Italics',
@@ -119,8 +110,5 @@ export enum CoreNodeType {
     Table = 'core/Table',
     CollapsibleSection = 'core/CollapsibleSection',
     PageTitle = 'core/PageTitle',
-    TableOfContentsList = 'core/TableOfContentsList',
-    TableOfContents = 'core/TableOfContents',
-    DoNotEditComment = 'core/DoNotEditComment',
     Page = 'core/Page',
 }

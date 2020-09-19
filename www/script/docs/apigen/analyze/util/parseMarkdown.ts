@@ -11,7 +11,6 @@ import { CodeSpanNode } from '../../core/nodes/CodeSpan';
 import { ContainerBase, ContainerNode } from '../../core/nodes/Container';
 import { HeadingNode } from '../../core/nodes/Heading';
 import { HorizontalRuleNode } from '../../core/nodes/HorizontalRule';
-import { HtmlCommentNode } from '../../core/nodes/HtmlComment';
 import { ImageNode, ImageParameters } from '../../core/nodes/Image';
 import { ItalicsNode } from '../../core/nodes/Italics';
 import { LinkNode, LinkParameters } from '../../core/nodes/Link';
@@ -22,6 +21,7 @@ import { StrikethroughNode } from '../../core/nodes/Strikethrough';
 import { SubheadingNode } from '../../core/nodes/Subheading';
 import { TableNode, TableRow } from '../../core/nodes/Table';
 import { TitleNode } from '../../core/nodes/Title';
+import { HtmlCommentNode } from '../../core/render/markdown/nodes/HtmlComment';
 
 const remark = unified().use(remarkParse);
 
@@ -55,7 +55,9 @@ export function parseMarkdown(
             throw new Error('Unexpected html text.');
         },
         oncomment(comment: string): void {
-            htmlParserContainer.children.push(HtmlCommentNode({ comment }));
+            htmlParserContainer.children.push(
+                (HtmlCommentNode({ comment }) as unknown) as DeepCoreNode,
+            );
         },
         oncdatastart(): void {
             throw new Error('Unexpected CDATA.');

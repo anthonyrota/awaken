@@ -13,6 +13,7 @@ import {
 } from '../../types';
 import {
     AnalyzeContext,
+    APIPackageData,
     APIPageData,
     getApiItemsByExportIdentifier,
 } from '../Context';
@@ -35,6 +36,7 @@ function getReleaseTag(apiItem: ApiItem): ReleaseTag {
 
 interface BuildApiPageParameters {
     context: AnalyzeContext;
+    packageData: APIPackageData;
     pageData: APIPageData;
     packageName: string;
 }
@@ -42,7 +44,7 @@ interface BuildApiPageParameters {
 export function buildApiPage(
     parameters: BuildApiPageParameters,
 ): PageNode<DeepCoreNode> {
-    const { context, pageData, packageName } = parameters;
+    const { context, packageData, pageData, packageName } = parameters;
     const nameToApiItems = new Map<string, ApiItem[]>();
 
     function addExportIdentifier(identifier: ExportIdentifier): void {
@@ -137,6 +139,7 @@ export function buildApiPage(
             title: pageData.pageTitle,
             tableOfContents: tableOfContents,
         },
+        pagePath: `${packageData.packageDirectory}/${pageData.pageDirectory}`,
         pageUrl: pageData.pageUrl,
         children: Array.from(nameToApiItems, ([, apiItems]) => {
             return buildApiItemImplementationGroup({

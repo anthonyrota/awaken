@@ -2,16 +2,16 @@ import { Node } from '../../nodes';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { RichCodeBlockBase } from '../../nodes/RichCodeBlock';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
+import { ParamWriteChildNode, ParamWriteRenderMarkdownNode } from '.';
 
 export function writeRichCodeBlock<ChildNode extends Node>(
     richCodeBlock: RichCodeBlockBase<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     if (output.constrainedToSingleLine) {
-        writeCoreNode(
+        writeRenderMarkdownNode(
             HtmlElementNode<ChildNode>({
                 tagName: 'pre',
                 children: richCodeBlock.children,
@@ -22,7 +22,7 @@ export function writeRichCodeBlock<ChildNode extends Node>(
         return;
     }
 
-    writeCoreNode(
+    writeRenderMarkdownNode(
         HtmlElementNode<ChildNode>({
             tagName: 'pre',
             children: richCodeBlock.children,

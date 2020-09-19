@@ -1,3 +1,4 @@
+import { outPagePathToPageUrl } from '../../../analyze/util/outPagePathToPageUrl';
 import {
     TableOfContentsInlineReference,
     TableOfContentsNestedReference,
@@ -8,16 +9,19 @@ import { ContainerNode } from '../../nodes/Container';
 import { ListNode, ListType } from '../../nodes/List';
 import { LocalPageLinkNode } from '../../nodes/LocalPageLink';
 import { PlainTextNode } from '../../nodes/PlainText';
-import { TableOfContentsListBase } from '../../nodes/TableOfContentsList';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteCoreNode, writeDeepCoreNode } from '.';
+import { TableOfContentsListBase } from './nodes/TableOfContentsList';
+import { ParamWriteRenderMarkdownNode, writeDeepRenderMarkdownNode } from '.';
 
 function buildTableOfContentsLink(
     reference: TableOfContentsInlineReference,
-    relativePagePath: string,
+    pagePath: string,
+    output: MarkdownOutput,
 ): DeepCoreNode {
+    const outPagePath = `${pagePath}#${reference.urlHashText}`;
     return LocalPageLinkNode<DeepCoreNode>({
-        destination: `${relativePagePath}#${reference.urlHashText}`,
+        pagePath: outPagePath,
+        pageUrl: outPagePathToPageUrl(outPagePath, output.analyzeContext),
         children: [
             CodeSpanNode<DeepCoreNode>({
                 children: [PlainTextNode({ text: reference.text })],
@@ -28,10 +32,11 @@ function buildTableOfContentsLink(
 
 function buildTableOfContentsListItem(
     reference: TableOfContentsNestedReference,
-    relativePagePath: string,
+    pagePath: string,
+    output: MarkdownOutput,
 ): ContainerNode<DeepCoreNode> {
     const listItem = ContainerNode<DeepCoreNode>({
-        children: [buildTableOfContentsLink(reference, relativePagePath)],
+        children: [buildTableOfContentsLink(reference, pagePath, output)],
     });
     if (reference.inlineReferences && reference.inlineReferences.length > 0) {
         listItem.children.push(PlainTextNode({ text: ' - ' }));
@@ -43,7 +48,7 @@ function buildTableOfContentsListItem(
                 listItem.children.push(PlainTextNode({ text: ', ' }));
             }
             listItem.children.push(
-                buildTableOfContentsLink(inlineReference, relativePagePath),
+                buildTableOfContentsLink(inlineReference, pagePath, output),
             );
         }
     }
@@ -53,7 +58,7 @@ function buildTableOfContentsListItem(
 export function writeTableOfContentsList(
     tableOfContentsList: TableOfContentsListBase,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void {
     const contentsList = ListNode<DeepCoreNode>({
         listType: {
@@ -63,7 +68,8 @@ export function writeTableOfContentsList(
     for (const mainReference of tableOfContentsList.tableOfContents) {
         const listItem = buildTableOfContentsListItem(
             mainReference,
-            tableOfContentsList.relativePagePath,
+            tableOfContentsList.pagePath,
+            output,
         );
         contentsList.children.push(listItem);
         if (mainReference.nested_references) {
@@ -77,11 +83,12 @@ export function writeTableOfContentsList(
                 nestedList.children.push(
                     buildTableOfContentsListItem(
                         nestedReference,
-                        tableOfContentsList.relativePagePath,
+                        tableOfContentsList.pagePath,
+                        output,
                     ),
                 );
             }
         }
     }
-    writeDeepCoreNode(contentsList, output, writeCoreNode);
+    writeDeepRenderMarkdownNode(contentsList, output, writeRenderMarkdownNode);
 }

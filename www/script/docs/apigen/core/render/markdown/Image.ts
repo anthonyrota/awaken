@@ -3,12 +3,12 @@ import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { ImageBase } from '../../nodes/Image';
 import { PlainTextNode } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteCoreNode } from '.';
+import { ParamWriteRenderMarkdownNode } from '.';
 
 export function writeImage(
     image: ImageBase,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void {
     output.withInSingleLine(() => {
         if (output.inHtmlBlockTag && !output.inTable) {
@@ -21,7 +21,7 @@ export function writeImage(
             if (image.alt !== undefined) {
                 attributes.alt = image.alt;
             }
-            writeCoreNode(
+            writeRenderMarkdownNode(
                 HtmlElementNode({ tagName: 'img', attributes }),
                 output,
                 noop,
@@ -29,12 +29,15 @@ export function writeImage(
         }
         output.write('![');
         if (image.alt)
-            writeCoreNode(PlainTextNode({ text: image.alt }), output);
+            writeRenderMarkdownNode(PlainTextNode({ text: image.alt }), output);
         output.write('](');
-        writeCoreNode(PlainTextNode({ text: image.src }), output);
+        writeRenderMarkdownNode(PlainTextNode({ text: image.src }), output);
         if (image.title) {
             output.write(' "');
-            writeCoreNode(PlainTextNode({ text: image.title }), output);
+            writeRenderMarkdownNode(
+                PlainTextNode({ text: image.title }),
+                output,
+            );
             output.write('"');
         }
         output.write(')');

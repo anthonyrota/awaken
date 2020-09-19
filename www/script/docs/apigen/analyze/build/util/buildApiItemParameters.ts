@@ -21,7 +21,8 @@ import {
     FoundExcerptTokenReferenceResultType,
     getExcerptTokenReference,
 } from '../../util/getExcerptTokenReference';
-import { getLinkToApiItem } from '../../util/getExportLinks';
+import { getPagePathOfApiItem } from '../../util/getExportLinks';
+import { outPagePathToPageUrl } from '../../util/outPagePathToPageUrl';
 import { getDocComment } from '../../util/tsdocUtil';
 import { buildApiItemDocNode } from './buildApiItemDocNode';
 
@@ -171,13 +172,15 @@ function createNodeForTypeExcerpt(
         } else if (
             result.type === FoundExcerptTokenReferenceResultType.Export
         ) {
+            const outPagePath = getPagePathOfApiItem(
+                getApiItemIdentifier(apiItem),
+                result.apiItem,
+                context,
+            );
             richCodeBlock.children.push(
                 LocalPageLinkNode({
-                    destination: getLinkToApiItem(
-                        getApiItemIdentifier(apiItem),
-                        result.apiItem,
-                        context,
-                    ),
+                    pagePath: outPagePath,
+                    pageUrl: outPagePathToPageUrl(outPagePath, context),
                     children: [PlainTextNode({ text: tokenText })],
                 }),
             );

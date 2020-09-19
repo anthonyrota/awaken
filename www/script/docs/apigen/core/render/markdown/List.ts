@@ -2,7 +2,7 @@ import { Node } from '../../nodes';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { ListBase, ListType } from '../../nodes/List';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteChildNode, ParamWriteCoreNode } from '.';
+import { ParamWriteChildNode, ParamWriteRenderMarkdownNode } from '.';
 
 function writeListItems<ChildNode extends Node>(
     list: ListBase<ChildNode>,
@@ -28,7 +28,7 @@ function writeListItems<ChildNode extends Node>(
 export function writeList<ChildNode extends Node>(
     list: ListBase<ChildNode>,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
     if (output.constrainedToSingleLine) {
@@ -49,8 +49,8 @@ export function writeList<ChildNode extends Node>(
                       tagName: 'ul',
                       children,
                   });
-        writeCoreNode(htmlElement, output, (node) => {
-            writeCoreNode(node, output, writeChildNode);
+        writeRenderMarkdownNode(htmlElement, output, (node) => {
+            writeRenderMarkdownNode(node, output, writeChildNode);
         });
         return;
     }

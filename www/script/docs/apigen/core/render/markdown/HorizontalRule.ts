@@ -2,15 +2,19 @@ import { noop } from '../../../util/noop';
 import { HorizontalRuleBase } from '../../nodes/HorizontalRule';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { MarkdownOutput } from './MarkdownOutput';
-import { ParamWriteCoreNode } from '.';
+import { ParamWriteRenderMarkdownNode } from '.';
 
 export function writeHorizontalRule(
     _horizontalRule: HorizontalRuleBase,
     output: MarkdownOutput,
-    writeCoreNode: ParamWriteCoreNode,
+    writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void {
     if (output.constrainedToSingleLine) {
-        writeCoreNode(HtmlElementNode({ tagName: 'hr' }), output, noop);
+        writeRenderMarkdownNode(
+            HtmlElementNode({ tagName: 'hr' }),
+            output,
+            noop,
+        );
     } else {
         output.withParagraphBreak(() => {
             output.writeLine('---');

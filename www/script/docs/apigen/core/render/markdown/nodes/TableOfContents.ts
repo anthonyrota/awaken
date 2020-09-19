@@ -1,14 +1,15 @@
-import { TableOfContents } from '../../types';
-import { Node, CoreNodeType } from '.';
+import { TableOfContents } from '../../../../types';
+import { Node } from '../../../nodes';
+import { RenderMarkdownNodeType } from '.';
 
 export interface TableOfContentsParameters {
     tableOfContents: TableOfContents;
-    relativePagePath?: string;
+    pagePath: string;
 }
 
 export interface TableOfContentsBase {
     tableOfContents: TableOfContents;
-    relativePagePath: string;
+    pagePath: string;
 }
 
 export function TableOfContentsBase(
@@ -16,19 +17,19 @@ export function TableOfContentsBase(
 ): TableOfContentsBase {
     return {
         tableOfContents: parameters.tableOfContents,
-        relativePagePath: parameters.relativePagePath ?? '',
+        pagePath: parameters.pagePath,
     };
 }
 
 export interface TableOfContentsNode extends TableOfContentsBase, Node {
-    type: CoreNodeType.TableOfContents;
+    type: RenderMarkdownNodeType.TableOfContents;
 }
 
 export function TableOfContentsNode(
     parameters: TableOfContentsParameters,
 ): TableOfContentsNode {
     return {
-        type: CoreNodeType.TableOfContents,
+        type: RenderMarkdownNodeType.TableOfContents,
         ...TableOfContentsBase(parameters),
     };
 }

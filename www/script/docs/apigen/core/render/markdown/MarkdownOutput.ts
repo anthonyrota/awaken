@@ -1,7 +1,9 @@
 import { IndentedWriter } from '../../../util/IndentedWriter';
+import { AnalyzeContext } from './../../../analyze/Context';
 
 export interface MarkdownOutputParameters {
     pagePath: string;
+    analyzeContext: AnalyzeContext;
 }
 
 export class MarkdownOutput extends IndentedWriter {
@@ -15,10 +17,12 @@ export class MarkdownOutput extends IndentedWriter {
     private _isMarkedNewParagraph = false;
     private _writingInlineHtmlTag = false;
     public readonly pagePath: string;
+    public readonly analyzeContext: AnalyzeContext;
 
     constructor(parameters: MarkdownOutputParameters) {
         super();
         this.pagePath = parameters.pagePath;
+        this.analyzeContext = parameters.analyzeContext;
     }
 
     public withInTable(write: () => void): void {

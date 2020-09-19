@@ -1,25 +1,25 @@
-import { DeepCoreNode } from '../../core/nodes';
 import { BoldNode } from '../../core/nodes/Bold';
 import { CollapsibleSectionNode } from '../../core/nodes/CollapsibleSection';
 import { ContainerNode } from '../../core/nodes/Container';
-import { DoNotEditCommentNode } from '../../core/nodes/DoNotEditComment';
 import { HeadingNode } from '../../core/nodes/Heading';
-import { LocalPageLinkNode } from '../../core/nodes/LocalPageLink';
 import { PageNode } from '../../core/nodes/Page';
 import { PageTitleNode } from '../../core/nodes/PageTitle';
 import { PlainTextNode } from '../../core/nodes/PlainText';
 import { SubheadingNode } from '../../core/nodes/Subheading';
-import { TableOfContentsNode } from '../../core/nodes/TableOfContents';
-import { renderDeepCoreNodeAsMarkdown } from '../../core/render/markdown';
+import { renderDeepRenderMarkdownNodeAsMarkdown } from '../../core/render/markdown';
+import { DoNotEditCommentNode } from '../../core/render/markdown/nodes/DoNotEditComment';
+import { TableOfContentsNode } from '../../core/render/markdown/nodes/TableOfContents';
 import {
     addFileToFolder,
     removeFileFromFolder,
     Folder,
 } from '../../util/Folder';
 import { AnalyzeContext } from '../Context';
+import { LinkNode } from './../../core/nodes/Link';
+import { DeepRenderMarkdownNode } from './../../core/render/markdown/nodes/index';
 
 export interface BuildApiPageMapToFolderParameters {
-    pageMap: Map<string, PageNode<DeepCoreNode>>;
+    pageMap: Map<string, PageNode<DeepRenderMarkdownNode>>;
     context: AnalyzeContext;
 }
 
@@ -35,15 +35,16 @@ export function buildApiPageMapToFolder(
         addFileToFolder(
             outFolder,
             fileName,
-            renderDeepCoreNodeAsMarkdown(page, {
+            renderDeepRenderMarkdownNodeAsMarkdown(page, {
                 pagePath: `${context.outDir}/${fileName}`,
+                analyzeContext: parameters.context,
             }),
         );
     }
 
     interface GetPageLinksFunction {
         (inBase: boolean): {
-            headingLink: LocalPageLinkNode<DeepCoreNode>;
+            headingLink: LinkNode<DeepRenderMarkdownNode>;
             tableOfContents: TableOfContentsNode;
         }[];
     }
@@ -70,20 +71,20 @@ export function buildApiPageMapToFolder(
                     ? 'README'
                     : pageData.pageDirectory;
                 const pagePath = inBase
-                    ? `${packageData.packageDirectory}/${pageName}`
-                    : pageName;
+                    ? `${packageData.packageDirectory}/${pageName}.md#readme`
+                    : `${pageName}.md#readme`;
+                const outPagePath = `${packageData.packageDirectory}/${pageData.pageDirectory}`;
                 return {
-                    headingLink: LocalPageLinkNode({
+                    headingLink: LinkNode({
                         destination: pagePath,
                         children: [PlainTextNode({ text: pageData.pageTitle })],
                     }),
                     tableOfContents: TableOfContentsNode({
                         // eslint-disable-next-line max-len
                         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        tableOfContents: pageNodeMap.get(
-                            `${packageData.packageDirectory}/${pageData.pageDirectory}`,
-                        )!.metadata.tableOfContents,
-                        relativePagePath: pagePath,
+                        tableOfContents: pageNodeMap.get(outPagePath)!.metadata
+                            .tableOfContents,
+                        pagePath: outPagePath,
                     }),
                 };
             });
@@ -101,11 +102,15 @@ export function buildApiPageMapToFolder(
             addFileToFolder(
                 outFolder,
                 newPagePath,
-                // eslint-disable-next-line max-len
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                renderDeepCoreNodeAsMarkdown(pageNodeMap.get(oldPagePathRaw)!, {
-                    pagePath: `${context.outDir}/${newPagePath}`,
-                }),
+                renderDeepRenderMarkdownNodeAsMarkdown(
+                    // eslint-disable-next-line max-len
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    pageNodeMap.get(oldPagePathRaw)!,
+                    {
+                        pagePath: `${context.outDir}/${newPagePath}`,
+                        analyzeContext: parameters.context,
+                    },
+                ),
             );
             continue;
         }
@@ -131,15 +136,16 @@ export function buildApiPageMapToFolder(
         addFileToFolder(
             outFolder,
             pagePath,
-            renderDeepCoreNodeAsMarkdown(contents, {
+            renderDeepRenderMarkdownNodeAsMarkdown(contents, {
                 pagePath: `${context.outDir}/${pagePath}`,
+                analyzeContext: parameters.context,
             }),
         );
     }
 
     const packageSummaries = [
         ...packageDirectoryToPageSummaryMap.entries(),
-    ].flatMap<DeepCoreNode>(([packageDirectory, packageSummary]) => {
+    ].flatMap<DeepRenderMarkdownNode>(([packageDirectory, packageSummary]) => {
         const {
             isOneIndexPagePackage,
             pageTitleTextNode,
@@ -148,8 +154,8 @@ export function buildApiPageMapToFolder(
 
         const heading = HeadingNode({
             children: [
-                LocalPageLinkNode({
-                    destination: `${packageDirectory}/README`,
+                LinkNode({
+                    destination: `${packageDirectory}/README.md#readme`,
                     children: [pageTitleTextNode],
                 }),
             ],
@@ -178,15 +184,12 @@ export function buildApiPageMapToFolder(
         ];
     });
 
-    const contents = ContainerNode<DeepCoreNode>({
+    const contents = ContainerNode<DeepRenderMarkdownNode>({
         children: [
             DoNotEditCommentNode({}),
             PageTitleNode({
                 children: [PlainTextNode({ text: 'Awaken API Reference' })],
             }),
-            // TODO.
-            // eslint-disable-next-line max-len
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             ...packageSummaries,
         ],
     });
@@ -195,8 +198,9 @@ export function buildApiPageMapToFolder(
     addFileToFolder(
         outFolder,
         pagePath,
-        renderDeepCoreNodeAsMarkdown(contents, {
+        renderDeepRenderMarkdownNodeAsMarkdown(contents, {
             pagePath: `${context.outDir}/${pagePath}`,
+            analyzeContext: parameters.context,
         }),
     );
 
