@@ -2,6 +2,8 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import { ApiModel } from '@microsoft/api-extractor-model';
 import * as fs from 'fs-extra';
+import { exit } from '../../exit';
+import { rootDir } from '../../rootDir';
 import { buildApiPageMap } from './analyze/build/buildApiPageMap';
 import { buildApiPageMapToFolder } from './analyze/build/buildApiPageMapToFolder';
 import { AnalyzeContext, APIPackageData } from './analyze/Context';
@@ -10,13 +12,7 @@ import {
     getUniqueExportIdentifierKey,
 } from './analyze/Identifier';
 import { generateSourceMetadata } from './analyze/sourceMetadata';
-import { rootDir } from './rootDir';
-import {
-    PageNodeMap,
-    PageNodeMapWithMetadata,
-    PageNodeMapMetadata,
-    ApiDocMapPathList,
-} from './types';
+import { Pages, PagesMetadata, PagesWithMetadata, PagesUrlList } from './types';
 import {
     addFileToFolder,
     Folder,
@@ -35,6 +31,7 @@ const packageDataList: APIPackageData[] = [
             {
                 pageDirectory: 'basics',
                 pageTitle: 'API Reference - Basics',
+                pageUrl: 'api-basics',
                 items: [
                     {
                         main: 'Disposable',
@@ -79,6 +76,7 @@ const packageDataList: APIPackageData[] = [
             {
                 pageDirectory: 'sources',
                 pageTitle: 'API Reference - Sources',
+                pageUrl: 'api-sources',
                 items: [
                     { main: 'all' },
                     { main: 'animationFrames' },
@@ -117,6 +115,7 @@ const packageDataList: APIPackageData[] = [
             {
                 pageDirectory: 'operators',
                 pageTitle: 'API Reference - Operators',
+                pageUrl: 'api-operators',
                 items: [
                     { main: 'at' },
                     { main: 'catchError' },
@@ -249,6 +248,7 @@ const packageDataList: APIPackageData[] = [
             {
                 pageDirectory: 'subjects',
                 pageTitle: 'API Reference - Subjects',
+                pageUrl: 'api-subjects',
                 items: [
                     { main: 'CurrentValueSubject' },
                     { main: 'FinalValueSubject' },
@@ -262,6 +262,7 @@ const packageDataList: APIPackageData[] = [
             {
                 pageDirectory: 'schedule-functions',
                 pageTitle: 'API Reference - Schedule Functions',
+                pageUrl: 'api-schedule',
                 items: [
                     { main: 'ScheduleAnimationFrameQueued' },
                     { main: 'ScheduleInterval' },
@@ -277,6 +278,7 @@ const packageDataList: APIPackageData[] = [
             {
                 pageDirectory: 'util',
                 pageTitle: 'API Reference - Utils',
+                pageUrl: 'api-utils',
                 items: [
                     { main: 'setTimeout' },
                     { main: 'setInterval' },
@@ -294,6 +296,7 @@ const packageDataList: APIPackageData[] = [
             {
                 pageDirectory: '_index',
                 pageTitle: 'API Reference',
+                pageUrl: 'testing/api-reference',
                 items: [
                     { main: 'TestSource' },
                     { main: 'SharedTestSource' },
@@ -396,8 +399,8 @@ const outFolder = Folder();
 
 // eslint-disable-next-line max-len
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-const pageNodeMap: PageNodeMap = Object.fromEntries(pageMap.entries());
-const pageNodeMapMetadata: PageNodeMapMetadata = {
+const pages: Pages = [...pageMap.values()];
+const pagesMetadata: PagesMetadata = {
     github:
         process.env.VERCEL_GITHUB_DEPLOYMENT === '1'
             ? {
@@ -410,35 +413,29 @@ const pageNodeMapMetadata: PageNodeMapMetadata = {
               }
             : null,
 };
-const pageNodeMapWithMetadata: PageNodeMapWithMetadata = {
-    metadata: pageNodeMapMetadata,
-    pageNodeMap,
+const pagesWithMetadata: PagesWithMetadata = {
+    metadata: pagesMetadata,
+    pages,
 };
-const pageNodeMapWithMetadataStringified = JSON.stringify(
-    pageNodeMapWithMetadata,
-);
+const pagesWithMetadataStringified = JSON.stringify(pagesWithMetadata);
 const hash = crypto
     .createHash('md5')
-    .update(pageNodeMapWithMetadataStringified)
+    .update(pagesWithMetadataStringified)
     .digest('hex')
     .slice(0, 8);
-const pathList: ApiDocMapPathList = [...pageMap.keys()];
+const pagesUrlList: PagesUrlList = pages.map((page) => page.pageUrl);
 
 addFileToFolder(
     outFolder,
-    `www/public/apiDocMap.${hash}.json`,
-    pageNodeMapWithMetadataStringified,
+    `www/_files/public/pages.${hash}.json`,
+    pagesWithMetadataStringified,
 );
+addFileToFolder(outFolder, `www/temp/pages.json`, pagesWithMetadataStringified);
+addFileToFolder(outFolder, 'www/temp/pagesHash', hash);
 addFileToFolder(
     outFolder,
-    `www/temp/apiDocMap.json`,
-    pageNodeMapWithMetadataStringified,
-);
-addFileToFolder(outFolder, 'www/temp/apiDocMapHash', hash);
-addFileToFolder(
-    outFolder,
-    'www/temp/apiDocMapPathList.json',
-    JSON.stringify(pathList),
+    'www/temp/pagesUrlList.json',
+    JSON.stringify(pagesUrlList),
 );
 
 const outApiFolder = getNestedFolderAtPath(outFolder, context.outDir);
@@ -448,5 +445,6 @@ for (const [path, fileOrFolder] of renderedApiFolder) {
 
 writeFolderToDirectoryPath(outFolder, rootDir).catch((error) => {
     console.error('error writing pages to out directory...');
-    throw error;
+    console.log(error);
+    exit();
 });

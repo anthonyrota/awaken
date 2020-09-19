@@ -137,6 +137,7 @@ export function buildApiPage(
             title: pageData.pageTitle,
             tableOfContents: tableOfContents,
         },
+        pageUrl: pageData.pageUrl,
         children: Array.from(nameToApiItems, ([, apiItems]) => {
             return buildApiItemImplementationGroup({
                 apiItems,

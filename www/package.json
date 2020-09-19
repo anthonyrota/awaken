@@ -3,10 +3,13 @@
     "private": true,
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build:docs": "cd .. && npm install && npm run build && cd www && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
-        "build:template": "rimraf template && ncp src template --stopOnErr && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/template/index.tsx",
-        "build:public": "npm run build:template && parcel build 'template/**/*.html' --dist-dir public --detailed-report --no-source-maps",
-        "build": "rimraf public && npm run build:docs && npm run build:public",
+        "build:docs": "cd .. && npm install && npm run build && cd www && npm run build:docs-analyze",
+        "build:docs-analyze": "npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
+        "build:template": "ncp src template --stopOnErr && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/template/index.tsx",
+        "build:public": "npm run build:template && parcel build 'template/**/*.html' --dist-dir _files/public --detailed-report --no-source-maps && rimraf template && npm run build:public-compressed",
+        "build:public-compressed": "rimraf _files/public-br && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/compressPublic/index.ts",
+        "build": "rimraf public _files/public && npm run build:docs && npm run build:public && mkdir public && echo > public/index.html",
+        "vercel-build": "npm run build",
         "postinstall": "cpy .browserslistrc node_modules/unfetch"
     },
     "dependencies": {

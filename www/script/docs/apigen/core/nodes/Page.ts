@@ -5,11 +5,13 @@ import { Node, CoreNodeType } from '.';
 export interface PageParameters<ChildNode extends Node>
     extends ContainerParameters<ChildNode> {
     metadata: PageMetadata;
+    pageUrl: string;
 }
 
 export interface PageBase<ChildNode extends Node>
     extends ContainerBase<ChildNode> {
     metadata: PageMetadata;
+    pageUrl: string;
 }
 
 export function PageBase<ChildNode extends Node>(
@@ -17,6 +19,7 @@ export function PageBase<ChildNode extends Node>(
 ): PageBase<ChildNode> {
     return {
         metadata: parameters.metadata,
+        pageUrl: parameters.pageUrl,
         ...ContainerBase<ChildNode>({ children: parameters.children }),
     };
 }

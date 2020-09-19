@@ -1,8 +1,9 @@
 import { DeepCoreNode } from './core/nodes';
+import { PageNode } from './core/nodes/Page';
 
-export type PageNodeMap = Record<string, DeepCoreNode>;
+export type Pages = PageNode<DeepCoreNode>[];
 
-export interface PageNodeMapMetadata {
+export interface PagesMetadata {
     github: null | {
         org: string;
         repo: string;
@@ -11,12 +12,12 @@ export interface PageNodeMapMetadata {
     };
 }
 
-export interface PageNodeMapWithMetadata {
-    metadata: PageNodeMapMetadata;
-    pageNodeMap: PageNodeMap;
+export interface PagesWithMetadata {
+    metadata: PagesMetadata;
+    pages: Pages;
 }
 
-export type ApiDocMapPathList = string[];
+export type PagesUrlList = string[];
 
 export interface TableOfContentsInlineReference {
     text: string;

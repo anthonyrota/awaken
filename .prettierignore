@@ -4,7 +4,8 @@ dist
 mangle.json
 extractor
 docs/api
-temp/*.api.json
+temp
 .vercel/project.json
+www/_files
 www/public
 www/template

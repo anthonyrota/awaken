@@ -8,7 +8,8 @@
         "**/**/CHANGELOG.md",
         "**/**/CONTRIBUTORS.md",
         "docs/api/**",
-        "www/public/**"
+        "www/public/**",
+        "www/_files/**"
     ],
     "dictionaries": [
         "typescript",
@@ -37,7 +38,8 @@
         "apigen",
         "brotli",
         "vercel",
-        "preact"
+        "preact",
+        "opendir"
     ],
     "overrides": []
 }

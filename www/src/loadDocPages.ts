@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { PageNodeMapWithMetadata } from '../script/docs/apigen/types';
+import { PagesWithMetadata } from '../script/docs/apigen/types';
 
 export const ResponseLoadingType = 0;
 export const ResponseHttpStatusErrorType = 1;
@@ -13,7 +13,7 @@ export type NonLoadingResponseState =
           statusText: string;
       }
     | { type: typeof ResponseJSONParsingErrorType; error: unknown }
-    | { type: typeof ResponseDoneType; data: PageNodeMapWithMetadata };
+    | { type: typeof ResponseDoneType; data: PagesWithMetadata };
 export type ResponseState =
     | { type: typeof ResponseLoadingType }
     | NonLoadingResponseState;
@@ -84,7 +84,7 @@ export function makeRequest(): void {
             return;
         }
 
-        let data: PageNodeMapWithMetadata;
+        let data: PagesWithMetadata;
 
         try {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -105,7 +105,7 @@ export function makeRequest(): void {
         });
     };
 
-    const hash = fs.readFileSync('temp/apiDocMapHash', 'utf-8');
-    request.open('GET', `/apiDocMap.${hash}.json`);
+    const hash = fs.readFileSync('temp/pagesHash', 'utf-8');
+    request.open('GET', `/pages.${hash}.json`);
     request.send();
 }

@@ -2,10 +2,7 @@ import * as os from 'os';
 import * as colors from 'colors';
 import * as ts from 'typescript';
 import * as configJson from '../../../../../tsconfig.json';
-
-export function exit(): never {
-    throw new Error('exiting...');
-}
+import { exit } from '../../../exit';
 
 export function logDiagnostic(diagnostic: ts.Diagnostic): void {
     const message = ts.flattenDiagnosticMessageText(

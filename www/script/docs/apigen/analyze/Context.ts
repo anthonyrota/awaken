@@ -10,6 +10,7 @@ export interface APIPageDataItem {
 export interface APIPageData {
     pageDirectory: string;
     pageTitle: string;
+    pageUrl: string;
     items: APIPageDataItem[];
 }
 

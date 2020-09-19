@@ -1,24 +1,23 @@
 import { createContext } from 'preact';
 import { useState, useContext, useEffect } from 'preact/hooks';
-import { ResponseState, NonLoadingResponseState } from './loadApiDocMap';
+import { ResponseState, NonLoadingResponseState } from './loadDocPages';
 
-export interface ApiDocMapResponseContextValue {
+export interface DocPagesResponseContextValue {
     getCurrentResponseState: () => ResponseState;
     onResponseStateChange: (
         setResponseState: (responseState: NonLoadingResponseState) => void,
     ) => () => void;
 }
 
-const apiDocMapResponseContext = createContext<ApiDocMapResponseContextValue>(
-    (null as unknown) as ApiDocMapResponseContextValue,
+const docPagesResponseContext = createContext<DocPagesResponseContextValue>(
+    (null as unknown) as DocPagesResponseContextValue,
 );
 
-export const ApiDocMapResponseContextProvider =
-    apiDocMapResponseContext.Provider;
+export const DocPagesResponseContextProvider = docPagesResponseContext.Provider;
 
-export function useApiDocMapResponseState(): ResponseState {
+export function useDocPagesResponseState(): ResponseState {
     const { getCurrentResponseState, onResponseStateChange } = useContext(
-        apiDocMapResponseContext,
+        docPagesResponseContext,
     );
     const { 0: responseState, 1: setResponseState } = useState(
         getCurrentResponseState(),

@@ -1,33 +1,32 @@
 import { h, Fragment, VNode } from 'preact';
 import { Router, Route, RouterOnChangeArgs } from 'preact-router';
 import { useMemo } from 'preact/hooks';
-import {
-    apiDocMapPathList,
-    convertApiDocMapPathToUrlPathName,
-} from './apiDocMapPathList';
-import { useApiDocMapResponseState } from './ApiDocMapResponseContext';
+import { useDocPagesResponseState } from './DocPagesResponseContext';
+import { docPageUrls, convertDocPageUrlToUrlPathName } from './docPageUrls';
 import {
     ResponseDoneType,
     ResponseHttpStatusErrorType,
     ResponseJSONParsingErrorType,
     ResponseLoadingType,
-} from './loadApiDocMap';
+} from './loadDocPages';
 
 export function IndexPage(): VNode {
     return <div>index</div>;
 }
 
-interface ApiDocPageProps {
-    pagePath: string;
+interface DocPageProps {
+    pageUrl: string;
 }
 
-export function ApiDocPage({ pagePath }: ApiDocPageProps): VNode {
-    const responseState = useApiDocMapResponseState();
+export function DocPage({ pageUrl }: DocPageProps): VNode {
+    const responseState = useDocPagesResponseState();
     const stringifiedNodeMap = useMemo(
         () =>
             responseState.type === ResponseDoneType
                 ? JSON.stringify(
-                      responseState.data.pageNodeMap[pagePath],
+                      responseState.data.pages.filter(
+                          (page) => page.pageUrl === pageUrl,
+                      )[0],
                       null,
                       4,
                   )
@@ -80,70 +79,39 @@ function endsWithTrailingSlash(url: string): boolean {
     return url[url.length - 1] === '/' && url !== '/';
 }
 
-function cleanUrlTrailingSlash(url: string): string | undefined {
+function cleanUrlTrailingSlash({ url }: RouterOnChangeArgs): void {
     if (endsWithTrailingSlash(url)) {
         do {
             url = url.slice(0, -1);
         } while (endsWithTrailingSlash(url));
-        return url;
-    }
-    return;
-}
-
-function cleanUrlTrailingString(url: string, str: string): string | undefined {
-    if (url.slice(-str.length) === str) {
-        return url.slice(0, -str.length);
-    }
-    return;
-}
-
-function cleanUrlTrailingIndexHtml(url: string): string | undefined {
-    return cleanUrlTrailingString(url, '/index.html');
-}
-
-function cleanUrlTrailingHtmlExtension(url: string): string | undefined {
-    return cleanUrlTrailingString(url, '.html');
-}
-
-function cleanUrl({ url }: RouterOnChangeArgs) {
-    const withoutTrailingSlashOrUndefined = cleanUrlTrailingSlash(url);
-    const withoutTrailingSlash = withoutTrailingSlashOrUndefined || url;
-    const newUrl =
-        cleanUrlTrailingIndexHtml(withoutTrailingSlash) ||
-        cleanUrlTrailingHtmlExtension(withoutTrailingSlash) ||
-        withoutTrailingSlashOrUndefined;
-
-    if (newUrl) {
-        history.pushState(null, (null as unknown) as string, newUrl);
+        history.pushState(null, (null as unknown) as string, url);
     }
 }
 
 export function App(): VNode {
     return (
-        <Router onChange={cleanUrl}>
+        <Router onChange={cleanUrlTrailingSlash}>
             <Route path="/" component={IndexPage} />
             <Route path="/index.html" component={IndexPage} />
             {Array.prototype.concat.apply<VNode[], VNode[][], VNode[]>(
                 [],
-                apiDocMapPathList.map((apiDocMapPath) => {
-                    const path = convertApiDocMapPathToUrlPathName(
-                        apiDocMapPath,
-                    );
+                docPageUrls.map((docPageUrl) => {
+                    const path = convertDocPageUrlToUrlPathName(docPageUrl);
                     return [
                         <Route
                             path={path}
-                            component={ApiDocPage}
-                            pagePath={apiDocMapPath}
+                            component={DocPage}
+                            pageUrl={docPageUrl}
                         />,
                         <Route
                             path={`${path}.html`}
-                            component={ApiDocPage}
-                            pagePath={apiDocMapPath}
+                            component={DocPage}
+                            pageUrl={docPageUrl}
                         />,
                         <Route
                             path={`${path}/index.html`}
-                            component={ApiDocPage}
-                            pagePath={apiDocMapPath}
+                            component={DocPage}
+                            pageUrl={docPageUrl}
                         />,
                     ];
                 }),

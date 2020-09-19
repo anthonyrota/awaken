@@ -1,13 +1,10 @@
 import { h, render } from 'preact';
-import {
-    apiDocMapPathList,
-    convertApiDocMapPathToUrlPathName,
-} from './apiDocMapPathList';
-import {
-    ApiDocMapResponseContextProvider,
-    ApiDocMapResponseContextValue,
-} from './ApiDocMapResponseContext';
 import { App } from './App';
+import {
+    DocPagesResponseContextProvider,
+    DocPagesResponseContextValue,
+} from './DocPagesResponseContext';
+import { docPageUrls, convertDocPageUrlToUrlPathName } from './docPageUrls';
 import {
     NonLoadingResponseState,
     getGlobalState,
@@ -16,36 +13,36 @@ import {
     ResponseHttpStatusErrorType,
     ResponseJSONParsingErrorType,
     ResponseLoadingType,
-} from './loadApiDocMap';
+} from './loadDocPages';
 
-const apiDocMapResponseContextValue: ApiDocMapResponseContextValue = {
+const docPagesResponseContextValue: DocPagesResponseContextValue = {
     getCurrentResponseState: getGlobalState,
     onResponseStateChange: onGlobalStateChange,
 };
 
 function renderApp(): void {
     render(
-        <ApiDocMapResponseContextProvider value={apiDocMapResponseContextValue}>
+        <DocPagesResponseContextProvider value={docPagesResponseContextValue}>
             <App />
-        </ApiDocMapResponseContextProvider>,
+        </DocPagesResponseContextProvider>,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         document.getElementById('root')!,
     );
 }
 
-function isApiDocMapPath(path: string): boolean {
-    return apiDocMapPathList.some((apiDocMapPath) => {
-        const otherPath = convertApiDocMapPathToUrlPathName(apiDocMapPath);
+function isDocPageUrl(pageUrl: string): boolean {
+    return docPageUrls.some((docPageUrl) => {
+        const otherPath = convertDocPageUrlToUrlPathName(docPageUrl);
         return (
-            path === otherPath ||
-            path === otherPath + '/' ||
-            path === otherPath + 'index.html' ||
-            path === otherPath + 'index.html/'
+            pageUrl === otherPath ||
+            pageUrl === otherPath + '/' ||
+            pageUrl === otherPath + 'index.html' ||
+            pageUrl === otherPath + 'index.html/'
         );
     });
 }
 
-if (isApiDocMapPath(window.location.pathname)) {
+if (isDocPageUrl(window.location.pathname)) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const responseState = getGlobalState()!;
 
