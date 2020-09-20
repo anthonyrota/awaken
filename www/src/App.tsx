@@ -105,30 +105,13 @@ export function App(props: AppProps): VNode {
             <Header />
             <Router onChange={cleanUrlTrailingSlash} {...props}>
                 <Route path="/" component={IndexPage} />
-                <Route path="/index.html" component={IndexPage} />
-                {Array.prototype.concat.apply<VNode[], VNode[][], VNode[]>(
-                    [],
-                    docPageUrls.map((docPageUrl) => {
-                        const path = convertDocPageUrlToUrlPathName(docPageUrl);
-                        return [
-                            <Route
-                                path={path}
-                                component={DocPage}
-                                pageUrl={docPageUrl}
-                            />,
-                            <Route
-                                path={`${path}.html`}
-                                component={DocPage}
-                                pageUrl={docPageUrl}
-                            />,
-                            <Route
-                                path={`${path}/index.html`}
-                                component={DocPage}
-                                pageUrl={docPageUrl}
-                            />,
-                        ];
-                    }),
-                )}
+                {docPageUrls.map((docPageUrl) => (
+                    <Route
+                        path={convertDocPageUrlToUrlPathName(docPageUrl)}
+                        component={DocPage}
+                        pageUrl={docPageUrl}
+                    />
+                ))}
                 <Route default component={NotFoundPage} />
             </Router>
         </Fragment>

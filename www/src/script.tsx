@@ -33,12 +33,7 @@ function renderApp(): void {
 function isDocPageUrl(pageUrl: string): boolean {
     return docPageUrls.some((docPageUrl) => {
         const otherPath = convertDocPageUrlToUrlPathName(docPageUrl);
-        return (
-            pageUrl === otherPath ||
-            pageUrl === otherPath + '/' ||
-            pageUrl === otherPath + 'index.html' ||
-            pageUrl === otherPath + 'index.html/'
-        );
+        return pageUrl === otherPath || pageUrl === otherPath + '/';
     });
 }
 
