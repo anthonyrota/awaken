@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { h } from 'preact';
+import { h, VNode } from 'preact';
 import { render } from 'preact-render-to-string';
-import { IndexPage, NotFoundPage, DocPage } from '../../src/App';
+import { App } from '../../src/App';
 import { DocPagesResponseContextProvider } from '../../src/DocPagesResponseContext';
 import { convertDocPageUrlToUrlPathName } from '../../src/docPageUrls';
 import { ResponseDoneType, ResponseState } from '../../src/loadDocPages';
@@ -19,10 +19,6 @@ const template = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf-8');
 // eslint-disable-next-line max-len
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 const pagesWithMetadata: PagesWithMetadata = require('../../temp/pages.json');
-
-function shouldNotBeCalled(): never {
-    throw new Error('This should not be called.');
-}
 
 const outFolder = Folder();
 
@@ -51,52 +47,39 @@ function addRenderedHtmlToFolder(html: string, filePath: string): void {
     addFileToFolder(outFolder, filePath, contents);
 }
 
-addRenderedHtmlToFolder(
-    render(
+interface SSRAppProps {
+    url: string;
+}
+
+function SSRApp(props: SSRAppProps): VNode {
+    return (
         <DocPagesResponseContextProvider
             value={{
-                getCurrentResponseState: shouldNotBeCalled,
-                onResponseStateChange: shouldNotBeCalled,
+                getCurrentResponseState(): ResponseState {
+                    return {
+                        type: ResponseDoneType,
+                        data: pagesWithMetadata,
+                    };
+                },
+                onResponseStateChange() {
+                    throw new Error('This should not be called.');
+                },
             }}
         >
-            <IndexPage />
-        </DocPagesResponseContextProvider>,
-    ),
-    'index.html',
-);
+            <App url={props.url} />
+        </DocPagesResponseContextProvider>
+    );
+}
 
-addRenderedHtmlToFolder(
-    render(
-        <DocPagesResponseContextProvider
-            value={{
-                getCurrentResponseState: shouldNotBeCalled,
-                onResponseStateChange: shouldNotBeCalled,
-            }}
-        >
-            <NotFoundPage />
-        </DocPagesResponseContextProvider>,
-    ),
-    '404.html',
-);
+addRenderedHtmlToFolder(render(<SSRApp url="/" />), 'index.html');
 
-const responseState: ResponseState = {
-    type: ResponseDoneType,
-    data: pagesWithMetadata,
-};
+addRenderedHtmlToFolder(render(<SSRApp url="/_notfound" />), '404.html');
 
 for (const { pageUrl } of pagesWithMetadata.pages) {
+    const pathname = convertDocPageUrlToUrlPathName(pageUrl);
     addRenderedHtmlToFolder(
-        render(
-            <DocPagesResponseContextProvider
-                value={{
-                    getCurrentResponseState: () => responseState,
-                    onResponseStateChange: shouldNotBeCalled,
-                }}
-            >
-                <DocPage pageUrl={pageUrl}></DocPage>
-            </DocPagesResponseContextProvider>,
-        ),
-        `${convertDocPageUrlToUrlPathName(pageUrl).replace(/^\//, '')}.html`,
+        render(<SSRApp url={pathname} />),
+        `${pathname.replace(/^\//, '')}.html`,
     );
 }
 

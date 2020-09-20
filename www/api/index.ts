@@ -2,9 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { encodings as parseEncodingsHeader } from '@hapi/accept';
 import { NowRequest, NowResponse } from '@vercel/node';
-import { CompressedFileMetadata } from 'script/compressPublic/types';
-
-console.log(fs.readdirSync(path.join(__dirname, '..')));
+import { CompressedFileMetadata } from '../script/compressPublic/types';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const publicFilesList: string[] = (require(path.join(

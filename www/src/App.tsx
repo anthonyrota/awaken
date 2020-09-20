@@ -1,5 +1,5 @@
 import { h, Fragment, VNode } from 'preact';
-import { Router, Route, RouterOnChangeArgs } from 'preact-router';
+import { Router, RouterProps, Route, RouterOnChangeArgs } from 'preact-router';
 import { useMemo } from 'preact/hooks';
 import { useDocPagesResponseState } from './DocPagesResponseContext';
 import { docPageUrls, convertDocPageUrlToUrlPathName } from './docPageUrls';
@@ -88,35 +88,49 @@ function cleanUrlTrailingSlash({ url }: RouterOnChangeArgs): void {
     }
 }
 
-export function App(): VNode {
+function Header(): VNode {
     return (
-        <Router onChange={cleanUrlTrailingSlash}>
-            <Route path="/" component={IndexPage} />
-            <Route path="/index.html" component={IndexPage} />
-            {Array.prototype.concat.apply<VNode[], VNode[][], VNode[]>(
-                [],
-                docPageUrls.map((docPageUrl) => {
-                    const path = convertDocPageUrlToUrlPathName(docPageUrl);
-                    return [
-                        <Route
-                            path={path}
-                            component={DocPage}
-                            pageUrl={docPageUrl}
-                        />,
-                        <Route
-                            path={`${path}.html`}
-                            component={DocPage}
-                            pageUrl={docPageUrl}
-                        />,
-                        <Route
-                            path={`${path}/index.html`}
-                            component={DocPage}
-                            pageUrl={docPageUrl}
-                        />,
-                    ];
-                }),
-            )}
-            <Route default component={NotFoundPage} />
-        </Router>
+        <Fragment>
+            header placeholder
+            <br />
+        </Fragment>
+    );
+}
+
+export interface AppProps extends Omit<RouterProps, 'onChange'> {}
+
+export function App(props: AppProps): VNode {
+    return (
+        <Fragment>
+            <Header />
+            <Router onChange={cleanUrlTrailingSlash} {...props}>
+                <Route path="/" component={IndexPage} />
+                <Route path="/index.html" component={IndexPage} />
+                {Array.prototype.concat.apply<VNode[], VNode[][], VNode[]>(
+                    [],
+                    docPageUrls.map((docPageUrl) => {
+                        const path = convertDocPageUrlToUrlPathName(docPageUrl);
+                        return [
+                            <Route
+                                path={path}
+                                component={DocPage}
+                                pageUrl={docPageUrl}
+                            />,
+                            <Route
+                                path={`${path}.html`}
+                                component={DocPage}
+                                pageUrl={docPageUrl}
+                            />,
+                            <Route
+                                path={`${path}/index.html`}
+                                component={DocPage}
+                                pageUrl={docPageUrl}
+                            />,
+                        ];
+                    }),
+                )}
+                <Route default component={NotFoundPage} />
+            </Router>
+        </Fragment>
     );
 }

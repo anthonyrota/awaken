@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import { ApiModel } from '@microsoft/api-extractor-model';
 import * as fs from 'fs-extra';
+import * as rimraf from 'rimraf';
 import { exit } from '../../exit';
 import { rootDir } from '../../rootDir';
 import { buildApiPageMap } from './analyze/build/buildApiPageMap';
@@ -424,6 +425,8 @@ const hash = crypto
     .digest('hex')
     .slice(0, 8);
 const pagesUrlList: PagesUrlList = pages.map((page) => page.pageUrl);
+
+rimraf.sync('_files/public/pages.*.json');
 
 addFileToFolder(
     outFolder,
