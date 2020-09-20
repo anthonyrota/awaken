@@ -32,7 +32,7 @@ function transformFilePathToUrl(filePath: string): string {
 }
 
 const hashedCacheControl = 'public, max-age=31536000';
-const defaultCacheControl = 'public, max-age=2678400';
+const defaultCacheControl = 'public, max-age=0, must-revalidate';
 
 function setFileSpecificHeaders(response: NowResponse, filePath: string): void {
     const extension = path.extname(filePath);
