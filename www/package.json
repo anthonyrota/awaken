@@ -13,7 +13,7 @@
     },
     "dependencies": {
         "@hapi/accept": "5.0.1",
-        "@types/http-proxy": "^1.17.4",
+        "@types/http-proxy": "1.17.4",
         "@vercel/node": "1.8.1",
         "preact": "10.4.8",
         "preact-router": "3.2.1",
