@@ -39,7 +39,8 @@
         "brotli",
         "vercel",
         "preact",
-        "opendir"
+        "opendir",
+        "entrypoint"
     ],
     "overrides": []
 }
