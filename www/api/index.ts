@@ -2,7 +2,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { encodings as parseEncodingsHeader } from '@hapi/accept';
 import { NowRequest, NowResponse } from '@vercel/node';
-import { CompressedFileMetadata } from '../script/compressPublic/types';
+import * as fresh_ from 'fresh';
+import { CompressedFileMetadata } from '../script/generatePublic/types';
+
+let fresh = fresh_;
+if ('default' in fresh) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    fresh = fresh_.default; // I don't know why.
+}
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const publicFilesList: string[] = (require(path.join(
@@ -31,7 +40,7 @@ function transformFilePathToUrl(filePath: string): string {
     return filePath;
 }
 
-const hashedCacheControl = 'public, max-age=31536000';
+const hashedCacheControl = 'public, max-age=31536000, immutable';
 const defaultCacheControl = 'public, max-age=0, must-revalidate';
 
 function setFileSpecificHeaders(response: NowResponse, filePath: string): void {
@@ -75,8 +84,7 @@ function sendPublicFileBrotli(
 ): void {
     response.setHeader('Content-Encoding', 'br');
 
-    // eslint-disable-next-line max-len
-    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { contentLength } = require(path.join(
         __dirname,
         '..',
@@ -116,6 +124,8 @@ function sendPublicFile(
     ).pipe(response);
 }
 
+const notFoundPublicFilePath = '404.html';
+
 export default (request: NowRequest, response: NowResponse) => {
     const { url } = request;
 
@@ -131,10 +141,26 @@ export default (request: NowRequest, response: NowResponse) => {
     const publicFilePath = publicUrlToPublicFilePath.get(url);
 
     if (publicFilePath) {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { etag } = require(path.join(
+            __dirname,
+            '..',
+            '_files',
+            'public-br',
+            'metadata',
+            `${publicFilePath}.json`,
+        )) as CompressedFileMetadata;
+
+        if (fresh(request.headers, { etag })) {
+            response.status(304).end();
+            return;
+        }
+
+        response.setHeader('ETag', etag);
         response.status(200);
         sendPublicFile(request, response, publicFilePath);
     } else {
         response.status(400);
-        sendPublicFile(request, response, '404.html');
+        sendPublicFile(request, response, notFoundPublicFilePath);
     }
 };

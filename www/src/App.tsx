@@ -91,7 +91,7 @@ function cleanUrlTrailingSlash({ url }: RouterOnChangeArgs): void {
 function Header(): VNode {
     return (
         <Fragment>
-            header placeholder
+            :header placeholder:
             <br />
         </Fragment>
     );

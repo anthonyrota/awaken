@@ -111,7 +111,7 @@ const watcher = chokidar.watch([
     'src',
     'api/index.ts',
     'script/template',
-    'script/compressPublic',
+    'script/generatePublic',
 ]);
 
 watcher.on('error', (error) => {

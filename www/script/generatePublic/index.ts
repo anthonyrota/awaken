@@ -2,6 +2,7 @@ import * as path from 'path';
 import { promisify } from 'util';
 import * as zlib from 'zlib';
 import * as colors from 'colors';
+import * as etag from 'etag';
 import * as fs from 'fs-extra';
 import { exit } from '../exit';
 import { rootDir } from '../rootDir';
@@ -72,24 +73,23 @@ async function brotliCompressDirectory(subPath: string): Promise<unknown> {
         console.log(`compressing file ${colors.red(fileHumanPath)}`);
 
         promises.push(
-            fs
-                .readFile(filePublicPath)
-                .then(brotliCompress)
-                .then((compressed) => {
-                    console.log(
-                        `writing compressed file ${colors.cyan(fileHumanPath)}`,
-                    );
-                    const metadata: CompressedFileMetadata = {
-                        contentLength: compressed.length,
-                    };
-                    return Promise.all([
-                        fs.writeFile(filePublicBrBinaryPath, compressed),
-                        fs.writeFile(
-                            filePublicBrMetadataPath,
-                            JSON.stringify(metadata),
-                        ),
-                    ]);
-                }),
+            fs.readFile(filePublicPath).then(async (buffer) => {
+                const compressed = await brotliCompress(buffer);
+                console.log(
+                    `writing compressed file ${colors.cyan(fileHumanPath)}`,
+                );
+                const metadata: CompressedFileMetadata = {
+                    contentLength: compressed.length,
+                    etag: etag(compressed),
+                };
+                return Promise.all([
+                    fs.writeFile(filePublicBrBinaryPath, compressed),
+                    fs.writeFile(
+                        filePublicBrMetadataPath,
+                        JSON.stringify(metadata),
+                    ),
+                ]);
+            }),
         );
     }
 
