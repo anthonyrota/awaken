@@ -3,7 +3,7 @@ import * as path from 'path';
 import { encodings as parseEncodingsHeader } from '@hapi/accept';
 import { NowRequest, NowResponse } from '@vercel/node';
 import * as fresh_ from 'fresh';
-import { CompressedFileMetadata } from '../script/generatePublic/types';
+import { PublicFileMetadata } from '../script/generatePublic/types';
 
 let fresh = fresh_;
 if ('default' in fresh) {
@@ -13,11 +13,12 @@ if ('default' in fresh) {
     fresh = fresh_.default; // I don't know why.
 }
 
+const filesPath = path.join(__dirname, '..', '_files');
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const publicFilesList: string[] = (require(path.join(
-    __dirname,
-    '..',
-    '_files/temp/publicFilesList.json',
+    filesPath,
+    'temp/publicFilesList.json',
 )) as string[]).map((path) => `/${path}`);
 const publicUrlToPublicFilePath = new Map(
     publicFilesList.map((filePath) => [
@@ -40,91 +41,112 @@ function transformFilePathToUrl(filePath: string): string {
     return filePath;
 }
 
-const hashedCacheControl = 'public, max-age=31536000, immutable';
-const defaultCacheControl = 'public, max-age=0, must-revalidate';
-
-function setFileSpecificHeaders(response: NowResponse, filePath: string): void {
-    const extension = path.extname(filePath);
-    switch (extension) {
-        case '.js': {
-            response.setHeader('Content-Type', 'text/javascript');
-            response.setHeader('Cache-Control', hashedCacheControl);
-            break;
-        }
-        case '.json': {
-            response.setHeader('Content-Type', 'application/json');
-            response.setHeader('Cache-Control', hashedCacheControl);
-            break;
-        }
-        case '.html': {
-            response.setHeader('Content-Type', 'text/html');
-            response.setHeader('Cache-Control', defaultCacheControl);
-            break;
-        }
-        default: {
-            throw new Error(`Unexpected extension ${extension}.`);
-        }
-    }
-}
-
-function isAcceptingBrotli(request: NowRequest): boolean {
-    const acceptEncodingHeader = request.headers['accept-encoding'];
-    if (typeof acceptEncodingHeader === 'string') {
-        const encodings = parseEncodingsHeader(acceptEncodingHeader);
-        if (encodings.includes('br')) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function sendPublicFileBrotli(
-    response: NowResponse,
-    publicFilePath: string,
-): void {
-    response.setHeader('Content-Encoding', 'br');
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { contentLength } = require(path.join(
-        __dirname,
-        '..',
-        '_files',
-        'public-br',
-        'metadata',
+function getPublicFileMetadata(publicFilePath: string): PublicFileMetadata {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return require(path.join(
+        filesPath,
+        'public-meta',
         `${publicFilePath}.json`,
-    )) as CompressedFileMetadata;
-    response.setHeader('Content-Length', contentLength);
+    ));
+}
+
+type SupportedContentEncoding = 'br' | 'gzip' | 'identity';
+
+interface SendPublicFileInEncoding {
+    publicFilePath: string;
+    contentEncoding: SupportedContentEncoding;
+    useETag: boolean;
+    status: number;
+}
+
+function sendPublicFileInEncoding(
+    request: NowRequest,
+    response: NowResponse,
+    params: SendPublicFileInEncoding,
+): void {
+    const { publicFilePath, contentEncoding, useETag, status } = params;
+    const meta = getPublicFileMetadata(publicFilePath);
+    const encodingMeta =
+        contentEncoding === 'br'
+            ? meta.brotliEncodingMeta
+            : contentEncoding === 'gzip'
+            ? meta.gzipEncodingMeta
+            : meta.identityEncodingMeta;
+
+    if (useETag) {
+        if (fresh(request.headers, { etag: encodingMeta.etag })) {
+            response.status(304).end();
+            return;
+        }
+
+        response.setHeader('ETag', encodingMeta.etag);
+    }
+
+    response.status(status);
+    response.setHeader('Content-Encoding', contentEncoding);
+    response.setHeader('Content-Length', encodingMeta.contentLength);
 
     fs.createReadStream(
-        path.join(
-            __dirname,
-            '..',
-            '_files',
-            'public-br',
-            'binary',
-            `${publicFilePath}.br`,
-        ),
+        contentEncoding === 'identity'
+            ? path.join(filesPath, 'public', publicFilePath)
+            : path.join(
+                  filesPath,
+                  `public-${contentEncoding}`,
+                  `${publicFilePath}.${
+                      contentEncoding === 'gzip' ? 'gz' : contentEncoding
+                  }`,
+              ),
     ).pipe(response);
+}
+
+interface SendPublicFileParams {
+    publicFilePath: string;
+    useETag: boolean;
+    status: number;
 }
 
 function sendPublicFile(
     request: NowRequest,
     response: NowResponse,
-    publicFilePath: string,
+    params: SendPublicFileParams,
 ): void {
-    setFileSpecificHeaders(response, publicFilePath);
+    const { publicFilePath, useETag, status } = params;
 
-    if (isAcceptingBrotli(request)) {
-        sendPublicFileBrotli(response, publicFilePath);
-        return;
+    let contentEncoding: SupportedContentEncoding = 'identity';
+    const acceptEncodingHeader = request.headers['accept-encoding'];
+    if (typeof acceptEncodingHeader === 'string') {
+        const encodings = parseEncodingsHeader(acceptEncodingHeader);
+        if (encodings.includes('br')) {
+            contentEncoding = 'br';
+        } else if (encodings.includes('gzip')) {
+            contentEncoding = 'gzip';
+        }
     }
 
-    fs.createReadStream(
-        path.join(__dirname, '..', '_files', 'public', publicFilePath),
-    ).pipe(response);
+    sendPublicFileInEncoding(request, response, {
+        publicFilePath,
+        contentEncoding,
+        useETag,
+        status,
+    });
 }
 
+const immutableCacheControl = 'public, max-age=31536000, immutable';
+const mustRevalidateCacheControl = 'public, max-age=0, must-revalidate';
+const noCacheCacheControl = 'no-store, must-revalidate';
+
+const htmlContentType = 'text/html; charset=utf-8';
+const htmlCacheControl = mustRevalidateCacheControl;
+
+const jsonContentType = 'application/json; charset=utf-8';
+const jsonCacheControl = immutableCacheControl;
+
+const javascriptContentType = 'text/javascript; charset=utf-8';
+const javascriptCacheControl = immutableCacheControl;
+
 const notFoundPublicFilePath = '404.html';
+const notFoundContentType = htmlContentType;
+const notFoundCacheControl = noCacheCacheControl;
 
 export default (request: NowRequest, response: NowResponse) => {
     const { url } = request;
@@ -138,29 +160,46 @@ export default (request: NowRequest, response: NowResponse) => {
         return;
     }
 
+    response.setHeader('Vary', 'Accept-Encoding');
+
     const publicFilePath = publicUrlToPublicFilePath.get(url);
 
-    if (publicFilePath) {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { etag } = require(path.join(
-            __dirname,
-            '..',
-            '_files',
-            'public-br',
-            'metadata',
-            `${publicFilePath}.json`,
-        )) as CompressedFileMetadata;
-
-        if (fresh(request.headers, { etag })) {
-            response.status(304).end();
-            return;
-        }
-
-        response.setHeader('ETag', etag);
-        response.status(200);
-        sendPublicFile(request, response, publicFilePath);
-    } else {
-        response.status(400);
-        sendPublicFile(request, response, notFoundPublicFilePath);
+    if (!publicFilePath) {
+        response.setHeader('Content-Type', notFoundContentType);
+        response.setHeader('Cache-Control', notFoundCacheControl);
+        sendPublicFile(request, response, {
+            publicFilePath: notFoundPublicFilePath,
+            useETag: false,
+            status: 404,
+        });
+        return;
     }
+
+    const extension = path.extname(publicFilePath);
+    switch (extension) {
+        case '.html': {
+            response.setHeader('Content-Type', htmlContentType);
+            response.setHeader('Cache-Control', htmlCacheControl);
+            break;
+        }
+        case '.json': {
+            response.setHeader('Content-Type', jsonContentType);
+            response.setHeader('Cache-Control', jsonCacheControl);
+            break;
+        }
+        case '.js': {
+            response.setHeader('Content-Type', javascriptContentType);
+            response.setHeader('Cache-Control', javascriptCacheControl);
+            break;
+        }
+        default: {
+            throw new Error(`Unexpected extension ${extension}.`);
+        }
+    }
+
+    sendPublicFile(request, response, {
+        publicFilePath,
+        useETag: true,
+        status: 200,
+    });
 };

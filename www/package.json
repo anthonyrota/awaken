@@ -7,7 +7,7 @@
         "build:docs-analyze": "npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/apigen/index.ts",
         "build:template": "ncp src template --stopOnErr && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/template/index.tsx",
         "build:public": "npm run build:template && del-cli '_files/public/**/*' '!_files/public/pages.*.json' && parcel build 'template/**/*.html' --dist-dir _files/public --detailed-report --no-source-maps && rimraf template && npm run build:public-compressed",
-        "build:public-compressed": "rimraf _files/public-br && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/generatePublic/index.ts",
+        "build:public-compressed": "rimraf _files/public-br _files/public-gzip _files/public-meta && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/generatePublic/index.ts",
         "vercel-build": "rimraf public && npm run build:docs && npm run build:public && mkdir public && echo > public/index.html",
         "dev": "node ./script/dev/index.js"
     },
@@ -30,7 +30,7 @@
         "@microsoft/api-extractor": "7.9.11",
         "@microsoft/api-extractor-model": "7.8.19",
         "@microsoft/tsdoc": "0.12.19",
-        "@types/http-proxy": "^1.17.4",
+        "@types/http-proxy": "1.17.4",
         "@types/mdast": "3.0.3",
         "@types/uuid": "8.3.0",
         "chokidar": "3.4.2",
