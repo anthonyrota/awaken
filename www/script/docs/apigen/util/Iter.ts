@@ -1,24 +1,46 @@
 export interface Iter<T> {
     next(): T | undefined;
     peekNext(): T | undefined;
-    forEach(cb: (node: T) => void): void;
 }
 
 export function Iter<T>(nodes: readonly T[]): Iter<T> {
     let idx = 0;
-    const iter = {
+    return {
         next(): T | undefined {
             return nodes[idx++];
         },
         peekNext(): T | undefined {
             return nodes[idx];
         },
-        forEach(cb: (node: T) => void): void {
-            let node: T | undefined;
-            while ((node = iter.next())) {
-                cb(node);
-            }
-        },
     };
-    return iter;
+}
+
+export function ConcatIter<T>(...iters: readonly Iter<T>[]): Iter<T> {
+    let iterIndex = 0;
+    function next(): T | undefined {
+        if (iterIndex === iters.length) {
+            return;
+        }
+        const value = iters[iterIndex].next();
+        if (value !== undefined) {
+            return value;
+        }
+        iterIndex++;
+        return next();
+    }
+    function peekNext(): T | undefined {
+        if (iterIndex === iters.length) {
+            return;
+        }
+        const value = iters[iterIndex].peekNext();
+        if (value !== undefined) {
+            return value;
+        }
+        iterIndex++;
+        return peekNext();
+    }
+    return {
+        next,
+        peekNext,
+    };
 }

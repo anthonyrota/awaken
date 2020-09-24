@@ -17,23 +17,26 @@ function writeInsides<ChildNode extends Node>(
     writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
-    output.withInSingleLine(() => {
-        if (heading123456.alternateId) {
-            writeRenderMarkdownNode(
-                HtmlElementNode({
-                    tagName: 'a',
-                    attributes: { name: heading123456.alternateId },
-                }),
-                output,
-                noop,
-            );
-        }
+    if (
+        heading123456.includeLink &&
+        heading123456.includeLink.alternateId !== undefined
+    ) {
         writeRenderMarkdownNode(
-            ContainerNode({ children: heading123456.children }),
+            HtmlElementNode({
+                tagName: 'a',
+                attributes: {
+                    name: heading123456.includeLink.alternateId,
+                },
+            }),
             output,
-            writeChildNode,
+            noop,
         );
-    });
+    }
+    writeRenderMarkdownNode(
+        ContainerNode({ children: heading123456.children }),
+        output,
+        writeChildNode,
+    );
 }
 
 export function writeHeading123456<ChildNode extends Node>(

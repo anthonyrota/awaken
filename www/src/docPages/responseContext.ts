@@ -1,6 +1,6 @@
 import { createContext } from 'preact';
 import { useState, useContext, useEffect } from 'preact/hooks';
-import { ResponseState, NonLoadingResponseState } from './loadDocPages';
+import { ResponseState, NonLoadingResponseState } from './request';
 
 export interface DocPagesResponseContextValue {
     getCurrentResponseState: () => ResponseState;

@@ -2,11 +2,13 @@ import { BoldNode } from '../../core/nodes/Bold';
 import { CollapsibleSectionNode } from '../../core/nodes/CollapsibleSection';
 import { ContainerNode } from '../../core/nodes/Container';
 import { HeadingNode } from '../../core/nodes/Heading';
+import { LinkNode } from '../../core/nodes/Link';
 import { PageNode } from '../../core/nodes/Page';
 import { PageTitleNode } from '../../core/nodes/PageTitle';
 import { PlainTextNode } from '../../core/nodes/PlainText';
 import { SubheadingNode } from '../../core/nodes/Subheading';
 import { renderDeepRenderMarkdownNodeAsMarkdown } from '../../core/render/markdown';
+import { DeepRenderMarkdownNode } from '../../core/render/markdown/nodes';
 import { DoNotEditCommentNode } from '../../core/render/markdown/nodes/DoNotEditComment';
 import { TableOfContentsNode } from '../../core/render/markdown/nodes/TableOfContents';
 import {
@@ -15,8 +17,6 @@ import {
     Folder,
 } from '../../util/Folder';
 import { AnalyzeContext } from '../Context';
-import { LinkNode } from './../../core/nodes/Link';
-import { DeepRenderMarkdownNode } from './../../core/render/markdown/nodes/index';
 
 export interface BuildApiPageMapToFolderParameters {
     pageMap: Map<string, PageNode<DeepRenderMarkdownNode>>;

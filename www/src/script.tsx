@@ -1,11 +1,6 @@
 import { h, render } from 'preact';
 import { App } from './App';
 import {
-    DocPagesResponseContextProvider,
-    DocPagesResponseContextValue,
-} from './DocPagesResponseContext';
-import { docPageUrls, convertDocPageUrlToUrlPathName } from './docPageUrls';
-import {
     NonLoadingResponseState,
     getGlobalState,
     onGlobalStateChange,
@@ -13,7 +8,12 @@ import {
     ResponseHttpStatusErrorType,
     ResponseJSONParsingErrorType,
     ResponseLoadingType,
-} from './loadDocPages';
+} from './docPages/request';
+import {
+    DocPagesResponseContextProvider,
+    DocPagesResponseContextValue,
+} from './docPages/responseContext';
+import { docPageUrls, convertDocPageUrlToUrlPathName } from './docPages/urls';
 
 const docPagesResponseContextValue: DocPagesResponseContextValue = {
     getCurrentResponseState: getGlobalState,

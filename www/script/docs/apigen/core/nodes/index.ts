@@ -34,7 +34,7 @@ export type LeafCoreNode =
     | CodeBlockNode
     | ImageNode;
 
-export type ParentCoreNode<ChildType extends Node> =
+export type ContainerCoreNode<ChildType extends Node> =
     | ContainerNode<ChildType>
     | BlockQuoteNode<ChildType>
     | HtmlElementNode<ChildType>
@@ -52,10 +52,13 @@ export type ParentCoreNode<ChildType extends Node> =
     | SubheadingNode<ChildType>
     | TitleNode<ChildType>
     | ListNode<ChildType>
-    | TableNode<ChildType, ChildType>
     | CollapsibleSectionNode<ChildType, ChildType>
     | PageTitleNode<ChildType>
     | PageNode<ChildType>;
+
+export type ParentCoreNode<ChildType extends Node> =
+    | ContainerCoreNode<ChildType>
+    | TableNode<ChildType, ChildType>;
 
 export type CoreNode<ChildType extends Node> =
     | LeafCoreNode

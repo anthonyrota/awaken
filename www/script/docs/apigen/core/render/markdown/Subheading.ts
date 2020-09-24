@@ -13,7 +13,7 @@ export function writeSubheading<ChildNode extends Node>(
     writeRenderMarkdownNode(
         Heading123456Node<ChildNode>({
             level: 3,
-            alternateId: subheading.alternateId,
+            includeLink: { alternateId: subheading.alternateId },
             children: subheading.children,
         }),
         output,

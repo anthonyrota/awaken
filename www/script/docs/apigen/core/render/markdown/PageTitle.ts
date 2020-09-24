@@ -13,7 +13,7 @@ export function writePageTitle<ChildNode extends Node>(
     writeRenderMarkdownNode(
         Heading123456Node<ChildNode>({
             level: 1,
-            alternateId: pageTitle.alternateId,
+            includeLink: { alternateId: pageTitle.alternateId },
             children: pageTitle.children,
         }),
         output,

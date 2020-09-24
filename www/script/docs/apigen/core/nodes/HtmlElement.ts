@@ -18,9 +18,12 @@ export function HtmlElementBase<ChildNode extends Node>(
 ): HtmlElementBase<ChildNode> {
     const htmlElementBase: HtmlElementBase<ChildNode> = {
         tagName: parameters.tagName,
-        ...ContainerBase<ChildNode>({ children: parameters.children }),
+        ...ContainerBase({ children: parameters.children }),
     };
-    if (parameters.attributes) {
+    if (
+        parameters.attributes &&
+        Object.keys(parameters.attributes).length !== 0
+    ) {
         htmlElementBase.attributes = parameters.attributes;
     }
     return htmlElementBase;

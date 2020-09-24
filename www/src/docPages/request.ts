@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { PagesWithMetadata } from '../script/docs/apigen/types';
+import { PagesWithMetadata } from '../../script/docs/apigen/types';
 
 export const ResponseLoadingType = 0;
 export const ResponseHttpStatusErrorType = 1;

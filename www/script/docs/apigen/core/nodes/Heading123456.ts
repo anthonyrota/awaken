@@ -4,13 +4,13 @@ import { Node, CoreNodeType } from '.';
 export interface Heading123456Parameters<ChildNode extends Node>
     extends ContainerParameters<ChildNode> {
     level: 1 | 2 | 3 | 4 | 5 | 6;
-    alternateId?: string;
+    includeLink?: { alternateId?: string };
 }
 
 export interface Heading123456Base<ChildNode extends Node>
     extends ContainerBase<ChildNode> {
     level: 1 | 2 | 3 | 4 | 5 | 6;
-    alternateId?: string;
+    includeLink?: { alternateId?: string };
 }
 
 export function Heading123456Base<ChildNode extends Node>(
@@ -20,8 +20,12 @@ export function Heading123456Base<ChildNode extends Node>(
         level: parameters.level,
         ...ContainerBase<ChildNode>({ children: parameters.children }),
     };
-    if (parameters.alternateId !== undefined) {
-        heading123456Base.alternateId = parameters.alternateId;
+    if (parameters.includeLink !== undefined) {
+        const includeLink: { alternateId?: string } = {};
+        if (parameters.includeLink.alternateId) {
+            includeLink.alternateId = parameters.includeLink.alternateId;
+        }
+        heading123456Base.includeLink = includeLink;
     }
     return heading123456Base;
 }

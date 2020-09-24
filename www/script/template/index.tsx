@@ -3,9 +3,9 @@ import * as path from 'path';
 import { h, VNode } from 'preact';
 import { render } from 'preact-render-to-string';
 import { App } from '../../src/App';
-import { DocPagesResponseContextProvider } from '../../src/DocPagesResponseContext';
-import { convertDocPageUrlToUrlPathName } from '../../src/docPageUrls';
-import { ResponseDoneType, ResponseState } from '../../src/loadDocPages';
+import { ResponseDoneType, ResponseState } from '../../src/docPages/request';
+import { DocPagesResponseContextProvider } from '../../src/docPages/responseContext';
+import { convertDocPageUrlToUrlPathName } from '../../src/docPages/urls';
 import { PagesWithMetadata } from '../docs/apigen/types';
 import {
     addFileToFolder,
@@ -41,8 +41,8 @@ function addRenderedHtmlToFolder(html: string, filePath: string): void {
             ensureRelative(getRelativePath(filePath, 'index.css')),
         )
         .replace(
-            /::loadDocPages\.ts::/g,
-            ensureRelative(getRelativePath(filePath, 'loadDocPages.ts')),
+            /::requestDocPages\.ts::/g,
+            ensureRelative(getRelativePath(filePath, 'docPages/request.ts')),
         );
     addFileToFolder(outFolder, filePath, contents);
 }

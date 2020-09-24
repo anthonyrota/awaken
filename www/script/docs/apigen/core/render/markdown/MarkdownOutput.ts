@@ -1,5 +1,5 @@
+import { AnalyzeContext } from '../../../analyze/Context';
 import { IndentedWriter } from '../../../util/IndentedWriter';
-import { AnalyzeContext } from './../../../analyze/Context';
 
 export interface MarkdownOutputParameters {
     pagePath: string;

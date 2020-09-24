@@ -1,16 +1,19 @@
 import * as htmlparser2 from 'htmlparser2';
 import * as mdast from 'mdast';
 import * as definitions from 'mdast-util-definitions';
+import * as remarkFrontmatter from 'remark-frontmatter';
 import * as remarkParse from 'remark-parse';
 import * as unified from 'unified';
-import { DeepCoreNode } from '../../core/nodes';
+import * as yaml from 'yaml';
+import { ContainerCoreNode, DeepCoreNode } from '../../core/nodes';
 import { BlockQuoteNode } from '../../core/nodes/BlockQuote';
 import { BoldNode } from '../../core/nodes/Bold';
 import { CodeBlockNode } from '../../core/nodes/CodeBlock';
 import { CodeSpanNode } from '../../core/nodes/CodeSpan';
-import { ContainerBase, ContainerNode } from '../../core/nodes/Container';
-import { HeadingNode } from '../../core/nodes/Heading';
+import { ContainerNode } from '../../core/nodes/Container';
+import { Heading123456Node } from '../../core/nodes/Heading123456';
 import { HorizontalRuleNode } from '../../core/nodes/HorizontalRule';
+import { HtmlElementNode } from '../../core/nodes/HtmlElement';
 import { ImageNode, ImageParameters } from '../../core/nodes/Image';
 import { ItalicsNode } from '../../core/nodes/Italics';
 import { LinkNode, LinkParameters } from '../../core/nodes/Link';
@@ -18,46 +21,66 @@ import { ListNode, ListType, ListTypeParameters } from '../../core/nodes/List';
 import { ParagraphNode } from '../../core/nodes/Paragraph';
 import { PlainTextNode } from '../../core/nodes/PlainText';
 import { StrikethroughNode } from '../../core/nodes/Strikethrough';
-import { SubheadingNode } from '../../core/nodes/Subheading';
 import { TableNode, TableRow } from '../../core/nodes/Table';
-import { TitleNode } from '../../core/nodes/Title';
-import { HtmlCommentNode } from '../../core/render/markdown/nodes/HtmlComment';
+import { ConcatIter, Iter } from '../../util/Iter';
 
-const remark = unified().use(remarkParse);
+const remark = unified().use(remarkParse).use(remarkFrontmatter);
 
-export function parseMarkdown(
+export interface ParseMarkdownContext {
+    container: ContainerCoreNode<DeepCoreNode>;
+    nodeIter: Iter<mdast.Content>;
+}
+
+export interface ParseMarkdownOptions {
+    unwrapFirstLineParagraph?: boolean;
+    handleHtmlComment?: (
+        context: ParseMarkdownContext,
+        comment: string,
+    ) => void;
+}
+
+type ParsedHtmlChunk =
+    | {
+          type: 'opentag';
+          tagName: string;
+          attributes: Record<string, string>;
+      }
+    | { type: 'closetag'; tagName: string }
+    | { type: 'text'; text: string }
+    | { type: 'comment'; comment: string };
+
+export function parseMarkdownWithYamlFrontmatter(
     text: string,
-    opt?: {
-        unwrapFirstLineParagraph?: boolean;
-    },
-): ContainerNode<DeepCoreNode> {
+    opt?: ParseMarkdownOptions,
+): {
+    frontmatter: null | { value: unknown };
+    rootContainer: ContainerNode<DeepCoreNode>;
+} {
     const rootNode = remark.parse(text) as mdast.Root;
     const definition = definitions(rootNode);
+    const rootContainer = ContainerNode<DeepCoreNode>({});
+    const context: ParseMarkdownContext = {
+        container: rootContainer,
+        nodeIter: Iter(rootNode.children),
+    };
+    let yamlFrontmatterString: string | null = null;
 
-    let htmlParserContainer: ContainerBase<DeepCoreNode>;
+    const chunks: ParsedHtmlChunk[] = [];
     const htmlParser = new htmlparser2.Parser({
         onerror(error): void {
             throw error;
         },
         onopentag(tagName, attributes): void {
-            tagName;
-            attributes;
-            // TODO.
-            throw new Error('Unexpected html tag.');
+            chunks.push({ type: 'opentag', tagName, attributes });
         },
         onclosetag(tagName): void {
-            tagName;
-            // TODO.
+            chunks.push({ type: 'closetag', tagName });
         },
         ontext(text: string): void {
-            text;
-            // TODO.
-            throw new Error('Unexpected html text.');
+            chunks.push({ type: 'text', text });
         },
         oncomment(comment: string): void {
-            htmlParserContainer.children.push(
-                (HtmlCommentNode({ comment }) as unknown) as DeepCoreNode,
-            );
+            chunks.push({ type: 'comment', comment });
         },
         oncdatastart(): void {
             throw new Error('Unexpected CDATA.');
@@ -68,10 +91,7 @@ export function parseMarkdown(
     });
 
     // https://github.com/syntax-tree/mdast
-    function traverseNode(
-        container: ContainerBase<DeepCoreNode>,
-        node: mdast.Content,
-    ): void {
+    function traverseNode(node: mdast.Content): void {
         switch (node.type) {
             case 'paragraph': {
                 if (!node.position) {
@@ -82,46 +102,29 @@ export function parseMarkdown(
                     node.position.start.column === 1 &&
                     node.position.start.line === 1
                 ) {
-                    traverseChildren(container, node);
+                    context.nodeIter = ConcatIter(
+                        Iter(node.children),
+                        context.nodeIter,
+                    );
                     break;
                 }
                 const paragraph = ParagraphNode<DeepCoreNode>({});
-                container.children.push(paragraph);
                 traverseChildren(paragraph, node);
                 break;
             }
             case 'heading': {
-                let heading: DeepCoreNode;
-                switch (node.depth) {
-                    case 2: {
-                        heading = HeadingNode<DeepCoreNode>({});
-                        break;
-                    }
-                    case 3: {
-                        heading = SubheadingNode<DeepCoreNode>({});
-                        break;
-                    }
-                    case 4: {
-                        heading = TitleNode<DeepCoreNode>({});
-                        break;
-                    }
-                    default: {
-                        throw new Error(
-                            `Unsupported heading depth: ${node.depth}.`,
-                        );
-                    }
-                }
-                container.children.push(heading);
-                traverseChildren(heading, node);
+                const heading123456 = Heading123456Node<DeepCoreNode>({
+                    level: node.depth,
+                });
+                traverseChildren(heading123456, node);
                 break;
             }
             case 'thematicBreak': {
-                container.children.push(HorizontalRuleNode({}));
+                context.container.children.push(HorizontalRuleNode({}));
                 break;
             }
             case 'blockquote': {
                 const blockQuote = BlockQuoteNode<DeepCoreNode>({});
-                container.children.push(blockQuote);
                 traverseChildren(blockQuote, node);
                 break;
             }
@@ -138,25 +141,23 @@ export function parseMarkdown(
                           type: ListType.Unordered,
                       };
                 const list = ListNode<DeepCoreNode>({ listType });
-                container.children.push(list);
+                context.container.children.push(list);
+                const oldContainer = context.container;
+                context.container = list;
                 for (const childNode of node.children) {
                     const container = ContainerNode<DeepCoreNode>({});
-                    list.children.push(container);
-                    if (childNode.type === 'listItem') {
-                        if (childNode.checked !== null) {
-                            throw new Error(
-                                `Unsupported list item type. ${JSON.stringify(
-                                    node,
-                                    null,
-                                    2,
-                                )}`,
-                            );
-                        }
-                        traverseChildren(container, childNode);
-                        continue;
+                    if (childNode.checked !== null) {
+                        throw new Error(
+                            `Unsupported list item type. ${JSON.stringify(
+                                node,
+                                null,
+                                2,
+                            )}`,
+                        );
                     }
-                    traverseNode(container, childNode);
+                    traverseChildren(container, childNode);
                 }
+                context.container = oldContainer;
                 break;
             }
             case 'table': {
@@ -172,7 +173,7 @@ export function parseMarkdown(
                     header,
                     rows: node.children.slice(1).map(parseTableRow),
                 });
-                container.children.push(table);
+                context.container.children.push(table);
                 break;
             }
             case 'tableRow': {
@@ -182,8 +183,114 @@ export function parseMarkdown(
                 throw new Error('Unexpected table cell.');
             }
             case 'html': {
-                htmlParserContainer = container;
                 htmlParser.write(node.value);
+                let _onCloseTag: ((tagName: string) => void) | undefined;
+
+                // eslint-disable-next-line no-inner-declarations
+                function onChunk(chunk: ParsedHtmlChunk): void {
+                    switch (chunk.type) {
+                        case 'opentag': {
+                            onOpenTag(chunk.tagName, chunk.attributes);
+                            break;
+                        }
+                        case 'closetag': {
+                            if (!_onCloseTag) {
+                                throw new Error(
+                                    'Closing html tag with no opening tag.',
+                                );
+                            }
+                            _onCloseTag(chunk.tagName);
+                            break;
+                        }
+                        case 'text': {
+                            context.container.children.push(
+                                PlainTextNode({
+                                    text: chunk.text,
+                                }),
+                            );
+                            break;
+                        }
+                        case 'comment': {
+                            if (opt && opt.handleHtmlComment) {
+                                opt.handleHtmlComment(context, chunk.comment);
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                // eslint-disable-next-line no-inner-declarations
+                function onOpenTag(
+                    tagName: string,
+                    attributes: Record<string, string>,
+                ): void {
+                    const htmlElement = HtmlElementNode<DeepCoreNode>({
+                        tagName,
+                        attributes,
+                    });
+                    const oldContainer = context.container;
+                    const oldNodeIter = context.nodeIter;
+                    oldContainer.children.push(htmlElement);
+                    context.container = htmlElement;
+                    let didFindCloseTag = false;
+                    const oldOnCloseTag = _onCloseTag;
+                    const onCloseTag = (endTagName: string) => {
+                        if (didFindCloseTag) {
+                            throw new Error('Multiple close tags.');
+                        }
+                        if (endTagName !== tagName) {
+                            throw new Error(
+                                'End tag name does not equal start tag name.',
+                            );
+                        }
+                        if (_onCloseTag !== onCloseTag) {
+                            throw new Error('Unclosed tag.');
+                        }
+                        if (context.container !== htmlElement) {
+                            throw new Error(
+                                'Not in same container when parsing html tag.',
+                            );
+                        }
+                        didFindCloseTag = true;
+                    };
+                    _onCloseTag = onCloseTag;
+                    while (true) {
+                        if (chunks.length !== 0) {
+                            let chunk: ParsedHtmlChunk | undefined;
+                            while ((chunk = chunks.shift())) {
+                                onChunk(chunk);
+                            }
+                            if (didFindCloseTag) {
+                                break;
+                            }
+                        }
+                        const node = context.nodeIter.next();
+                        if (!node) {
+                            break;
+                        }
+                        if (node.type === 'html') {
+                            htmlParser.write(node.value);
+                        } else {
+                            traverseNode(node);
+                            if (didFindCloseTag) {
+                                break;
+                            }
+                        }
+                    }
+                    if (!didFindCloseTag) {
+                        throw new Error(
+                            'Did not find corresponding close tag.',
+                        );
+                    }
+                    context.container = oldContainer;
+                    context.nodeIter = oldNodeIter;
+                    _onCloseTag = oldOnCloseTag;
+                }
+
+                let chunk: ParsedHtmlChunk | undefined;
+                while ((chunk = chunks.shift())) {
+                    onChunk(chunk);
+                }
                 break;
             }
             case 'code': {
@@ -194,7 +301,7 @@ export function parseMarkdown(
                     language: node.lang,
                     code: node.value,
                 });
-                container.children.push(codeBlock);
+                context.container.children.push(codeBlock);
                 break;
             }
             case 'definition': {
@@ -205,24 +312,23 @@ export function parseMarkdown(
                 throw new Error('Footnote definitions are not supported.');
             }
             case 'text': {
-                container.children.push(PlainTextNode({ text: node.value }));
+                context.container.children.push(
+                    PlainTextNode({ text: node.value }),
+                );
                 break;
             }
             case 'emphasis': {
                 const italics = ItalicsNode<DeepCoreNode>({});
-                container.children.push(italics);
                 traverseChildren(italics, node);
                 break;
             }
             case 'strong': {
                 const bold = BoldNode<DeepCoreNode>({});
-                container.children.push(bold);
                 traverseChildren(bold, node);
                 break;
             }
             case 'delete': {
                 const strikethrough = StrikethroughNode<DeepCoreNode>({});
-                container.children.push(strikethrough);
                 traverseChildren(strikethrough, node);
                 break;
             }
@@ -230,7 +336,7 @@ export function parseMarkdown(
                 const inlineCode = CodeSpanNode<PlainTextNode>({
                     children: [PlainTextNode({ text: node.value })],
                 });
-                container.children.push(inlineCode);
+                context.container.children.push(inlineCode);
                 break;
             }
             case 'break': {
@@ -246,7 +352,6 @@ export function parseMarkdown(
                     parameters.title = node.title;
                 }
                 const link = LinkNode<DeepCoreNode>(parameters);
-                container.children.push(link);
                 traverseChildren(link, node);
                 break;
             }
@@ -259,7 +364,7 @@ export function parseMarkdown(
                     parameters.alt = node.alt;
                 }
                 const image = ImageNode(parameters);
-                container.children.push(image);
+                context.container.children.push(image);
                 break;
             }
             case 'linkReference': {
@@ -276,10 +381,10 @@ export function parseMarkdown(
                     parameters.title = definitionNode.title;
                 }
                 const link = LinkNode<DeepCoreNode>(parameters);
-                container.children.push(link);
                 if (node.children.length > 0) {
                     traverseChildren(link, node);
                 } else {
+                    context.container.children.push(link);
                     link.children.push(
                         PlainTextNode({
                             text:
@@ -306,7 +411,7 @@ export function parseMarkdown(
                     parameters.alt = node.alt;
                 }
                 const image = ImageNode(parameters);
-                container.children.push(image);
+                context.container.children.push(image);
                 break;
             }
             case 'footnoteReference': {
@@ -317,7 +422,8 @@ export function parseMarkdown(
                 throw new Error('Footnotes are not supported.');
             }
             case 'yaml': {
-                throw new Error('Unexpected YAML.');
+                yamlFrontmatterString = node.value;
+                break;
             }
             default: {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -325,7 +431,7 @@ export function parseMarkdown(
                 // eslint-disable-next-line max-len
                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                 console.error(`Unknown node type ${node.type}`);
-                console.dir(node);
+                console.dir(node, { depth: null });
             }
         }
     }
@@ -342,15 +448,47 @@ export function parseMarkdown(
     }
 
     function traverseChildren(
-        container: ContainerBase<DeepCoreNode>,
+        container: ContainerCoreNode<DeepCoreNode>,
         parent: mdast.Parent,
     ): void {
-        for (const node of parent.children) {
-            traverseNode(container, node);
+        const oldContainer = context.container;
+        const oldNodeIter = context.nodeIter;
+        oldContainer.children.push(container);
+        context.container = container;
+        context.nodeIter = Iter(parent.children);
+        let node: mdast.Content | undefined;
+        while ((node = context.nodeIter.next())) {
+            traverseNode(node);
         }
+        context.container = oldContainer;
+        context.nodeIter = oldNodeIter;
     }
 
-    const container = ContainerNode<DeepCoreNode>({});
-    traverseChildren(container, rootNode);
-    return container;
+    let node: mdast.Content | undefined;
+    while ((node = context.nodeIter.next())) {
+        traverseNode(node);
+    }
+    return {
+        frontmatter:
+            yamlFrontmatterString === null
+                ? null
+                : {
+                      value: yaml.parse(yamlFrontmatterString),
+                  },
+        rootContainer,
+    };
+}
+
+export function parseMarkdown(
+    text: string,
+    opt?: ParseMarkdownOptions,
+): ContainerNode<DeepCoreNode> {
+    const { frontmatter, rootContainer } = parseMarkdownWithYamlFrontmatter(
+        text,
+        opt,
+    );
+    if (frontmatter !== null) {
+        throw new Error('Unexpected markdown frontmatter.');
+    }
+    return rootContainer;
 }

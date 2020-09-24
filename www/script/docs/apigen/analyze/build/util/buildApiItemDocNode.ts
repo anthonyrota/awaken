@@ -61,7 +61,7 @@ export function buildApiItemDocNode(
         embeddedNodeContext,
         apiItem,
     };
-    writeNode(docNode, context_);
+    addNode(docNode, context_);
     if (container_.children.length > 0) {
         const embeddedNode = EmbeddedNode({
             originalNode: container_,
@@ -180,6 +180,11 @@ function substituteEmbeddedNodes(
 
     const markdownContainer = parseMarkdown(markdown, {
         unwrapFirstLineParagraph: true,
+        handleHtmlComment(context, comment): void {
+            context.container.children.push(
+                (HtmlCommentNode({ comment }) as unknown) as DeepCoreNode,
+            );
+        },
     });
 
     _substituteEmbeddedNodes(embeddedNode, context, markdownContainer);
@@ -214,10 +219,7 @@ function _substituteEmbeddedNodes(
     }
 }
 
-function writeNode(
-    docNode: tsdoc.DocNode,
-    context: TSDocNodeWriteContext,
-): void {
+function addNode(docNode: tsdoc.DocNode, context: TSDocNodeWriteContext): void {
     const { container } = context;
 
     switch (docNode.kind) {
@@ -242,10 +244,27 @@ function writeNode(
         }
         case tsdoc.DocNodeKind.HtmlStartTag: {
             const docStartTag = docNode as tsdoc.DocHtmlStartTag;
-            const oldContainer = container;
+            const attributes: Record<string, string> = {};
+            for (const attribute of docStartTag.htmlAttributes) {
+                attributes[attribute.name] = attribute.value;
+            }
+            if (docStartTag.selfClosingTag) {
+                container.children.push(
+                    EmbeddedNode({
+                        originalNode: HtmlElementNode({
+                            tagName: docStartTag.name,
+                            attributes,
+                        }),
+                        context: context.embeddedNodeContext,
+                    }),
+                );
+                return;
+            }
             const htmlElement = HtmlElementNode<MarkdownParsingNode>({
                 tagName: docStartTag.name,
+                attributes,
             });
+            const oldContainer = container;
             oldContainer.children.push(
                 EmbeddedNode({
                     originalNode: htmlElement,
@@ -272,10 +291,11 @@ function writeNode(
                         );
                     }
                     context.container = oldContainer;
+                    context.htmlTagStack.pop();
                     didFindEndTag = true;
                     break;
                 }
-                writeNode(docNode, context);
+                addNode(docNode, context);
             }
             if (!didFindEndTag) {
                 throw new Error('Did not find corresponding end tag.');
@@ -307,9 +327,9 @@ function writeNode(
         case tsdoc.DocNodeKind.LinkTag: {
             const docLinkTag = docNode as tsdoc.DocLinkTag;
             if (docLinkTag.codeDestination) {
-                writeLinkTagWithCodeDestination(docLinkTag, context);
+                addLinkTagWithCodeDestination(docLinkTag, context);
             } else if (docLinkTag.urlDestination) {
-                writeLinkTagWithUrlDestination(docLinkTag, context);
+                addLinkTagWithUrlDestination(docLinkTag, context);
             } else if (docLinkTag.linkText) {
                 container.children.push(
                     EmbeddedNode({
@@ -329,10 +349,13 @@ function writeNode(
                 docParagraph,
             );
             const oldContainer = container;
+            const oldNodeIter = context.nodeIter;
             const paragraph = ParagraphNode<MarkdownParsingNode>({});
             context.container = paragraph;
-            for (const node of trimmedParagraph.nodes) {
-                writeNode(node, context);
+            context.nodeIter = Iter(trimmedParagraph.nodes);
+            let node: tsdoc.DocNode | undefined;
+            while ((node = context.nodeIter.next())) {
+                addNode(node, context);
             }
             if (paragraph.children.length > 0) {
                 oldContainer.children.push(
@@ -343,6 +366,7 @@ function writeNode(
                 );
             }
             context.container = oldContainer;
+            context.nodeIter = oldNodeIter;
             break;
         }
         case tsdoc.DocNodeKind.FencedCode: {
@@ -360,9 +384,18 @@ function writeNode(
         }
         case tsdoc.DocNodeKind.Section: {
             const docSection = docNode as tsdoc.DocSection;
-            for (const node of docSection.nodes) {
-                writeNode(node, context);
+            const oldContainer = context.container;
+            const container = ContainerNode<MarkdownParsingNode>({});
+            const oldNodeIter = context.nodeIter;
+            context.container = container;
+            context.nodeIter = Iter(docSection.nodes);
+            let node: tsdoc.DocNode | undefined;
+            while ((node = context.nodeIter.next())) {
+                addNode(node, context);
             }
+            oldContainer.children.push(...container.children);
+            context.container = oldContainer;
+            context.nodeIter = oldNodeIter;
             break;
         }
         case tsdoc.DocNodeKind.SoftBreak: {
@@ -409,7 +442,7 @@ function writeNode(
     }
 }
 
-function writeLinkTagWithCodeDestination(
+function addLinkTagWithCodeDestination(
     docLinkTag: tsdoc.DocLinkTag,
     context: TSDocNodeWriteContext,
 ): void {
@@ -472,7 +505,7 @@ function writeLinkTagWithCodeDestination(
     );
 }
 
-function writeLinkTagWithUrlDestination(
+function addLinkTagWithUrlDestination(
     docLinkTag: tsdoc.DocLinkTag,
     context: TSDocNodeWriteContext,
 ): void {
