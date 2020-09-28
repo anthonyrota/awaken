@@ -9,17 +9,17 @@ import {
 import { useDocPagesResponseState } from '../docPages/responseContext';
 
 interface DocPageProps {
-    pageUrl: string;
+    pageId: string;
 }
 
-export function DocPage({ pageUrl }: DocPageProps): VNode {
+export function DocPage({ pageId }: DocPageProps): VNode {
     const responseState = useDocPagesResponseState();
     const stringifiedNodeMap = useMemo(
         () =>
             responseState.type === ResponseDoneType
                 ? JSON.stringify(
                       responseState.data.pages.filter(
-                          (page) => page.pageUrl === pageUrl,
+                          (page) => page.pageId === pageId,
                       )[0],
                       null,
                       4,

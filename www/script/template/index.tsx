@@ -3,16 +3,16 @@ import * as path from 'path';
 import { h, VNode } from 'preact';
 import { render } from 'preact-render-to-string';
 import { App } from '../../src/App';
+import { pageIdToWebsitePath } from '../../src/docPages/pageIdToWebsitePath';
 import { ResponseDoneType, ResponseState } from '../../src/docPages/request';
 import { DocPagesResponseContextProvider } from '../../src/docPages/responseContext';
-import { convertDocPageUrlToUrlPathName } from '../../src/docPages/urls';
-import { PagesWithMetadata } from '../docs/apigen/types';
+import { PagesWithMetadata } from '../docs/types';
 import {
     addFileToFolder,
     Folder,
     writeFolderToDirectoryPath,
-} from '../docs/apigen/util/Folder';
-import { getRelativePath } from '../docs/apigen/util/getRelativePath';
+} from '../docs/util/Folder';
+import { getRelativePath } from '../docs/util/getRelativePath';
 import { exit } from '../exit';
 
 const template = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf-8');
@@ -75,11 +75,11 @@ addRenderedHtmlToFolder(render(<SSRApp url="/" />), 'index.html');
 
 addRenderedHtmlToFolder(render(<SSRApp url="/_notfound" />), '404.html');
 
-for (const { pageUrl } of pagesWithMetadata.pages) {
-    const pathname = convertDocPageUrlToUrlPathName(pageUrl);
+for (const { pageId } of pagesWithMetadata.pages) {
+    const websitePath = pageIdToWebsitePath[pageId];
     addRenderedHtmlToFolder(
-        render(<SSRApp url={pathname} />),
-        `${pathname.replace(/^\//, '')}.html`,
+        render(<SSRApp url={`/${websitePath}`} />),
+        `${websitePath}.html`,
     );
 }
 

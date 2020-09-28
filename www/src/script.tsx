@@ -1,5 +1,6 @@
 import { h, render } from 'preact';
 import { App } from './App';
+import { docPageUrls } from './docPages/pageIdToWebsitePath';
 import {
     NonLoadingResponseState,
     getGlobalState,
@@ -13,7 +14,6 @@ import {
     DocPagesResponseContextProvider,
     DocPagesResponseContextValue,
 } from './docPages/responseContext';
-import { docPageUrls, convertDocPageUrlToUrlPathName } from './docPages/urls';
 
 const docPagesResponseContextValue: DocPagesResponseContextValue = {
     getCurrentResponseState: getGlobalState,
@@ -32,7 +32,7 @@ function renderApp(): void {
 
 function isDocPageUrl(pageUrl: string): boolean {
     return docPageUrls.some((docPageUrl) => {
-        const otherPath = convertDocPageUrlToUrlPathName(docPageUrl);
+        const otherPath = `/${docPageUrl}`;
         return pageUrl === otherPath || pageUrl === otherPath + '/';
     });
 }

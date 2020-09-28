@@ -1,7 +1,7 @@
 import { h, Fragment, VNode } from 'preact';
 import { Router, RouterProps, Route, RouterOnChangeArgs } from 'preact-router';
 import { Header } from './components/Header';
-import { docPageUrls, convertDocPageUrlToUrlPathName } from './docPages/urls';
+import { pageIdToWebsitePath } from './docPages/pageIdToWebsitePath';
 import { DocPage } from './routes/DocPage';
 import { IndexPage } from './routes/IndexPage';
 import { NotFoundPage } from './routes/NotFoundPage';
@@ -15,6 +15,7 @@ function cleanUrlTrailingSlash({ url }: RouterOnChangeArgs): void {
         do {
             url = url.slice(0, -1);
         } while (endsWithTrailingSlash(url));
+        // Title (2nd parameter) can be null but TypeScript doesn't like that.
         history.pushState(null, (null as unknown) as string, url);
     }
 }
@@ -27,13 +28,21 @@ export function App(props: AppProps): VNode {
             <Header />
             <Router onChange={cleanUrlTrailingSlash} {...props}>
                 <Route path="/" component={IndexPage} />
-                {docPageUrls.map((docPageUrl) => (
-                    <Route
-                        path={convertDocPageUrlToUrlPathName(docPageUrl)}
-                        component={DocPage}
-                        pageUrl={docPageUrl}
-                    />
-                ))}
+                {Object.keys(pageIdToWebsitePath).map((pageId) => {
+                    const pagePath = pageIdToWebsitePath[pageId];
+                    return [
+                        <Route
+                            path={`/${pagePath}`}
+                            component={DocPage}
+                            pageId={pageId}
+                        />,
+                        <Route
+                            path={`/${pagePath}/`}
+                            component={DocPage}
+                            pageId={pageId}
+                        />,
+                    ];
+                })}
                 <Route default component={NotFoundPage} />
             </Router>
         </Fragment>

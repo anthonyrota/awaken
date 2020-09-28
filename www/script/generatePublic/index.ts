@@ -46,7 +46,9 @@ async function brotliCompressDirectory(subPath: string): Promise<unknown> {
 
     const promises: Promise<unknown>[] = [];
 
+    let foundThing = false;
     for await (const thing of await fs.opendir(dirPublicPath)) {
+        foundThing = true;
         const { name } = thing;
 
         if (thing.isDirectory()) {
@@ -109,6 +111,10 @@ async function brotliCompressDirectory(subPath: string): Promise<unknown> {
                 ]);
             }),
         );
+    }
+
+    if (!foundThing) {
+        throw new Error(`Empty directory ${dirPublicPath}`);
     }
 
     return Promise.all(promises);

@@ -9,7 +9,9 @@
         "test:watch": "jest --runInBand --watch",
         "test:build": "npm run test && npm run build && jest --runInBand --config ./jest.config.build.js",
         "lint": "eslint . && prettier --list-different . && cspell '**/*.{ts,js,md}' && tsc --noEmit",
-        "cz": "git-cz"
+        "cz": "git-cz",
+        "postinstall": "npm run postinstall:microbundle",
+        "postinstall:microbundle": "cd node_modules/microbundle && npm install typescript@latest"
     },
     "dependencies": {},
     "devDependencies": {
@@ -40,6 +42,6 @@
         "rimraf": "3.0.2",
         "standard-version": "9.0.0",
         "ts-jest": "26.3.0",
-        "typescript": "4.0.2"
+        "typescript": "4.0.3"
     }
 }

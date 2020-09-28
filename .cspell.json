@@ -23,16 +23,19 @@
     "ignoreRegExpList": [],
     "words": [
         "aedoc",
-        "apigen",
         "brotli",
         "callbag",
         "callbags",
+        "caniuse",
         "closetag",
         "commitlint",
         "entrypoint",
         "etag",
+        "firebaseapp",
         "frontmatter",
         "mdast",
+        "npmjs",
+        "oncdataend",
         "oncdatastart",
         "onclosetag",
         "oncomment",
@@ -42,10 +45,13 @@
         "opendir",
         "opentag",
         "preact",
+        "staltz",
         "strikethrough",
         "tsdoc",
+        "typescriptlang",
         "unist",
-        "vercel"
+        "vercel",
+        "yarnpkg"
     ],
     "overrides": []
 }
