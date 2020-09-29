@@ -1,13 +1,9 @@
 import { h, render } from 'preact';
 import { App } from './App';
-import { docPageUrls } from './docPages/pageIdToWebsitePath';
+import { docPageUrls } from './docPages/dynamicData';
 import {
-    NonLoadingResponseState,
     getGlobalState,
     onGlobalStateChange,
-    ResponseDoneType,
-    ResponseHttpStatusErrorType,
-    ResponseJSONParsingErrorType,
     ResponseLoadingType,
 } from './docPages/request';
 import {
@@ -38,42 +34,10 @@ function isDocPageUrl(pageUrl: string): boolean {
 }
 
 if (isDocPageUrl(window.location.pathname)) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const responseState = getGlobalState()!;
-
-    const onNonLoadingResponseState = (
-        responseState: NonLoadingResponseState,
-    ): void => {
-        switch (responseState.type) {
-            case ResponseDoneType: {
-                renderApp();
-                break;
-            }
-            case ResponseHttpStatusErrorType: {
-                throw new Error(
-                    [
-                        'error fetching api doc map',
-                        responseState.status,
-                        responseState.statusText,
-                    ]
-                        .filter(Boolean)
-                        .join(' '),
-                );
-            }
-            case ResponseJSONParsingErrorType: {
-                throw new Error(
-                    // eslint-disable-next-line max-len
-                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                    `error parsing fetched api doc map ${responseState.error}`,
-                );
-            }
-        }
-    };
-
-    if (responseState.type === ResponseLoadingType) {
-        onGlobalStateChange(onNonLoadingResponseState);
+    if (getGlobalState().type === ResponseLoadingType) {
+        onGlobalStateChange(renderApp);
     } else {
-        onNonLoadingResponseState(responseState);
+        renderApp();
     }
 } else {
     renderApp();

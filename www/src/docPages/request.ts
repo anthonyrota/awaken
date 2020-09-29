@@ -76,6 +76,7 @@ export function makeRequest(): void {
         if (request.readyState !== 4) return;
 
         if (request.status < 200 || request.status >= 300) {
+            // TODO: report errors.
             changeGlobalState({
                 type: ResponseHttpStatusErrorType,
                 status: request.status,

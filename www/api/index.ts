@@ -3,6 +3,7 @@ import * as path from 'path';
 import { encodings as parseEncodingsHeader } from '@hapi/accept';
 import { NowRequest, NowResponse } from '@vercel/node';
 import * as fresh_ from 'fresh';
+import { parsePath } from 'history';
 import { PublicFileMetadata } from '../script/generatePublic/types';
 
 let fresh = fresh_;
@@ -86,6 +87,11 @@ function sendPublicFileInEncoding(
     response.setHeader('Content-Encoding', contentEncoding);
     response.setHeader('Content-Length', encodingMeta.contentLength);
 
+    if (request.method === 'HEAD') {
+        response.status(204).end();
+        return;
+    }
+
     fs.createReadStream(
         contentEncoding === 'identity'
             ? path.join(filesPath, 'public', publicFilePath)
@@ -133,7 +139,7 @@ function sendPublicFile(
 
 const immutableCacheControl = 'public, max-age=31536000, immutable';
 const mustRevalidateCacheControl = 'public, max-age=0, must-revalidate';
-const noCacheCacheControl = 'no-store, must-revalidate';
+const noCacheCacheControl = 'no-cache, no-store, max-age=0, must-revalidate';
 
 const htmlContentType = 'text/html; charset=utf-8';
 const htmlCacheControl = mustRevalidateCacheControl;
@@ -148,21 +154,39 @@ const notFoundPublicFilePath = '404.html';
 const notFoundContentType = htmlContentType;
 const notFoundCacheControl = noCacheCacheControl;
 
-export default (request: NowRequest, response: NowResponse) => {
-    const { url } = request;
+const allowHeaderValue = 'GET, HEAD, OPTIONS';
 
-    if (!url) {
-        throw new Error('Unexpected: no url.');
+export default (request: NowRequest, response: NowResponse) => {
+    if (!request.url || !request.method) {
+        throw new Error('Unexpected: no url or no method.');
     }
 
-    if (url.endsWith('/') && url !== '/') {
-        response.redirect(308, url.slice(0, -1));
+    if (request.method === 'OPTIONS') {
+        response.writeHead(204, {
+            Allow: allowHeaderValue,
+        });
+        response.end();
+        return;
+    }
+
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+        response.writeHead(405, {
+            Allow: allowHeaderValue,
+        });
+        response.end();
+        return;
+    }
+
+    const { pathname = '/', search = '' } = parsePath(request.url);
+
+    if (pathname.endsWith('/') && pathname !== '/') {
+        response.redirect(308, pathname.slice(0, -1) + search);
         return;
     }
 
     response.setHeader('Vary', 'Accept-Encoding');
 
-    const publicFilePath = publicUrlToPublicFilePath.get(url);
+    const publicFilePath = publicUrlToPublicFilePath.get(pathname);
 
     if (!publicFilePath) {
         response.setHeader('Content-Type', notFoundContentType);

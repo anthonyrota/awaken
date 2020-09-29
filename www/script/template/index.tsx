@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { h, VNode } from 'preact';
 import { render } from 'preact-render-to-string';
-import { App } from '../../src/App';
-import { pageIdToWebsitePath } from '../../src/docPages/pageIdToWebsitePath';
+import { App, AppProps } from '../../src/App';
+import { pageIdToWebsitePath } from '../../src/docPages/dynamicData';
 import { ResponseDoneType, ResponseState } from '../../src/docPages/request';
 import { DocPagesResponseContextProvider } from '../../src/docPages/responseContext';
 import { PagesWithMetadata } from '../docs/types';
@@ -12,8 +12,8 @@ import {
     Folder,
     writeFolderToDirectoryPath,
 } from '../docs/util/Folder';
-import { getRelativePath } from '../docs/util/getRelativePath';
 import { exit } from '../exit';
+import { rootDir } from '../rootDir';
 
 const template = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf-8');
 // eslint-disable-next-line max-len
@@ -22,34 +22,12 @@ const pagesWithMetadata: PagesWithMetadata = require('../../temp/pages.json');
 
 const outFolder = Folder();
 
-function ensureRelative(path: string): string {
-    if (path[0] !== '.') {
-        return `./${path}`;
-    }
-    return path;
-}
-
 function addRenderedHtmlToFolder(html: string, filePath: string): void {
-    const contents = template
-        .replace('::ssr::', html)
-        .replace(
-            /::script\.tsx::/g,
-            ensureRelative(getRelativePath(filePath, 'script.tsx')),
-        )
-        .replace(
-            /::index\.css::/g,
-            ensureRelative(getRelativePath(filePath, 'index.css')),
-        )
-        .replace(
-            /::requestDocPages\.ts::/g,
-            ensureRelative(getRelativePath(filePath, 'docPages/request.ts')),
-        );
+    const contents = template.replace(/::ssr::/g, html);
     addFileToFolder(outFolder, filePath, contents);
 }
 
-interface SSRAppProps {
-    url: string;
-}
+interface SSRAppProps extends AppProps {}
 
 function SSRApp(props: SSRAppProps): VNode {
     return (
@@ -66,26 +44,32 @@ function SSRApp(props: SSRAppProps): VNode {
                 },
             }}
         >
-            <App url={props.url} />
+            <App {...props} />
         </DocPagesResponseContextProvider>
     );
 }
 
-addRenderedHtmlToFolder(render(<SSRApp url="/" />), 'index.html');
+addRenderedHtmlToFolder(
+    render(<SSRApp path={{ pathname: '/' }} />),
+    'index.html',
+);
 
-addRenderedHtmlToFolder(render(<SSRApp url="/_notfound" />), '404.html');
+addRenderedHtmlToFolder(
+    render(<SSRApp path={{ pathname: '/_notfound' }} />),
+    '404.html',
+);
 
 for (const { pageId } of pagesWithMetadata.pages) {
     const websitePath = pageIdToWebsitePath[pageId];
     addRenderedHtmlToFolder(
-        render(<SSRApp url={`/${websitePath}`} />),
+        render(<SSRApp path={{ pathname: `/${websitePath}` }} />),
         `${websitePath}.html`,
     );
 }
 
-export const rootDir = path.join(__dirname, '..', '..', 'template');
+export const templateDir = path.join(rootDir, 'www', 'template');
 
-writeFolderToDirectoryPath(outFolder, rootDir).catch((error) => {
+writeFolderToDirectoryPath(outFolder, templateDir).catch((error) => {
     console.error('error writing pages to out directory...');
     console.log(error);
     exit();

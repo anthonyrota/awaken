@@ -6,7 +6,7 @@
         "build:docs": "cd .. && npm install && npm run build && cd www && npm run build:docs-analyze",
         "build:docs-analyze": "npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/docs/index.ts",
         "build:template": "ncp src template --stopOnErr && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/template/index.tsx",
-        "build:public": "npm run build:template && del-cli '_files/public/**/*' '!_files/public/pages.*.json' && parcel build 'template/**/*.html' --dist-dir _files/public --detailed-report --no-source-maps && rimraf template && npm run build:public-compressed",
+        "build:public": "npm run build:template && del-cli '_files/public/**/*' '!_files/public/pages.*.json' && rimraf .parcel-cache && parcel build 'template/**/*.html' --dist-dir _files/public --detailed-report --no-source-maps && rimraf template && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/template/postparcel.ts && npm run build:public-compressed",
         "build:public-compressed": "rimraf _files/public-br _files/public-gzip _files/public-meta && npx -s sh ts-node --project ./tsconfig.ts-node.json ./script/generatePublic/index.ts",
         "vercel-build": "rimraf public && npm run build:docs && npm run build:public && mkdir public && echo > public/index.html",
         "dev": "node ./script/dev/index.js"
@@ -18,8 +18,8 @@
         "@vercel/node": "1.8.1",
         "etag": "1.8.1",
         "fresh": "0.5.2",
+        "history": "5.0.0",
         "preact": "10.4.8",
-        "preact-router": "3.2.1",
         "tslib": "2.0.1"
     },
     "devDependencies": {

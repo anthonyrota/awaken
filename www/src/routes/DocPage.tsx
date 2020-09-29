@@ -1,5 +1,6 @@
 import { h, Fragment, VNode } from 'preact';
 import { useMemo } from 'preact/hooks';
+import { Header } from '../components/Header';
 import {
     ResponseDoneType,
     ResponseHttpStatusErrorType,
@@ -56,6 +57,7 @@ export function DocPage({ pageId }: DocPageProps): VNode {
             }
             return (
                 <Fragment>
+                    <Header></Header>
                     <h1>{headingContents}</h1>
                     <br />
                     <pre>{stringifiedNodeMap}</pre>

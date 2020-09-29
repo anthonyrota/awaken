@@ -2,6 +2,7 @@
 const child_process = require('child_process');
 const http = require('http');
 const chokidar = require('chokidar');
+const colors = require('colors');
 const httpProxy = require('http-proxy');
 const open = require('open');
 const kill = require('tree-kill');
@@ -36,11 +37,11 @@ function exitError() {
 function buildPublic(/** @type {(() => void)|undefined} */ cb) {
     killChild(buildPublicChild);
 
-    buildPublicChild = child_process.spawn('npm', ['run', 'build:public'], {
+    const child = child_process.spawn('npm', ['run', 'build:public'], {
         stdio: 'inherit',
     });
 
-    const child = buildPublicChild;
+    buildPublicChild = child;
     child
         .on('error', (error) => {
             console.log(error);
@@ -51,9 +52,11 @@ function buildPublic(/** @type {(() => void)|undefined} */ cb) {
                 return;
             }
             if (code !== 0) {
-                exitError();
+                console.log(`public build exited with code ${code}`);
+                killChild(child);
                 return;
             }
+            console.log(colors.green('✓') + ' done build');
             if (cb) cb();
         });
 }
