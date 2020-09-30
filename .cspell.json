@@ -34,6 +34,7 @@
         "firebaseapp",
         "frontmatter",
         "mdast",
+        "nocheck",
         "npmjs",
         "oncdataend",
         "oncdatastart",

@@ -7,7 +7,7 @@ import {
     ResponseJSONParsingErrorType,
     ResponseLoadingType,
 } from '../docPages/request';
-import { useDocPagesResponseState } from '../docPages/responseContext';
+import { useDocPagesResponseState } from '../hooks/useDocPagesResponseState';
 
 interface DocPageProps {
     pageId: string;

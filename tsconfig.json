@@ -3,6 +3,7 @@
         "target": "esnext",
         "module": "esnext",
         "moduleResolution": "node",
+        "esModuleInterop": false,
         "allowJs": true,
         "checkJs": true,
         "importHelpers": true,

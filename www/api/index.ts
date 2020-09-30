@@ -2,17 +2,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { encodings as parseEncodingsHeader } from '@hapi/accept';
 import { NowRequest, NowResponse } from '@vercel/node';
-import * as fresh_ from 'fresh';
+import * as fresh from 'fresh';
 import { parsePath } from 'history';
 import { PublicFileMetadata } from '../script/generatePublic/types';
-
-let fresh = fresh_;
-if ('default' in fresh) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    fresh = fresh_.default; // I don't know why.
-}
 
 const filesPath = path.join(__dirname, '..', '_files');
 

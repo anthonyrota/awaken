@@ -2,25 +2,17 @@ import { h, render } from 'preact';
 import { App } from './App';
 import { docPageUrls } from './docPages/dynamicData';
 import {
-    getGlobalState,
-    onGlobalStateChange,
+    getCurrentResponseState,
+    getOnResponseStateChangeFunction,
     ResponseLoadingType,
+    setupOnGlobalStateChange,
 } from './docPages/request';
-import {
-    DocPagesResponseContextProvider,
-    DocPagesResponseContextValue,
-} from './docPages/responseContext';
 
-const docPagesResponseContextValue: DocPagesResponseContextValue = {
-    getCurrentResponseState: getGlobalState,
-    onResponseStateChange: onGlobalStateChange,
-};
+setupOnGlobalStateChange();
 
 function renderApp(): void {
     render(
-        <DocPagesResponseContextProvider value={docPagesResponseContextValue}>
-            <App />
-        </DocPagesResponseContextProvider>,
+        <App />,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         document.getElementById('root')!,
     );
@@ -34,8 +26,8 @@ function isDocPageUrl(pageUrl: string): boolean {
 }
 
 if (isDocPageUrl(window.location.pathname)) {
-    if (getGlobalState().type === ResponseLoadingType) {
-        onGlobalStateChange(renderApp);
+    if (getCurrentResponseState().type === ResponseLoadingType) {
+        getOnResponseStateChangeFunction()(renderApp);
     } else {
         renderApp();
     }

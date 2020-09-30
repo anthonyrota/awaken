@@ -20,6 +20,10 @@
             import { makeRequest } from '/docPages/request.ts';
             makeRequest();
         </script>
+        <script>
+            import { globalPageIdToWebsitePathKey } from '/globalKeys.ts';
+            window[globalPageIdToWebsitePathKey] = __pageIdToWebsitePath__;
+        </script>
         <script async src="/script.tsx"></script>
     </body>
 </html>
