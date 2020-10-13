@@ -7,7 +7,7 @@ import {
     TestSource,
     SharedTestSource,
     watchSourceEvents,
-} from '@awaken/testing';
+} from '@microstream/testing';
 
 describe('TestSource', () => {
     it('works', () => {

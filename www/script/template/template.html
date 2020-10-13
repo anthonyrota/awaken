@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#ffffff" />
+        ::preloadPagesLink::
+        <link rel="preload" href="/script" as="script" />
+        ::manifestLink::
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/static/icons/apple-touch-icon.png"
+        />
+        <link
+            rel="mask-icon"
+            href="/static/icons/safari-pinned-tab.svg"
+            color="#00b4b6"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="/static/icons/favicon-32x32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="/static/icons/favicon-16x16.png"
+        />
+        ::css::
+    </head>
+    <body>
+        <div id="root">::ssr::</div>
+        <script>
+            import { makeRequest } from '/data/docPages';
+            import { globalPagesMetadataKey } from '/globalKeys';
+            makeRequest();
+            window[globalPagesMetadataKey] = __pagesMetadata__;
+        </script>
+        <script async type="application/javascript" src="/script"></script>
+    </body>
+</html>

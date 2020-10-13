@@ -30,8 +30,8 @@
         "types": ["jest-extended", "node"],
         "skipLibCheck": true,
         "paths": {
-            "@awaken/core": ["packages/core/src/index.ts"],
-            "@awaken/testing": ["packages/testing/src/index.ts"]
+            "@microstream/core": ["packages/core/src/index.ts"],
+            "@microstream/testing": ["packages/testing/src/index.ts"]
         }
     },
     "include": [

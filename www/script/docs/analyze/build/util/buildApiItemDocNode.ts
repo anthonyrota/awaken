@@ -15,11 +15,13 @@ import { Node, CoreNode, DeepCoreNode } from '../../../core/nodes';
 import { CodeBlockNode } from '../../../core/nodes/CodeBlock';
 import { CodeSpanNode } from '../../../core/nodes/CodeSpan';
 import { ContainerBase, ContainerNode } from '../../../core/nodes/Container';
+import { DocPageLinkNode } from '../../../core/nodes/DocPageLink';
 import { HtmlElementNode } from '../../../core/nodes/HtmlElement';
 import { LinkNode } from '../../../core/nodes/Link';
-import { LocalPageLinkNode } from '../../../core/nodes/LocalPageLink';
 import { ParagraphNode } from '../../../core/nodes/Paragraph';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
+import { parseMarkdown } from '../../../core/nodes/util/parseMarkdown';
+import { replaceHtml } from '../../../core/nodes/util/replaceHtml';
 import { simplifyDeepCoreNode } from '../../../core/nodes/util/simplify';
 import { substituteDynamicTextValues } from '../../../core/nodes/util/substituteDynamicTextValues';
 import { RenderMarkdownNodeType } from '../../../core/render/markdown/nodes';
@@ -27,7 +29,6 @@ import { HtmlCommentNode } from '../../../core/render/markdown/nodes/HtmlComment
 import { Iter } from '../../../util/Iter';
 import { StringBuilder } from '../../../util/StringBuilder';
 import { AnalyzeContext } from '../../Context';
-import { parseMarkdown } from '../../util/parseMarkdown';
 
 interface TSDocNodeWriteContext {
     context: AnalyzeContext;
@@ -76,7 +77,8 @@ export function buildApiItemDocNode(
             container,
             context.getDynamicTextVariableReplacement,
         );
-        return (container_ as unknown) as ContainerNode<DeepCoreNode>;
+        replaceHtml(container);
+        return container;
     }
     return;
 }
@@ -476,7 +478,7 @@ function addLinkTagWithCodeDestination(
         codeDestination.packageName + codeDestination.importPath;
     const packageParts = [
         // TODO: fix this.
-        '@awaken',
+        '@microstream',
         ...memberIdentifier.split('/'),
     ];
     if (packageParts.length !== 3) {
@@ -489,7 +491,7 @@ function addLinkTagWithCodeDestination(
     const pageId = context.context.getPageIdFromExportIdentifier(identifier);
     codeSpan.children.push(
         EmbeddedNode({
-            originalNode: LocalPageLinkNode({
+            originalNode: DocPageLinkNode({
                 pageId,
                 hash: exportName,
                 children: [

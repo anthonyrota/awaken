@@ -7,7 +7,6 @@
         "script/**/*",
         "www/src/**/*",
         "www/api/**/*",
-        "www/types/**/*",
         "www/script/**/*",
         "jest.config.js",
         "jest.config.build.js",

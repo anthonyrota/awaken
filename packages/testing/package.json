@@ -1,45 +1,50 @@
 {
-    "name": "@awaken/testing",
-    "amdName": "awakenTesting",
+    "name": "@microstream/testing",
+    "amdName": "microstreamTesting",
     "version": "0.0.0",
-    "description": "Testing utils for awaken",
+    "description": "Testing utils for microstream",
     "source": "src/index.ts",
-    "main": "dist/awakenTesting.js",
-    "module": "dist/awakenTesting.module.js",
-    "umd:main": "dist/awakenTesting.umd.js",
-    "unpkg": "dist/awakenTesting.umd.js",
-    "jsdelivr": "dist/awakenTesting.umd.js",
+    "main": "dist/microstreamTesting.js",
+    "module": "dist/microstreamTesting.module.js",
+    "umd:main": "dist/microstreamTesting.umd.js",
+    "unpkg": "dist/microstreamTesting.umd.js",
+    "jsdelivr": "dist/microstreamTesting.umd.js",
     "types": "dist/index.d.ts",
     "license": "MIT",
     "keywords": [
-        "awaken",
+        "microstream",
+        "test",
+        "testing",
+        "spec",
+        "jest",
+        "rxjs",
         "reactive",
+        "react",
         "callbag",
         "callback",
         "observables",
         "observable",
         "iterable",
         "stream",
+        "promise",
+        "async",
         "es6",
-        "es2015",
-        "test",
-        "testing",
-        "spec"
+        "es2015"
     ],
     "author": "Anthony Rota",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/anthonyrota/awaken.git",
+        "url": "git+https://github.com/anthonyrota/microstream.git",
         "directory": "packages/testing"
     },
-    "bugs": "https://github.com/anthonyrota/awaken/issues",
+    "bugs": "https://github.com/anthonyrota/microstream/issues",
     "sideEffects": "false",
     "exports": {
         ".": {
-            "browser": "./dist/awakenTesting.module.js",
-            "umd": "./dist/awakenTesting.umd.js",
-            "import": "./dist/awakenTesting.mjs",
-            "require": "./dist/awakenTesting.js"
+            "browser": "./dist/microstreamTesting.module.js",
+            "umd": "./dist/microstreamTesting.umd.js",
+            "import": "./dist/microstreamTesting.mjs",
+            "require": "./dist/microstreamTesting.js"
         },
         "./package.json": "./package.json"
     },
@@ -53,7 +58,7 @@
         "clean:prebuild": "rimraf dist"
     },
     "dependencies": {
-        "@awaken/core": "^0.0.0"
+        "@microstream/core": "^0.0.0"
     },
     "publishConfig": {
         "access": "public"

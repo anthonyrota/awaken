@@ -1,6 +1,12 @@
 import { Node, CoreNodeType, DeepCoreNode, CoreNode } from '..';
-import { ContainerNode } from '../Container';
+import { ContainerBase, ContainerNode } from '../Container';
+import {
+    getHtmlTagClassification,
+    HtmlTagClassification,
+} from '../HtmlElement';
+import { ParagraphNode } from '../Paragraph';
 import { PlainTextNode } from '../PlainText';
+import { walkDeepCoreNode } from './walk';
 
 export function mergePlainTextNodes(children: Node[]): void {
     for (let i = 0; i < children.length - 1; i++) {
@@ -57,29 +63,57 @@ export function isChildEmpty(child: Node): boolean {
     return (
         (child.type === CoreNodeType.PlainText &&
             (child as PlainTextNode).text === '') ||
-        (child.type === CoreNodeType.Container &&
-            (child as ContainerNode<Node>).children.length === 0)
+        ((child.type === CoreNodeType.Container ||
+            child.type === CoreNodeType.Italics ||
+            child.type === CoreNodeType.Bold ||
+            child.type === CoreNodeType.Strikethrough ||
+            child.type === CoreNodeType.CodeSpan ||
+            child.type === CoreNodeType.Link ||
+            child.type === CoreNodeType.DocPageLink ||
+            child.type === CoreNodeType.GithubSourceLink ||
+            child.type === CoreNodeType.Subscript ||
+            child.type === CoreNodeType.Superscript) &&
+            (child as Node & ContainerBase<Node>).children.length === 0)
+    );
+}
+
+export function isChildEmptyBlock(child: Node): boolean {
+    return (
+        child.type === CoreNodeType.List &&
+        (child as Node & ContainerBase<Node>).children.length === 0
     );
 }
 
 export function removeEmptyChildren<ChildNode extends Node>(
-    children: (ContainerNode<ChildNode> | ChildNode)[],
+    children: (
+        | ContainerNode<ChildNode>
+        | ParagraphNode<ChildNode>
+        | ChildNode
+    )[],
 ): void {
     for (let i = 0; i < children.length; i++) {
         const child = children[i];
         if (isChildEmpty(child)) {
             children.splice(i--, 1);
+        } else if (isChildEmptyBlock(child)) {
+            children[i] = ParagraphNode({});
         }
     }
 }
 
 export function replaceEmptyChildren<ChildNode extends Node>(
-    children: (ContainerNode<ChildNode> | ChildNode)[],
+    children: (
+        | ContainerNode<ChildNode>
+        | ParagraphNode<ChildNode>
+        | ChildNode
+    )[],
 ): void {
     for (let i = 0; i < children.length; i++) {
         const child = children[i];
         if (isChildEmpty(child) && child.type !== CoreNodeType.Container) {
             children[i] = ContainerNode({});
+        } else if (isChildEmptyBlock(child)) {
+            children[i] = ParagraphNode({});
         }
     }
 }
@@ -102,7 +136,9 @@ export function simplifyCoreNode<ChildNode extends Node>(
 
     switch (node.type) {
         case CoreNodeType.CollapsibleSection: {
-            simplifyChildNode(node.summaryNode);
+            if (node.summaryNode) {
+                simplifyChildNode(node.summaryNode);
+            }
             break;
         }
         case CoreNodeType.Table: {
@@ -121,4 +157,107 @@ export function simplifyCoreNode<ChildNode extends Node>(
 
 export function simplifyDeepCoreNode(node: DeepCoreNode): void {
     simplifyCoreNode(node, simplifyDeepCoreNode);
+}
+
+export function collapseDeepCoreNodeWhitespace(rootNode: DeepCoreNode): void {
+    function isBlock(node: DeepCoreNode): boolean {
+        return (
+            node.type === CoreNodeType.HorizontalRule ||
+            (node.type === CoreNodeType.HtmlElement &&
+                getHtmlTagClassification(node.tagName) !==
+                    HtmlTagClassification.Inline) ||
+            node.type === CoreNodeType.BlockQuote ||
+            node.type === CoreNodeType.CodeBlock ||
+            node.type === CoreNodeType.RichCodeBlock ||
+            node.type === CoreNodeType.Image ||
+            node.type === CoreNodeType.Paragraph ||
+            node.type === CoreNodeType.Heading123456 ||
+            node.type === CoreNodeType.Heading ||
+            node.type === CoreNodeType.Subheading ||
+            node.type === CoreNodeType.Title ||
+            node.type === CoreNodeType.List ||
+            node.type === CoreNodeType.Table ||
+            node.type === CoreNodeType.CollapsibleSection ||
+            node.type === CoreNodeType.LineBreak ||
+            node.type === CoreNodeType.PageTitle
+        );
+    }
+
+    function isInlineVoid(node: DeepCoreNode): boolean {
+        return (
+            node.type === CoreNodeType.HtmlElement &&
+            getHtmlTagClassification(node.tagName) ===
+                HtmlTagClassification.SelfClosing
+        );
+    }
+
+    let lastTextNodes: { text: string }[] = [];
+    const textBlocks: { text: string }[][] = [];
+    walkDeepCoreNode(rootNode, (node): boolean | void => {
+        if (node.type === CoreNodeType.PlainText) {
+            if (lastTextNodes.length === 0) {
+                textBlocks.push(lastTextNodes);
+            }
+            lastTextNodes.push(node);
+        } else if (isBlock(node)) {
+            lastTextNodes = [];
+            if (node.type === CoreNodeType.RichCodeBlock) {
+                // Don't walk over children.
+                return true;
+            }
+        } else if (isInlineVoid(node)) {
+            if (lastTextNodes.length === 0) {
+                textBlocks.push(lastTextNodes);
+            }
+            // Placeholder to represent the void node so surrounding whitespace
+            // doesn't disappear.
+            lastTextNodes.push({ text: 'x' });
+        }
+    });
+
+    // Collapse whitespace in each block.
+    for (const textNodes of textBlocks) {
+        const text = textNodes.map((textNode) => textNode.text).join('');
+        let offset = 0;
+        for (const whitespaceRegionMatch of text.matchAll(/\s+/g)) {
+            const matchedText = whitespaceRegionMatch[0];
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const originalMatchStart = whitespaceRegionMatch.index!;
+            const originalMatchEnd = originalMatchStart + matchedText.length;
+            const replacementText =
+                originalMatchStart === 0 || originalMatchEnd === text.length
+                    ? ''
+                    : ' ';
+            if (replacementText === matchedText) {
+                continue;
+            }
+            const matchStart = offset + originalMatchStart;
+            const matchEnd = offset + originalMatchEnd;
+            offset += replacementText.length - (matchEnd - matchStart);
+            let textNodeStartIndex = 0;
+            for (let i = 0; i < textNodes.length; i++) {
+                const textNode = textNodes[i];
+                const textNodeEndIndex =
+                    textNodeStartIndex + textNode.text.length;
+                if (matchEnd <= textNodeStartIndex) {
+                    break;
+                }
+                if (matchStart < textNodeEndIndex) {
+                    const textNodeMatchStart = Math.max(
+                        matchStart - textNodeStartIndex,
+                        0,
+                    );
+                    const textNodeMatchEnd = matchEnd - textNodeStartIndex;
+                    textNode.text =
+                        textNode.text.slice(0, textNodeMatchStart) +
+                        (matchStart >= textNodeStartIndex
+                            ? // Replace whitespace at first node.
+                              replacementText
+                            : '') +
+                        textNode.text.slice(textNodeMatchEnd);
+                }
+                textNodeStartIndex = textNodeEndIndex;
+            }
+        }
+    }
 }

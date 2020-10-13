@@ -39,14 +39,13 @@ export type PageExports = PageExport[];
 interface BuildApiPageParameters {
     context: AnalyzeContext;
     pageId: string;
-    pageTitle: string;
     pageExports: PageExports;
 }
 
 export function buildApiPage(
     parameters: BuildApiPageParameters,
 ): PageNode<DeepCoreNode> {
-    const { context, pageId, pageTitle, pageExports } = parameters;
+    const { context, pageId, pageExports } = parameters;
     const exportIdentifierKeyToApiItems = new Map<string, ApiItem[]>();
 
     function addExportIdentifier(identifier: ExportIdentifier): void {
@@ -132,7 +131,6 @@ export function buildApiPage(
     }
 
     const pageNode = PageNode<DeepCoreNode>({
-        title: pageTitle,
         tableOfContents: tableOfContents,
         pageId,
         children: Array.from(exportIdentifierKeyToApiItems, ([, apiItems]) => {

@@ -127,4 +127,6 @@ export function writeTable<
             writeTableRow(row, columnCount, output, writeBodyCellNode);
         }
     });
+    // Table breaks if no newline.
+    output.ensureNewLine();
 }

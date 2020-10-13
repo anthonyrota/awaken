@@ -11,7 +11,7 @@ import {
     Sink,
     subscribe,
     zipSources,
-} from '@awaken/core';
+} from '@microstream/core';
 
 describe('PushType', () => {
     it('should be equal to zero', () => {
@@ -112,7 +112,7 @@ import {
     E,
     TestSource,
     watchSourceEvents,
-} from '@awaken/testing';
+} from '@microstream/testing';
 
 /** @todo actual tests */
 describe('zipSources', () => {

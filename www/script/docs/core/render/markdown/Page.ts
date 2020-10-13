@@ -21,7 +21,11 @@ export function writePage<ChildNode extends Node>(
     writeRenderMarkdownNode(DoNotEditCommentNode({}), output);
     writeDeepRenderMarkdownNode(
         PageTitleNode({
-            children: [PlainTextNode({ text: page.title })],
+            children: [
+                PlainTextNode({
+                    text: output.getPageTitleFromPageId(page.pageId),
+                }),
+            ],
         }),
         output,
         writeRenderMarkdownNode,

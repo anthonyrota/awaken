@@ -1,0 +1,8 @@
+{
+    /* Turn on 80 character line limit. */
+    "MD013": true,
+    /* Enable trailing punctuation in headers. */
+    "MD026": false,
+    /* Enable HTML in markdown. */
+    "MD033": false
+}

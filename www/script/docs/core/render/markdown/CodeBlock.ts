@@ -47,5 +47,7 @@ export function writeCodeBlock(
             output.ensureNewLine();
         });
         output.write('```');
+        // Nothing can go on the same line as the backticks or it will break.
+        output.writeLine();
     });
 }

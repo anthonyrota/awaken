@@ -11,7 +11,7 @@ title: 'Bug: '
     your issue has not already been fixed.
 -->
 
-Awaken version: <!--  -->
+MicroStream version: <!--  -->
 
 ## Steps To Reproduce
 

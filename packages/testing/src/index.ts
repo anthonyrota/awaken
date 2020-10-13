@@ -11,7 +11,7 @@ import {
     Sink,
     SubjectBase,
     _b as binarySearchNextLargestIndex,
-} from '@awaken/core';
+} from '@microstream/core';
 
 interface TestScheduleImplementation {
     (

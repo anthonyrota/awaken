@@ -1,21 +1,24 @@
-import { h, VNode } from 'preact';
-import { pageIdToWebsitePath } from './docPages/dynamicData';
+import { h, Fragment, VNode, JSX } from 'preact';
+import { useCallback, useRef } from 'preact/hooks';
+import { Header } from './components/Header';
 import {
+    getPagesMetadata,
     ResponseLoadingType,
     getCurrentResponseState,
-} from './docPages/request';
-import { Path, useHistory } from './History';
+} from './data/docPages';
 import { useDocPagesResponseState } from './hooks/useDocPagesResponseState';
+import { Path, useHistory } from './hooks/useHistory';
 import { usePrevious } from './hooks/usePrevious';
-import { DocPage } from './routes/DocPage';
-import { IndexPage } from './routes/IndexPage';
-import { NotFoundPage } from './routes/NotFoundPage';
+import { DocPage } from './pages/DocPage';
+import { IndexPage } from './pages/IndexPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 export interface AppProps {
     path?: Path;
 }
 
 function getPageIdFromPathname(pathname: string): string | void {
+    const { pageIdToWebsitePath } = getPagesMetadata();
     for (const pageId in pageIdToWebsitePath) {
         const pagePath = pageIdToWebsitePath[pageId];
         if (pathname === `/${pagePath}`) {
@@ -35,6 +38,17 @@ export function App(props: AppProps): VNode {
     // Needed in the below case where we are blocking the page transition.
     useDocPagesResponseState();
 
+    const mainAnchorRef = useRef<HTMLAnchorElement>();
+    const onSkipLinkClick = useCallback<
+        JSX.MouseEventHandler<HTMLAnchorElement>
+    >((event) => {
+        event.preventDefault();
+        mainAnchorRef.current.scrollIntoView();
+        mainAnchorRef.current.focus();
+    }, []);
+
+    let appPathPropsToUse = appPathProps;
+
     if (
         previousAppPathPropsBox &&
         getCurrentResponseState().type === ResponseLoadingType &&
@@ -48,11 +62,28 @@ export function App(props: AppProps): VNode {
             // doc page to a doc page. In this case prevent the transition
             // until the pages load.
             nextPreviousAppPathPropsBox[0] = previousAppPathProps;
-            return <AppPath {...previousAppPathProps} />;
+            appPathPropsToUse = previousAppPathProps;
         }
     }
 
-    return <AppPath {...appPathProps} />;
+    return (
+        <Fragment>
+            <a
+                class="skip-link"
+                tabIndex={0}
+                href="#main"
+                alt=""
+                onClick={onSkipLinkClick}
+            >
+                Skip to main
+            </a>
+            <Header />
+            <a tabIndex={0} name="main" ref={mainAnchorRef} />
+            <main class="main">
+                <AppPath {...appPathPropsToUse} />
+            </main>
+        </Fragment>
+    );
 }
 
 interface AppPathProps {

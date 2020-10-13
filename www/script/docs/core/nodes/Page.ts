@@ -1,18 +1,16 @@
-import { TableOfContents } from './../../types';
+import { TableOfContents } from '../../types';
 import { ContainerParameters, ContainerBase } from './Container';
 import { Node, CoreNodeType } from '.';
 
 export interface PageParameters<ChildNode extends Node>
     extends ContainerParameters<ChildNode> {
     pageId: string;
-    title: string;
     tableOfContents?: TableOfContents;
 }
 
 export interface PageBase<ChildNode extends Node>
     extends ContainerBase<ChildNode> {
     pageId: string;
-    title: string;
     tableOfContents?: TableOfContents;
 }
 
@@ -21,7 +19,6 @@ export function PageBase<ChildNode extends Node>(
 ): PageBase<ChildNode> {
     const pageBase: PageBase<ChildNode> = {
         pageId: parameters.pageId,
-        title: parameters.title,
         ...ContainerBase<ChildNode>({ children: parameters.children }),
     };
     if (parameters.tableOfContents) {

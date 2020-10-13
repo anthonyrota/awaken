@@ -5,6 +5,9 @@ import { rootDir } from '../../rootDir';
 
 const globP = promisify(glob);
 
-export function globAbsolute(pattern: string): Promise<string[]> {
-    return globP(path.join(rootDir, pattern));
+export function globAbsolute(
+    pattern: string,
+    opt?: glob.IOptions,
+): Promise<string[]> {
+    return globP(path.join(rootDir, pattern), opt);
 }

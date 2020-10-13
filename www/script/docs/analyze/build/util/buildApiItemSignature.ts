@@ -15,7 +15,7 @@ import {
 import { CoreNodeType, DeepCoreNode } from '../../../core/nodes';
 import { CodeBlockNode } from '../../../core/nodes/CodeBlock';
 import { ContainerNode } from '../../../core/nodes/Container';
-import { LocalPageLinkNode } from '../../../core/nodes/LocalPageLink';
+import { DocPageLinkNode } from '../../../core/nodes/DocPageLink';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
 import { RichCodeBlockNode } from '../../../core/nodes/RichCodeBlock';
 import { TitleNode } from '../../../core/nodes/Title';
@@ -95,7 +95,7 @@ function buildExcerpt(
             const identifier = getApiItemIdentifier(apiItem);
             const pageId = context.getPageIdFromExportIdentifier(identifier);
             nodes.push(
-                LocalPageLinkNode({
+                DocPageLinkNode({
                     pageId,
                     hash: getApiItemAnchorName({ apiItem, context }),
                     children: [PlainTextNode({ text: tokenText })],

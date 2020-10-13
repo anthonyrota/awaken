@@ -2,4 +2,4 @@
 const rimraf = require('rimraf');
 const { getAbsolutePath } = require('./util/fileUtil');
 
-rimraf.sync(getAbsolutePath('node_modules', '@awaken'));
+rimraf.sync(getAbsolutePath('node_modules', '@microstream'));

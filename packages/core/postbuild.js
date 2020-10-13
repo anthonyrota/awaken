@@ -6,9 +6,9 @@ const {
 } = require('../../script/util/fileUtil');
 
 renameOutputModule({
-    from: getAbsolutePath('dist', 'awakenCore.module.js'),
+    from: getAbsolutePath('dist', 'microstream.module.js'),
     toDir: getAbsolutePath('dist'),
-    toName: 'awakenCore.mjs',
+    toName: 'microstream.mjs',
 });
 
 fs.readdirSync(getAbsolutePath('src')).forEach((file) => {

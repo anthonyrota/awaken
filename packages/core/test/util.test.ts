@@ -8,7 +8,7 @@ import {
     setTimeout,
     setInterval,
     asyncReportError,
-} from '@awaken/core';
+} from '@microstream/core';
 
 type CF = (x: string) => string;
 const composableFunction1: CF = (x) => x + '+f1';

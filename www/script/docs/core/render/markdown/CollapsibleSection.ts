@@ -16,15 +16,20 @@ export function writeCollapsibleSection<
     writeSummaryNode: ParamWriteChildNode<SummaryNode>,
     writeChildNode: ParamWriteChildNode<ChildNode>,
 ): void {
+    const containerNode = ContainerNode({
+        children: collapsibleSection.children,
+    });
     const detailsElement = HtmlElementNode({
         tagName: 'details',
-        children: [
-            HtmlElementNode<SummaryNode>({
-                tagName: 'summary',
-                children: [collapsibleSection.summaryNode],
-            }),
-            ContainerNode<ChildNode>({ children: collapsibleSection.children }),
-        ],
+        children: collapsibleSection.summaryNode
+            ? [
+                  HtmlElementNode<SummaryNode>({
+                      tagName: 'summary',
+                      children: [collapsibleSection.summaryNode],
+                  }),
+                  containerNode,
+              ]
+            : [containerNode],
     });
     writeRenderMarkdownNode(detailsElement, output, (node) => {
         if (node.type === CoreNodeType.Container) {

@@ -1,16 +1,20 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { Transform } from 'stream';
 import * as zlib from 'zlib';
 import { rootDir } from '../rootDir';
 
-function getBrotliCompressedSizeKb(rootPath: string): Promise<number> {
+function getCompressedSizeKb(
+    rootPath: string,
+    createCompress: () => Transform,
+): Promise<number> {
     return new Promise((resolve, reject) => {
         const absolutePath = path.join(rootDir, rootPath);
         const source = fs.createReadStream(absolutePath);
         let length = 0;
 
         source
-            .pipe(zlib.createBrotliCompress())
+            .pipe(createCompress())
             .on('data', (data) => {
                 // eslint-disable-next-line max-len
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -23,27 +27,45 @@ function getBrotliCompressedSizeKb(rootPath: string): Promise<number> {
     });
 }
 
-const coreBrSizeP = getBrotliCompressedSizeKb(
-    'packages/core/dist/awakenCore.mjs',
-);
-const testingBrSizeP = getBrotliCompressedSizeKb(
-    'packages/testing/dist/awakenTesting.mjs',
-);
+function getBrotliCompressedSizeKb(rootPath: string): Promise<number> {
+    return getCompressedSizeKb(rootPath, zlib.createBrotliCompress);
+}
+
+function getGzipCompressedSizeKb(rootPath: string): Promise<number> {
+    return getCompressedSizeKb(rootPath, zlib.createGzip);
+}
+
+const coreModulePath = 'packages/core/dist/microstream.mjs';
+const testingModulePath = 'packages/testing/dist/microstreamTesting.mjs';
+
+const coreBrSizeP = getBrotliCompressedSizeKb(coreModulePath);
+const coreGzSizeP = getGzipCompressedSizeKb(coreModulePath);
+const testingBrSizeP = getBrotliCompressedSizeKb(testingModulePath);
+const testingGzSizeP = getGzipCompressedSizeKb(testingModulePath);
 
 async function createGetDynamicTextVariableReplacementFunction(): Promise<
     (variableName: string) => string
 > {
-    const [coreBrSize, testingBrSize] = await Promise.all([
+    const [
+        coreBrSize,
+        coreGzSize,
+        testingBrSize,
+        testingGzSize,
+    ] = await Promise.all([
         coreBrSizeP,
+        coreGzSizeP,
         testingBrSizeP,
+        testingGzSizeP,
     ]);
 
     const replacements: Record<string, string> = {
-        LibName: 'AwakenJS',
-        LibCoreImportPath: '@awaken/core',
+        LibName: 'MicroStream',
+        LibCoreImportPath: '@microstream/core',
         LibCoreBrotliCompressedSizeKb: `${coreBrSize}`,
-        LibTestingImportPath: '@awaken/testing',
+        LibCoreGzipCompressedSizeKb: `${coreGzSize}`,
+        LibTestingImportPath: '@microstream/testing',
         LibTestingBrotliCompressedSizeKb: `${testingBrSize}`,
+        LibTestingGzipCompressedSizeKb: `${testingGzSize}`,
     };
 
     function getDynamicTextVariableReplacement(variableName: string): string {

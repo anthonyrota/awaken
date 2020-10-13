@@ -82,7 +82,7 @@ export function writeHtmlElement<ChildNode extends Node>(
                     output,
                     writeChildNode,
                 );
-            });
+            }, false);
             return;
         }
         if (output.constrainedToSingleLine) {
@@ -100,7 +100,7 @@ export function writeHtmlElement<ChildNode extends Node>(
                     writeRenderMarkdownNode,
                     writeChildNode,
                 );
-            });
+            }, false);
         }
         return;
     }

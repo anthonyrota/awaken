@@ -1,0 +1,23 @@
+{
+    "name": "MicroStreamJS",
+    "short_name": "MicroStreamJS",
+    "description": "A fast and extremely lightweight reactive programming library for Typescript, inspired by callbags and RxJS",
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
+    "display": "standalone",
+    "orientation": "portrait",
+    "start_url": "/",
+    "icons": [
+        {
+            "src": "/static/icons/manifest-icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icons/manifest-icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "splash_pages": null
+}

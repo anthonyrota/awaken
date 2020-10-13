@@ -5,14 +5,14 @@ export interface CollapsibleSectionParameters<
     SummaryNode extends Node,
     ChildNode extends Node
 > extends ContainerParameters<ChildNode> {
-    summaryNode: SummaryNode;
+    summaryNode?: SummaryNode;
 }
 
 export interface CollapsibleSectionBase<
     SummaryNode extends Node,
     ChildNode extends Node
 > extends ContainerBase<ChildNode> {
-    summaryNode: SummaryNode;
+    summaryNode?: SummaryNode;
 }
 
 export function CollapsibleSectionBase<
@@ -21,10 +21,16 @@ export function CollapsibleSectionBase<
 >(
     parameters: CollapsibleSectionParameters<SummaryNode, ChildNode>,
 ): CollapsibleSectionBase<SummaryNode, ChildNode> {
-    return {
-        summaryNode: parameters.summaryNode,
-        ...ContainerBase<ChildNode>({ children: parameters.children }),
-    };
+    const collapsibleSection: CollapsibleSectionBase<
+        SummaryNode,
+        ChildNode
+    > = ContainerBase({
+        children: parameters.children,
+    });
+    if (parameters.summaryNode !== undefined) {
+        collapsibleSection.summaryNode = parameters.summaryNode;
+    }
+    return collapsibleSection;
 }
 
 export interface CollapsibleSectionNode<

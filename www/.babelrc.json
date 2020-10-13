@@ -1,6 +1,6 @@
 {
     "presets": [
-        ["@babel/env", { "modules": false, "loose": true }],
+        ["@babel/env", { "modules": false, "bugfixes": true, "loose": true }],
         ["@babel/preset-typescript", { "jsxPragma": "h" }]
     ],
     "plugins": [

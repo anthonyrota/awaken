@@ -4,6 +4,7 @@ import { CodeBlockNode } from './CodeBlock';
 import { CodeSpanNode } from './CodeSpan';
 import { CollapsibleSectionNode } from './CollapsibleSection';
 import { ContainerNode } from './Container';
+import { DocPageLinkNode } from './DocPageLink';
 import { GithubSourceLinkNode } from './GithubSourceLink';
 import { HeadingNode } from './Heading';
 import { Heading123456Node } from './Heading123456';
@@ -11,9 +12,10 @@ import { HorizontalRuleNode } from './HorizontalRule';
 import { HtmlElementNode } from './HtmlElement';
 import { ImageNode } from './Image';
 import { ItalicsNode } from './Italics';
+import { LineBreakNode } from './LineBreak';
 import { LinkNode } from './Link';
 import { ListNode } from './List';
-import { LocalPageLinkNode } from './LocalPageLink';
+import { NamedAnchorNode } from './NamedAnchor';
 import { PageNode } from './Page';
 import { PageTitleNode } from './PageTitle';
 import { ParagraphNode } from './Paragraph';
@@ -21,6 +23,8 @@ import { PlainTextNode } from './PlainText';
 import { RichCodeBlockNode } from './RichCodeBlock';
 import { StrikethroughNode } from './Strikethrough';
 import { SubheadingNode } from './Subheading';
+import { SubscriptNode } from './Subscript';
+import { SuperscriptNode } from './Superscript';
 import { TableNode } from './Table';
 import { TitleNode } from './Title';
 
@@ -32,7 +36,9 @@ export type LeafCoreNode =
     | PlainTextNode
     | HorizontalRuleNode
     | CodeBlockNode
-    | ImageNode;
+    | ImageNode
+    | NamedAnchorNode
+    | LineBreakNode;
 
 export type ContainerCoreNode<ChildType extends Node> =
     | ContainerNode<ChildType>
@@ -44,7 +50,7 @@ export type ContainerCoreNode<ChildType extends Node> =
     | CodeSpanNode<ChildType>
     | RichCodeBlockNode<ChildType>
     | LinkNode<ChildType>
-    | LocalPageLinkNode<ChildType>
+    | DocPageLinkNode<ChildType>
     | GithubSourceLinkNode<ChildType>
     | ParagraphNode<ChildType>
     | Heading123456Node<ChildType>
@@ -53,6 +59,8 @@ export type ContainerCoreNode<ChildType extends Node> =
     | TitleNode<ChildType>
     | ListNode<ChildType>
     | CollapsibleSectionNode<ChildType, ChildType>
+    | SubscriptNode<ChildType>
+    | SuperscriptNode<ChildType>
     | PageTitleNode<ChildType>
     | PageNode<ChildType>;
 
@@ -75,7 +83,7 @@ export type DeepCoreNode =
     | CodeSpanNode<DeepCoreNode>
     | RichCodeBlockNode<DeepCoreNode>
     | LinkNode<DeepCoreNode>
-    | LocalPageLinkNode<DeepCoreNode>
+    | DocPageLinkNode<DeepCoreNode>
     | GithubSourceLinkNode<DeepCoreNode>
     | ParagraphNode<DeepCoreNode>
     | Heading123456Node<DeepCoreNode>
@@ -85,6 +93,8 @@ export type DeepCoreNode =
     | ListNode<DeepCoreNode>
     | TableNode<DeepCoreNode, DeepCoreNode>
     | CollapsibleSectionNode<DeepCoreNode, DeepCoreNode>
+    | SubscriptNode<DeepCoreNode>
+    | SuperscriptNode<DeepCoreNode>
     | PageTitleNode<DeepCoreNode>
     | PageNode<DeepCoreNode>;
 
@@ -101,7 +111,7 @@ export enum CoreNodeType {
     CodeBlock = 'core/CodeBlock',
     RichCodeBlock = 'core/RichCodeBlock',
     Link = 'core/Link',
-    LocalPageLink = 'core/LocalPageLink',
+    DocPageLink = 'core/DocPageLink',
     GithubSourceLink = 'core/GithubSourceLink',
     Image = 'core/Image',
     Paragraph = 'core/Paragraph',
@@ -112,6 +122,10 @@ export enum CoreNodeType {
     List = 'core/List',
     Table = 'core/Table',
     CollapsibleSection = 'core/CollapsibleSection',
+    NamedAnchor = 'core/NamedAnchor',
+    Subscript = 'core/Subscript',
+    Superscript = 'core/Superscript',
+    LineBreak = 'core/LineBreak',
     PageTitle = 'core/PageTitle',
     Page = 'core/Page',
 }

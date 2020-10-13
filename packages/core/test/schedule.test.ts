@@ -12,7 +12,7 @@ import {
     ScheduleTimeoutQueued,
     ScheduleInterval,
     ScheduleFunction,
-} from '@awaken/core';
+} from '@microstream/core';
 
 describe('ScheduleQueued', () => {
     it('should be a function', () => {

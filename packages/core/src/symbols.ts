@@ -2,7 +2,7 @@
 function Symbol_(name: string): any {
     // eslint-disable-next-line max-len
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
-    return `__$$_awaken_symbol_${name}_$$__` as any;
+    return `__$$_microstream_symbol_${name}_$$__` as any;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

@@ -6,9 +6,9 @@ const {
 } = require('../../script/util/fileUtil');
 
 renameOutputModule({
-    from: getAbsolutePath('dist', 'awakenTesting.module.js'),
+    from: getAbsolutePath('dist', 'microstreamTesting.module.js'),
     toDir: getAbsolutePath('dist'),
-    toName: 'awakenTesting.mjs',
+    toName: 'microstreamTesting.mjs',
 });
 
 rimraf.sync(getAbsolutePath('dist', 'testing'));

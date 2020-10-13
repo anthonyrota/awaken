@@ -1,5 +1,5 @@
-import * as crypto from 'crypto';
 import * as path from 'path';
+import { promisify } from 'util';
 import {
     ApiModel,
     ApiItem,
@@ -8,6 +8,7 @@ import {
 } from '@microsoft/api-extractor-model';
 import * as fs from 'fs-extra';
 import * as rimraf from 'rimraf';
+import { computeFileHash } from '../computeFileHash';
 import { exit } from '../exit';
 import { rootDir } from '../rootDir';
 import { buildApiPage, PageExports } from './analyze/build/buildApiPage';
@@ -19,15 +20,18 @@ import {
 import { generateSourceMetadata } from './analyze/sourceMetadata';
 import { getApiItemIdentifier } from './analyze/util/getApiItemIdentifier';
 import { UnsupportedApiItemError } from './analyze/util/UnsupportedApiItemError';
+import { DeepCoreNode } from './core/nodes';
+import { DocPageLinkNode } from './core/nodes/DocPageLink';
+import { HtmlElementNode } from './core/nodes/HtmlElement';
+import { LineBreakNode } from './core/nodes/LineBreak';
+import { PageNode } from './core/nodes/Page';
+import { PlainTextNode } from './core/nodes/PlainText';
+import { TableNode, TableRow } from './core/nodes/Table';
+import { collapseDeepCoreNodeWhitespace } from './core/nodes/util/simplify';
 import { renderDeepRenderMarkdownNodeAsMarkdown } from './core/render/markdown';
 import { buildDocsSourceDirectoryToApiPages } from './docsSource';
 import { getDynamicTextVariableReplacementP } from './getDynamicTextVariableReplacement';
-import {
-    Pages,
-    PagesMetadata,
-    PagesWithMetadata,
-    PageIdToWebsitePath,
-} from './types';
+import { Pages, PagesMetadata } from './types';
 import {
     addFileToFolder,
     Folder,
@@ -36,14 +40,18 @@ import {
 import { globAbsolute } from './util/glob';
 import { createProgram } from './util/ts';
 
+const rimrafP = promisify(rimraf);
+
 async function main() {
-    const sourceFilePaths = await globAbsolute('packages/*/src/**');
+    const sourceFilePaths = await globAbsolute('packages/*/src/**', {
+        nodir: true,
+    });
     const program = createProgram(sourceFilePaths);
 
-    const packages = fs.readdirSync(path.join(rootDir, 'packages'));
+    const packages = await fs.readdir(path.join(rootDir, 'packages'));
     const packageNameToExportFilePath = new Map<string, string>(
         packages.map((packageName) => [
-            `@awaken/${packageName}`,
+            `@microstream/${packageName}`,
             `packages/${packageName}/src/index.ts`,
         ]),
     );
@@ -53,7 +61,9 @@ async function main() {
     );
 
     const apiModel = new ApiModel();
-    const apiModelFilePaths = await globAbsolute('temp/*.api.json');
+    const apiModelFilePaths = await globAbsolute('temp/*.api.json', {
+        nodir: true,
+    });
 
     for (const apiModelFilePath of apiModelFilePaths) {
         apiModel.loadPackage(apiModelFilePath);
@@ -69,14 +79,14 @@ async function main() {
 
     function coreIdentifier(exportName: string): ExportIdentifier {
         return {
-            packageName: '@awaken/core',
+            packageName: '@microstream/core',
             exportName,
         };
     }
 
     function testingIdentifier(exportName: string): ExportIdentifier {
         return {
-            packageName: '@awaken/testing',
+            packageName: '@microstream/testing',
             exportName,
         };
     }
@@ -469,48 +479,41 @@ async function main() {
         buildApiPage({
             context: analyzeContext,
             pageId: coreApiBasicsId,
-            pageTitle: 'API Reference - Basics',
             pageExports: coreBasicsExports,
         }),
         buildApiPage({
             context: analyzeContext,
             pageId: coreApiSourcesId,
-            pageTitle: 'API Reference - Sources',
             pageExports: coreSourcesExports,
         }),
         buildApiPage({
             context: analyzeContext,
             pageId: coreApiOperatorsId,
-            pageTitle: 'API Reference - Operators',
             pageExports: coreOperatorsExports,
         }),
         buildApiPage({
             context: analyzeContext,
             pageId: coreApiSubjectsId,
-            pageTitle: 'API Reference - Subjects',
             pageExports: coreSubjectsExports,
         }),
         buildApiPage({
             context: analyzeContext,
             pageId: coreApiScheduleFunctionsId,
-            pageTitle: 'API Reference - Schedule Functions',
             pageExports: coreScheduleFunctionsExports,
         }),
         buildApiPage({
             context: analyzeContext,
             pageId: coreApiUtilsId,
-            pageTitle: 'API Reference - Utils',
             pageExports: coreUtilsExports,
         }),
         buildApiPage({
             context: analyzeContext,
             pageId: testingApiId,
-            pageTitle: 'API Reference - Testing',
             pageExports: testingExports,
         }),
     ];
 
-    const pageIdToWebsitePath: PageIdToWebsitePath = {
+    const pageIdToWebsitePath: Record<string, string> = {
         [coreApiBasicsId]: 'docs/api-basics',
         [coreApiSourcesId]: 'docs/api-sources',
         [coreApiOperatorsId]: 'docs/api-operators',
@@ -518,6 +521,15 @@ async function main() {
         [coreApiScheduleFunctionsId]: 'docs/api-schedule-functions',
         [coreApiUtilsId]: 'docs/api-utils',
         [testingApiId]: 'docs/api-testing',
+    };
+    const pageIdToPageTitle: Record<string, string> = {
+        [coreApiBasicsId]: 'API - Basics',
+        [coreApiSourcesId]: 'API - Sources',
+        [coreApiOperatorsId]: 'API - Operators',
+        [coreApiSubjectsId]: 'API - Subjects',
+        [coreApiScheduleFunctionsId]: 'API - Schedule Functions',
+        [coreApiUtilsId]: 'API - Utils',
+        [testingApiId]: 'API - Testing',
     };
     const pageIdToMdPagePath: Record<string, string> = Object.fromEntries(
         Object.entries(pageIdToWebsitePath).map(([pageId, websitePath]) => [
@@ -542,13 +554,10 @@ async function main() {
 
     pages.push(...docsSource.pages);
     mergeExpectUnique(pageIdToMdPagePath, docsSource.pageIdToMdPagePath);
+    mergeExpectUnique(pageIdToPageTitle, docsSource.pageIdToPageTitle);
     mergeExpectUnique(pageIdToWebsitePath, docsSource.pageIdToWebsitePath);
 
-    const order = [
-        'core--introduction',
-        'test',
-        ...exportsWithIds.map(([, id]) => id),
-    ];
+    const order = ['core--introduction', ...exportsWithIds.map(([, id]) => id)];
 
     const uniquePageIds = new Set();
     for (const pageId of order) {
@@ -569,17 +578,114 @@ async function main() {
     const docsDir = path.join(rootDir, docsDirectoryName);
     const outFolder = Folder();
 
+    function getPageTitleFromPageId(pageId: string): string {
+        if (!(pageId in pageIdToPageTitle)) {
+            throw new Error(`Unknown page id ${pageId}`);
+        }
+        return pageIdToPageTitle[pageId];
+    }
+
     function getPageMarkdownPathFromPageId(pageId: string): string {
         if (!(pageId in pageIdToMdPagePath)) {
             throw new Error(`Unknown page id ${pageId}`);
         }
-        return pageIdToWebsitePath[pageId];
-    }
-
-    for (const page of pages) {
-        const mdPath = pageIdToMdPagePath[page.pageId];
+        const mdPath = pageIdToMdPagePath[pageId];
         if (!mdPath.startsWith(`${docsDirectoryName}/`)) {
             throw new Error(`${mdPath} is not in docs directory`);
+        }
+
+        const index = order.indexOf(pageId);
+        const maxNumberLength = Math.max(
+            (order.length - 1).toString().length,
+            2,
+        );
+        const number = `${index}`.padStart(maxNumberLength, '0');
+
+        const insideDocsPath = mdPath.slice(docsDirectoryName.length + 1);
+        return `${docsDirectoryName}/${number}-${insideDocsPath}`;
+    }
+
+    enum FooterCellRole {
+        Previous,
+        Next,
+    }
+
+    function createFooterCell(
+        role: FooterCellRole,
+        pageOrderIndex: number,
+    ): DeepCoreNode | undefined {
+        const description = FooterCellRole[role];
+        let toPageId: string;
+        if (role === FooterCellRole.Previous) {
+            if (pageOrderIndex === 0) {
+                return;
+            }
+            toPageId = order[pageOrderIndex - 1];
+        } else {
+            if (pageOrderIndex === order.length - 1) {
+                return;
+            }
+            toPageId = order[pageOrderIndex + 1];
+        }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const toPageTitle = pageIdToPageTitle[toPageId];
+        return DocPageLinkNode({
+            pageId: toPageId,
+            children: [
+                PlainTextNode({
+                    text: `${description} (${toPageTitle})`,
+                }),
+            ],
+        });
+    }
+
+    for (let page of pages) {
+        collapseDeepCoreNodeWhitespace(page);
+        const mdPath = getPageMarkdownPathFromPageId(page.pageId);
+        const pageOrderIndex = order.indexOf(page.pageId);
+        const previousCell = createFooterCell(
+            FooterCellRole.Previous,
+            pageOrderIndex,
+        );
+        const nextCell = createFooterCell(FooterCellRole.Next, pageOrderIndex);
+        const previousTable =
+            previousCell &&
+            TableNode<DeepCoreNode, DeepCoreNode>({
+                header: TableRow({
+                    children: [previousCell],
+                }),
+            });
+        const nextTable =
+            nextCell &&
+            HtmlElementNode({
+                tagName: 'div',
+                attributes: {
+                    align: 'right',
+                },
+                children: [
+                    TableNode<DeepCoreNode, DeepCoreNode>({
+                        header: TableRow({
+                            children: [nextCell],
+                        }),
+                    }),
+                ],
+            });
+        if (previousTable || nextTable) {
+            const children: DeepCoreNode[] = [
+                ...page.children,
+                LineBreakNode({}),
+            ];
+            if (previousTable) {
+                children.push(previousTable);
+            }
+            if (nextTable) {
+                children.push(nextTable);
+            }
+            page = PageNode<DeepCoreNode>({
+                pageId: page.pageId,
+                tableOfContents: page.tableOfContents,
+                children,
+            });
         }
         addFileToFolder(
             outFolder,
@@ -587,11 +693,14 @@ async function main() {
             renderDeepRenderMarkdownNodeAsMarkdown(page, {
                 pageId: page.pageId,
                 getPagePathFromPageId: getPageMarkdownPathFromPageId,
+                getPageTitleFromPageId,
             }),
         );
     }
 
     const pagesMetadata: PagesMetadata = {
+        pageIdToWebsitePath,
+        pageIdToPageTitle,
         order,
         github:
             process.env.VERCEL_GITHUB_DEPLOYMENT === '1'
@@ -607,55 +716,31 @@ async function main() {
                   }
                 : null,
     };
-    const pagesWithMetadata: PagesWithMetadata = {
-        metadata: pagesMetadata,
-        pages,
-    };
-    const pagesWithMetadataStringified = JSON.stringify(pagesWithMetadata);
-    // Why eight hex characters chosen to represent the hash? Because parcel
-    // does it too.
-    // eslint-disable-next-line max-len
-    // How good are eight hex characters? Well, according to https://everydayinternetstuff.com/2015/04/hash-collision-probability-calculator/,
-    // these are the probabilities of collision given `n` hashes
-    // | number of hashes | probability of collision |
-    // | ---------------- | ------------------------ |
-    // | 5000             | 0.0029055716014250166    |
-    // | 10000            | 0.01157288105708909      |
-    // | 20000            | 0.04549633911131801      |
-    // | 40000            | 0.16994213048124074      |
-    // | 80000            | 0.5252888411157739       |
-    // | 160000           | 0.9492180149513215       |
-    const pagesWithMetadataHash = crypto
-        .createHash('md5')
-        .update(pagesWithMetadataStringified)
-        .digest('hex')
-        .slice(-8);
+    const pagesStringified = JSON.stringify(pages);
+    const pagesMetadataStringified = JSON.stringify(pagesMetadata);
+    const pagesHash = computeFileHash(pagesStringified);
 
     addFileToFolder(
         outFolder,
-        `www/_files/public/pages.${pagesWithMetadataHash}.json`,
-        pagesWithMetadataStringified,
+        `www/_files/public/pages.${pagesHash}.json`,
+        pagesStringified,
     );
+    addFileToFolder(outFolder, 'www/temp/pages.json', pagesStringified);
+    addFileToFolder(outFolder, 'www/temp/pagesHash', pagesHash);
     addFileToFolder(
         outFolder,
-        'www/temp/pages.json',
-        pagesWithMetadataStringified,
-    );
-    addFileToFolder(outFolder, 'www/temp/pagesHash', pagesWithMetadataHash);
-    addFileToFolder(
-        outFolder,
-        'www/temp/pageIdToWebsitePath.json',
-        JSON.stringify(pageIdToWebsitePath),
+        'www/temp/pagesMetadata.json',
+        pagesMetadataStringified,
     );
 
-    fs.removeSync(docsDir);
-    rimraf.sync('_files/public/pages.*.json');
-
+    await Promise.all([
+        fs.remove(docsDir),
+        rimrafP('_files/public/pages.*.json'),
+    ]);
     await writeFolderToDirectoryPath(outFolder, rootDir);
 }
 
 main().catch((error) => {
     console.error('error making docs...');
-    console.log(error);
-    exit();
+    exit(error);
 });

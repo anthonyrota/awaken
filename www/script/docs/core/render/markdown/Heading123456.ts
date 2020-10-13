@@ -3,6 +3,7 @@ import { Node } from '../../nodes';
 import { ContainerNode } from '../../nodes/Container';
 import { Heading123456Base } from '../../nodes/Heading123456';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { NamedAnchorNode } from '../../nodes/NamedAnchor';
 import { MarkdownOutput } from './MarkdownOutput';
 import { FunctionalNode } from './nodes/FunctionalNode';
 import {
@@ -19,11 +20,8 @@ function writeInsides<ChildNode extends Node>(
 ): void {
     if (heading123456.alternateId) {
         writeRenderMarkdownNode(
-            HtmlElementNode({
-                tagName: 'a',
-                attributes: {
-                    name: heading123456.alternateId,
-                },
+            NamedAnchorNode({
+                name: heading123456.alternateId,
             }),
             output,
             noop,

@@ -1,13 +1,12 @@
 import { DeepCoreNode } from '..';
 import { format, formatWithCursor, Language } from '../../../util/prettier';
 import { ContainerBase } from '../Container';
-import { PlainTextNode } from '../PlainText';
-import { extractTextNodes } from './extractTextNodes';
+import { ExtractedTextNode, extractTextNodes } from './extractTextNodes';
 
 export function formatCodeContainer(
     container: ContainerBase<DeepCoreNode>,
 ): void {
-    const textNodes: PlainTextNode[] = [];
+    const textNodes: ExtractedTextNode[] = [];
     for (const childNode of container.children) {
         extractTextNodes(childNode, textNodes);
     }

@@ -1,7 +1,12 @@
 import * as path from 'path';
+import { Readable } from 'stream';
+import { promisify } from 'util';
 import * as fs from 'fs-extra';
+import * as rimraf from 'rimraf';
 
-export type File = string | Buffer;
+const rimrafP = promisify(rimraf);
+
+export type File = string | Buffer | Readable;
 export type Folder = Map<string, File | Folder>;
 
 export function Folder(): Folder {
@@ -97,14 +102,14 @@ export function removeFileFromFolder(folder: Folder, filePath: string): void {
     nestedFolder.delete(fileName);
 }
 
-export function getFileInFolder(folder: Folder, filePath: string): string {
+export function getFileInFolder(folder: Folder, filePath: string): File {
     const [nestedFolder, fileName] = getNestedFolderAndFileNameAtPath(
         folder,
         filePath,
         true,
     );
 
-    return nestedFolder.get(fileName) as string;
+    return nestedFolder.get(fileName) as File;
 }
 
 export function moveFileInFolder(
@@ -126,11 +131,10 @@ export function copyFolder(to: Folder, from: Folder): void {
 export async function writeFolderToDirectoryPath(
     folder: Folder,
     directoryPath: string,
-): Promise<unknown> {
+): Promise<void> {
     await fs.ensureDir(directoryPath);
-
-    return Promise.all(
-        Array.from(folder, ([fileOrFolderPath, fileOrFolder]) => {
+    await Promise.all(
+        Array.from(folder, async ([fileOrFolderPath, fileOrFolder]) => {
             if (fileOrFolderPath === '') {
                 throw new Error(
                     'Empty string as file or folder path not allowed.',
@@ -141,6 +145,27 @@ export async function writeFolderToDirectoryPath(
 
             if (fileOrFolder instanceof Map) {
                 return writeFolderToDirectoryPath(fileOrFolder, writePath);
+            }
+
+            if (fs.existsSync(writePath)) {
+                const stats = fs.lstatSync(writePath);
+
+                if (stats.isDirectory()) {
+                    await rimrafP(writePath);
+                } else if (!stats.isFile()) {
+                    throw new Error(`${writePath} is not a file or directory`);
+                }
+            }
+
+            if (fileOrFolder instanceof Readable) {
+                return new Promise((resolve, reject) => {
+                    const writeStream = fs.createWriteStream(writePath);
+
+                    writeStream.on('finish', resolve);
+                    writeStream.on('error', reject);
+
+                    fileOrFolder.pipe(writeStream);
+                });
             }
 
             return fs.writeFile(writePath, fileOrFolder, 'utf-8');

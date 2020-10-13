@@ -1,5 +1,4 @@
 node_modules
 apiReport
 CHANGELOG.md
-docs
-docs-source
+/docs

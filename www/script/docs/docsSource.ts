@@ -1,12 +1,14 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { rootDir } from '../rootDir';
-import { parseMarkdownWithYamlFrontmatter } from './analyze/util/parseMarkdown';
+import { CoreNodeType, DeepCoreNode } from './core/nodes';
 import { ContainerNode } from './core/nodes/Container';
 import { Heading123456Level } from './core/nodes/Heading123456';
-import { CoreNodeType, DeepCoreNode } from './core/nodes/index';
 import { PageNode } from './core/nodes/Page';
 import { extractTextNodes } from './core/nodes/util/extractTextNodes';
+import { parseMarkdownWithYamlFrontmatter } from './core/nodes/util/parseMarkdown';
+import { replaceHtml } from './core/nodes/util/replaceHtml';
+import { simplifyDeepCoreNode } from './core/nodes/util/simplify';
 import { substituteDynamicTextValues } from './core/nodes/util/substituteDynamicTextValues';
 import { walkDeepCoreNode } from './core/nodes/util/walk';
 import { getDynamicTextVariableReplacementP } from './getDynamicTextVariableReplacement';
@@ -15,6 +17,7 @@ import { TableOfContents, TableOfContentsMainReference } from './types';
 interface DocsSourceFrontMatter {
     title: string;
     pageId: string;
+    docsPath?: string;
     websitePath?: string;
 }
 
@@ -28,7 +31,7 @@ function validateDocsSourceFrontMatter(
     }
 
     const requiredStringKeys = ['title', 'pageId'];
-    const optionalStringKeys = ['websitePath'];
+    const optionalStringKeys = ['docsPath', 'websitePath'];
 
     for (const key of requiredStringKeys) {
         if (!(key in value)) {
@@ -57,12 +60,13 @@ function validateDocsSourceFrontMatter(
     }
 }
 
-const docsSourceDirectory = path.join(rootDir, 'docs-source');
+const docsSourceDirectory = path.join(rootDir, 'www', 'docs');
 
 async function buildDocsSourceSubdirectoryToApiPages(
     subPath,
     pages: PageNode<DeepCoreNode>[],
     pageIdToMdPagePath: Record<string, string>,
+    pageIdToPageTitle: Record<string, string>,
     pageIdToWebsitePath: Record<string, string>,
 ): Promise<unknown> {
     // eslint-disable-next-line max-len
@@ -82,6 +86,7 @@ async function buildDocsSourceSubdirectoryToApiPages(
                     path.join(subPath, name),
                     pages,
                     pageIdToMdPagePath,
+                    pageIdToPageTitle,
                     pageIdToWebsitePath,
                 ),
             );
@@ -111,23 +116,29 @@ async function buildDocsSourceSubdirectoryToApiPages(
 
             validateDocsSourceFrontMatter(frontmatter.value);
 
-            const { title, pageId, websitePath } = frontmatter.value;
+            const { title, pageId, docsPath, websitePath } = frontmatter.value;
 
-            const mdPagePath = `docs/` + path.join(subPath, name);
+            const mdPagePath =
+                docsPath !== undefined
+                    ? docsPath
+                    : `docs/` + path.join(subPath, name);
             const defaultWebsitePath = mdPagePath.slice(0, -ext.length);
             pageIdToMdPagePath[pageId] = mdPagePath;
-            pageIdToWebsitePath[pageId] = websitePath ?? defaultWebsitePath;
+            (pageIdToPageTitle[pageId] = title),
+                (pageIdToWebsitePath[pageId] =
+                    websitePath ?? defaultWebsitePath);
 
+            substituteDynamicTextValues(
+                rootContainer,
+                getDynamicTextVariableReplacement,
+            );
             const pageNode = PageNode({
-                title,
                 tableOfContents: buildTableOfContents(rootContainer),
                 pageId,
                 children: rootContainer.children,
             });
-            substituteDynamicTextValues(
-                pageNode,
-                getDynamicTextVariableReplacement,
-            );
+            replaceHtml(pageNode);
+            simplifyDeepCoreNode(pageNode);
             pages.push(pageNode);
         });
 
@@ -144,20 +155,24 @@ async function buildDocsSourceSubdirectoryToApiPages(
 export async function buildDocsSourceDirectoryToApiPages(): Promise<{
     pages: PageNode<DeepCoreNode>[];
     pageIdToMdPagePath: Record<string, string>;
+    pageIdToPageTitle: Record<string, string>;
     pageIdToWebsitePath: Record<string, string>;
 }> {
     const pages: PageNode<DeepCoreNode>[] = [];
     const pageIdToMdPagePath: Record<string, string> = {};
+    const pageIdToPageTitle: Record<string, string> = {};
     const pageIdToWebsitePath: Record<string, string> = {};
     await buildDocsSourceSubdirectoryToApiPages(
         '',
         pages,
         pageIdToMdPagePath,
+        pageIdToPageTitle,
         pageIdToWebsitePath,
     );
     return {
         pages,
         pageIdToMdPagePath,
+        pageIdToPageTitle,
         pageIdToWebsitePath,
     };
 }

@@ -7,7 +7,7 @@ import {
     isDisposable,
     DISPOSED,
     implDisposableMethods,
-} from '@awaken/core';
+} from '@microstream/core';
 
 describe('isDisposable', () => {
     it('should be a function', () => {

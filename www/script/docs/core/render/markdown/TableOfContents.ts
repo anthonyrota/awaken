@@ -1,6 +1,6 @@
 import { BoldNode } from '../../nodes/Bold';
 import { CollapsibleSectionNode } from '../../nodes/CollapsibleSection';
-import { HtmlElementNode } from '../../nodes/HtmlElement';
+import { LineBreakNode } from '../../nodes/LineBreak';
 import { PlainTextNode } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
 import { TableOfContentsBase } from './nodes/TableOfContents';
@@ -18,7 +18,7 @@ export function writeTableOfContents(
                 children: [PlainTextNode({ text: 'Table of Contents' })],
             }),
             children: [
-                HtmlElementNode({ tagName: 'br' }),
+                LineBreakNode({}),
                 TableOfContentsListNode({
                     tableOfContents: tableOfContents.tableOfContents,
                 }),

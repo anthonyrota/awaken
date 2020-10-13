@@ -1,22 +1,43 @@
 import { Node, CoreNodeType, DeepCoreNode, CoreNode } from '..';
 
+function visitChildren<ChildNode extends Node>(
+    children: ChildNode[],
+    onChildNode: (
+        node: ChildNode,
+        replaceNode: (newNode: ChildNode) => void,
+    ) => void,
+): void {
+    children.forEach((childNode, index) => {
+        onChildNode(childNode, (newNode) => {
+            children[index] = newNode;
+        });
+    });
+}
+
 export function visitCoreNodeChildren<ChildNode extends Node>(
     node: CoreNode<ChildNode>,
-    onChildNode: (node: ChildNode) => void,
+    onChildNode: (
+        node: ChildNode,
+        replaceNode: (newNode: ChildNode) => void,
+    ) => void,
 ): void {
     if ('children' in node) {
-        node.children.forEach(onChildNode);
+        visitChildren(node.children, onChildNode);
     }
 
     switch (node.type) {
         case CoreNodeType.CollapsibleSection: {
-            onChildNode(node.summaryNode);
+            if (node.summaryNode) {
+                onChildNode(node.summaryNode, (newNode) => {
+                    node.summaryNode = newNode;
+                });
+            }
             break;
         }
         case CoreNodeType.Table: {
-            node.header.children.forEach(onChildNode);
+            visitChildren(node.header.children, onChildNode);
             for (const row of node.rows) {
-                row.children.forEach(onChildNode);
+                visitChildren(row.children, onChildNode);
             }
             break;
         }
@@ -25,12 +46,19 @@ export function visitCoreNodeChildren<ChildNode extends Node>(
 
 export function walkDeepCoreNode(
     node: DeepCoreNode,
-    onNode: (node: DeepCoreNode) => void,
+    onNode: (
+        node: DeepCoreNode,
+        replaceNode: ((newNode: DeepCoreNode) => void) | null,
+    ) => boolean | void,
 ): void {
-    function onChildNode(node: DeepCoreNode): void {
-        onNode(node);
-        visitCoreNodeChildren(node, onChildNode);
+    function onChildNode(
+        node: DeepCoreNode,
+        replaceNode: ((newNode: DeepCoreNode) => void) | null,
+    ): void {
+        if (onNode(node, replaceNode) !== true) {
+            visitCoreNodeChildren(node, onChildNode);
+        }
     }
 
-    onChildNode(node);
+    onChildNode(node, null);
 }

@@ -1,11 +1,11 @@
-# `@awaken/testing`
+# `@microstream/testing`
 
 > TODO: description
 
 ## Usage
 
 ```ts
-import {} from '@awaken/testing';
+import {} from '@microstream/testing';
 
 // TODO: DEMONSTRATE API
 ```

@@ -5,7 +5,9 @@ import { writeCodeBlock } from './CodeBlock';
 import { writeCodeSpan } from './CodeSpan';
 import { writeCollapsibleSection } from './CollapsibleSection';
 import { writeContainer } from './ContainerBase';
+import { writeDocPageLink } from './DocPageLink';
 import { writeDoNotEditComment } from './DoNotEditComment';
+import { writeFunctional } from './Functional';
 import { writeGithubSourceLink } from './GithubSourceLink';
 import { writeHeading } from './Heading';
 import { writeHeading123456 } from './Heading123456';
@@ -14,10 +16,11 @@ import { writeHtmlComment } from './HtmlComment';
 import { writeHtmlElement } from './HtmlElement';
 import { writeImage } from './Image';
 import { writeItalics } from './Italics';
+import { writeLineBreak } from './LineBreak';
 import { writeLink } from './Link';
 import { writeList } from './List';
-import { writeLocalPageLink } from './LocalPageLink';
 import { MarkdownOutput, MarkdownOutputParameters } from './MarkdownOutput';
+import { writeNamedAnchor } from './NamedAnchor';
 import {
     LeafRenderMarkdownNode,
     RenderMarkdownNode,
@@ -31,11 +34,12 @@ import { writePlainText } from './PlainText';
 import { writeRichCodeBlock } from './RichCodeBlock';
 import { writeStrikethrough } from './Strikethrough';
 import { writeSubheading } from './Subheading';
+import { writeSubscript } from './Subscript';
+import { writeSuperscript } from './Superscript';
 import { writeTable } from './Table';
 import { writeTableOfContents } from './TableOfContents';
 import { writeTableOfContentsList } from './TableOfContentsList';
 import { writeTitle } from './Title';
-import { writeFunctionalNode } from './writeFunctionalNode';
 
 export interface ParamWriteChildNode<ChildNode extends Node> {
     (node: ChildNode, output: MarkdownOutput): void;
@@ -169,8 +173,8 @@ export function writeRenderMarkdownNode<ChildNode extends Node>(
             writeLink(node, output, writeRenderMarkdownNode, writeChildNode!);
             break;
         }
-        case CoreNodeType.LocalPageLink: {
-            writeLocalPageLink(
+        case CoreNodeType.DocPageLink: {
+            writeDocPageLink(
                 node,
                 output,
                 writeRenderMarkdownNode,
@@ -255,6 +259,32 @@ export function writeRenderMarkdownNode<ChildNode extends Node>(
             );
             break;
         }
+        case CoreNodeType.Subscript: {
+            writeSubscript(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
+            break;
+        }
+        case CoreNodeType.Superscript: {
+            writeSuperscript(
+                node,
+                output,
+                writeRenderMarkdownNode,
+                writeChildNode!,
+            );
+            break;
+        }
+        case CoreNodeType.NamedAnchor: {
+            writeNamedAnchor(node, output, writeRenderMarkdownNode);
+            break;
+        }
+        case CoreNodeType.LineBreak: {
+            writeLineBreak(node, output, writeRenderMarkdownNode);
+            break;
+        }
         case CoreNodeType.PageTitle: {
             writePageTitle(
                 node,
@@ -262,6 +292,10 @@ export function writeRenderMarkdownNode<ChildNode extends Node>(
                 writeRenderMarkdownNode,
                 writeChildNode!,
             );
+            break;
+        }
+        case CoreNodeType.Page: {
+            writePage(node, output, writeRenderMarkdownNode, writeChildNode!);
             break;
         }
         case RenderMarkdownNodeType.TableOfContentsList: {
@@ -276,12 +310,8 @@ export function writeRenderMarkdownNode<ChildNode extends Node>(
             writeDoNotEditComment(node, output, writeRenderMarkdownNode);
             break;
         }
-        case CoreNodeType.Page: {
-            writePage(node, output, writeRenderMarkdownNode, writeChildNode!);
-            break;
-        }
         case RenderMarkdownNodeType.FunctionalNode: {
-            writeFunctionalNode(node, output, writeRenderMarkdownNode);
+            writeFunctional(node, output, writeRenderMarkdownNode);
             break;
         }
         default: {

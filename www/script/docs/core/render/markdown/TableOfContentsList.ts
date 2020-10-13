@@ -5,8 +5,8 @@ import {
 import { DeepCoreNode } from '../../nodes';
 import { CodeSpanNode } from '../../nodes/CodeSpan';
 import { ContainerNode } from '../../nodes/Container';
+import { DocPageLinkNode } from '../../nodes/DocPageLink';
 import { ListNode, ListType } from '../../nodes/List';
-import { LocalPageLinkNode } from '../../nodes/LocalPageLink';
 import { PlainTextNode } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
 import { TableOfContentsListBase } from './nodes/TableOfContentsList';
@@ -16,7 +16,7 @@ function buildTableOfContentsLink(
     reference: TableOfContentsInlineReference,
     output: MarkdownOutput,
 ): DeepCoreNode {
-    return LocalPageLinkNode<DeepCoreNode>({
+    return DocPageLinkNode<DeepCoreNode>({
         pageId: output.pageId,
         hash: reference.urlHashText,
         children: [

@@ -1,10 +1,12 @@
-import { DeepCoreNode } from './core/nodes';
-import { PageNode } from './core/nodes/Page';
+import type { DeepCoreNode } from './core/nodes';
+import type { PageNode } from './core/nodes/Page';
 
 export type PageOrder = /* PageId[] */ string[];
 export type Pages = PageNode<DeepCoreNode>[];
 
 export interface PagesMetadata {
+    pageIdToWebsitePath: Record<string, string>;
+    pageIdToPageTitle: Record<string, string>;
     order: PageOrder;
     github: null | {
         org: string;
@@ -13,13 +15,6 @@ export interface PagesMetadata {
         sha: string;
     };
 }
-
-export interface PagesWithMetadata {
-    metadata: PagesMetadata;
-    pages: Pages;
-}
-
-export type PageIdToWebsitePath = Record<string, string>;
 
 export interface TableOfContentsInlineReference {
     text: string;

@@ -1,0 +1,455 @@
+/*
+ * http://meyerweb.com/eric/tools/css/reset/
+ * v2.0 | 20110126
+ * License: none (public domain)
+ */
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+input,
+video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+// HTML5 display-role reset for older browsers
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+    display: block;
+}
+
+body {
+    line-height: 1;
+}
+ol,
+ul {
+    list-style: none;
+}
+blockquote,
+q {
+    quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+$mobile-size: 420px;
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-family: BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+        'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.42857;
+    font-size: 16px;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+html {
+    overflow-y: scroll;
+}
+
+input,
+button {
+    border: none;
+    background: inherit;
+}
+
+$z-index-main: 0;
+$z-index-header: 1;
+$z-index-menu: 1;
+$z-index-skip-link: 2;
+
+// https://web.dev/headings-and-landmarks/#use-landmarks-to-aid-navigation
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 8px;
+    background: #000000;
+    color: white;
+    padding: 8px;
+    z-index: $z-index-skip-link;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+$spacing: 1em;
+$text-color: rgb(54, 60, 63);
+$link-highlight-color: #f36;
+$light-border: 1px solid #ececec;
+$max-width: 1000px;
+$header-height: 56px;
+$header-border-height: 1px;
+
+@mixin navigation-link--active {
+    color: $link-highlight-color;
+}
+
+@mixin navigation-link {
+    text-decoration: none;
+    color: $text-color;
+
+    &:hover,
+    &:focus {
+        @include navigation-link--active();
+    }
+}
+
+.header {
+    $link-margin: 1px;
+    $link-padding: 7px;
+    $content-height: 40px;
+
+    line-height: 1.5;
+    background-color: #fff;
+    border-bottom: $light-border;
+    display: flex;
+    align-items: center;
+    height: $header-height;
+    right: 0;
+    left: 0;
+    top: 0;
+    position: relative;
+    z-index: $z-index-header;
+    font-weight: 500;
+
+    &__contents {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: $max-width;
+        position: relative;
+        width: 100%;
+        height: $header-height;
+
+        &__container {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+    }
+
+    &__logo {
+        display: flex;
+        align-items: center;
+        margin-left: $spacing/2;
+        padding-left: $spacing/2;
+        padding-right: $spacing/2;
+        height: $content-height;
+
+        &__img {
+            fill: none;
+            height: 100%;
+            width: auto;
+            display: block;
+        }
+    }
+
+    &__nav {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        padding: 0 calc(#{$spacing} - #{$link-margin} - #{$link-padding});
+
+        &__link-container {
+            display: flex;
+            height: 100%;
+            align-items: center;
+
+            &--active {
+                border-bottom: 2px solid $link-highlight-color;
+            }
+        }
+
+        &__link-container--active &__link {
+            @include navigation-link--active();
+            margin-bottom: -2px;
+        }
+
+        &__link {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 0px $link-margin;
+            padding: 0px $link-padding;
+            height: $content-height;
+
+            @include navigation-link();
+        }
+
+        &__icon {
+            fill: $text-color;
+            height: 20px;
+
+            &--menu {
+                height: 24px;
+            }
+        }
+
+        &__link:hover &__icon,
+        &__link:focus &__icon {
+            opacity: 0.7;
+        }
+    }
+
+    &__search {
+        position: relative;
+        flex-grow: 1;
+        margin-left: $spacing/2;
+        $icon-size: 16px;
+
+        &__input {
+            font-weight: 400;
+            display: block;
+            padding-left: $spacing * 2.7;
+            padding-right: $spacing;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+            height: $content-height;
+
+            &::placeholder {
+                color: $text-color;
+            }
+        }
+
+        &__icon {
+            display: flex;
+            align-items: center;
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            padding-left: $icon-size;
+
+            &__svg {
+                fill: $text-color;
+                height: $icon-size;
+            }
+        }
+    }
+
+    &__version {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        color: $text-color;
+    }
+
+    @media only screen and (max-width: 800px) {
+        &__nav {
+            &__pages {
+                display: none;
+            }
+        }
+
+        &__search {
+            justify-content: space-around;
+            margin-right: $spacing;
+        }
+    }
+
+    &__logo {
+        &__without-text {
+            display: none;
+        }
+    }
+
+    @media screen and (max-width: $mobile-size) {
+        &__logo {
+            &__without-text {
+                display: block;
+            }
+            &__with-text {
+                display: none;
+            }
+        }
+    }
+}
+
+.menu {
+    display: flex;
+    justify-content: center;
+    height: calc(100vh - #{$header-height} - #{$header-border-height});
+    width: 100%;
+    z-index: $z-index-menu;
+
+    &--open ~ .main {
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+    }
+
+    // Fix chromium bug where focusing the link through javascript does not show
+    // outline.
+    .menu__link--fix-chromium-focus:focus {
+        outline: 2px solid -webkit-focus-ring-color;
+    }
+
+    &__contents {
+        position: relative;
+        width: 100%;
+        max-width: $max-width;
+        height: 100%;
+        padding-top: $spacing;
+        padding-bottom: $spacing;
+        left: $spacing;
+        background: #fff;
+    }
+
+    &__li {
+        margin-bottom: 13px;
+        line-height: 24px;
+        list-style-position: inside;
+    }
+
+    &__link-container--active {
+        display: inline-block;
+        border-bottom: 2px solid $link-highlight-color;
+        padding-bottom: 1px;
+        margin-bottom: -3px;
+    }
+
+    &__link-container--active &__link {
+        @include navigation-link--active();
+    }
+
+    &__link {
+        padding: $spacing / 2;
+        @include navigation-link();
+    }
+}
+
+.main {
+    padding-top: 1em;
+    padding-left: $spacing;
+    padding-right: $spacing;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: $max-width;
+    width: 100%;
+    overflow: hidden;
+    z-index: $z-index-main;
+}

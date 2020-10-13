@@ -2,9 +2,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { encodings as parseEncodingsHeader } from '@hapi/accept';
 import { NowRequest, NowResponse } from '@vercel/node';
-import * as fresh from 'fresh';
+// import * as fresh from 'fresh';
 import { parsePath } from 'history';
-import { PublicFileMetadata } from '../script/generatePublic/types';
+import { PublicFileMetadata } from '../script/template/types';
 
 const filesPath = path.join(__dirname, '..', '_files');
 
@@ -67,11 +67,11 @@ function sendPublicFileInEncoding(
             : meta.identityEncodingMeta;
 
     if (useETag) {
-        if (fresh(request.headers, { etag: encodingMeta.etag })) {
-            response.status(304).end();
-            return;
-        }
-
+        // Handled by vercel.
+        // if (fresh(request.headers, { etag: encodingMeta.etag })) {
+        //     response.status(304).end();
+        //     return;
+        // }
         response.setHeader('ETag', encodingMeta.etag);
     }
 
@@ -111,13 +111,16 @@ function sendPublicFile(
     const { publicFilePath, useETag, status } = params;
 
     let contentEncoding: SupportedContentEncoding = 'identity';
-    const acceptEncodingHeader = request.headers['accept-encoding'];
-    if (typeof acceptEncodingHeader === 'string') {
-        const encodings = parseEncodingsHeader(acceptEncodingHeader);
-        if (encodings.includes('br')) {
-            contentEncoding = 'br';
-        } else if (encodings.includes('gzip')) {
-            contentEncoding = 'gzip';
+    const ext = path.extname(publicFilePath);
+    if (ext !== '.png') {
+        const acceptEncodingHeader = request.headers['accept-encoding'];
+        if (typeof acceptEncodingHeader === 'string') {
+            const encodings = parseEncodingsHeader(acceptEncodingHeader);
+            if (encodings.includes('br')) {
+                contentEncoding = 'br';
+            } else if (encodings.includes('gzip')) {
+                contentEncoding = 'gzip';
+            }
         }
     }
 
@@ -130,21 +133,9 @@ function sendPublicFile(
 }
 
 const immutableCacheControl = 'public, max-age=31536000, immutable';
-const mustRevalidateCacheControl = 'public, max-age=0, must-revalidate';
-const noCacheCacheControl = 'no-cache, no-store, max-age=0, must-revalidate';
-
-const htmlContentType = 'text/html; charset=utf-8';
-const htmlCacheControl = mustRevalidateCacheControl;
-
-const jsonContentType = 'application/json; charset=utf-8';
-const jsonCacheControl = immutableCacheControl;
-
-const javascriptContentType = 'text/javascript; charset=utf-8';
-const javascriptCacheControl = immutableCacheControl;
-
-const notFoundPublicFilePath = '404.html';
-const notFoundContentType = htmlContentType;
-const notFoundCacheControl = noCacheCacheControl;
+const mustRevalidateCacheControl =
+    'public, s-maxage=31536000, max-age=0';
+// const noCacheCacheControl = 'no-cache, no-store, max-age=0, must-revalidate';
 
 const allowHeaderValue = 'GET, HEAD, OPTIONS';
 
@@ -181,11 +172,11 @@ export default (request: NowRequest, response: NowResponse) => {
     const publicFilePath = publicUrlToPublicFilePath.get(pathname);
 
     if (!publicFilePath) {
-        response.setHeader('Content-Type', notFoundContentType);
-        response.setHeader('Cache-Control', notFoundCacheControl);
+        response.setHeader('Content-Type', 'text/html; charset=utf-8');
+        response.setHeader('Cache-Control', mustRevalidateCacheControl);
         sendPublicFile(request, response, {
-            publicFilePath: notFoundPublicFilePath,
-            useETag: false,
+            publicFilePath: '404.html',
+            useETag: true,
             status: 404,
         });
         return;
@@ -194,18 +185,47 @@ export default (request: NowRequest, response: NowResponse) => {
     const extension = path.extname(publicFilePath);
     switch (extension) {
         case '.html': {
-            response.setHeader('Content-Type', htmlContentType);
-            response.setHeader('Cache-Control', htmlCacheControl);
+            response.setHeader('Content-Type', 'text/html; charset=utf-8');
+            response.setHeader('Cache-Control', mustRevalidateCacheControl);
             break;
         }
         case '.json': {
-            response.setHeader('Content-Type', jsonContentType);
-            response.setHeader('Cache-Control', jsonCacheControl);
+            response.setHeader(
+                'Content-Type',
+                'application/json; charset=utf-8',
+            );
+            response.setHeader('Cache-Control', immutableCacheControl);
             break;
         }
         case '.js': {
-            response.setHeader('Content-Type', javascriptContentType);
-            response.setHeader('Cache-Control', javascriptCacheControl);
+            response.setHeader(
+                'Content-Type',
+                'text/javascript; charset=utf-8',
+            );
+            if (publicFilePath === '/sw.js') {
+                // Service worker changes basically every build.
+                response.setHeader('Cache-Control', mustRevalidateCacheControl);
+            } else {
+                response.setHeader('Cache-Control', immutableCacheControl);
+            }
+            break;
+        }
+        case '.webmanifest': {
+            response.setHeader(
+                'Content-Type',
+                'application/manifest+json; charset=utf-8',
+            );
+            response.setHeader('Cache-Control', mustRevalidateCacheControl);
+            break;
+        }
+        case '.png': {
+            response.setHeader('Content-Type', 'image/png');
+            response.setHeader('Cache-Control', immutableCacheControl);
+            break;
+        }
+        case '.svg': {
+            response.setHeader('Content-Type', 'image/svg+xml');
+            response.setHeader('Cache-Control', immutableCacheControl);
             break;
         }
         default: {

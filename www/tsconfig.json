@@ -2,8 +2,9 @@
     "extends": "../tsconfig.json",
     "compilerOptions": {
         "baseUrl": ".",
-        "paths": {}
+        "paths": {},
+        "importHelpers": false
     },
-    "include": ["src/**/*", "api/**/*", "types/**/*", "script/**/*"],
+    "include": ["src/**/*", "api/**/*", "script/**/*"],
     "exclude": []
 }

@@ -1,12 +1,18 @@
 import { CoreNodeType, DeepCoreNode } from '..';
+import { CodeBlockNode } from '../CodeBlock';
 import { PlainTextNode } from '../PlainText';
+
+export interface ExtractedTextNode {
+    originalNode: PlainTextNode | CodeBlockNode;
+    text: string;
+}
 
 // TODO: generalize, differentiate between actual text nodes and dynamic text
 // nodes.
 export function extractTextNodes(
     node: DeepCoreNode,
-    textNodes: PlainTextNode[] = [],
-): PlainTextNode[] {
+    textNodes: ExtractedTextNode[] = [],
+): ExtractedTextNode[] {
     if ('children' in node) {
         for (const childNode of node.children) {
             extractTextNodes(childNode, textNodes);
@@ -15,7 +21,9 @@ export function extractTextNodes(
 
     switch (node.type) {
         case CoreNodeType.CollapsibleSection: {
-            extractTextNodes(node.summaryNode, textNodes);
+            if (node.summaryNode) {
+                extractTextNodes(node.summaryNode, textNodes);
+            }
             break;
         }
         case CoreNodeType.Table: {
@@ -30,13 +38,22 @@ export function extractTextNodes(
             break;
         }
         case CoreNodeType.PlainText: {
-            textNodes.push(node);
+            const plainTextNode = node;
+            textNodes.push({
+                originalNode: plainTextNode,
+                get text() {
+                    return plainTextNode.text;
+                },
+                set text(text) {
+                    plainTextNode.text = text;
+                },
+            });
             break;
         }
         case CoreNodeType.CodeBlock: {
             const codeBlockNode = node;
             textNodes.push({
-                type: CoreNodeType.PlainText,
+                originalNode: codeBlockNode,
                 get text() {
                     return codeBlockNode.code;
                 },

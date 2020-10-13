@@ -3,7 +3,7 @@ import {
     ResponseState,
     getOnResponseStateChangeFunction,
     getCurrentResponseState,
-} from '../docPages/request';
+} from '../data/docPages';
 
 export function useDocPagesResponseState(): ResponseState {
     const onResponseStateChange = getOnResponseStateChangeFunction();

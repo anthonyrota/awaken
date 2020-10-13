@@ -12,7 +12,7 @@ export function writeStrikethrough<ChildNode extends Node>(
 ): void {
     writeRenderMarkdownNode(
         HtmlElementNode<ChildNode>({
-            tagName: 's',
+            tagName: 'del',
             children: Strikethrough.children,
         }),
         output,

@@ -1,9 +1,11 @@
+import { SubscriptNode } from 'script/docs/core/nodes/Subscript';
 import { Node, LeafCoreNode, ParentCoreNode } from '../../../nodes';
 import { BlockQuoteNode } from '../../../nodes/BlockQuote';
 import { BoldNode } from '../../../nodes/Bold';
 import { CodeSpanNode } from '../../../nodes/CodeSpan';
 import { CollapsibleSectionNode } from '../../../nodes/CollapsibleSection';
 import { ContainerNode } from '../../../nodes/Container';
+import { DocPageLinkNode } from '../../../nodes/DocPageLink';
 import { GithubSourceLinkNode } from '../../../nodes/GithubSourceLink';
 import { HeadingNode } from '../../../nodes/Heading';
 import { Heading123456Node } from '../../../nodes/Heading123456';
@@ -11,13 +13,14 @@ import { HtmlElementNode } from '../../../nodes/HtmlElement';
 import { ItalicsNode } from '../../../nodes/Italics';
 import { LinkNode } from '../../../nodes/Link';
 import { ListNode } from '../../../nodes/List';
-import { LocalPageLinkNode } from '../../../nodes/LocalPageLink';
+import { NamedAnchorNode } from '../../../nodes/NamedAnchor';
 import { PageNode } from '../../../nodes/Page';
 import { PageTitleNode } from '../../../nodes/PageTitle';
 import { ParagraphNode } from '../../../nodes/Paragraph';
 import { RichCodeBlockNode } from '../../../nodes/RichCodeBlock';
 import { StrikethroughNode } from '../../../nodes/Strikethrough';
 import { SubheadingNode } from '../../../nodes/Subheading';
+import { SuperscriptNode } from '../../../nodes/Superscript';
 import { TableNode } from '../../../nodes/Table';
 import { TitleNode } from '../../../nodes/Title';
 import { DoNotEditCommentNode } from './DoNotEditComment';
@@ -32,7 +35,8 @@ export type LeafRenderMarkdownNode =
     | DoNotEditCommentNode
     | HtmlCommentNode
     | TableOfContentsNode
-    | TableOfContentsListNode;
+    | TableOfContentsListNode
+    | NamedAnchorNode;
 
 export type ParentRenderMarkdownNode<ChildType extends Node> = ParentCoreNode<
     ChildType
@@ -53,7 +57,7 @@ export type DeepRenderMarkdownNode =
     | CodeSpanNode<DeepRenderMarkdownNode>
     | RichCodeBlockNode<DeepRenderMarkdownNode>
     | LinkNode<DeepRenderMarkdownNode>
-    | LocalPageLinkNode<DeepRenderMarkdownNode>
+    | DocPageLinkNode<DeepRenderMarkdownNode>
     | GithubSourceLinkNode<DeepRenderMarkdownNode>
     | ParagraphNode<DeepRenderMarkdownNode>
     | Heading123456Node<DeepRenderMarkdownNode>
@@ -63,6 +67,8 @@ export type DeepRenderMarkdownNode =
     | ListNode<DeepRenderMarkdownNode>
     | TableNode<DeepRenderMarkdownNode, DeepRenderMarkdownNode>
     | CollapsibleSectionNode<DeepRenderMarkdownNode, DeepRenderMarkdownNode>
+    | SubscriptNode<DeepRenderMarkdownNode>
+    | SuperscriptNode<DeepRenderMarkdownNode>
     | PageTitleNode<DeepRenderMarkdownNode>
     | PageNode<DeepRenderMarkdownNode>;
 

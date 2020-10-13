@@ -603,10 +603,12 @@ export function isSource(value: unknown): value is Source<unknown> {
  * @public
  */
 export function subscribe<T>(
-    sink = Sink<T>(noop),
-): (source: Source<T>) => void {
+    sink: Sink<T> | ((event: Event<T>) => void) = Sink<T>(noop),
+): (source: Source<T>) => Sink<T> {
+    const actualSink = isSink(sink) ? sink : Sink(sink);
     return (source) => {
-        source(sink);
+        source(actualSink);
+        return actualSink;
     };
 }
 
