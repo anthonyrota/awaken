@@ -1,6 +1,5 @@
-import { createPath, parsePath, PartialPath } from 'history';
+import { parsePath, PartialPath } from 'history';
 import { h, VNode, JSX } from 'preact';
-import { useCallback } from 'preact/hooks';
 import { customHistory } from '../hooks/useHistory';
 
 export function Link({
@@ -44,13 +43,7 @@ export function Link({
         return false;
     };
 
-    return (
-        <a
-            ref={innerRef}
-            onClick={useCallback(onLinkClick, [onClick, target, href])}
-            {...props}
-        />
-    );
+    return <a ref={innerRef} onClick={onLinkClick} {...props} />;
 }
 
 export function parsePathDefaultingToEmptyString(
@@ -61,11 +54,5 @@ export function parsePathDefaultingToEmptyString(
 }
 
 export function isActivePath(path: PartialPath): boolean {
-    return (
-        createPath(path) ===
-        createPath({
-            pathname: customHistory.location.pathname,
-            hash: customHistory.location.hash,
-        })
-    );
+    return path.pathname === customHistory.location.pathname;
 }

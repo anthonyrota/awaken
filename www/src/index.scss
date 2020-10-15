@@ -136,7 +136,7 @@ table {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-$mobile-size: 420px;
+$size-small: 700px;
 
 *,
 *::before,
@@ -190,7 +190,7 @@ $z-index-skip-link: 2;
     top: 0;
 }
 
-$spacing: 1em;
+$spacing: 0.8em;
 $text-color: rgb(54, 60, 63);
 $link-highlight-color: #f36;
 $light-border: 1px solid #ececec;
@@ -248,27 +248,17 @@ $header-border-height: 1px;
         }
     }
 
-    &__logo {
-        display: flex;
-        align-items: center;
-        margin-left: $spacing/2;
-        padding-left: $spacing/2;
-        padding-right: $spacing/2;
-        height: $content-height;
-
-        &__img {
-            fill: none;
-            height: 100%;
-            width: auto;
-            display: block;
-        }
-    }
-
     &__nav {
         display: flex;
         align-items: center;
         height: 100%;
         padding: 0 calc(#{$spacing} - #{$link-margin} - #{$link-padding});
+
+        @media screen and (max-width: $size-small) {
+            &--left-with-back-button {
+                padding-right: 0;
+            }
+        }
 
         &__link-container {
             display: flex;
@@ -312,17 +302,49 @@ $header-border-height: 1px;
         }
     }
 
+    @media screen and (max-width: $size-small) {
+        &__logo--next-to-back-button {
+            padding: 0;
+        }
+    }
+
+    &__logo-img {
+        fill: none;
+        height: 100%;
+        width: auto;
+        display: block;
+
+        &--without-text {
+            display: none;
+        }
+
+        @media screen and (max-width: $size-small) {
+            padding-left: 0;
+            padding-right: 0;
+
+            &--without-text {
+                display: block;
+            }
+
+            &--with-text {
+                display: none;
+            }
+        }
+    }
+
     &__search {
         position: relative;
         flex-grow: 1;
-        margin-left: $spacing/2;
-        $icon-size: 16px;
+
+        $icon-size: 1em;
+        $icon-padding-left: $spacing/2;
+        $icon-spacing: $spacing/2;
 
         &__input {
             font-weight: 400;
             display: block;
-            padding-left: $spacing * 2.7;
-            padding-right: $spacing;
+            padding-left: $icon-size + $icon-padding-left + $icon-spacing;
+            padding-right: $icon-spacing;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -342,7 +364,7 @@ $header-border-height: 1px;
             top: 0;
             bottom: 0;
             left: 0;
-            padding-left: $icon-size;
+            padding-left: $icon-padding-left;
 
             &__svg {
                 fill: $text-color;
@@ -358,9 +380,9 @@ $header-border-height: 1px;
         color: $text-color;
     }
 
-    @media only screen and (max-width: 800px) {
+    @media screen and (max-width: $size-small) {
         &__nav {
-            &__pages {
+            &--pages {
                 display: none;
             }
         }
@@ -368,23 +390,6 @@ $header-border-height: 1px;
         &__search {
             justify-content: space-around;
             margin-right: $spacing;
-        }
-    }
-
-    &__logo {
-        &__without-text {
-            display: none;
-        }
-    }
-
-    @media screen and (max-width: $mobile-size) {
-        &__logo {
-            &__without-text {
-                display: block;
-            }
-            &__with-text {
-                display: none;
-            }
         }
     }
 }

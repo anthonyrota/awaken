@@ -35,8 +35,10 @@
         <div id="root">::ssr::</div>
         <script>
             import { makeRequest } from '/data/docPages';
-            import { globalPagesMetadataKey } from '/globalKeys';
             makeRequest();
+        </script>
+        <script>
+            import { globalPagesMetadataKey } from '/globalKeys';
             window[globalPagesMetadataKey] = __pagesMetadata__;
         </script>
         <script async type="application/javascript" src="/script"></script>

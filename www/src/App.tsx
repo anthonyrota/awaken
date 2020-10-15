@@ -1,5 +1,5 @@
-import { h, Fragment, VNode, JSX } from 'preact';
-import { useCallback, useRef } from 'preact/hooks';
+import { h, Fragment, VNode } from 'preact';
+import { useLayoutEffect, useRef } from 'preact/hooks';
 import { Header } from './components/Header';
 import {
     getPagesMetadata,
@@ -7,7 +7,7 @@ import {
     getCurrentResponseState,
 } from './data/docPages';
 import { useDocPagesResponseState } from './hooks/useDocPagesResponseState';
-import { Path, useHistory } from './hooks/useHistory';
+import { customHistory, Path, useHistory } from './hooks/useHistory';
 import { usePrevious } from './hooks/usePrevious';
 import { DocPage } from './pages/DocPage';
 import { IndexPage } from './pages/IndexPage';
@@ -31,6 +31,7 @@ export function App(props: AppProps): VNode {
     const { path } = useHistory({ path: props.path });
     const appPathProps: AppPathProps = {
         pathname: path.pathname,
+        isDuplicateRender: false,
     };
     const nextPreviousAppPathPropsBox: [AppPathProps] = [appPathProps];
     const previousAppPathPropsBox = usePrevious(nextPreviousAppPathPropsBox);
@@ -39,13 +40,11 @@ export function App(props: AppProps): VNode {
     useDocPagesResponseState();
 
     const mainAnchorRef = useRef<HTMLAnchorElement>();
-    const onSkipLinkClick = useCallback<
-        JSX.MouseEventHandler<HTMLAnchorElement>
-    >((event) => {
+    function onSkipLinkClick(event: Event): void {
         event.preventDefault();
         mainAnchorRef.current.scrollIntoView();
         mainAnchorRef.current.focus();
-    }, []);
+    }
 
     let appPathPropsToUse = appPathProps;
 
@@ -62,7 +61,10 @@ export function App(props: AppProps): VNode {
             // doc page to a doc page. In this case prevent the transition
             // until the pages load.
             nextPreviousAppPathPropsBox[0] = previousAppPathProps;
-            appPathPropsToUse = previousAppPathProps;
+            appPathPropsToUse = {
+                pathname: previousAppPathProps.pathname,
+                isDuplicateRender: true,
+            };
         }
     }
 
@@ -88,9 +90,46 @@ export function App(props: AppProps): VNode {
 
 interface AppPathProps {
     pathname: string;
+    isDuplicateRender: boolean;
 }
 
-function AppPath({ pathname }: AppPathProps): VNode {
+function AppPath({ pathname, isDuplicateRender }: AppPathProps): VNode {
+    const { location } = customHistory;
+    const isFirstRenderRef = useRef(true);
+
+    useLayoutEffect(() => {
+        if (!isFirstRenderRef.current) {
+            isFirstRenderRef.current = false;
+            return;
+        }
+
+        if (isDuplicateRender) {
+            return;
+        }
+
+        let setFocusBeforeEl: Element = document.body;
+
+        if (location.hash) {
+            const setFocusBeforeEl_ = document.getElementById(location.hash);
+            if (setFocusBeforeEl_) {
+                setFocusBeforeEl = setFocusBeforeEl_;
+            } else {
+                return;
+            }
+        }
+
+        const parentEl = setFocusBeforeEl.parentElement;
+        if (!parentEl) {
+            return;
+        }
+
+        const tempDiv = document.createElement('div');
+        tempDiv.setAttribute('tabindex', '0');
+        parentEl.insertBefore(tempDiv, setFocusBeforeEl);
+        tempDiv.focus();
+        parentEl.removeChild(tempDiv);
+    }, [location, isDuplicateRender]);
+
     if (pathname === '/') {
         return <IndexPage />;
     }

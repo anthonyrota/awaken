@@ -133,8 +133,7 @@ function sendPublicFile(
 }
 
 const immutableCacheControl = 'public, max-age=31536000, immutable';
-const mustRevalidateCacheControl =
-    'public, s-maxage=31536000, max-age=0';
+const mustRevalidateCacheControl = 'public, s-maxage=31536000, max-age=0';
 // const noCacheCacheControl = 'no-cache, no-store, max-age=0, must-revalidate';
 
 const allowHeaderValue = 'GET, HEAD, OPTIONS';
