@@ -31,7 +31,7 @@
 
 <b>Signature</b>
 
-<pre>interface TestSource&lt;T&gt; extends <a href="00--1-api-basics.md#Source-Interface">Source</a>&lt;T&gt; {<br>    readonly subscriptions: <a href="#TestSourceSubscriptions">TestSourceSubscriptions</a><br>}</pre>
+<pre>interface TestSource&lt;T&gt; extends <a href="01-00-api-basics.md#Source-Interface">Source</a>&lt;T&gt; {<br>    readonly subscriptions: <a href="#TestSourceSubscriptions">TestSourceSubscriptions</a><br>}</pre>
 
 ## <a name="SharedTestSource"></a><code>SharedTestSource</code>
 
@@ -49,7 +49,7 @@
 
 <b>Signature</b>
 
-<pre>interface SharedTestSource&lt;T&gt; extends <a href="#TestSource-Interface">TestSource</a>&lt;T&gt; {<br>    readonly schedule: (subscription?: <a href="00--1-api-basics.md#Disposable-Interface">Disposable</a>) =&gt; void<br>}</pre>
+<pre>interface SharedTestSource&lt;T&gt; extends <a href="#TestSource-Interface">TestSource</a>&lt;T&gt; {<br>    readonly schedule: (subscription?: <a href="01-00-api-basics.md#Disposable-Interface">Disposable</a>) =&gt; void<br>}</pre>
 
 ## <a name="TestSourceEvent"></a><code>TestSourceEvent</code>
 
@@ -57,7 +57,7 @@
 
 <b>Signature</b>
 
-<pre>type TestSourceEvent&lt;T&gt; = <a href="00--1-api-basics.md#Event">Event</a>&lt;T&gt; & {<br>    readonly frame: number<br>}</pre>
+<pre>type TestSourceEvent&lt;T&gt; = <a href="01-00-api-basics.md#Event">Event</a>&lt;T&gt; & {<br>    readonly frame: number<br>}</pre>
 
 ## <a name="TestSubscriptionInfo"></a><code>TestSubscriptionInfo</code>
 
@@ -106,7 +106,7 @@ interface TestSubscriptionInfo {
 
 <b>Signature</b>
 
-<pre>interface TestSchedule {<br>    (callback: () =&gt; void, delayFrames: number, subscription?: <a href="00--1-api-basics.md#Disposable-Interface">Disposable</a>): void<br>    readonly currentFrame: number<br>    readonly flush: () =&gt; void<br>    readonly reset: () =&gt; void<br>}</pre>
+<pre>interface TestSchedule {<br>    (callback: () =&gt; void, delayFrames: number, subscription?: <a href="01-00-api-basics.md#Disposable-Interface">Disposable</a>): void<br>    readonly currentFrame: number<br>    readonly flush: () =&gt; void<br>    readonly reset: () =&gt; void<br>}</pre>
 
 ## <a name="watchSourceEvents"></a><code>watchSourceEvents</code>
 
@@ -114,7 +114,7 @@ interface TestSubscriptionInfo {
 
 <b>Signature</b>
 
-<pre>function watchSourceEvents&lt;T&gt;(<br>    source: <a href="00--1-api-basics.md#Source-Interface">Source</a>&lt;T&gt;,<br>    testSchedule: <a href="#TestSchedule-Interface">TestSchedule</a>,<br>    subscriptionInfo?: <a href="#TestSubscriptionInfo-Interface">TestSubscriptionInfo</a>,<br>): <a href="#TestSourceEvent">TestSourceEvent</a>&lt;T&gt;[]</pre>
+<pre>function watchSourceEvents&lt;T&gt;(<br>    source: <a href="01-00-api-basics.md#Source-Interface">Source</a>&lt;T&gt;,<br>    testSchedule: <a href="#TestSchedule-Interface">TestSchedule</a>,<br>    subscriptionInfo?: <a href="#TestSubscriptionInfo-Interface">TestSubscriptionInfo</a>,<br>): <a href="#TestSourceEvent">TestSourceEvent</a>&lt;T&gt;[]</pre>
 
 ## <a name="P"></a><code>P</code>
 
@@ -122,7 +122,7 @@ interface TestSubscriptionInfo {
 
 <b>Signature</b>
 
-<pre>function P&lt;T&gt;(<br>    value: T,<br>    frame: number,<br>): <a href="00--1-api-basics.md#Push-Interface">Push</a>&lt;T&gt; & {<br>    readonly frame: number<br>}</pre>
+<pre>function P&lt;T&gt;(<br>    value: T,<br>    frame: number,<br>): <a href="01-00-api-basics.md#Push-Interface">Push</a>&lt;T&gt; & {<br>    readonly frame: number<br>}</pre>
 
 ## <a name="T"></a><code>T</code>
 
@@ -130,7 +130,7 @@ interface TestSubscriptionInfo {
 
 <b>Signature</b>
 
-<pre>function T(<br>    error: unknown,<br>    frame: number,<br>): <a href="00--1-api-basics.md#Throw-Interface">Throw</a> & {<br>    readonly frame: number<br>}</pre>
+<pre>function T(<br>    error: unknown,<br>    frame: number,<br>): <a href="01-00-api-basics.md#Throw-Interface">Throw</a> & {<br>    readonly frame: number<br>}</pre>
 
 ## <a name="E"></a><code>E</code>
 
@@ -138,7 +138,7 @@ interface TestSubscriptionInfo {
 
 <b>Signature</b>
 
-<pre>function E(<br>    frame: number,<br>): <a href="00--1-api-basics.md#End-Interface">End</a> & {<br>    readonly frame: number<br>}</pre><br>
+<pre>function E(<br>    frame: number,<br>): <a href="01-00-api-basics.md#End-Interface">End</a> & {<br>    readonly frame: number<br>}</pre><br>
 
-| [Previous \(Utils\)](00--1-api-utils.md#readme) |
+| [Previous \(Utils\)](01-05-api-utils.md#readme) |
 | --- |

@@ -16,7 +16,7 @@
 
 <b>Signature</b>
 
-<pre>declare function setTimeoutImplementation&lt;T extends any[]&gt;(<br>    callback: (...args: T) =&gt; void,<br>    delayMs?: number,<br>    subscription?: <a href="00--1-api-basics.md#Disposable-Interface">Disposable</a>,<br>    ...args: T<br>): void</pre>
+<pre>declare function setTimeoutImplementation&lt;T extends any[]&gt;(<br>    callback: (...args: T) =&gt; void,<br>    delayMs?: number,<br>    subscription?: <a href="01-00-api-basics.md#Disposable-Interface">Disposable</a>,<br>    ...args: T<br>): void</pre>
 
 Disposable-based alternative to built-in <code>setTimeout</code>.
 
@@ -26,7 +26,7 @@ Disposable-based alternative to built-in <code>setTimeout</code>.
 | --- | --- | --- |
 | callback | <pre lang="ts">(...args: T) =&gt; void</pre> | The callback to schedule. |
 | delayMs | <pre lang="ts">number</pre> | The amount of delay. |
-| subscription | <pre>[Disposable](00--1-api-basics.md#Disposable-Interface)</pre> | If this is disposed then the request will be cancelled. |
+| subscription | <pre>[Disposable](01-00-api-basics.md#Disposable-Interface)</pre> | If this is disposed then the request will be cancelled. |
 | args | <pre lang="ts">T</pre> | The arguments to send to the callback. |
 
 ## <a name="setInterval"></a><code>setInterval</code>
@@ -35,7 +35,7 @@ Disposable-based alternative to built-in <code>setTimeout</code>.
 
 <b>Signature</b>
 
-<pre>declare function setIntervalImplementation&lt;T extends any[]&gt;(<br>    callback: (...args: T) =&gt; void,<br>    delayMs?: number,<br>    subscription?: <a href="00--1-api-basics.md#Disposable-Interface">Disposable</a>,<br>    ...args: T<br>): void</pre>
+<pre>declare function setIntervalImplementation&lt;T extends any[]&gt;(<br>    callback: (...args: T) =&gt; void,<br>    delayMs?: number,<br>    subscription?: <a href="01-00-api-basics.md#Disposable-Interface">Disposable</a>,<br>    ...args: T<br>): void</pre>
 
 Disposable-based alternative to built-in <code>setInterval</code>.
 
@@ -45,7 +45,7 @@ Disposable-based alternative to built-in <code>setInterval</code>.
 | --- | --- | --- |
 | callback | <pre lang="ts">(...args: T) =&gt; void</pre> | The callback to schedule. |
 | delayMs | <pre lang="ts">number</pre> | The amount of delay. |
-| subscription | <pre>[Disposable](00--1-api-basics.md#Disposable-Interface)</pre> | If this is disposed then the request will be cancelled. |
+| subscription | <pre>[Disposable](01-00-api-basics.md#Disposable-Interface)</pre> | If this is disposed then the request will be cancelled. |
 | args | <pre lang="ts">T</pre> | The arguments to send to the callback. |
 
 ## <a name="requestAnimationFrame"></a><code>requestAnimationFrame</code>
@@ -54,7 +54,7 @@ Disposable-based alternative to built-in <code>setInterval</code>.
 
 <b>Signature</b>
 
-<pre>declare function requestAnimationFrameImplementation(<br>    callback: (time: number) =&gt; void,<br>    subscription?: <a href="00--1-api-basics.md#Disposable-Interface">Disposable</a>,<br>): void</pre>
+<pre>declare function requestAnimationFrameImplementation(<br>    callback: (time: number) =&gt; void,<br>    subscription?: <a href="01-00-api-basics.md#Disposable-Interface">Disposable</a>,<br>): void</pre>
 
 Disposable-based alternative to built-in <code>requestAnimationFrame</code>.
 
@@ -63,7 +63,7 @@ Disposable-based alternative to built-in <code>requestAnimationFrame</code>.
 | Parameter | Type | Description |
 | --- | --- | --- |
 | callback | <pre lang="ts">(time: number) =&gt; void</pre> | The callback to schedule. This will be called with a <code>time</code> parameter. |
-| subscription | <pre>[Disposable](00--1-api-basics.md#Disposable-Interface)</pre> | If this is disposed then the request will be cancelled. |
+| subscription | <pre>[Disposable](01-00-api-basics.md#Disposable-Interface)</pre> | If this is disposed then the request will be cancelled. |
 
 ## <a name="asyncReportError"></a><code>asyncReportError</code>
 
@@ -96,11 +96,11 @@ interface TimeProvider {
 ```
 <br>
 
-| [Previous \(Schedule Functions\)](00--1-api-schedule-functions.md#readme) |
+| [Previous \(Schedule Functions\)](01-04-api-schedule-functions.md#readme) |
 | --- |
 
 <div align="right">
 
-| [Next \(Testing\)](00--1-api-testing.md#readme) |
+| [Next \(Testing\)](01-06-api-testing.md#readme) |
 | --- |
 </div>

@@ -602,7 +602,7 @@ async function main() {
         }
 
         const pageGroupIndex = pageGroups.findIndex(
-            (pageGroup) => pageGroup.pageIds.indexOf(pageId) !== undefined,
+            (pageGroup) => pageGroup.pageIds.indexOf(pageId) !== -1,
         );
         const inPageGroupIndex = pageGroups[pageGroupIndex].pageIds.indexOf(
             pageId,

@@ -18,7 +18,7 @@
 
 <b>Signature</b>
 
-<pre>function CurrentValueSubject&lt;T&gt;(initialValue: T): <a href="00--1-api-basics.md#Subject-Interface">Subject</a>&lt;T&gt;</pre>
+<pre>function CurrentValueSubject&lt;T&gt;(initialValue: T): <a href="01-00-api-basics.md#Subject-Interface">Subject</a>&lt;T&gt;</pre>
 
 ### <a name="CurrentValueSubject-Interface"></a><code>CurrentValueSubject - Interface</code>
 
@@ -26,7 +26,7 @@
 
 <b>Signature</b>
 
-<pre>interface CurrentValueSubject&lt;T&gt; extends <a href="00--1-api-basics.md#Subject-Interface">Subject</a>&lt;T&gt; {<br>    currentValue: T<br>}</pre>
+<pre>interface CurrentValueSubject&lt;T&gt; extends <a href="01-00-api-basics.md#Subject-Interface">Subject</a>&lt;T&gt; {<br>    currentValue: T<br>}</pre>
 
 ## <a name="FinalValueSubject"></a><code>FinalValueSubject</code>
 
@@ -34,7 +34,7 @@
 
 <b>Signature</b>
 
-<pre>function FinalValueSubject&lt;T&gt;(): <a href="00--1-api-basics.md#Subject-Interface">Subject</a>&lt;T&gt;</pre>
+<pre>function FinalValueSubject&lt;T&gt;(): <a href="01-00-api-basics.md#Subject-Interface">Subject</a>&lt;T&gt;</pre>
 
 ## <a name="ReplaySubject"></a><code>ReplaySubject</code>
 
@@ -42,7 +42,7 @@
 
 <b>Signature</b>
 
-<pre>function ReplaySubject&lt;T&gt;(<br>    count_?: number | null,<br>    timeoutConfig_?: <a href="#ReplaySubjectTimeoutConfig">ReplaySubjectTimeoutConfig</a> | null,<br>): <a href="00--1-api-basics.md#Subject-Interface">Subject</a>&lt;T&gt;</pre>
+<pre>function ReplaySubject&lt;T&gt;(<br>    count_?: number | null,<br>    timeoutConfig_?: <a href="#ReplaySubjectTimeoutConfig">ReplaySubjectTimeoutConfig</a> | null,<br>): <a href="01-00-api-basics.md#Subject-Interface">Subject</a>&lt;T&gt;</pre>
 
 ## <a name="ReplaySubjectTimeoutConfig"></a><code>ReplaySubjectTimeoutConfig</code>
 
@@ -50,7 +50,7 @@
 
 <b>Signature</b>
 
-<pre>interface ReplaySubjectTimeoutConfig {<br>    maxDuration: number<br>    provideTime?: <a href="00--1-api-utils.md#TimeProvider">TimeProvider</a> | null<br>}</pre>
+<pre>interface ReplaySubjectTimeoutConfig {<br>    maxDuration: number<br>    provideTime?: <a href="01-05-api-utils.md#TimeProvider">TimeProvider</a> | null<br>}</pre>
 
 ## <a name="SubjectBase"></a><code>SubjectBase</code>
 
@@ -58,13 +58,13 @@
 
 <b>Signature</b>
 
-<pre>function SubjectBase&lt;T&gt;(): <a href="00--1-api-basics.md#Subject-Interface">Subject</a>&lt;T&gt;</pre><br>
+<pre>function SubjectBase&lt;T&gt;(): <a href="01-00-api-basics.md#Subject-Interface">Subject</a>&lt;T&gt;</pre><br>
 
-| [Previous \(Operators\)](00--1-api-operators.md#readme) |
+| [Previous \(Operators\)](01-02-api-operators.md#readme) |
 | --- |
 
 <div align="right">
 
-| [Next \(Schedule Functions\)](00--1-api-schedule-functions.md#readme) |
+| [Next \(Schedule Functions\)](01-04-api-schedule-functions.md#readme) |
 | --- |
 </div>

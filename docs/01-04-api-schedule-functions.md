@@ -20,7 +20,7 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleAnimationFrameQueued(): <a href="00--1-api-basics.md#ScheduleFunction">ScheduleFunction</a>&lt;[number]&gt;</pre>
+<pre>function ScheduleAnimationFrameQueued(): <a href="01-00-api-basics.md#ScheduleFunction">ScheduleFunction</a>&lt;[number]&gt;</pre>
 
 ## <a name="ScheduleInterval"></a><code>ScheduleInterval</code>
 
@@ -28,7 +28,7 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleInterval(delayMs: number): <a href="00--1-api-basics.md#ScheduleFunction">ScheduleFunction</a></pre>
+<pre>function ScheduleInterval(delayMs: number): <a href="01-00-api-basics.md#ScheduleFunction">ScheduleFunction</a></pre>
 
 ## <a name="ScheduleQueued"></a><code>ScheduleQueued</code>
 
@@ -36,7 +36,7 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleQueued&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callNext: (...args: T) =&gt; void,<br>        subscription: <a href="00--1-api-basics.md#Disposable-Interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="00--1-api-basics.md#ScheduleFunction">ScheduleFunction</a>&lt;T&gt;</pre>
+<pre>function ScheduleQueued&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callNext: (...args: T) =&gt; void,<br>        subscription: <a href="01-00-api-basics.md#Disposable-Interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="01-00-api-basics.md#ScheduleFunction">ScheduleFunction</a>&lt;T&gt;</pre>
 
 ## <a name="ScheduleQueuedDiscrete"></a><code>ScheduleQueuedDiscrete</code>
 
@@ -44,7 +44,7 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleQueuedDiscrete&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callback: (...args: T) =&gt; void,<br>        subscription: <a href="00--1-api-basics.md#Disposable-Interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="00--1-api-basics.md#ScheduleFunction">ScheduleFunction</a>&lt;T&gt;</pre>
+<pre>function ScheduleQueuedDiscrete&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callback: (...args: T) =&gt; void,<br>        subscription: <a href="01-00-api-basics.md#Disposable-Interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="01-00-api-basics.md#ScheduleFunction">ScheduleFunction</a>&lt;T&gt;</pre>
 
 ## <a name="ScheduleSyncQueued"></a><code>ScheduleSyncQueued</code>
 
@@ -52,7 +52,7 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleSyncQueued(): <a href="00--1-api-basics.md#ScheduleFunction">ScheduleFunction</a></pre>
+<pre>function ScheduleSyncQueued(): <a href="01-00-api-basics.md#ScheduleFunction">ScheduleFunction</a></pre>
 
 ## <a name="ScheduleTimeout"></a><code>ScheduleTimeout</code>
 
@@ -60,7 +60,7 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleTimeout(delayMs: number): <a href="00--1-api-basics.md#ScheduleFunction">ScheduleFunction</a></pre>
+<pre>function ScheduleTimeout(delayMs: number): <a href="01-00-api-basics.md#ScheduleFunction">ScheduleFunction</a></pre>
 
 ## <a name="ScheduleTimeoutQueued"></a><code>ScheduleTimeoutQueued</code>
 
@@ -68,7 +68,7 @@
 
 <b>Signature</b>
 
-<pre>function ScheduleTimeoutQueued(delayMs: number): <a href="00--1-api-basics.md#ScheduleFunction">ScheduleFunction</a></pre>
+<pre>function ScheduleTimeoutQueued(delayMs: number): <a href="01-00-api-basics.md#ScheduleFunction">ScheduleFunction</a></pre>
 
 ## <a name="scheduleAnimationFrame"></a><code>scheduleAnimationFrame</code>
 
@@ -76,7 +76,7 @@
 
 <b>Signature</b>
 
-<pre>var scheduleAnimationFrame: <a href="00--1-api-basics.md#ScheduleFunction">ScheduleFunction</a>&lt;[number]&gt;</pre>
+<pre>var scheduleAnimationFrame: <a href="01-00-api-basics.md#ScheduleFunction">ScheduleFunction</a>&lt;[number]&gt;</pre>
 
 ## <a name="scheduleSync"></a><code>scheduleSync</code>
 
@@ -84,13 +84,13 @@
 
 <b>Signature</b>
 
-<pre>var scheduleSync: <a href="00--1-api-basics.md#ScheduleFunction">ScheduleFunction</a></pre><br>
+<pre>var scheduleSync: <a href="01-00-api-basics.md#ScheduleFunction">ScheduleFunction</a></pre><br>
 
-| [Previous \(Subjects\)](00--1-api-subjects.md#readme) |
+| [Previous \(Subjects\)](01-03-api-subjects.md#readme) |
 | --- |
 
 <div align="right">
 
-| [Next \(Utils\)](00--1-api-utils.md#readme) |
+| [Next \(Utils\)](01-05-api-utils.md#readme) |
 | --- |
 </div>
