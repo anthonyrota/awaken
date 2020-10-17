@@ -2,7 +2,7 @@
     "name": "@microstream/core",
     "amdName": "microstream",
     "version": "0.0.0",
-    "description": "A fast and extremely lightweight reactive programming library for Typescript",
+    "description": "A fast and extremely lightweight reactive programming library for TypeScript",
     "source": "src/index.ts",
     "main": "dist/microstream.js",
     "module": "dist/microstream.module.js",

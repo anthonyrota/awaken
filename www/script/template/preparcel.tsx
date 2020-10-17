@@ -5,6 +5,7 @@ import * as ncp from 'ncp';
 import { h } from 'preact';
 import { render } from 'preact-render-to-string';
 import { App } from '../../src/App';
+import { SSRHeadValues, getSSRHeadValues } from '../../src/Head';
 import { setCustomHistory } from '../../src/hooks/useHistory';
 import {
     addFileToFolder,
@@ -21,8 +22,20 @@ async function main() {
     const buildHtmlFile = await createBuildHtmlFileFunction();
     const outFolder = Folder();
 
-    function addRenderedHtmlToFolder(html: string, filePath: string): void {
-        addFileToFolder(outFolder, filePath, buildHtmlFile(html));
+    function addRenderedHtmlToFolder(
+        html: string,
+        filePath: string,
+        isSpa = false,
+    ): void {
+        let ssrHeadValues: SSRHeadValues | undefined;
+        if (!isSpa) {
+            ssrHeadValues = getSSRHeadValues();
+        }
+        addFileToFolder(
+            outFolder,
+            filePath,
+            buildHtmlFile(html, ssrHeadValues),
+        );
     }
 
     function renderAppAtPath(pathname: string): string {
@@ -55,7 +68,7 @@ async function main() {
         );
     }
 
-    addRenderedHtmlToFolder('', '_spa.html');
+    addRenderedHtmlToFolder('', '_spa.html', true);
 
     await Promise.all([
         promisify(ncp)('src', 'template', {

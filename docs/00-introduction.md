@@ -9,9 +9,9 @@
 3. [<code>Installation</code>](#installation)
 4. [<code>Supported Languages</code>](#supported-languages)
 5. [<code>Tree Shaking</code>](#tree-shaking)
-6. [<code>Using MicroStream</code>](#using-the-library)</details>
+6. [<code>Using Microstream</code>](#using-the-library)</details>
 
-MicroStream is an extensive and lightweight observable library inspired by the [callbag spec](https:\/\/staltz.com\/why-we-need-callbags.html) and [rxjs](https:\/\/rxjs-dev.firebaseapp.com\/guide\/overview). It provides composable utilities to build event-driven applications, allowing for the creation, transformation and consumption of event sources.
+Microstream is an extensive and lightweight observable library inspired by the [callbag spec](https:\/\/staltz.com\/why-we-need-callbags.html) and [rxjs](https:\/\/rxjs-dev.firebaseapp.com\/guide\/overview). It provides composable utilities to build event-driven applications, allowing for the creation, transformation and consumption of event sources.
 
 ## <a name="motivation"></a>Motivation
 
@@ -33,15 +33,15 @@ When we start dealing with <b>asynchronous lists of data</b> the problem becomes
 
 While these previously described solutions are perfectly suitable for many scenarios, the problem with them is that the transformation of such iterators \(both synchronous and asynchronous\), combined with the managing of their associated subscriptions \(for example, cleaning up every event listener you subscribed to, or closing all of the files you opened a connection to\) <b>can easily become difficult to manage and can grow out of control easily without a solid framework to build around</b>.
 
-As well as this, the problem becomes much more complicated when we introduce lists of data \(potentially asynchronous\) which <i>cannot be pulled from</i> \(ie. they cannot be accessed on demand, eg. a stream containing the coordinates of mouse movements — the user controls them, not the programmer\). In this case the production \/ creation of the data cannot be strictly controlled by us. This is where the concept of <b>reactive programming</b> comes in to play, and is the problem that MicroStream aims to solve, by providing an easy way to manage, transform, and subscribe to created streams of events.
+As well as this, the problem becomes much more complicated when we introduce lists of data \(potentially asynchronous\) which <i>cannot be pulled from</i> \(ie. they cannot be accessed on demand, eg. a stream containing the coordinates of mouse movements — the user controls them, not the programmer\). In this case the production \/ creation of the data cannot be strictly controlled by us. This is where the concept of <b>reactive programming</b> comes in to play, and is the problem that Microstream aims to solve, by providing an easy way to manage, transform, and subscribe to created streams of events.
 
 ### Reactive Programming
 
-Reactive programming with MicroStream provides a few new primary data structures: the <b>Source</b>, which describes both synchronous and asynchronous streams of events, the <b>Sink</b>, which is used to subscribe to sources, and the <b>Operator</b>, allowing for the aggregation and transformation of sources.
+Reactive programming with Microstream provides a few new primary data structures: the <b>Source</b>, which describes both synchronous and asynchronous streams of events, the <b>Sink</b>, which is used to subscribe to sources, and the <b>Operator</b>, allowing for the aggregation and transformation of sources.
 
 This allows us to transform collections of complicated asynchronous events as simply as we would filter the values in an array.
 
-> In this way <del>rxjs</del><a name="lodash-quote-footnote-link"></a><sup>[1](#lodash-quote-footnote)</sup> MicroStream can essentially be thought of as Lodash for events.
+> In this way <del>rxjs</del><a name="lodash-quote-footnote-link"></a><sup>[1](#lodash-quote-footnote)</sup> Microstream can essentially be thought of as Lodash for events.
 
 Built in to JavaScript there are a few fundamental representations of items and sequences of values:
 
@@ -59,11 +59,11 @@ However there remains a gap for push-based streams. <b>Sources</b> fill the gap,
 
 You can essentially think of sources as being the both synchronous and asynchronous &quot;push&quot;-based equivalent to iterators, whereby values\/events are &quot;pushed&quot; to consumers whenever they are available.
 
-MicroStream fills the need for immutable, asynchronous push-based streams in JavaScript, and utilizes concepts from the [Observer pattern](https:\/\/en.wikipedia.org\/wiki\/Observer\_pattern), the [Iterator pattern](https:\/\/en.wikipedia.org\/wiki\/Iterator\_pattern) as well as patterns from [functional programming with collections](https:\/\/datacadamia.com\/code\/fp\/fp), allowing for a simple way to manage sequences of events.
+Microstream fills the need for immutable, asynchronous push-based streams in JavaScript, and utilizes concepts from the [Observer pattern](https:\/\/en.wikipedia.org\/wiki\/Observer\_pattern), the [Iterator pattern](https:\/\/en.wikipedia.org\/wiki\/Iterator\_pattern) as well as patterns from [functional programming with collections](https:\/\/datacadamia.com\/code\/fp\/fp), allowing for a simple way to manage sequences of events.
 
 > <details><summary>1. <a name="lodash-quote-footnote"></a><a href="#lodash-quote-footnote-link">^</a></summary><br>
 > 
-> This quote is shamelessly stolen from the RxJS documentation. The original quote had RxJS instead of MicroStream... Sorry! I couldn't resist.</details>
+> This quote is shamelessly stolen from the RxJS documentation. The original quote had RxJS instead of Microstream... Sorry! I couldn't resist.</details>
 
 ### Why use Reactive Programming?
 
@@ -81,19 +81,19 @@ This is where <i>reactive programming</i> shines. We implement the Reactive Prog
 
 These structures all combine to allow for the <b>easy creation, transformation \/ composition, and subscription to event streams</b>. The 100+ operators we provide allow for you to efficiently filter, aggregate, transform and compose sources of events, and much more.
 
-Using reactive programming with MicroStream has the following advantages:
+Using reactive programming with Microstream has the following advantages:
 
-- MicroStream provides a model to <b>drastically simplify dealing with asynchronous data</b>.
-- MicroStream allows your code, which handles complex ideas \(such as the transformation and aggregation of different streams of events\), to <b>remain readable and understandable</b> to both you and others.
-- MicroStream <b>simplifies the cleanup and disposal of the subscriptions used</b> \(eg. cleaning up open files, event listeners, etc.\), which in the majority of cases is done automatically upon unsubscription.
+- Microstream provides a model to <b>drastically simplify dealing with asynchronous data</b>.
+- Microstream allows your code, which handles complex ideas \(such as the transformation and aggregation of different streams of events\), to <b>remain readable and understandable</b> to both you and others.
+- Microstream <b>simplifies the cleanup and disposal of the subscriptions used</b> \(eg. cleaning up open files, event listeners, etc.\), which in the majority of cases is done automatically upon unsubscription.
 
 ## <a name="motivating-concepts"></a>Motivating Concepts
 
-The primary idea behind the development of MicroStream is the provision of a reactive model of programming that allows you to create, transform and subscribe to streams of events as simply as you would manage and transform a collection of items such as an <code>Array</code>.
+The primary idea behind the development of Microstream is the provision of a reactive model of programming that allows you to create, transform and subscribe to streams of events as simply as you would manage and transform a collection of items such as an <code>Array</code>.
 
 ### Avoiding Callback Hell
 
-We all love promises because they allow for the avoidance of so called [callback hell](https:\/\/en.wiktionary.org\/wiki\/callback\_hell). But the problem remains for asynchronous streams of data. Using MicroStream frees you from those nasty deep callbacks, increasing the readability of your code and thereby reducing the risk to bugs.
+We all love promises because they allow for the avoidance of so called [callback hell](https:\/\/en.wiktionary.org\/wiki\/callback\_hell). But the problem remains for asynchronous streams of data. Using Microstream frees you from those nasty deep callbacks, increasing the readability of your code and thereby reducing the risk to bugs.
 
 ### Composability
 
@@ -101,11 +101,11 @@ Using existing solutions such as chains of promises, event emitters and\/or simp
 
 Furthermore, in JavaScript there exists no simple built-in solution to easily compose and aggregate such streams of events in a simple and effective manner while keeping track of their subscriptions and automatically cleaning them up upon unsubscription.
 
-This is an area in which MicroStream <i>shines</i>, as it is <b>intended</b> for composing sequences of asynchronous data while abstracting away the cleanup of all side effects involved in creating the source of data so that in most cases you don't even have to think about it.
+This is an area in which Microstream <i>shines</i>, as it is <b>intended</b> for composing sequences of asynchronous data while abstracting away the cleanup of all side effects involved in creating the source of data so that in most cases you don't even have to think about it.
 
 ### Flexibility
 
-MicroStream Sources are not just built for the streaming of singular values \(although they can very well be used for that purpose\), but are also <b>used for the streaming of multiple or even infinite values</b>.
+Microstream Sources are not just built for the streaming of singular values \(although they can very well be used for that purpose\), but are also <b>used for the streaming of multiple or even infinite values</b>.
 
 Similarly, Sources can not only be used for <b>synchronous streams of data</b>, but can also be used for <b>asynchronous streams of data</b> \(such as intervals, or user interactions\).
 
@@ -117,7 +117,7 @@ While traditional bare-bones callback solutions to streams of events are highly 
 
 ### Tiny Bundle Size
 
-We wouldn't be able to use the word <i>micro</i> in the name of our library if it wasn't for MicroStream's absurdly tiny bundle size.
+We wouldn't be able to use the word <i>micro</i> in the name of our library if it wasn't for Microstream's absurdly tiny bundle size.
 
 The current version of <code>@microstream\/core</code> is <code>8.822Kb</code> large when compressed using [brotli](https:\/\/caniuse.com\/brotli) at the highest compression level<a name="how-is-size-calculated-footnote-link"></a><sup>[2](#how-is-size-calculated-footnote)</sup>.
 
@@ -145,7 +145,7 @@ yarn add @microstream/core
 
 ## <a name="supported-languages"></a>Supported Languages
 
-MicroStream is written in [TypeScript](https:\/\/www.typescriptlang.org\/), a superset of JavaScript, and provides TypeScript typings out-of-the-box. There are no flow typings as it is a complex task to automatically generate them from the TypeScript source files due to the fact that flow shares it's type namespace with it's variable namespace, meaning there are several collisions after conversion.
+Microstream is written in [TypeScript](https:\/\/www.typescriptlang.org\/), a superset of JavaScript, and provides TypeScript typings out-of-the-box. There are no flow typings as it is a complex task to automatically generate them from the TypeScript source files due to the fact that flow shares it's type namespace with it's variable namespace, meaning there are several collisions after conversion.
 
 Because TypeScript is a superset of JavaScript and conversion between the two for small examples is trivial, the examples shown in this documentation are written in TypeScript.
 
@@ -165,11 +165,11 @@ pipe(
 );
 ```
 
-## <a name="using-the-library"></a>Using MicroStream
+## <a name="using-the-library"></a>Using Microstream
 
-Using MicroStream is simple: just import the methods and variables you need to use from this package and use them. Because this package is tree-shakable, you don't have to worry about large bundle sizes from the 100+ utilities exported by this library because they will be stripped away by your bundler in production \(reference: [Tree Shaking](#tree-shaking)\).
+Using Microstream is simple: just import the methods and variables you need to use from this package and use them. Because this package is tree-shakable, you don't have to worry about large bundle sizes from the 100+ utilities exported by this library because they will be stripped away by your bundler in production \(reference: [Tree Shaking](#tree-shaking)\).
 
-MicroStream exposes all of its methods and utilities, all of which are exported from the root of the package:
+Microstream exposes all of its methods and utilities, all of which are exported from the root of the package:
 
 ```ts
 // TypeScript / ESModules.

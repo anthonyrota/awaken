@@ -1,7 +1,7 @@
 {
-    "name": "MicroStreamJS",
-    "short_name": "MicroStreamJS",
-    "description": "A fast and extremely lightweight reactive programming library for Typescript, inspired by callbags and RxJS",
+    "name": "MicrostreamJS",
+    "short_name": "MicrostreamJS",
+    "description": "A fast and extremely lightweight reactive programming library for TypeScript, inspired by callbags and RxJS",
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
     "display": "standalone",

@@ -11,7 +11,7 @@ title: 'Bug: '
     your issue has not already been fixed.
 -->
 
-MicroStream version: <!--  -->
+Microstream version: <!--  -->
 
 ## Steps To Reproduce
 

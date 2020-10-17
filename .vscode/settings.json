@@ -1,6 +1,9 @@
 {
     "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.preferences.importModuleSpecifier": "relative",
     "files.associations": {
         "*.json": "jsonc"
-    }
+    },
+    "html-css-class-completion.includeGlobPattern": "**/*.{scss,tsx,html}",
+    "html-css-class-completion.excludeGlobPattern": "**/{node_modules,coverage}/**"
 }

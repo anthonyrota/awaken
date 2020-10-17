@@ -164,9 +164,9 @@ export function Header(): VNode {
                 }
             }
         };
-        window.addEventListener('keydown', listener);
+        document.addEventListener('keydown', listener);
         return () => {
-            window.removeEventListener('keydown', listener);
+            document.removeEventListener('keydown', listener);
         };
     }, [!!isMenuOpen]);
 
@@ -189,12 +189,6 @@ export function Header(): VNode {
                 animationRequestId = undefined;
             }
             const lastLinkRef = menuLinkRefs[menuLinkRefs.length - 1];
-            if (
-                target !== firstLinkRef.current &&
-                target !== lastLinkRef.current
-            ) {
-                return;
-            }
             animationRequestId = requestAnimationFrame(() => {
                 animationRequestId = undefined;
                 const focusedElement = document.activeElement;
@@ -204,19 +198,19 @@ export function Header(): VNode {
                 ) {
                     return;
                 }
-                if (target === lastLinkRef.current) {
-                    manuallySetFocus(firstLinkRef.current);
-                } else {
+                if (target === firstLinkRef.current) {
                     manuallySetFocus(lastLinkRef.current);
+                } else {
+                    manuallySetFocus(firstLinkRef.current);
                 }
             });
         };
-        document.body.addEventListener('focusout', listener);
+        document.addEventListener('focusout', listener);
         return () => {
             if (animationRequestId !== undefined) {
                 cancelAnimationFrame(animationRequestId);
             }
-            document.body.removeEventListener('focusout', listener);
+            document.removeEventListener('focusout', listener);
         };
     }, [!!isMenuOpen]);
 
@@ -238,8 +232,8 @@ export function Header(): VNode {
                 setFixChromiumFocusBug(false);
             }
         };
-        document.body.addEventListener('focusout', listener);
-        return () => document.body.removeEventListener('focusout', listener);
+        document.addEventListener('focusout', listener);
+        return () => document.removeEventListener('focusout', listener);
     }, [fixChromiumFocusBug]);
 
     const toggleMenu = () => {
@@ -281,7 +275,7 @@ export function Header(): VNode {
         parsePathDefaultingToEmptyString('/license'),
     );
 
-    const toggleButtonLabel = `${isMenuOpen ? 'Close' : 'Open'} Menu`;
+    const toggleButtonLabel = 'Toggle Navigation Menu';
 
     const goBack = (e: Event) => {
         e.preventDefault();
@@ -398,7 +392,7 @@ export function Header(): VNode {
                             >
                                 <DocPageLink
                                     class="header__nav__link"
-                                    pageId="core--introduction"
+                                    pageId={'core--introduction'}
                                 >
                                     Documentation
                                 </DocPageLink>
@@ -464,52 +458,49 @@ export function Header(): VNode {
                     </div>
                 </div>
             </header>
-            {isMenuOpen && (
-                <aside
-                    ref={menuRef}
-                    class={'menu' + (isMenuOpen ? ' menu--open' : '')}
-                >
-                    <ul
-                        class="menu__contents"
-                        role="navigation"
-                        aria-label="Site Menu"
-                    >
-                        {order.map((pageId, index) => {
-                            const href = `/${pageIdToWebsitePath[pageId]}`;
-                            const isActive = isActivePath(
-                                parsePathDefaultingToEmptyString(href),
-                            );
+            <aside
+                ref={menuRef}
+                class={'menu' + (isMenuOpen ? ' menu--open' : '')}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Site Navigation Menu"
+            >
+                <ul class="menu__contents" role="navigation">
+                    {order.map((pageId, index) => {
+                        const href = `/${pageIdToWebsitePath[pageId]}`;
+                        const isActive = isActivePath(
+                            parsePathDefaultingToEmptyString(href),
+                        );
 
-                            return (
-                                <li key={pageId} class="menu__li">
-                                    <div
+                        return (
+                            <li key={pageId} class="menu__li">
+                                <div
+                                    class={
+                                        'menu__link-container' +
+                                        (isActive
+                                            ? ' menu__link-container--active'
+                                            : '')
+                                    }
+                                >
+                                    <DocPageLink
                                         class={
-                                            'menu__link-container' +
-                                            (isActive
-                                                ? ' menu__link-container--active'
+                                            'menu__link' +
+                                            (fixChromiumFocusBug
+                                                ? ' menu__link--fix-chromium-focus'
                                                 : '')
                                         }
+                                        pageId={pageId}
+                                        innerRef={menuLinkRefs[index]}
+                                        onClick={onMenuLinkClick}
                                     >
-                                        <DocPageLink
-                                            class={
-                                                'menu__link' +
-                                                (fixChromiumFocusBug
-                                                    ? ' menu__link--fix-chromium-focus'
-                                                    : '')
-                                            }
-                                            pageId={pageId}
-                                            innerRef={menuLinkRefs[index]}
-                                            onClick={onMenuLinkClick}
-                                        >
-                                            {pageIdToPageTitle[pageId]}
-                                        </DocPageLink>
-                                    </div>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </aside>
-            )}
+                                        {pageIdToPageTitle[pageId]}
+                                    </DocPageLink>
+                                </div>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </aside>
         </Fragment>
     );
 }

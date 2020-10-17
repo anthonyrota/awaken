@@ -1,5 +1,11 @@
-import { h, VNode } from 'preact';
+import { h, Fragment, VNode } from 'preact';
+import { DocumentTitle } from '../Head';
 
 export function NotFoundPage(): VNode {
-    return <div>404</div>;
+    return (
+        <Fragment>
+            <DocumentTitle title="404: Page not found · Microstream JS" />
+            <div>404</div>
+        </Fragment>
+    );
 }

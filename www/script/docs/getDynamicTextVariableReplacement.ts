@@ -59,7 +59,7 @@ async function createGetDynamicTextVariableReplacementFunction(): Promise<
     ]);
 
     const replacements: Record<string, string> = {
-        LibName: 'MicroStream',
+        LibName: 'Microstream',
         LibCoreImportPath: '@microstream/core',
         LibCoreBrotliCompressedSizeKb: `${coreBrSize}`,
         LibCoreGzipCompressedSizeKb: `${coreGzSize}`,

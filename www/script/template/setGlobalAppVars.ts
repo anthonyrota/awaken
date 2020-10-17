@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'ssr';
 import { ResponseDoneType, ResponseState } from '../../src/data/docPages';
 import {
     globalOnResponseStateChangeKey,

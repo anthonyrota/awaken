@@ -337,19 +337,25 @@ $header-border-height: 1px;
         flex-grow: 1;
 
         $icon-size: 1em;
-        $icon-padding-left: $spacing/2;
-        $icon-spacing: $spacing/2;
+        $icon-spacing-lg: $spacing;
+        $icon-spacing-sm: $spacing/2;
 
         &__input {
             font-weight: 400;
             display: block;
-            padding-left: $icon-size + $icon-padding-left + $icon-spacing;
-            padding-right: $icon-spacing;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             width: 100%;
             height: $content-height;
+
+            padding-left: $icon-size + $icon-spacing-lg * 2;
+            padding-right: $icon-spacing-lg;
+
+            @media screen and (max-width: $size-small) {
+                padding-left: $icon-size + $icon-spacing-sm * 2;
+                padding-right: $icon-spacing-sm;
+            }
 
             &::placeholder {
                 color: $text-color;
@@ -364,7 +370,11 @@ $header-border-height: 1px;
             top: 0;
             bottom: 0;
             left: 0;
-            padding-left: $icon-padding-left;
+
+            padding-left: $icon-spacing-lg;
+            @media screen and (max-width: $size-small) {
+                padding-left: $icon-spacing-sm;
+            }
 
             &__svg {
                 fill: $text-color;
@@ -395,16 +405,21 @@ $header-border-height: 1px;
 }
 
 .menu {
-    display: flex;
+    display: none;
     justify-content: center;
-    height: calc(100vh - #{$header-height} - #{$header-border-height});
+    min-height: calc(100vh - #{$header-height} - #{$header-border-height});
     width: 100%;
     z-index: $z-index-menu;
+    margin-left: -$spacing / 2;
 
-    &--open ~ .main {
-        position: absolute !important;
-        top: -9999px !important;
-        left: -9999px !important;
+    &--open {
+        display: flex;
+
+        & ~ .main {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
     }
 
     // Fix chromium bug where focusing the link through javascript does not show
@@ -425,9 +440,11 @@ $header-border-height: 1px;
     }
 
     &__li {
-        margin-bottom: 13px;
+        &:not(:first-child) {
+            margin-top: 13px;
+        }
+
         line-height: 24px;
-        list-style-position: inside;
     }
 
     &__link-container--active {

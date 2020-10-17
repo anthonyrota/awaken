@@ -25,7 +25,7 @@ export function logDiagnostic(diagnostic: ts.Diagnostic): void {
     }
 }
 
-function getTypescriptConfig(): ts.CompilerOptions {
+function getTypeScriptConfig(): ts.CompilerOptions {
     const compilerOptionsConversionResult = ts.convertCompilerOptionsFromJson(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         { ...configJson.compilerOptions, baseUrl: '..' },
@@ -42,7 +42,7 @@ function getTypescriptConfig(): ts.CompilerOptions {
 }
 
 export function createProgram(sourceFilePaths: string[]): ts.Program {
-    const program = ts.createProgram(sourceFilePaths, getTypescriptConfig());
+    const program = ts.createProgram(sourceFilePaths, getTypeScriptConfig());
     const compilerDiagnostics = program.getSemanticDiagnostics();
 
     if (compilerDiagnostics.length) {

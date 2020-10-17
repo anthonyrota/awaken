@@ -1,10 +1,11 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
+import { SSRHeadValues } from '../../src/Head';
 import { isDev } from './env';
 import { pagesMetadata } from './setGlobalAppVars';
 
 export async function createBuildHtmlFileFunction(): Promise<
-    (contentHtml: string) => string
+    (contentHtml: string, ssrHeadValues?: SSRHeadValues) => string
 > {
     const template = await fs.readFile(
         path.join(__dirname, 'template.html'),
@@ -12,19 +13,27 @@ export async function createBuildHtmlFileFunction(): Promise<
     );
     const stringifiedPagesMetadata = JSON.stringify(pagesMetadata);
 
-    return (contentHtml) => {
+    return (contentHtml, ssrHeadValues) => {
         return template
             .replace(
-                '::manifestLink::',
-                isDev
-                    ? ''
-                    : '<link rel="manifest" href="/manifest.webmanifest" />',
+                '::ssrHead::',
+                ssrHeadValues
+                    ? [`<title>${ssrHeadValues.title}</title>`].join(
+                          '\n' + ' '.repeat(8),
+                      )
+                    : '',
             )
             .replace(
                 '::preloadPagesLink::',
                 isDev
                     ? ''
                     : '<link rel="preload" href="::pages.json::" as="fetch" crossorigin="anonymous" />',
+            )
+            .replace(
+                '::manifestLink::',
+                isDev
+                    ? ''
+                    : '<link rel="manifest" href="/manifest.webmanifest" />',
             )
             .replace(
                 '::css::',

@@ -9,4 +9,5 @@ temp
 www/_files
 www/public
 www/template
+www/src/__auto_generated__index.html
 www/parcel-public
