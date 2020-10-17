@@ -48,7 +48,7 @@ async function main() {
     }
 
     if (isDev) {
-        addRenderedHtmlToFolder('', '__auto_generated__index.html');
+        addRenderedHtmlToFolder('', '__auto_generated__index.html', true);
         await writeFolderToDirectoryPath(
             outFolder,
             path.join(rootDir, 'www', 'src'),

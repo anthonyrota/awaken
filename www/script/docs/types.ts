@@ -1,13 +1,18 @@
 import type { DeepCoreNode } from './core/nodes';
 import type { PageNode } from './core/nodes/Page';
 
-export type PageOrder = /* PageId[] */ string[];
+export type PageIds = /* PageId[] */ string[];
 export type Pages = PageNode<DeepCoreNode>[];
+
+export interface PageGroup {
+    title: string;
+    pageIds: PageIds;
+}
 
 export interface PagesMetadata {
     pageIdToWebsitePath: Record<string, string>;
     pageIdToPageTitle: Record<string, string>;
-    order: PageOrder;
+    pageGroups: PageGroup[];
     github: null | {
         org: string;
         repo: string;

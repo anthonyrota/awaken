@@ -158,6 +158,7 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    letter-spacing: 0.025em;
 }
 
 html {
@@ -191,7 +192,7 @@ $z-index-skip-link: 2;
 }
 
 $spacing: 0.8em;
-$text-color: rgb(54, 60, 63);
+$text-color: rgba(54, 60, 63, 0.815);
 $link-highlight-color: #f36;
 $light-border: 1px solid #ececec;
 $max-width: 1000px;
@@ -388,6 +389,7 @@ $header-border-height: 1px;
         flex-direction: column;
         justify-content: center;
         color: $text-color;
+        letter-spacing: 0;
     }
 
     @media screen and (max-width: $size-small) {
@@ -410,7 +412,6 @@ $header-border-height: 1px;
     min-height: calc(100vh - #{$header-height} - #{$header-border-height});
     width: 100%;
     z-index: $z-index-menu;
-    margin-left: -$spacing / 2;
 
     &--open {
         display: flex;
@@ -439,11 +440,25 @@ $header-border-height: 1px;
         background: #fff;
     }
 
-    &__li {
-        &:not(:first-child) {
-            margin-top: 13px;
+    &__header {
+        margin: 0;
+        font-weight: 700;
+        color: rgb(112, 119, 129);
+        text-transform: uppercase;
+        font-size: 0.83rem;
+        margin-top: $spacing * 4;
+        &:first-child {
+            margin-top: $spacing;
         }
+        margin-bottom: 0.5rem;
+    }
 
+    &__link-list {
+        margin-left: $spacing/2;
+    }
+
+    &__li {
+        margin-top: 13px;
         line-height: 24px;
     }
 

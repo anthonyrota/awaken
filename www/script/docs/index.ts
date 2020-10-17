@@ -31,7 +31,7 @@ import { collapseDeepCoreNodeWhitespace } from './core/nodes/util/simplify';
 import { renderDeepRenderMarkdownNodeAsMarkdown } from './core/render/markdown';
 import { buildDocsSourceDirectoryToApiPages } from './docsSource';
 import { getDynamicTextVariableReplacementP } from './getDynamicTextVariableReplacement';
-import { Pages, PagesMetadata } from './types';
+import { PageGroup, Pages, PagesMetadata } from './types';
 import {
     addFileToFolder,
     Folder,
@@ -523,13 +523,13 @@ async function main() {
         [testingApiId]: 'docs/api-testing',
     };
     const pageIdToPageTitle: Record<string, string> = {
-        [coreApiBasicsId]: 'API - Basics',
-        [coreApiSourcesId]: 'API - Sources',
-        [coreApiOperatorsId]: 'API - Operators',
-        [coreApiSubjectsId]: 'API - Subjects',
-        [coreApiScheduleFunctionsId]: 'API - Schedule Functions',
-        [coreApiUtilsId]: 'API - Utils',
-        [testingApiId]: 'API - Testing',
+        [coreApiBasicsId]: 'Basics',
+        [coreApiSourcesId]: 'Sources',
+        [coreApiOperatorsId]: 'Operators',
+        [coreApiSubjectsId]: 'Subjects',
+        [coreApiScheduleFunctionsId]: 'Schedule Functions',
+        [coreApiUtilsId]: 'Utils',
+        [testingApiId]: 'Testing',
     };
     const pageIdToMdPagePath: Record<string, string> = Object.fromEntries(
         Object.entries(pageIdToWebsitePath).map(([pageId, websitePath]) => [
@@ -557,20 +557,27 @@ async function main() {
     mergeExpectUnique(pageIdToPageTitle, docsSource.pageIdToPageTitle);
     mergeExpectUnique(pageIdToWebsitePath, docsSource.pageIdToWebsitePath);
 
-    const order = ['core--introduction', ...exportsWithIds.map(([, id]) => id)];
+    const pageGroups: PageGroup[] = [
+        { title: 'Documentation', pageIds: ['core--introduction'] },
+        { title: 'API', pageIds: exportsWithIds.map(([, id]) => id) },
+    ];
+
+    const allPageGroupIds = pageGroups.flatMap(
+        (pageGroup) => pageGroup.pageIds,
+    );
 
     const uniquePageIds = new Set();
-    for (const pageId of order) {
+    for (const pageId of allPageGroupIds) {
         if (pages.every((page) => page.pageId !== pageId)) {
             throw new Error(`No page id matching ${pageId}`);
         }
         if (uniquePageIds.has(pageId)) {
-            throw new Error(`Duplicate page id ${pageId} in page order list`);
+            throw new Error(`Duplicate page id ${pageId} in page group list`);
         }
         uniquePageIds.add(pageId);
     }
 
-    if (order.length !== pages.length) {
+    if (allPageGroupIds.length !== pages.length) {
         throw new Error('order.length !== pages.length');
     }
 
@@ -594,15 +601,27 @@ async function main() {
             throw new Error(`${mdPath} is not in docs directory`);
         }
 
-        const index = order.indexOf(pageId);
-        const maxNumberLength = Math.max(
-            (order.length - 1).toString().length,
-            2,
+        const pageGroupIndex = pageGroups.findIndex(
+            (pageGroup) => pageGroup.pageIds.indexOf(pageId) !== undefined,
         );
-        const number = `${index}`.padStart(maxNumberLength, '0');
+        const inPageGroupIndex = pageGroups[pageGroupIndex].pageIds.indexOf(
+            pageId,
+        );
+        const pageGroupPrefix = `${pageGroupIndex}`.padStart(
+            Math.max((pageGroups.length - 1).toString().length, 2),
+            '0',
+        );
+        const inPageGroupPrefix = `${inPageGroupIndex}`.padStart(
+            Math.max(
+                (pageGroups[pageGroupIndex].pageIds.length - 1).toString()
+                    .length,
+                2,
+            ),
+            '0',
+        );
 
         const insideDocsPath = mdPath.slice(docsDirectoryName.length + 1);
-        return `${docsDirectoryName}/${number}-${insideDocsPath}`;
+        return `${docsDirectoryName}/${pageGroupPrefix}-${inPageGroupPrefix}-${insideDocsPath}`;
     }
 
     enum FooterCellRole {
@@ -620,12 +639,12 @@ async function main() {
             if (pageOrderIndex === 0) {
                 return;
             }
-            toPageId = order[pageOrderIndex - 1];
+            toPageId = allPageGroupIds[pageOrderIndex - 1];
         } else {
-            if (pageOrderIndex === order.length - 1) {
+            if (pageOrderIndex === allPageGroupIds.length - 1) {
                 return;
             }
-            toPageId = order[pageOrderIndex + 1];
+            toPageId = allPageGroupIds[pageOrderIndex + 1];
         }
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const toPageTitle = pageIdToPageTitle[toPageId];
@@ -642,7 +661,7 @@ async function main() {
     for (let page of pages) {
         collapseDeepCoreNodeWhitespace(page);
         const mdPath = getPageMarkdownPathFromPageId(page.pageId);
-        const pageOrderIndex = order.indexOf(page.pageId);
+        const pageOrderIndex = allPageGroupIds.indexOf(page.pageId);
         const previousCell = createFooterCell(
             FooterCellRole.Previous,
             pageOrderIndex,
@@ -701,7 +720,7 @@ async function main() {
     const pagesMetadata: PagesMetadata = {
         pageIdToWebsitePath,
         pageIdToPageTitle,
-        order,
+        pageGroups,
         github:
             process.env.VERCEL_GITHUB_DEPLOYMENT === '1'
                 ? {

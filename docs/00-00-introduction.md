@@ -233,6 +233,6 @@ fromArray(1, 2, 3)(Sink(event => console.log(event)))
 
 <div align="right">
 
-| [Next \(API - Basics\)](01-api-basics.md#readme) |
+| [Next \(Basics\)](00--1-api-basics.md#readme) |
 | --- |
 </div>

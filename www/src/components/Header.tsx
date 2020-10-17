@@ -1,5 +1,5 @@
 import { h, Fragment, VNode, JSX } from 'preact';
-import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useState, useRef, useEffect, useLayoutEffect } from 'preact/hooks';
 import { getPagesMetadata } from '../data/docPages';
 import { isChromium, isMobile, isStandalone } from '../env';
 import { customHistory, usePath } from '../hooks/useHistory';
@@ -31,7 +31,7 @@ export function Header(): VNode {
     const {
         pageIdToWebsitePath,
         pageIdToPageTitle,
-        order,
+        pageGroups,
         github,
     } = getPagesMetadata();
 
@@ -39,20 +39,38 @@ export function Header(): VNode {
     // undefined -> don't focus anything
     // false -> regular closing, focus toggle element
     // true -> regular opening, focus first link.
-    const { 0: isMenuOpen, 1: setMenuOpen } = useState<boolean | undefined>(
+    const { 0: isMenuOpen, 1: setIsMenuOpen } = useState<boolean | undefined>(
         undefined,
     );
     const { 0: searchValue, 1: setSearchValue } = useState('');
+    const { 0: fixChromiumFocusBug, 1: setFixChromiumFocusBug } = useState(
+        false,
+    );
 
     const path = usePath();
     const previousPath = usePrevious(path);
 
     if (previousPath && previousPath.value !== path) {
         previousPath.value = path;
-        setMenuOpen(undefined);
+        setIsMenuOpen(undefined);
     }
 
-    const menuLinkRefs = order.map(() => useRef<HTMLAnchorElement>());
+    const menuLinkTexts: string[] = [];
+    pageGroups.forEach((pageGroup) => {
+        pageGroup.pageIds.forEach((pageId) => {
+            menuLinkTexts.push(pageIdToPageTitle[pageId]);
+        });
+    });
+
+    const licenseLinkText = 'License';
+    const githubLinkText = 'GitHub';
+    menuLinkTexts.push(licenseLinkText, githubLinkText);
+
+    // eslint-disable-next-line prefer-spread
+    const menuLinkRefs = Array.apply(
+        null,
+        Array(menuLinkTexts.length),
+    ).map(() => useRef<HTMLAnchorElement>());
 
     function getMenuLinkFocusIndex(): number {
         const focusedElement = document.activeElement;
@@ -67,6 +85,8 @@ export function Header(): VNode {
         isMovingFocusManuallyRef.current = false;
     }
 
+    const searchInputRef = useRef<HTMLInputElement>();
+
     useEffect(() => {
         if (!isMenuOpen) {
             return;
@@ -80,19 +100,22 @@ export function Header(): VNode {
                 return;
             }
 
-            if (event.key.length === 1 && /\S/.test(event.key)) {
+            if (
+                event.key.length === 1 &&
+                /\S/.test(event.key) &&
+                document.activeElement !== searchInputRef.current
+            ) {
                 const index = getMenuLinkFocusIndex();
-                const predicate = (id: string) =>
-                    pageIdToPageTitle[id][0].toLowerCase() ===
-                    event.key.toLowerCase();
+                const predicate = (title: string) =>
+                    title.toLowerCase()[0] === event.key.toLowerCase();
                 let nextIndexStartingWithChar = findIndex(
-                    order,
+                    menuLinkTexts,
                     predicate,
                     index + 1,
                 );
                 if (nextIndexStartingWithChar === -1) {
                     nextIndexStartingWithChar = findIndex(
-                        order,
+                        menuLinkTexts,
                         predicate,
                         0,
                         index - 1,
@@ -117,7 +140,7 @@ export function Header(): VNode {
             switch (event.key) {
                 case 'Escape':
                 case 'Esc': {
-                    setMenuOpen(false);
+                    setIsMenuOpen(false);
                     stopEvent(event);
                     break;
                 }
@@ -194,15 +217,22 @@ export function Header(): VNode {
                 const focusedElement = document.activeElement;
                 if (
                     headerRef.current.contains(focusedElement) ||
-                    menuRef.current.contains(focusedElement)
+                    menuRef.current.contains(focusedElement) ||
+                    focusedElement === document.body
                 ) {
                     return;
                 }
-                if (target === firstLinkRef.current) {
-                    manuallySetFocus(lastLinkRef.current);
-                } else {
-                    manuallySetFocus(firstLinkRef.current);
-                }
+                setIsMenuOpen((isMenuOpen) => {
+                    if (!isMenuOpen) {
+                        return;
+                    }
+                    if (target === firstLinkRef.current) {
+                        manuallySetFocus(lastLinkRef.current);
+                    } else {
+                        manuallySetFocus(firstLinkRef.current);
+                    }
+                    return isMenuOpen;
+                });
             });
         };
         document.addEventListener('focusout', listener);
@@ -214,10 +244,6 @@ export function Header(): VNode {
         };
     }, [!!isMenuOpen]);
 
-    const { 0: fixChromiumFocusBug, 1: setFixChromiumFocusBug } = useState(
-        false,
-    );
-
     useEffect(() => {
         if (!fixChromiumFocusBug) {
             return;
@@ -227,7 +253,9 @@ export function Header(): VNode {
                 isChromium &&
                 fixChromiumFocusBug &&
                 !isMovingFocusManuallyRef.current &&
-                menuLinkRefs.some((ref) => ref.current === event.target)
+                menuLinkRefs.some((ref) => ref.current === event.target) &&
+                // Moving focus away and back to window reintroduces the bug.
+                document.hasFocus()
             ) {
                 setFixChromiumFocusBug(false);
             }
@@ -236,31 +264,34 @@ export function Header(): VNode {
         return () => document.removeEventListener('focusout', listener);
     }, [fixChromiumFocusBug]);
 
-    const toggleMenu = () => {
-        setMenuOpen((isMenuOpen) => !isMenuOpen);
-    };
-
     const onMenuLinkClick = () => {
-        setMenuOpen(undefined);
+        setIsMenuOpen(undefined);
     };
 
     const onSearchInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {
         setSearchValue(e.currentTarget.value);
     };
 
-    const toggleButtonRef = useRef<HTMLButtonElement>();
-
-    const onToggleButtonRelease = () => {
-        if (isChromium) {
-            setFixChromiumFocusBug(true);
-        }
+    const onToggleButtonClick = (
+        event: JSX.TargetedMouseEvent<HTMLButtonElement>,
+    ) => {
+        setIsMenuOpen((isMenuOpen) => {
+            const isMenuOpenAfterClick = !isMenuOpen;
+            if (event.detail !== 0 && isMenuOpenAfterClick) {
+                // Opening with click.
+                setFixChromiumFocusBug(true);
+            }
+            return isMenuOpenAfterClick;
+        });
     };
+
+    const toggleButtonRef = useRef<HTMLButtonElement>();
 
     useLayoutEffect(() => {
         if (isMenuOpen) {
-            menuLinkRefs[0].current.focus();
+            manuallySetFocus(menuLinkRefs[0].current);
         } else if (isMenuOpen === false) {
-            toggleButtonRef.current.focus();
+            manuallySetFocus(toggleButtonRef.current);
         }
     }, [isMenuOpen]);
 
@@ -287,6 +318,17 @@ export function Header(): VNode {
         // eslint-disable-next-line max-len
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         window.history.state.idx !== 0;
+
+    const menuLinkClass =
+        'menu__link' +
+        (fixChromiumFocusBug ? ' menu__link--fix-chromium-focus' : '');
+
+    const githubUrl = github
+        ? `https://github.com/${github.org}/${github.repo}/tree/${github.sha}`
+        : 'https://github.com/anthonyrota/microstream';
+    const githubLinkLabel = 'Open GitHub Repository';
+
+    let menuLinkIndex = 0;
 
     return (
         <Fragment>
@@ -367,6 +409,7 @@ export function Header(): VNode {
                             class="header__search__input"
                             value={searchValue}
                             onInput={onSearchInput}
+                            ref={searchInputRef}
                         />
                         <div class="header__search__icon">
                             <svg
@@ -379,7 +422,7 @@ export function Header(): VNode {
                     </div>
                     <div class="header__contents__container">
                         <nav
-                            aria-label="quick navigation links"
+                            aria-label="Quick Site Navigation Links"
                             class="header__nav header__nav--pages"
                         >
                             <div
@@ -406,27 +449,26 @@ export function Header(): VNode {
                                 }
                             >
                                 <Link class="header__nav__link" href="/license">
-                                    License
+                                    {licenseLinkText}
                                 </Link>
                             </div>
                         </nav>
                         <div class="header__version">v0.0.1</div>
-                        <nav aria-label="quick links" class="header__nav">
+                        <nav
+                            aria-label="External and Site Navigation"
+                            class="header__nav"
+                        >
                             <a
                                 class="header__nav__link"
-                                aria-label="Open GitHub Repository"
-                                title="Open GitHub Repository"
-                                href={
-                                    github
-                                        ? `https://github.com/${github.org}/${github.repo}/tree/${github.sha}`
-                                        : 'https://github.com/anthonyrota/microstream'
-                                }
+                                aria-label={githubLinkLabel}
+                                title={githubLinkLabel}
+                                href={githubUrl}
                             >
                                 <svg
                                     class="header__nav__icon"
                                     viewBox="0 0 20 20"
                                 >
-                                    <title>Open GitHub Repository</title>
+                                    <title>{githubLinkLabel}</title>
                                     <path d="M10 0a10 10 0 0 0-3.16 19.49c.5.1.68-.22.68-.48l-.01-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.1.39-1.99 1.03-2.69a3.6 3.6 0 0 1 .1-2.64s.84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.3 2.75-1.02 2.75-1.02.55 1.37.2 2.4.1 2.64.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85l-.01 2.75c0 .26.18.58.69.48A10 10 0 0 0 10 0"></path>
                                 </svg>
                             </a>
@@ -437,9 +479,7 @@ export function Header(): VNode {
                                 aria-label={toggleButtonLabel}
                                 tabIndex={0}
                                 title={toggleButtonLabel}
-                                onMouseUp={onToggleButtonRelease}
-                                onTouchEnd={onToggleButtonRelease}
-                                onClick={toggleMenu}
+                                onClick={onToggleButtonClick}
                                 ref={toggleButtonRef}
                             >
                                 <svg
@@ -463,43 +503,82 @@ export function Header(): VNode {
                 class={'menu' + (isMenuOpen ? ' menu--open' : '')}
                 role="dialog"
                 aria-modal="true"
-                aria-label="Site Navigation Menu"
+                aria-label="Site Navigation"
             >
-                <ul class="menu__contents" role="navigation">
-                    {order.map((pageId, index) => {
-                        const href = `/${pageIdToWebsitePath[pageId]}`;
-                        const isActive = isActivePath(
-                            parsePathDefaultingToEmptyString(href),
-                        );
+                <div class="menu__contents">
+                    {pageGroups.map((pageGroup, pageGroupIndex) => (
+                        <Fragment key={pageGroupIndex}>
+                            <h2 class="menu__header">{pageGroup.title}</h2>
+                            <ul
+                                class="menu__link-list"
+                                role="navigation"
+                                aria-label="Documentation Navigation"
+                            >
+                                {pageGroup.pageIds.map((pageId, index) => {
+                                    const href = `/${pageIdToWebsitePath[pageId]}`;
+                                    const isActive = isActivePath(
+                                        parsePathDefaultingToEmptyString(href),
+                                    );
 
-                        return (
-                            <li key={pageId} class="menu__li">
-                                <div
-                                    class={
-                                        'menu__link-container' +
-                                        (isActive
-                                            ? ' menu__link-container--active'
-                                            : '')
-                                    }
+                                    return (
+                                        <li key={index} class="menu__li">
+                                            <div
+                                                class={
+                                                    'menu__link-container' +
+                                                    (isActive
+                                                        ? ' menu__link-container--active'
+                                                        : '')
+                                                }
+                                            >
+                                                <DocPageLink
+                                                    class={menuLinkClass}
+                                                    pageId={pageId}
+                                                    innerRef={
+                                                        menuLinkRefs[
+                                                            menuLinkIndex++
+                                                        ]
+                                                    }
+                                                    onClick={onMenuLinkClick}
+                                                >
+                                                    {pageIdToPageTitle[pageId]}
+                                                </DocPageLink>
+                                            </div>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </Fragment>
+                    ))}
+                    <h2 class="menu__header">Resources</h2>
+                    <ul
+                        class="menu__link-list"
+                        role="navigation"
+                        aria-label="Resources Navigation"
+                    >
+                        <li class="menu__li">
+                            <div class="menu__link-container">
+                                <Link
+                                    class={menuLinkClass}
+                                    innerRef={menuLinkRefs[menuLinkIndex++]}
+                                    href="/license"
                                 >
-                                    <DocPageLink
-                                        class={
-                                            'menu__link' +
-                                            (fixChromiumFocusBug
-                                                ? ' menu__link--fix-chromium-focus'
-                                                : '')
-                                        }
-                                        pageId={pageId}
-                                        innerRef={menuLinkRefs[index]}
-                                        onClick={onMenuLinkClick}
-                                    >
-                                        {pageIdToPageTitle[pageId]}
-                                    </DocPageLink>
-                                </div>
-                            </li>
-                        );
-                    })}
-                </ul>
+                                    {licenseLinkText}
+                                </Link>
+                            </div>
+                        </li>
+                        <li class="menu__li">
+                            <div class="menu__link-container">
+                                <a
+                                    class={menuLinkClass}
+                                    ref={menuLinkRefs[menuLinkIndex++]}
+                                    href={githubUrl}
+                                >
+                                    {githubLinkText}
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </aside>
         </Fragment>
     );
