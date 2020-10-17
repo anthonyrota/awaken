@@ -556,7 +556,14 @@ export function Header(): VNode {
                         aria-label="Resources Navigation"
                     >
                         <li class="menu__li">
-                            <div class="menu__link-container">
+                            <div
+                                class={
+                                    'menu__link-container' +
+                                    (isLicensePage
+                                        ? ' menu__link-container--active'
+                                        : '')
+                                }
+                            >
                                 <Link
                                     class={menuLinkClass}
                                     innerRef={menuLinkRefs[menuLinkIndex++]}
