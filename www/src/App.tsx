@@ -98,7 +98,7 @@ function AppPath({ pathname, isDuplicateRender }: AppPathProps): VNode {
     const isFirstRenderRef = useRef(true);
 
     useLayoutEffect(() => {
-        if (!isFirstRenderRef.current) {
+        if (isFirstRenderRef.current) {
             isFirstRenderRef.current = false;
             return;
         }

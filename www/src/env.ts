@@ -6,12 +6,12 @@ export const isChromium =
     isBrowser && !!(window as any).chrome;
 
 // eslint-disable-next-line max-len
-export const isMobile = isBrowser
-    ? // eslint-disable-next-line max-len
-      /\b(BlackBerry|webOS|iPhone|IEMobile|Android|Windows Phone|iPad|iPod)\b/i.test(
-          navigator.userAgent,
-      )
-    : false;
+export const isMobile =
+    isBrowser &&
+    // eslint-disable-next-line max-len
+    /\b(BlackBerry|webOS|iPhone|IEMobile|Android|Windows Phone|iPad|iPod)\b/i.test(
+        navigator.userAgent,
+    );
 
 export const isStandalone =
     isBrowser &&
