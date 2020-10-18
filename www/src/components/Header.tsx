@@ -12,29 +12,58 @@ function stopEvent(event: Event): void {
     event.preventDefault();
 }
 
-// Not supported in IE.
-function findIndex<T>(
-    list: readonly T[],
-    predicate: (value: T) => boolean,
-    startIndex = 0,
-    endIndex = list.length - 1,
-): number {
-    for (let i = startIndex; i <= endIndex; i++) {
-        if (predicate(list[i])) {
-            return i;
+const {
+    pageIdToWebsitePath,
+    pageIdToPageTitle,
+    pageGroups,
+    github,
+} = getPagesMetadata();
+
+const githubUrl = github
+    ? `https://github.com/${github.org}/${github.repo}/tree/${github.sha}`
+    : 'https://github.com/anthonyrota/microstream';
+
+const licenseLinkText = 'License';
+const githubLinkText = 'GitHub';
+
+interface UseResetFixChromiumFocusParams {
+    fixChromiumFocus: boolean;
+    resetFixChromiumFocus: () => void;
+    isMovingFocusManuallyRef: { current: boolean };
+    linkRefs: { current: HTMLAnchorElement }[];
+}
+
+function useResetFixChromiumFocus(
+    params: UseResetFixChromiumFocusParams,
+): void {
+    const {
+        fixChromiumFocus,
+        resetFixChromiumFocus,
+        isMovingFocusManuallyRef,
+        linkRefs,
+    } = params;
+
+    useEffect(() => {
+        if (!fixChromiumFocus) {
+            return;
         }
-    }
-    return -1;
+        const listener = (event: FocusEvent) => {
+            if (
+                fixChromiumFocus &&
+                !isMovingFocusManuallyRef.current &&
+                linkRefs.some((ref) => ref.current === event.target) &&
+                // Moving focus away and back to window reintroduces.
+                document.hasFocus()
+            ) {
+                resetFixChromiumFocus();
+            }
+        };
+        document.addEventListener('focusout', listener);
+        return () => document.removeEventListener('focusout', listener);
+    }, [fixChromiumFocus]);
 }
 
 export function Header(): VNode {
-    const {
-        pageIdToWebsitePath,
-        pageIdToPageTitle,
-        pageGroups,
-        github,
-    } = getPagesMetadata();
-
     // Hack:
     // undefined -> don't focus anything
     // false -> regular closing, focus toggle element
@@ -43,9 +72,7 @@ export function Header(): VNode {
         undefined,
     );
     const { 0: searchValue, 1: setSearchValue } = useState('');
-    const { 0: fixChromiumFocusBug, 1: setFixChromiumFocusBug } = useState(
-        false,
-    );
+    const { 0: fixChromiumFocus, 1: setFixChromiumFocus } = useState(false);
 
     const path = usePath();
     const previousPath = usePrevious(path);
@@ -53,28 +80,6 @@ export function Header(): VNode {
     if (previousPath && previousPath.value !== path) {
         previousPath.value = path;
         setIsMenuOpen(undefined);
-    }
-
-    const menuLinkTexts: string[] = [];
-    pageGroups.forEach((pageGroup) => {
-        pageGroup.pageIds.forEach((pageId) => {
-            menuLinkTexts.push(pageIdToPageTitle[pageId]);
-        });
-    });
-
-    const licenseLinkText = 'License';
-    const githubLinkText = 'GitHub';
-    menuLinkTexts.push(licenseLinkText, githubLinkText);
-
-    // eslint-disable-next-line prefer-spread
-    const menuLinkRefs = Array.apply(
-        null,
-        Array(menuLinkTexts.length),
-    ).map(() => useRef<HTMLAnchorElement>());
-
-    function getMenuLinkFocusIndex(): number {
-        const focusedElement = document.activeElement;
-        return findIndex(menuLinkRefs, (ref) => ref.current === focusedElement);
     }
 
     const isMovingFocusManuallyRef = useRef(false);
@@ -92,48 +97,12 @@ export function Header(): VNode {
             return;
         }
         const listener = (event: KeyboardEvent) => {
-            if (!isMenuOpen) {
-                return;
-            }
-
-            if (event.ctrlKey || event.metaKey || event.altKey) {
-                return;
-            }
-
             if (
-                event.key.length === 1 &&
-                /\S/.test(event.key) &&
-                document.activeElement !== searchInputRef.current
+                event.ctrlKey ||
+                event.metaKey ||
+                event.altKey ||
+                event.shiftKey
             ) {
-                const index = getMenuLinkFocusIndex();
-                const predicate = (title: string) =>
-                    title.toLowerCase()[0] === event.key.toLowerCase();
-                let nextIndexStartingWithChar = findIndex(
-                    menuLinkTexts,
-                    predicate,
-                    index + 1,
-                );
-                if (nextIndexStartingWithChar === -1) {
-                    nextIndexStartingWithChar = findIndex(
-                        menuLinkTexts,
-                        predicate,
-                        0,
-                        index - 1,
-                    );
-                }
-                if (nextIndexStartingWithChar === -1) {
-                    return;
-                }
-                manuallySetFocus(
-                    menuLinkRefs[nextIndexStartingWithChar].current,
-                );
-                if (event.shiftKey) {
-                    stopEvent(event);
-                }
-                return;
-            }
-
-            if (event.shiftKey) {
                 return;
             }
 
@@ -143,47 +112,6 @@ export function Header(): VNode {
                     setIsMenuOpen(false);
                     stopEvent(event);
                     break;
-                }
-                case 'ArrowUp':
-                case 'Up': {
-                    const index = getMenuLinkFocusIndex();
-                    if (index === -1) {
-                        return;
-                    }
-                    manuallySetFocus(
-                        menuLinkRefs[
-                            index === 0 ? menuLinkRefs.length - 1 : index - 1
-                        ].current,
-                    );
-                    stopEvent(event);
-                    break;
-                }
-                case 'ArrowDown':
-                case 'Down': {
-                    const index = getMenuLinkFocusIndex();
-                    if (index === -1) {
-                        return;
-                    }
-                    manuallySetFocus(
-                        menuLinkRefs[
-                            index === menuLinkRefs.length - 1 ? 0 : index + 1
-                        ].current,
-                    );
-                    stopEvent(event);
-                    break;
-                }
-                case 'Home':
-                case 'PageUp': {
-                    manuallySetFocus(menuLinkRefs[0].current);
-                    stopEvent(event);
-                    break;
-                }
-                case 'End':
-                case 'PageDown': {
-                    manuallySetFocus(
-                        menuLinkRefs[menuLinkRefs.length - 1].current,
-                    );
-                    stopEvent(event);
                 }
             }
         };
@@ -196,6 +124,7 @@ export function Header(): VNode {
     const headerRef = useRef<HTMLElement>();
     const menuRef = useRef<HTMLElement>();
     const firstLinkRef = useRef<HTMLAnchorElement>();
+    const menuLinkRefs: { current: HTMLAnchorElement }[] = [];
 
     useEffect(() => {
         if (!isMenuOpen) {
@@ -244,29 +173,14 @@ export function Header(): VNode {
         };
     }, [!!isMenuOpen]);
 
-    useEffect(() => {
-        if (!fixChromiumFocusBug) {
-            return;
-        }
-        const listener = (event: FocusEvent) => {
-            if (
-                isChromium &&
-                fixChromiumFocusBug &&
-                !isMovingFocusManuallyRef.current &&
-                menuLinkRefs.some((ref) => ref.current === event.target) &&
-                // Moving focus away and back to window reintroduces the bug.
-                document.hasFocus()
-            ) {
-                setFixChromiumFocusBug(false);
-            }
-        };
-        document.addEventListener('focusout', listener);
-        return () => document.removeEventListener('focusout', listener);
-    }, [fixChromiumFocusBug]);
-
-    const onMenuLinkClick = () => {
-        setIsMenuOpen(undefined);
-    };
+    if (isChromium) {
+        useResetFixChromiumFocus({
+            fixChromiumFocus,
+            resetFixChromiumFocus: () => setFixChromiumFocus(false),
+            isMovingFocusManuallyRef,
+            linkRefs: menuLinkRefs,
+        });
+    }
 
     const onSearchInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {
         setSearchValue(e.currentTarget.value);
@@ -277,9 +191,9 @@ export function Header(): VNode {
     ) => {
         setIsMenuOpen((isMenuOpen) => {
             const isMenuOpenAfterClick = !isMenuOpen;
-            if (event.detail !== 0 && isMenuOpenAfterClick) {
+            if (isChromium && event.detail !== 0 && isMenuOpenAfterClick) {
                 // Opening with click.
-                setFixChromiumFocusBug(true);
+                setFixChromiumFocus(true);
             }
             return isMenuOpenAfterClick;
         });
@@ -289,7 +203,9 @@ export function Header(): VNode {
 
     useLayoutEffect(() => {
         if (isMenuOpen) {
-            manuallySetFocus(menuLinkRefs[0].current);
+            requestAnimationFrame(() => {
+                manuallySetFocus(menuLinkRefs[0].current);
+            });
         } else if (isMenuOpen === false) {
             manuallySetFocus(toggleButtonRef.current);
         }
@@ -302,12 +218,6 @@ export function Header(): VNode {
         },
     );
 
-    const isLicensePage = isActivePath(
-        parsePathDefaultingToEmptyString('/license'),
-    );
-
-    const toggleButtonLabel = 'Toggle Navigation Menu';
-
     const goBack = (e: Event) => {
         e.preventDefault();
         customHistory.back();
@@ -319,16 +229,8 @@ export function Header(): VNode {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         window.history.state.idx !== 0;
 
-    const menuLinkClass =
-        'menu__link' +
-        (fixChromiumFocusBug ? ' menu__link--fix-chromium-focus' : '');
-
-    const githubUrl = github
-        ? `https://github.com/${github.org}/${github.repo}/tree/${github.sha}`
-        : 'https://github.com/anthonyrota/microstream';
+    const toggleButtonLabel = 'Toggle Navigation Menu';
     const githubLinkLabel = 'Open GitHub Repository';
-
-    let menuLinkIndex = 0;
 
     return (
         <Fragment>
@@ -443,7 +345,11 @@ export function Header(): VNode {
                             <div
                                 class={
                                     'header__nav__link-container' +
-                                    (isLicensePage
+                                    (isActivePath(
+                                        parsePathDefaultingToEmptyString(
+                                            '/license',
+                                        ),
+                                    )
                                         ? ' header__nav__link-container--active'
                                         : '')
                                 }
@@ -506,87 +412,339 @@ export function Header(): VNode {
                 aria-label="Site Navigation"
             >
                 <div class="menu__contents">
-                    {pageGroups.map((pageGroup, pageGroupIndex) => (
-                        <Fragment key={pageGroupIndex}>
-                            <h2 class="menu__header">{pageGroup.title}</h2>
-                            <ul
-                                class="menu__link-list"
-                                role="navigation"
-                                aria-label="Documentation Navigation"
-                            >
-                                {pageGroup.pageIds.map((pageId, index) => {
-                                    const href = `/${pageIdToWebsitePath[pageId]}`;
-                                    const isActive = isActivePath(
-                                        parsePathDefaultingToEmptyString(href),
-                                    );
-
-                                    return (
-                                        <li key={index} class="menu__li">
-                                            <div
-                                                class={
-                                                    'menu__link-container' +
-                                                    (isActive
-                                                        ? ' menu__link-container--active'
-                                                        : '')
-                                                }
-                                            >
-                                                <DocPageLink
-                                                    class={menuLinkClass}
-                                                    pageId={pageId}
-                                                    innerRef={
-                                                        menuLinkRefs[
-                                                            menuLinkIndex++
-                                                        ]
-                                                    }
-                                                    onClick={onMenuLinkClick}
-                                                >
-                                                    {pageIdToPageTitle[pageId]}
-                                                </DocPageLink>
-                                            </div>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </Fragment>
-                    ))}
-                    <h2 class="menu__header">Resources</h2>
-                    <ul
-                        class="menu__link-list"
-                        role="navigation"
-                        aria-label="Resources Navigation"
-                    >
-                        <li class="menu__li">
-                            <div
-                                class={
-                                    'menu__link-container' +
-                                    (isLicensePage
-                                        ? ' menu__link-container--active'
-                                        : '')
-                                }
-                            >
-                                <Link
-                                    class={menuLinkClass}
-                                    innerRef={menuLinkRefs[menuLinkIndex++]}
-                                    href="/license"
-                                >
-                                    {licenseLinkText}
-                                </Link>
-                            </div>
-                        </li>
-                        <li class="menu__li">
-                            <div class="menu__link-container">
-                                <a
-                                    class={menuLinkClass}
-                                    ref={menuLinkRefs[menuLinkIndex++]}
-                                    href={githubUrl}
-                                >
-                                    {githubLinkText}
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
+                    <FullSiteNavigationContents
+                        bindKeys={
+                            isMenuOpen ? BindKeysNoRequireFocus : NoBindKeys
+                        }
+                        getAllowSingleLetterKeyLinkJumpShortcut={() => {
+                            return (
+                                document.activeElement !==
+                                searchInputRef.current
+                            );
+                        }}
+                        manuallySetFocus={manuallySetFocus}
+                        isMovingFocusManuallyRef={isMovingFocusManuallyRef}
+                        fixLinkChromiumFocus={fixChromiumFocus}
+                        linkRefs={menuLinkRefs}
+                    />
                 </div>
             </aside>
+        </Fragment>
+    );
+}
+
+// Not supported in IE.
+function findIndex<T>(
+    list: readonly T[],
+    predicate: (value: T) => boolean,
+    startIndex = 0,
+    endIndex = list.length - 1,
+): number {
+    for (let i = startIndex; i <= endIndex; i++) {
+        if (predicate(list[i])) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+const NoBindKeys = 0;
+const BindKeysRequireFocus = 1;
+const BindKeysNoRequireFocus = 2;
+
+interface FullSiteNavigationContentsProps {
+    bindKeys:
+        | typeof NoBindKeys
+        | typeof BindKeysRequireFocus
+        | typeof BindKeysNoRequireFocus;
+    getAllowSingleLetterKeyLinkJumpShortcut?: (() => boolean) | undefined;
+    manuallySetFocus?: (element: HTMLElement) => void;
+    isMovingFocusManuallyRef?: { current: boolean };
+    fixLinkChromiumFocus?: boolean;
+    linkRefs: { current: HTMLAnchorElement }[];
+}
+
+function FullSiteNavigationContents({
+    bindKeys,
+    manuallySetFocus,
+    isMovingFocusManuallyRef,
+    getAllowSingleLetterKeyLinkJumpShortcut,
+    fixLinkChromiumFocus: fixLinkChromiumFocusProp,
+    linkRefs,
+}: FullSiteNavigationContentsProps): VNode {
+    function getMenuLinkFocusIndex(): number {
+        const focusedElement = document.activeElement;
+        return findIndex(linkRefs, (ref) => ref.current === focusedElement);
+    }
+
+    const menuLinkTexts: string[] = [];
+    pageGroups.forEach((pageGroup) => {
+        pageGroup.pageIds.forEach((pageId) => {
+            menuLinkTexts.push(pageIdToPageTitle[pageId]);
+        });
+    });
+
+    menuLinkTexts.push(licenseLinkText, githubLinkText);
+
+    for (let i = 0; i < menuLinkTexts.length; i++) {
+        linkRefs[i] = useRef<HTMLAnchorElement>();
+    }
+
+    const isChromiumFocusedElementOnKeyShortcutQuirkyRef = useRef(false);
+    if (isChromium) {
+        useEffect(() => {
+            if (bindKeys === NoBindKeys) {
+                return;
+            }
+            let animationId = requestAnimationFrame(function cb(): void {
+                let isChromiumFocusedElementOnKeyShortcutQuirky = false;
+                if (document.activeElement !== null) {
+                    if ('matches' in document.activeElement) {
+                        try {
+                            // eslint-disable-next-line max-len
+                            isChromiumFocusedElementOnKeyShortcutQuirky = !document.activeElement.matches(
+                                ':focus-visible',
+                            );
+                        } catch (error) {
+                            // Focus visible not supported;
+                        }
+                    }
+                    if (!isChromiumFocusedElementOnKeyShortcutQuirky) {
+                        if (document.activeElement.tagName === 'INPUT') {
+                            isChromiumFocusedElementOnKeyShortcutQuirky = true;
+                        }
+                    }
+                }
+                // eslint-disable-next-line max-len
+                isChromiumFocusedElementOnKeyShortcutQuirkyRef.current = isChromiumFocusedElementOnKeyShortcutQuirky;
+                animationId = requestAnimationFrame(cb);
+            });
+            return () => {
+                cancelAnimationFrame(animationId);
+            };
+        }, [bindKeys === NoBindKeys]);
+    }
+
+    const { 0: fixChromiumFocus, 1: setFixChromiumFocus } = useState(false);
+
+    const setFocus = (element: HTMLElement) => {
+        if (
+            findIndex(linkRefs, (ref) => ref.current === element) !== -1 &&
+            isChromiumFocusedElementOnKeyShortcutQuirkyRef.current
+        ) {
+            setFixChromiumFocus(true);
+        }
+
+        if (manuallySetFocus) {
+            manuallySetFocus(element);
+        } else {
+            element.focus();
+        }
+    };
+
+    if (isChromium && isMovingFocusManuallyRef) {
+        useResetFixChromiumFocus({
+            fixChromiumFocus,
+            resetFixChromiumFocus: () => setFixChromiumFocus(false),
+            isMovingFocusManuallyRef,
+            linkRefs,
+        });
+    }
+
+    useEffect(() => {
+        if (!bindKeys) {
+            return;
+        }
+        const listener = (event: KeyboardEvent) => {
+            if (
+                bindKeys === BindKeysRequireFocus &&
+                getMenuLinkFocusIndex() === -1
+            ) {
+                return;
+            }
+
+            if (event.ctrlKey || event.metaKey || event.altKey) {
+                return;
+            }
+
+            if (
+                event.key.length === 1 &&
+                /\S/.test(event.key) &&
+                (!getAllowSingleLetterKeyLinkJumpShortcut ||
+                    getAllowSingleLetterKeyLinkJumpShortcut())
+            ) {
+                const index = getMenuLinkFocusIndex();
+                const predicate = (title: string) =>
+                    title.toLowerCase()[0] === event.key.toLowerCase();
+                let nextIndexStartingWithChar = findIndex(
+                    menuLinkTexts,
+                    predicate,
+                    index + 1,
+                );
+                if (nextIndexStartingWithChar === -1) {
+                    nextIndexStartingWithChar = findIndex(
+                        menuLinkTexts,
+                        predicate,
+                        0,
+                        index - 1,
+                    );
+                }
+                if (nextIndexStartingWithChar === -1) {
+                    return;
+                }
+                setFocus(linkRefs[nextIndexStartingWithChar].current);
+                if (event.shiftKey) {
+                    stopEvent(event);
+                }
+                return;
+            }
+
+            if (event.shiftKey) {
+                return;
+            }
+
+            switch (event.key) {
+                case 'ArrowUp':
+                case 'Up': {
+                    const index = getMenuLinkFocusIndex();
+                    if (index === -1) {
+                        return;
+                    }
+                    setFocus(
+                        linkRefs[index === 0 ? linkRefs.length - 1 : index - 1]
+                            .current,
+                    );
+                    stopEvent(event);
+                    break;
+                }
+                case 'ArrowDown':
+                case 'Down': {
+                    const index = getMenuLinkFocusIndex();
+                    if (index === -1) {
+                        return;
+                    }
+                    setFocus(
+                        linkRefs[index === linkRefs.length - 1 ? 0 : index + 1]
+                            .current,
+                    );
+                    stopEvent(event);
+                    break;
+                }
+                case 'Home':
+                case 'PageUp': {
+                    setFocus(linkRefs[0].current);
+                    stopEvent(event);
+                    break;
+                }
+                case 'End':
+                case 'PageDown': {
+                    setFocus(linkRefs[linkRefs.length - 1].current);
+                    stopEvent(event);
+                }
+            }
+        };
+        document.addEventListener('keydown', listener);
+        return () => {
+            document.removeEventListener('keydown', listener);
+        };
+    }, [bindKeys]);
+
+    let menuLinkIndex = 0;
+
+    return (
+        <Fragment>
+            {pageGroups.map((pageGroup, pageGroupIndex) => (
+                <Fragment key={pageGroupIndex}>
+                    <h2 class="full-site-nav__header">{pageGroup.title}</h2>
+                    <ul
+                        class="full-site-nav__link-list"
+                        role="navigation"
+                        aria-label="Documentation Navigation"
+                    >
+                        {pageGroup.pageIds.map((pageId, index) => {
+                            const href = `/${pageIdToWebsitePath[pageId]}`;
+                            const isActive = isActivePath(
+                                parsePathDefaultingToEmptyString(href),
+                            );
+
+                            return (
+                                <li key={index} class="full-site-nav__li">
+                                    <div
+                                        class={
+                                            'full-site-nav__link-container' +
+                                            (isActive
+                                                ? ' full-site-nav__link-container--active'
+                                                : '')
+                                        }
+                                    >
+                                        <DocPageLink
+                                            class={
+                                                'full-site-nav__link' +
+                                                (fixLinkChromiumFocusProp ||
+                                                fixChromiumFocus
+                                                    ? ` full-site-nav__link--fix-chromium-focus`
+                                                    : '')
+                                            }
+                                            pageId={pageId}
+                                            innerRef={linkRefs[menuLinkIndex++]}
+                                        >
+                                            {pageIdToPageTitle[pageId]}
+                                        </DocPageLink>
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </Fragment>
+            ))}
+            <h2 class="full-site-nav__header">Resources</h2>
+            <ul
+                class="full-site-nav__link-list"
+                role="navigation"
+                aria-label="Resources Navigation"
+            >
+                <li class="full-site-nav__li">
+                    <div
+                        class={
+                            'full-site-nav__link-container' +
+                            (isActivePath(
+                                parsePathDefaultingToEmptyString('/license'),
+                            )
+                                ? ' full-site-nav__link-container--active'
+                                : '')
+                        }
+                    >
+                        <Link
+                            class={
+                                'full-site-nav__link' +
+                                (fixLinkChromiumFocusProp || fixChromiumFocus
+                                    ? ` full-site-nav__link--fix-chromium-focus`
+                                    : '')
+                            }
+                            innerRef={linkRefs[menuLinkIndex++]}
+                            href="/license"
+                        >
+                            {licenseLinkText}
+                        </Link>
+                    </div>
+                </li>
+                <li class="full-site-nav__li">
+                    <div class="full-site-nav__link-container">
+                        <a
+                            class={
+                                'full-site-nav__link' +
+                                (fixLinkChromiumFocusProp || fixChromiumFocus
+                                    ? ` full-site-nav__link--fix-chromium-focus`
+                                    : '')
+                            }
+                            ref={linkRefs[menuLinkIndex++]}
+                            href={githubUrl}
+                        >
+                            {githubLinkText}
+                        </a>
+                    </div>
+                </li>
+            </ul>
         </Fragment>
     );
 }

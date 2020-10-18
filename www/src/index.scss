@@ -172,9 +172,9 @@ button {
 }
 
 $z-index-main: 0;
-$z-index-header: 1;
-$z-index-menu: 1;
-$z-index-skip-link: 2;
+$z-index-header: 0;
+$z-index-menu: 0;
+$z-index-skip-link: 1;
 
 // https://web.dev/headings-and-landmarks/#use-landmarks-to-aid-navigation
 .skip-link {
@@ -199,17 +199,17 @@ $max-width: 1000px;
 $header-height: 56px;
 $header-border-height: 1px;
 
-@mixin navigation-link--active {
-    color: $link-highlight-color;
-}
-
 @mixin navigation-link {
     text-decoration: none;
     color: $text-color;
 
     &:hover,
     &:focus {
-        @include navigation-link--active();
+        color: $link-highlight-color;
+    }
+
+    &:focus:not(:focus-visible) {
+        color: $text-color;
     }
 }
 
@@ -272,7 +272,7 @@ $header-border-height: 1px;
         }
 
         &__link-container--active &__link {
-            @include navigation-link--active();
+            color: $link-highlight-color !important;
             margin-bottom: -2px;
         }
 
@@ -300,6 +300,10 @@ $header-border-height: 1px;
         &__link:hover &__icon,
         &__link:focus &__icon {
             opacity: 0.7;
+        }
+
+        &__link:focus:not(:focus-visible) &__icon {
+            opacity: 1;
         }
     }
 
@@ -352,7 +356,6 @@ $header-border-height: 1px;
 
             padding-left: $icon-size + $icon-spacing-lg * 2;
             padding-right: $icon-spacing-lg;
-
             @media screen and (max-width: $size-small) {
                 padding-left: $icon-size + $icon-spacing-sm * 2;
                 padding-right: $icon-spacing-sm;
@@ -423,12 +426,6 @@ $header-border-height: 1px;
         }
     }
 
-    // Fix chromium bug where focusing the link through javascript does not show
-    // outline.
-    .menu__link--fix-chromium-focus:focus {
-        outline: 2px solid -webkit-focus-ring-color;
-    }
-
     &__contents {
         position: relative;
         width: 100%;
@@ -439,7 +436,9 @@ $header-border-height: 1px;
         left: $spacing;
         background: #fff;
     }
+}
 
+.full-site-nav {
     &__header {
         margin: 0;
         font-weight: 700;
@@ -470,7 +469,14 @@ $header-border-height: 1px;
     }
 
     &__link-container--active &__link {
-        @include navigation-link--active();
+        color: $link-highlight-color !important;
+    }
+
+    // Fix chromium quirk where focusing the link through javascript in specific
+    // circumstances does not show an outline.
+    &__link--fix-chromium-focus:focus {
+        outline: 2px solid -webkit-focus-ring-color !important;
+        color: $link-highlight-color !important;
     }
 
     &__link {

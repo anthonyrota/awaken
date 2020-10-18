@@ -1,3 +1,5 @@
+// eslint-disable-next-line import/order
+import { pages, pagesMetadata } from './setGlobalAppVars';
 import * as path from 'path';
 import { promisify } from 'util';
 import { createMemoryHistory } from 'history';
@@ -16,7 +18,6 @@ import { exit } from '../exit';
 import { rootDir } from '../rootDir';
 import { createBuildHtmlFileFunction } from './buildHtmlFile';
 import { isDev } from './env';
-import { pages, pagesMetadata } from './setGlobalAppVars';
 
 async function main() {
     const buildHtmlFile = await createBuildHtmlFileFunction();
