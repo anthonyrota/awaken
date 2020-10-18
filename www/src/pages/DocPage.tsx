@@ -15,9 +15,7 @@ export function DocPage({ pageId }: DocPageProps): VNode | null {
 
     return (
         <Fragment>
-            <DocumentTitle
-                title={`${pageIdToPageTitle[pageId]} · Microstream JS`}
-            />
+            <DocumentTitle title={pageIdToPageTitle[pageId]} />
             {Array.from({ length: 1000 }, () => (
                 <br />
             ))}

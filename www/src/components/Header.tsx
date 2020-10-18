@@ -5,7 +5,7 @@ import { isChromium, isMobile, isStandalone } from '../env';
 import { customHistory, usePath } from '../hooks/useHistory';
 import { usePrevious } from '../hooks/usePrevious';
 import { DocPageLink } from './DocPageLink';
-import { isActivePath, Link, parsePathDefaultingToEmptyString } from './Link';
+import { Link, isStringActivePath, isDocPageIdActivePath } from './Link';
 
 function stopEvent(event: Event): void {
     event.stopPropagation();
@@ -63,7 +63,11 @@ function useResetFixChromiumFocus(
     }, [fixChromiumFocus]);
 }
 
-export function Header(): VNode {
+export interface HeaderProps {
+    enableMenu: boolean;
+}
+
+export function Header({ enableMenu }: HeaderProps): VNode {
     // Hack:
     // undefined -> don't focus anything
     // false -> regular closing, focus toggle element
@@ -212,10 +216,7 @@ export function Header(): VNode {
     }, [isMenuOpen]);
 
     const isDocumentationPage = Object.keys(pageIdToWebsitePath).some(
-        (pageId) => {
-            const href = `/${pageIdToWebsitePath[pageId]}`;
-            return isActivePath(parsePathDefaultingToEmptyString(href));
-        },
+        isDocPageIdActivePath,
     );
 
     const goBack = (e: Event) => {
@@ -345,11 +346,7 @@ export function Header(): VNode {
                             <div
                                 class={
                                     'header__nav__link-container' +
-                                    (isActivePath(
-                                        parsePathDefaultingToEmptyString(
-                                            '/license',
-                                        ),
-                                    )
+                                    (isStringActivePath('/license')
                                         ? ' header__nav__link-container--active'
                                         : '')
                                 }
@@ -379,7 +376,12 @@ export function Header(): VNode {
                                 </svg>
                             </a>
                             <button
-                                class="header__nav__link"
+                                class={
+                                    'header__nav__link header__menu-toggle-button' +
+                                    (enableMenu
+                                        ? ' header__menu-toggle-button--enabled'
+                                        : '')
+                                }
                                 type="button"
                                 aria-expanded={isMenuOpen}
                                 aria-label={toggleButtonLabel}
@@ -406,7 +408,11 @@ export function Header(): VNode {
             </header>
             <aside
                 ref={menuRef}
-                class={'menu' + (isMenuOpen ? ' menu--open' : '')}
+                class={
+                    'menu' +
+                    (isMenuOpen ? ' menu--open' : '') +
+                    (enableMenu ? ' menu--enabled' : '')
+                }
                 role="dialog"
                 aria-modal="true"
                 aria-label="Site Navigation"
@@ -448,11 +454,11 @@ function findIndex<T>(
     return -1;
 }
 
-const NoBindKeys = 0;
-const BindKeysRequireFocus = 1;
-const BindKeysNoRequireFocus = 2;
+export const NoBindKeys = 0;
+export const BindKeysRequireFocus = 1;
+export const BindKeysNoRequireFocus = 2;
 
-interface FullSiteNavigationContentsProps {
+export interface FullSiteNavigationContentsProps {
     bindKeys:
         | typeof NoBindKeys
         | typeof BindKeysRequireFocus
@@ -461,16 +467,16 @@ interface FullSiteNavigationContentsProps {
     manuallySetFocus?: (element: HTMLElement) => void;
     isMovingFocusManuallyRef?: { current: boolean };
     fixLinkChromiumFocus?: boolean;
-    linkRefs: { current: HTMLAnchorElement }[];
+    linkRefs?: { current: HTMLAnchorElement }[];
 }
 
-function FullSiteNavigationContents({
+export function FullSiteNavigationContents({
     bindKeys,
     manuallySetFocus,
     isMovingFocusManuallyRef,
     getAllowSingleLetterKeyLinkJumpShortcut,
     fixLinkChromiumFocus: fixLinkChromiumFocusProp,
-    linkRefs,
+    linkRefs = [],
 }: FullSiteNavigationContentsProps): VNode {
     function getMenuLinkFocusIndex(): number {
         const focusedElement = document.activeElement;
@@ -655,61 +661,76 @@ function FullSiteNavigationContents({
         <Fragment>
             {pageGroups.map((pageGroup, pageGroupIndex) => (
                 <Fragment key={pageGroupIndex}>
-                    <h2 class="full-site-nav__header">{pageGroup.title}</h2>
+                    <h2
+                        class={
+                            'full-site-nav__header' +
+                            (pageGroup.pageIds.some(isDocPageIdActivePath)
+                                ? ' full-site-nav__header--active'
+                                : '')
+                        }
+                    >
+                        {pageGroup.title}
+                    </h2>
                     <ul
-                        class="full-site-nav__link-list"
                         role="navigation"
+                        class="full-site-nav__link-list"
                         aria-label="Documentation Navigation"
                     >
-                        {pageGroup.pageIds.map((pageId, index) => {
-                            const href = `/${pageIdToWebsitePath[pageId]}`;
-                            const isActive = isActivePath(
-                                parsePathDefaultingToEmptyString(href),
-                            );
-
-                            return (
-                                <li key={index} class="full-site-nav__li">
-                                    <div
+                        {pageGroup.pageIds.map((pageId, index) => (
+                            <li key={index} class="full-site-nav__li">
+                                <div
+                                    class={
+                                        'full-site-nav__link-container' +
+                                        (isDocPageIdActivePath(pageId)
+                                            ? ' full-site-nav__link-container--active'
+                                            : '')
+                                    }
+                                >
+                                    <DocPageLink
                                         class={
-                                            'full-site-nav__link-container' +
-                                            (isActive
-                                                ? ' full-site-nav__link-container--active'
+                                            'full-site-nav__link' +
+                                            (fixLinkChromiumFocusProp ||
+                                            fixChromiumFocus
+                                                ? ` full-site-nav__link--fix-chromium-focus`
                                                 : '')
                                         }
+                                        pageId={pageId}
+                                        innerRef={linkRefs[menuLinkIndex++]}
                                     >
-                                        <DocPageLink
-                                            class={
-                                                'full-site-nav__link' +
-                                                (fixLinkChromiumFocusProp ||
-                                                fixChromiumFocus
-                                                    ? ` full-site-nav__link--fix-chromium-focus`
-                                                    : '')
-                                            }
-                                            pageId={pageId}
-                                            innerRef={linkRefs[menuLinkIndex++]}
+                                        <span
+                                            class="full-site-nav__link__border"
+                                            aria-hidden
                                         >
                                             {pageIdToPageTitle[pageId]}
-                                        </DocPageLink>
-                                    </div>
-                                </li>
-                            );
-                        })}
+                                        </span>
+                                        {pageIdToPageTitle[pageId]}
+                                    </DocPageLink>
+                                </div>
+                            </li>
+                        ))}
                     </ul>
                 </Fragment>
             ))}
-            <h2 class="full-site-nav__header">Resources</h2>
+            <h2
+                class={
+                    'full-site-nav__header' +
+                    (['/license'].some(isStringActivePath)
+                        ? ' full-site-nav__header--active'
+                        : '')
+                }
+            >
+                Resources
+            </h2>
             <ul
-                class="full-site-nav__link-list"
                 role="navigation"
+                class="full-site-nav__link-list"
                 aria-label="Resources Navigation"
             >
                 <li class="full-site-nav__li">
                     <div
                         class={
                             'full-site-nav__link-container' +
-                            (isActivePath(
-                                parsePathDefaultingToEmptyString('/license'),
-                            )
+                            (isStringActivePath('/license')
                                 ? ' full-site-nav__link-container--active'
                                 : '')
                         }
@@ -724,6 +745,12 @@ function FullSiteNavigationContents({
                             innerRef={linkRefs[menuLinkIndex++]}
                             href="/license"
                         >
+                            <span
+                                class="full-site-nav__link__border"
+                                aria-hidden
+                            >
+                                {licenseLinkText}
+                            </span>
                             {licenseLinkText}
                         </Link>
                     </div>
@@ -740,6 +767,12 @@ function FullSiteNavigationContents({
                             ref={linkRefs[menuLinkIndex++]}
                             href={githubUrl}
                         >
+                            <span
+                                class="full-site-nav__link__border"
+                                aria-hidden
+                            >
+                                {licenseLinkText}
+                            </span>
                             {githubLinkText}
                         </a>
                     </div>

@@ -19,18 +19,32 @@ export function getSSRHeadValues(): SSRHeadValues {
     };
 }
 
+export const WebsiteNamePositionStart = 0;
+export const WebsiteNamePositionEnd = 1;
+
 export interface DocumentTitleProps {
     title: string;
+    websiteNamePosition?:
+        | typeof WebsiteNamePositionStart
+        | typeof WebsiteNamePositionEnd;
 }
 
-export function DocumentTitle({ title }: DocumentTitleProps): null {
+export function DocumentTitle({
+    title,
+    websiteNamePosition = WebsiteNamePositionEnd,
+}: DocumentTitleProps): null {
+    const titleWithWebsiteName =
+        websiteNamePosition === WebsiteNamePositionStart
+            ? `Microstream JS · ${title}`
+            : `${title} · Microstream JS`;
+
     if (process.env.NODE_ENV === 'ssr') {
-        ssrHeadValues.title = title;
+        ssrHeadValues.title = titleWithWebsiteName;
     }
 
     useEffect(() => {
-        document.title = title;
-    }, [title]);
+        document.title = titleWithWebsiteName;
+    }, [titleWithWebsiteName]);
 
     return null;
 }

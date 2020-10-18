@@ -137,6 +137,7 @@ table {
 ////////////////////////////////////////////////////////////////////////////////
 
 $size-small: 700px;
+$size-show-menu: 840px;
 
 *,
 *::before,
@@ -160,10 +161,7 @@ body {
     overflow-x: hidden;
     letter-spacing: 0.025em;
     text-size-adjust: none;
-}
-
-html {
-    overflow-y: scroll;
+    overflow-y: hidden;
 }
 
 input,
@@ -172,9 +170,6 @@ button {
     background: inherit;
 }
 
-$z-index-main: 0;
-$z-index-header: 0;
-$z-index-menu: 0;
 $z-index-skip-link: 1;
 
 // https://web.dev/headings-and-landmarks/#use-landmarks-to-aid-navigation
@@ -193,12 +188,15 @@ $z-index-skip-link: 1;
 }
 
 $spacing: 0.8em;
-$text-color: rgb(88, 96, 109);
+// $text-color: rgb(29, 32, 36);
+$text-color: rgb(59, 65, 73);
+// $text-color: rgb(80, 87, 99);
 $link-highlight-color: #f36;
 $light-border: 1px solid #ececec;
-$max-width: 1000px;
+$max-width: 1200px;
 $header-height: 56px;
 $header-border-height: 1px;
+$hover-opacity: 0.7;
 
 @mixin navigation-link {
     text-decoration: none;
@@ -206,11 +204,11 @@ $header-border-height: 1px;
 
     &:hover,
     &:focus {
-        color: $link-highlight-color;
+        opacity: $hover-opacity;
     }
 
     &:focus:not(:focus-visible) {
-        color: $text-color;
+        opacity: 1;
     }
 }
 
@@ -229,7 +227,6 @@ $header-border-height: 1px;
     left: 0;
     top: 0;
     position: relative;
-    z-index: $z-index-header;
     font-weight: 500;
 
     &__contents {
@@ -300,7 +297,7 @@ $header-border-height: 1px;
 
         &__link:hover &__icon,
         &__link:focus &__icon {
-            opacity: 0.7;
+            opacity: $hover-opacity;
         }
 
         &__link:focus:not(:focus-visible) &__icon {
@@ -408,65 +405,115 @@ $header-border-height: 1px;
             margin-right: $spacing;
         }
     }
+
+    &__menu-toggle-button {
+        &:not(&--enabled) {
+            @media screen and (min-width: $size-show-menu) {
+                display: none;
+            }
+        }
+    }
 }
 
+$main-min-height: calc(100vh - #{$header-height} - #{$header-border-height});
+
 .menu {
+    position: relative;
     display: none;
-    justify-content: center;
-    min-height: calc(100vh - #{$header-height} - #{$header-border-height});
-    width: 100%;
-    z-index: $z-index-menu;
+    overflow-y: auto;
+    height: $main-min-height;
 
-    &--open {
-        display: flex;
+    @mixin show {
+        display: block;
 
-        & ~ .main {
+        & ~ .page {
             position: absolute;
             top: -9999px;
             left: -9999px;
         }
     }
 
+    &--open {
+        @media screen and (max-width: $size-show-menu) {
+            @include show();
+        }
+    }
+
+    &--open#{&}--enabled {
+        @include show();
+    }
+
     &__contents {
-        position: relative;
         width: 100%;
         max-width: $max-width;
-        height: 100%;
-        padding-top: $spacing;
-        padding-bottom: $spacing;
-        left: $spacing;
-        background: #fff;
+        padding: $spacing;
     }
 }
 
 .full-site-nav {
     &__header {
         margin: 0;
-        font-weight: 700;
-        color: rgb(112, 119, 129);
+        font-weight: bold;
         text-transform: uppercase;
-        font-size: 0.83rem;
+        font-size: 16px;
         margin-top: $spacing * 4;
         &:first-child {
             margin-top: $spacing;
         }
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.5em;
+        letter-spacing: 1.9px;
+
+        &--active {
+            color: $link-highlight-color;
+        }
     }
 
+    $link-padding-tb: $spacing / 2;
+    $link-padding-lr: $spacing / 2;
+    $link-padding-lr-menu: $spacing / 4;
+    $link-padding: $link-padding-tb $link-padding-lr;
+    $link-padding-menu: $link-padding-tb $link-padding-lr-menu;
+
     &__link-list {
-        margin-left: $spacing/2;
+        margin-left: -$link-padding-lr;
+        width: calc(100% + #{$link-padding-lr * 2});
+        .menu & {
+            margin-left: -$link-padding-lr-menu;
+            width: calc(100% + #{$link-padding-lr-menu * 2});
+        }
     }
 
     &__li {
-        margin-top: 13px;
+        margin-top: 4px;
         line-height: 24px;
     }
 
-    &__link-container--active {
+    &__link__border {
+        display: none;
+    }
+
+    &__link-container--active &__link__border {
+        padding: $link-padding;
+        .menu & {
+            padding: $link-padding-menu;
+        }
         display: inline-block;
-        border-bottom: 2px solid $link-highlight-color;
-        padding-bottom: 1px;
-        margin-bottom: -3px;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        &::after {
+            position: absolute;
+            left: $link-padding-lr - $link-padding-lr-menu;
+            right: $link-padding-lr - $link-padding-lr-menu;
+            .menu & {
+                left: 0;
+                right: 0;
+            }
+            bottom: 3px;
+            content: '';
+            border-bottom: 2px solid $link-highlight-color;
+        }
     }
 
     &__link-container--active &__link {
@@ -477,23 +524,55 @@ $header-border-height: 1px;
     // circumstances does not show an outline.
     &__link--fix-chromium-focus:focus {
         outline: 2px solid -webkit-focus-ring-color !important;
-        color: $link-highlight-color !important;
+        opacity: $hover-opacity !important;
     }
 
     &__link {
-        padding: $spacing / 2;
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        padding: $link-padding;
+        .menu & {
+            padding: $link-padding-menu;
+        }
         @include navigation-link();
     }
 }
 
-.main {
-    padding-top: 1em;
-    padding-left: $spacing;
-    padding-right: $spacing;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: $max-width;
-    width: 100%;
-    overflow: hidden;
-    z-index: $z-index-main;
+.page {
+    overflow-y: auto;
+    height: $main-min-height;
+
+    &__inner {
+        position: relative;
+        display: flex;
+        width: 100%;
+        max-width: $max-width;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    &__sidebar {
+        position: fixed;
+        margin-top: $header-height + $header-border-height;
+        height: $main-min-height;
+        overflow-y: auto;
+        top: 0;
+        bottom: 0;
+        flex-shrink: 0;
+        width: 275px;
+        padding: $spacing;
+        border-right: $light-border;
+        overflow-y: auto;
+        top: 0;
+
+        @media screen and (max-width: $size-show-menu) {
+            display: none;
+        }
+    }
+
+    &__content {
+        padding: $spacing;
+        flex-grow: 1;
+    }
 }

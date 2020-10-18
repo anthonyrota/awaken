@@ -1,5 +1,6 @@
 import { parsePath, PartialPath } from 'history';
 import { h, VNode, JSX } from 'preact';
+import { getPagesMetadata } from '../data/docPages';
 import { customHistory } from '../hooks/useHistory';
 
 export function Link({
@@ -55,4 +56,14 @@ export function parsePathDefaultingToEmptyString(
 
 export function isActivePath(path: PartialPath): boolean {
     return path.pathname === customHistory.location.pathname;
+}
+
+export function isStringActivePath(stringPath: string): boolean {
+    return isActivePath(parsePathDefaultingToEmptyString(stringPath));
+}
+
+export function isDocPageIdActivePath(docPageId: string): boolean {
+    return isStringActivePath(
+        `/${getPagesMetadata().pageIdToWebsitePath[docPageId]}`,
+    );
 }

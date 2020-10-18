@@ -1,6 +1,10 @@
 import { h, Fragment, VNode } from 'preact';
 import { useLayoutEffect, useRef } from 'preact/hooks';
-import { Header } from './components/Header';
+import {
+    BindKeysRequireFocus,
+    FullSiteNavigationContents,
+    Header,
+} from './components/Header';
 import {
     getPagesMetadata,
     ResponseLoadingType,
@@ -27,6 +31,19 @@ function getPageIdFromPathname(pathname: string): string | void {
     }
 }
 
+function setFocusBefore(element: ChildNode): void {
+    const parentEl = element.parentElement;
+    if (!parentEl) {
+        return;
+    }
+
+    const tempDiv = document.createElement('div');
+    tempDiv.setAttribute('tabindex', '0');
+    parentEl.insertBefore(tempDiv, element);
+    tempDiv.focus();
+    parentEl.removeChild(tempDiv);
+}
+
 export function App(props: AppProps): VNode {
     const { path } = useHistory({ path: props.path });
     const appPathProps: AppPathProps = {
@@ -39,19 +56,20 @@ export function App(props: AppProps): VNode {
     // Needed in the below case where we are blocking the page transition.
     useDocPagesResponseState();
 
-    const mainAnchorRef = useRef<HTMLAnchorElement>();
-    function onSkipLinkClick(event: Event): void {
+    const pageContentRef = useRef<HTMLElement>();
+    const onSkipLinkClick = (event: Event) => {
         event.preventDefault();
-        mainAnchorRef.current.scrollIntoView();
-        mainAnchorRef.current.focus();
-    }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        setFocusBefore(pageContentRef.current.firstChild!);
+    };
 
     let appPathPropsToUse = appPathProps;
+    const docPageId = getPageIdFromPathname(path.pathname);
 
     if (
         previousAppPathPropsBox &&
         getCurrentResponseState().type === ResponseLoadingType &&
-        getPageIdFromPathname(path.pathname) !== undefined
+        docPageId !== undefined
     ) {
         const previousAppPathProps = previousAppPathPropsBox.value[0];
         if (
@@ -79,11 +97,21 @@ export function App(props: AppProps): VNode {
             >
                 Skip to main
             </a>
-            <Header />
-            <a tabIndex={0} name="main" ref={mainAnchorRef} />
-            <main class="main">
-                <AppPath {...appPathPropsToUse} />
-            </main>
+            <Header enableMenu={docPageId === undefined} />
+            <div class="page">
+                <div class="page__inner">
+                    {docPageId !== undefined && (
+                        <aside class="page__sidebar">
+                            <FullSiteNavigationContents
+                                bindKeys={BindKeysRequireFocus}
+                            />
+                        </aside>
+                    )}
+                    <main class="page__content" ref={pageContentRef}>
+                        <AppPath {...appPathPropsToUse} />
+                    </main>
+                </div>
+            </div>
         </Fragment>
     );
 }
@@ -107,27 +135,16 @@ function AppPath({ pathname, isDuplicateRender }: AppPathProps): VNode {
             return;
         }
 
-        let setFocusBeforeEl: Element = document.body;
-
         if (location.hash) {
-            const setFocusBeforeEl_ = document.getElementById(location.hash);
-            if (setFocusBeforeEl_) {
-                setFocusBeforeEl = setFocusBeforeEl_;
+            const element = document.getElementById(location.hash);
+            if (element) {
+                setFocusBefore(element);
             } else {
                 return;
             }
         }
 
-        const parentEl = setFocusBeforeEl.parentElement;
-        if (!parentEl) {
-            return;
-        }
-
-        const tempDiv = document.createElement('div');
-        tempDiv.setAttribute('tabindex', '0');
-        parentEl.insertBefore(tempDiv, setFocusBeforeEl);
-        tempDiv.focus();
-        parentEl.removeChild(tempDiv);
+        setFocusBefore(document.body);
     }, [location, isDuplicateRender]);
 
     if (pathname === '/') {

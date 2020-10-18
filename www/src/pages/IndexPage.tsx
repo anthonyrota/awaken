@@ -1,11 +1,14 @@
 import { h, Fragment, VNode } from 'preact';
-import { DocumentTitle } from '../Head';
+import { DocumentTitle, WebsiteNamePositionStart } from '../Head';
 
 export function IndexPage(): VNode {
     return (
         <Fragment>
-            <DocumentTitle title="Microstream JS · A fast and extremely lightweight reactive programming library for TypeScript" />
-            <div>index</div>
+            <DocumentTitle
+                title="A fast and extremely lightweight reactive programming library for TypeScript"
+                websiteNamePosition={WebsiteNamePositionStart}
+            />
+            index
         </Fragment>
     );
 }
