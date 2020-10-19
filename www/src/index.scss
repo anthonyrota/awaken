@@ -161,7 +161,10 @@ body {
     overflow-x: hidden;
     letter-spacing: 0.025em;
     text-size-adjust: none;
-    overflow-y: hidden;
+}
+
+html {
+    overflow: hidden;
 }
 
 input,
@@ -170,7 +173,8 @@ button {
     background: inherit;
 }
 
-$z-index-skip-link: 1;
+$z-index-header: 1;
+$z-index-skip-link: 2;
 
 // https://web.dev/headings-and-landmarks/#use-landmarks-to-aid-navigation
 .skip-link {
@@ -194,9 +198,10 @@ $text-color: rgb(59, 65, 73);
 $link-highlight-color: #f36;
 $light-border: 1px solid #ececec;
 $max-width: 1200px;
+$hover-opacity: 0.7;
+// IMPORTANT: These should mirror the JavaScript variables defined in App.tsx.
 $header-height: 56px;
 $header-border-height: 1px;
-$hover-opacity: 0.7;
 
 @mixin navigation-link {
     text-decoration: none;
@@ -228,6 +233,7 @@ $hover-opacity: 0.7;
     top: 0;
     position: relative;
     font-weight: 500;
+    z-index: $z-index-header;
 
     &__contents {
         display: flex;
@@ -420,7 +426,6 @@ $main-min-height: calc(100vh - #{$header-height} - #{$header-border-height});
 .menu {
     position: relative;
     display: none;
-    overflow-y: auto;
     height: $main-min-height;
 
     @mixin show {
@@ -540,7 +545,7 @@ $main-min-height: calc(100vh - #{$header-height} - #{$header-border-height});
 }
 
 .page {
-    overflow-y: auto;
+    // display: flex;
     height: $main-min-height;
 
     &__inner {
@@ -552,19 +557,48 @@ $main-min-height: calc(100vh - #{$header-height} - #{$header-border-height});
         margin-right: auto;
     }
 
+    $sidebar-width: 275px;
+
     &__sidebar {
-        position: fixed;
-        margin-top: $header-height + $header-border-height;
-        height: $main-min-height;
         overflow-y: auto;
-        top: 0;
-        bottom: 0;
         flex-shrink: 0;
-        width: 275px;
+        width: $sidebar-width;
         padding: $spacing;
-        border-right: $light-border;
-        overflow-y: auto;
-        top: 0;
+
+        &--sticky {
+            position: fixed;
+            top: 0;
+            z-index: 100;
+            background: #fff;
+            height: 100vh;
+
+            & ~ .page__content {
+                width: calc(100% - #{$sidebar-width});
+                flex-grow: 0;
+                margin-left: auto;
+            }
+        }
+
+        // TODO: determine if this is ok.
+        @media screen and (max-width: $max-width) {
+            &::after {
+                position: fixed;
+                left: $sidebar-width;
+                top: 0;
+                bottom: 0;
+                content: '';
+                border-right: $light-border;
+                height: 100vh;
+            }
+        }
+
+        @supports (position: sticky) {
+            position: sticky;
+            top: 0;
+            min-height: calc(100vh - #{$header-height + $header-border-height});
+            max-height: 100vh;
+            padding-bottom: $header-height + $header-border-height;
+        }
 
         @media screen and (max-width: $size-show-menu) {
             display: none;
@@ -572,7 +606,19 @@ $main-min-height: calc(100vh - #{$header-height} - #{$header-border-height});
     }
 
     &__content {
-        padding: $spacing;
         flex-grow: 1;
+
+        &__container {
+            padding: $spacing * 2;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.7;
+            color: $text-color;
+
+            p:not(:first-child) {
+                margin-top: $spacing * 4;
+            }
+        }
     }
 }

@@ -16,8 +16,22 @@ export function DocPage({ pageId }: DocPageProps): VNode | null {
     return (
         <Fragment>
             <DocumentTitle title={pageIdToPageTitle[pageId]} />
-            {Array.from({ length: 1000 }, () => (
-                <br />
+            {Array.from({ length: 10 }, () => (
+                <p>
+                    {Array.from(
+                        { length: Math.floor(Math.random() * 300) + 150 },
+                        () =>
+                            [
+                                'foo',
+                                'bar',
+                                'baz',
+                                'lorem',
+                                'ipsum',
+                                'cat',
+                                'dog',
+                            ][Math.floor(Math.random() * 7)],
+                    ).join(' ')}
+                </p>
             ))}
         </Fragment>
     );
