@@ -158,13 +158,8 @@ html,
 body {
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
     letter-spacing: 0.025em;
     text-size-adjust: none;
-}
-
-html {
-    overflow: hidden;
 }
 
 input,
@@ -192,9 +187,7 @@ $z-index-skip-link: 2;
 }
 
 $spacing: 0.8em;
-// $text-color: rgb(29, 32, 36);
 $text-color: rgb(59, 65, 73);
-// $text-color: rgb(80, 87, 99);
 $link-highlight-color: #f36;
 $light-border: 1px solid #ececec;
 $max-width: 1200px;
@@ -223,7 +216,6 @@ $header-border-height: 1px;
     $content-height: 40px;
 
     line-height: 1.5;
-    background-color: #fff;
     border-bottom: $light-border;
     display: flex;
     align-items: center;
@@ -421,12 +413,9 @@ $header-border-height: 1px;
     }
 }
 
-$main-min-height: calc(100vh - #{$header-height} - #{$header-border-height});
-
 .menu {
     position: relative;
     display: none;
-    height: $main-min-height;
 
     @mixin show {
         display: block;
@@ -545,9 +534,6 @@ $main-min-height: calc(100vh - #{$header-height} - #{$header-border-height});
 }
 
 .page {
-    // display: flex;
-    height: $main-min-height;
-
     &__inner {
         position: relative;
         display: flex;
@@ -557,23 +543,27 @@ $main-min-height: calc(100vh - #{$header-height} - #{$header-border-height});
         margin-right: auto;
     }
 
-    $sidebar-width: 275px;
-
     &__sidebar {
+        $max-width: 275px;
+        $min-width: 210px;
+        $width-old-browser: ($min-width + $max-width) / 2;
+        $width-new-browser: #{'max' }(#{'min' }(25vw, $max-width), $min-width);
+
         overflow-y: auto;
         flex-shrink: 0;
-        width: $sidebar-width;
+        width: $width-old-browser;
+        width: $width-new-browser;
         padding: $spacing;
 
-        &--sticky {
+        &--js-sticky-active {
             position: fixed;
             top: 0;
             z-index: 100;
-            background: #fff;
             height: 100vh;
 
             & ~ .page__content {
-                width: calc(100% - #{$sidebar-width});
+                width: calc(100% - #{$width-old-browser});
+                width: calc(100% - #{$width-new-browser});
                 flex-grow: 0;
                 margin-left: auto;
             }
@@ -582,9 +572,12 @@ $main-min-height: calc(100vh - #{$header-height} - #{$header-border-height});
         @supports (position: sticky) {
             position: sticky;
             top: 0;
-            min-height: calc(100vh - #{$header-height + $header-border-height});
             max-height: 100vh;
             padding-bottom: $header-height + $header-border-height;
+
+            &--native-sticky-fix-active {
+                padding-bottom: 0;
+            }
         }
 
         @media screen and (max-width: $size-show-menu) {

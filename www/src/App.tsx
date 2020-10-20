@@ -137,49 +137,50 @@ const supportsSticky =
 
 function Sidebar(): VNode {
     const { 0: height, 1: setHeight } = useState<string | undefined>(undefined);
-    const { 0: paddingBottom, 1: setPaddingBottom } = useState<
-        string | undefined
-    >(undefined);
-    const { 0: hasStickyClass, 1: setHasStickyClass } = useState<boolean>(
-        false,
-    );
+    const { 0: stickyClass, 1: setStickyClass } = useState<string>('');
 
     useLayoutEffect(() => {
         const listener = () => {
+            const headerVisibleHeight = Math.max(
+                totalHeaderSpace - document.documentElement.scrollTop,
+                0,
+            );
             setHeight(
-                `${
-                    window.innerHeight -
-                    Math.max(totalHeaderSpace - document.body.scrollTop, 0)
-                }px`,
+                // 100vh - headerVisibleHeight.
+                headerVisibleHeight === 0
+                    ? undefined
+                    : `${
+                          Math.max(
+                              document.documentElement.clientHeight,
+                              window.innerHeight || 0,
+                          ) - headerVisibleHeight
+                      }px`,
             );
             if (supportsSticky) {
                 return;
             }
-            setHasStickyClass(document.body.scrollTop >= totalHeaderSpace);
+            setStickyClass(
+                document.documentElement.scrollTop >= totalHeaderSpace
+                    ? ' page__sidebar--js-sticky-active'
+                    : '',
+            );
         };
         listener();
         if (supportsSticky) {
-            setPaddingBottom('0');
+            setStickyClass(' page__sidebar--native-sticky-fix-active');
         }
-        document.body.addEventListener('scroll', listener);
+        document.addEventListener('scroll', listener);
         window.addEventListener('resize', listener);
         return () => {
-            document.body.removeEventListener('scroll', listener);
+            document.removeEventListener('scroll', listener);
             window.addEventListener('resize', listener);
         };
     }, []);
 
     return (
         <aside
-            class={
-                'page__sidebar' +
-                (hasStickyClass ? ' page__sidebar--sticky' : '')
-            }
-            style={
-                { height, paddingBottom } as {
-                    [key: string]: string | number;
-                }
-            }
+            class={`page__sidebar${stickyClass}`}
+            style={height && { height }}
         >
             <FullSiteNavigationContents bindKeys={BindKeysRequireFocus} />
         </aside>
