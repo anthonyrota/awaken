@@ -4,7 +4,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build:docs": "ts-node --project ./tsconfig.ts-node.json ./script/docs/index.ts",
-        "build:public": "npm run preparcel && del-cli '_files/public/**/*' '!_files/public/pages.*.json' && rimraf .parcel-cache _files/public-* && parcel build 'template/**/*.html' --dist-dir _files/public --detailed-report --no-source-maps --no-cache && rimraf .parcel-cache && ts-node --project ./tsconfig.ts-node.json ./script/template/postparcel.ts",
+        "build:public": "npm run preparcel && del-cli 'vercel-public/**/*' '!vercel-public/pages.*.json' && rimraf .parcel-cache && parcel build 'template/**/*.html' --dist-dir vercel-public --detailed-report --no-source-maps --no-cache && rimraf .parcel-cache && ts-node --project ./tsconfig.ts-node.json ./script/template/postparcel.ts",
         "preparcel": "rimraf template && ts-node --project ./tsconfig.ts-node.json ./script/template/preparcel.tsx",
         "vercel-build": "cd .. && npm install && npm run build && cd www && npm run build:docs && npm run build:public",
         "start": "npm run preparcel -- --dev && rimraf .parcel-cache && parcel 'src/__auto_generated__index.html' --open --dist-dir parcel-public --detailed-report && rimraf parcel-public .parcel-cache src/__auto_generated__index.html",

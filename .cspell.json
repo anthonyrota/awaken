@@ -8,7 +8,7 @@
         "**/CHANGELOG.md",
         "**/CONTRIBUTORS.md",
         "docs/**",
-        "www/_files/**",
+        "www/vercel-public/**",
         "www/public/**",
         "www/template/**",
         "www/parcel-public/**",

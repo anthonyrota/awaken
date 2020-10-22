@@ -741,7 +741,7 @@ async function main() {
 
     addFileToFolder(
         outFolder,
-        `www/_files/public/pages.${pagesHash}.json`,
+        `www/vercel-public/pages.${pagesHash}.json`,
         pagesStringified,
     );
     addFileToFolder(outFolder, 'www/temp/pages.json', pagesStringified);
@@ -754,7 +754,7 @@ async function main() {
 
     await Promise.all([
         fs.remove(docsDir),
-        rimrafP('_files/public/pages.*.json'),
+        rimrafP('vercel-public/pages.*.json'),
     ]);
     await writeFolderToDirectoryPath(outFolder, rootDir);
 }

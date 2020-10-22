@@ -6,7 +6,7 @@ extractor
 docs/api
 temp
 .vercel/project.json
-www/_files
+www/vercel-public
 www/public
 www/template
 www/src/__auto_generated__index.html
