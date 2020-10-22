@@ -9,9 +9,11 @@ export const isChromium =
 export const isMobile =
     isBrowser &&
     // eslint-disable-next-line max-len
-    /\b(BlackBerry|webOS|iPhone|IEMobile|Android|Windows Phone|iPad|iPod)\b/i.test(
+    (/\b(BlackBerry|webOS|iPhone|IEMobile|Android|Windows Phone|iPad|iPod)\b/i.test(
         navigator.userAgent,
-    );
+    ) ||
+        // Newer iPad.
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 
 export const isStandalone =
     isBrowser &&

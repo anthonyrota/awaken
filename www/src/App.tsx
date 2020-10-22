@@ -32,17 +32,22 @@ function getPageIdFromPathname(pathname: string): string | void {
     }
 }
 
-function setFocusBefore(element: ChildNode): void {
-    const parentEl = element.parentElement;
-    if (!parentEl) {
-        return;
-    }
-
+function setFocusBefore(element?: ChildNode): void {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const parentEl = element ? element.parentElement! : document.body;
     const tempDiv = document.createElement('div');
     tempDiv.setAttribute('tabindex', '0');
-    parentEl.insertBefore(tempDiv, element);
+    parentEl.insertBefore(tempDiv, element || document.body.firstChild);
     tempDiv.focus();
     parentEl.removeChild(tempDiv);
+
+    if (element) {
+        if (element instanceof Element) {
+            element.scrollIntoView();
+        }
+    } else {
+        window.scrollTo(0, 0);
+    }
 }
 
 export function App(props: AppProps): VNode {
@@ -216,7 +221,7 @@ function AppPath({ pathname, isDuplicateRender }: AppPathProps): VNode {
         }
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        setFocusBefore(document.body.firstChild!);
+        setFocusBefore();
     }, [location, isDuplicateRender]);
 
     if (pathname === '/') {

@@ -414,11 +414,11 @@ $header-border-height: 1px;
 }
 
 .menu {
-    position: relative;
     display: none;
+    justify-content: center;
 
     @mixin show {
-        display: block;
+        display: flex;
 
         & ~ .page {
             position: absolute;
