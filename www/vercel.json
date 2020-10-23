@@ -13,5 +13,11 @@
                 }
             ]
         }
+    ],
+    "rewrites": [
+        {
+            "source": "/404",
+            "destination": "/_notfound"
+        }
     ]
 }
