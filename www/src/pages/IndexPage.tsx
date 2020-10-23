@@ -8,7 +8,7 @@ export function IndexPage(): VNode {
                 title="A fast and extremely lightweight reactive programming library for TypeScript"
                 websiteNamePosition={WebsiteNamePositionStart}
             />
-            index
+            <main class="cls-page__content__container">index</main>
         </Fragment>
     );
 }

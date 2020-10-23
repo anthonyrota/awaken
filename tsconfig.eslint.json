@@ -6,7 +6,6 @@
         "packages/*/postbuild.js",
         "script/**/*",
         "www/src/**/*",
-        "www/api/**/*",
         "www/script/**/*",
         "jest.config.js",
         "jest.config.build.js",

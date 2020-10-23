@@ -235,20 +235,20 @@ export function Header({ enableMenu }: HeaderProps): VNode {
 
     return (
         <Fragment>
-            <header role="banner" class="header" ref={headerRef}>
-                <div class="header__contents">
-                    <div class="header__contents__container">
+            <header role="banner" class="cls-header" ref={headerRef}>
+                <div class="cls-header__contents">
+                    <div class="cls-header__contents__container">
                         <div
                             class={
-                                'header__nav' +
+                                'cls-header__nav cls-header__nav__list' +
                                 (showBackButton
-                                    ? ' header__nav--left-with-back-button'
+                                    ? ' cls-header__nav--left-with-back-button'
                                     : '')
                             }
                         >
                             {showBackButton && (
                                 <a
-                                    class="header__nav__link header__back-button"
+                                    class="cls-header__nav__link cls-header__back-button"
                                     role="img"
                                     aria-label="Go to Previous Page"
                                     title="Go to Previous Page"
@@ -256,7 +256,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                     href=""
                                 >
                                     <svg
-                                        class="header__nav__icon"
+                                        class="cls-header__nav__icon"
                                         viewBox="0 0 16 24"
                                     >
                                         <title>Go to Previous Page</title>
@@ -268,14 +268,14 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                 innerRef={firstLinkRef}
                                 href="/"
                                 class={
-                                    'header__nav__link' +
+                                    'cls-header__nav__link' +
                                     (showBackButton
-                                        ? ' header__logo--next-to-back-button'
+                                        ? ' cls-header__logo--next-to-back-button'
                                         : '')
                                 }
                             >
                                 <svg
-                                    class="header__logo-img header__logo-img--with-text"
+                                    class="cls-header__logo-img cls-header__logo-img--with-text"
                                     role="img"
                                     aria-label="Tailwind CSS"
                                     viewBox="0 0 273 64"
@@ -291,7 +291,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                     ></path>
                                 </svg>
                                 <svg
-                                    class="header__logo-img header__logo-img--without-text"
+                                    class="cls-header__logo-img cls-header__logo-img--without-text"
                                     role="img"
                                     aria-label="Click to Go Home"
                                     viewBox="0 0 64 64"
@@ -305,70 +305,72 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                             </Link>
                         </div>
                     </div>
-                    <div class="header__search">
+                    <div class="cls-header__search">
                         <input
                             placeholder="Search..."
                             aria-label="Search Website"
-                            class="header__search__input"
+                            class="cls-header__search__input"
                             value={searchValue}
                             onInput={onSearchInput}
                             ref={searchInputRef}
                         />
-                        <div class="header__search__icon">
+                        <div class="cls-header__search__icon">
                             <svg
-                                class="header__search__icon__svg"
+                                class="cls-header__search__icon__svg"
                                 viewBox="0 0 20 20"
                             >
                                 <path d="M12.9 14.32a8 8 0 1 1 1.41-1.41l5.35 5.33-1.42 1.42-5.33-5.34zM8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="header__contents__container">
+                    <div class="cls-header__contents__container">
                         <nav
+                            class="cls-header__nav"
                             aria-label="Quick Site Navigation Links"
-                            class="header__nav header__nav--pages"
                         >
-                            <div
-                                class={
-                                    'header__nav__link-container' +
-                                    (isDocumentationPage
-                                        ? ' header__nav__link-container--active'
-                                        : '')
-                                }
-                            >
-                                <DocPageLink
-                                    class="header__nav__link"
-                                    pageId={'core--introduction'}
+                            <ul class="cls-header__nav__list cls-header__nav--pages">
+                                <li
+                                    class={
+                                        'cls-header__nav__link-container' +
+                                        (isDocumentationPage
+                                            ? ' cls-header__nav__link-container--active'
+                                            : '')
+                                    }
                                 >
-                                    Documentation
-                                </DocPageLink>
-                            </div>
-                            <div
-                                class={
-                                    'header__nav__link-container' +
-                                    (isStringActivePath('/license')
-                                        ? ' header__nav__link-container--active'
-                                        : '')
-                                }
-                            >
-                                <Link class="header__nav__link" href="/license">
-                                    {licenseLinkText}
-                                </Link>
-                            </div>
+                                    <DocPageLink
+                                        class="cls-header__nav__link"
+                                        pageId={'core--introduction'}
+                                    >
+                                        Documentation
+                                    </DocPageLink>
+                                </li>
+                                <li
+                                    class={
+                                        'cls-header__nav__link-container' +
+                                        (isStringActivePath('/license')
+                                            ? ' cls-header__nav__link-container--active'
+                                            : '')
+                                    }
+                                >
+                                    <Link
+                                        class="cls-header__nav__link"
+                                        href="/license"
+                                    >
+                                        {licenseLinkText}
+                                    </Link>
+                                </li>
+                            </ul>
                         </nav>
-                        <div class="header__version">v0.0.1</div>
-                        <nav
-                            aria-label="External and Site Navigation"
-                            class="header__nav"
-                        >
+                        <div class="cls-header__version">v0.0.1</div>
+                        <div class="cls-header__nav cls-header__nav__list">
                             <a
-                                class="header__nav__link"
+                                class="cls-header__nav__link"
                                 aria-label={githubLinkLabel}
                                 title={githubLinkLabel}
                                 href={githubUrl}
                             >
                                 <svg
-                                    class="header__nav__icon"
+                                    class="cls-header__nav__icon"
                                     viewBox="0 0 20 20"
                                 >
                                     <title>{githubLinkLabel}</title>
@@ -377,9 +379,9 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                             </a>
                             <button
                                 class={
-                                    'header__nav__link header__menu-toggle-button' +
+                                    'cls-header__nav__link cls-header__menu-toggle-button' +
                                     (enableMenu
-                                        ? ' header__menu-toggle-button--enabled'
+                                        ? ' cls-header__menu-toggle-button--enabled'
                                         : '')
                                 }
                                 type="button"
@@ -391,7 +393,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                 ref={toggleButtonRef}
                             >
                                 <svg
-                                    class="header__nav__icon header__nav__icon--menu"
+                                    class="cls-header__nav__icon cls-header__nav__icon--menu"
                                     viewBox="0 0 24 24"
                                 >
                                     <title>{toggleButtonLabel}</title>
@@ -402,22 +404,22 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                     )}
                                 </svg>
                             </button>
-                        </nav>
+                        </div>
                     </div>
                 </div>
             </header>
             <aside
                 ref={menuRef}
                 class={
-                    'menu' +
-                    (isMenuOpen ? ' menu--open' : '') +
-                    (enableMenu ? ' menu--enabled' : '')
+                    'cls-menu' +
+                    (isMenuOpen ? ' cls-menu--open' : '') +
+                    (enableMenu ? ' cls-menu--enabled' : '')
                 }
                 role="dialog"
                 aria-modal="true"
                 aria-label="Site Navigation"
             >
-                <div class="menu__contents">
+                <div class="cls-menu__contents">
                     <FullSiteNavigationContents
                         bindKeys={
                             isMenuOpen ? BindKeysNoRequireFocus : NoBindKeys
@@ -663,9 +665,9 @@ export function FullSiteNavigationContents({
                 <Fragment key={pageGroupIndex}>
                     <h2
                         class={
-                            'full-site-nav__header' +
+                            'cls-full-site-nav__header' +
                             (pageGroup.pageIds.some(isDocPageIdActivePath)
-                                ? ' full-site-nav__header--active'
+                                ? ' cls-full-site-nav__header--active'
                                 : '')
                         }
                     >
@@ -673,32 +675,31 @@ export function FullSiteNavigationContents({
                     </h2>
                     <ul
                         role="navigation"
-                        class="full-site-nav__link-list"
+                        class="cls-full-site-nav__link-list"
                         aria-label="Documentation Navigation"
                     >
                         {pageGroup.pageIds.map((pageId, index) => (
-                            <li key={index} class="full-site-nav__li">
+                            <li key={index} class="cls-full-site-nav__li">
                                 <div
                                     class={
-                                        'full-site-nav__link-container' +
-                                        (isDocPageIdActivePath(pageId)
-                                            ? ' full-site-nav__link-container--active'
-                                            : '')
+                                        isDocPageIdActivePath(pageId)
+                                            ? ' cls-full-site-nav__link-container--active'
+                                            : undefined
                                     }
                                 >
                                     <DocPageLink
                                         class={
-                                            'full-site-nav__link' +
+                                            'cls-full-site-nav__link' +
                                             (fixLinkChromiumFocusProp ||
                                             fixChromiumFocus
-                                                ? ` full-site-nav__link--fix-chromium-focus`
+                                                ? ` cls-full-site-nav__link--fix-chromium-focus`
                                                 : '')
                                         }
                                         pageId={pageId}
                                         innerRef={linkRefs[menuLinkIndex++]}
                                     >
                                         <span
-                                            class="full-site-nav__link__border"
+                                            class="cls-full-site-nav__link__border"
                                             aria-hidden
                                         >
                                             {pageIdToPageTitle[pageId]}
@@ -713,9 +714,9 @@ export function FullSiteNavigationContents({
             ))}
             <h2
                 class={
-                    'full-site-nav__header' +
+                    'cls-full-site-nav__header' +
                     (['/license'].some(isStringActivePath)
-                        ? ' full-site-nav__header--active'
+                        ? ' cls-full-site-nav__header--active'
                         : '')
                 }
             >
@@ -723,30 +724,29 @@ export function FullSiteNavigationContents({
             </h2>
             <ul
                 role="navigation"
-                class="full-site-nav__link-list"
+                class="cls-full-site-nav__link-list"
                 aria-label="Resources Navigation"
             >
-                <li class="full-site-nav__li">
+                <li class="cls-full-site-nav__li">
                     <div
                         class={
-                            'full-site-nav__link-container' +
-                            (isStringActivePath('/license')
-                                ? ' full-site-nav__link-container--active'
-                                : '')
+                            isStringActivePath('/license')
+                                ? ' cls-full-site-nav__link-container--active'
+                                : undefined
                         }
                     >
                         <Link
                             class={
-                                'full-site-nav__link' +
+                                'cls-full-site-nav__link' +
                                 (fixLinkChromiumFocusProp || fixChromiumFocus
-                                    ? ` full-site-nav__link--fix-chromium-focus`
+                                    ? ` cls-full-site-nav__link--fix-chromium-focus`
                                     : '')
                             }
                             innerRef={linkRefs[menuLinkIndex++]}
                             href="/license"
                         >
                             <span
-                                class="full-site-nav__link__border"
+                                class="cls-full-site-nav__link__border"
                                 aria-hidden
                             >
                                 {licenseLinkText}
@@ -755,27 +755,25 @@ export function FullSiteNavigationContents({
                         </Link>
                     </div>
                 </li>
-                <li class="full-site-nav__li">
-                    <div class="full-site-nav__link-container">
-                        <a
-                            class={
-                                'full-site-nav__link' +
-                                (fixLinkChromiumFocusProp || fixChromiumFocus
-                                    ? ` full-site-nav__link--fix-chromium-focus`
-                                    : '')
-                            }
-                            ref={linkRefs[menuLinkIndex++]}
-                            href={githubUrl}
+                <li class="cls-full-site-nav__li">
+                    <a
+                        class={
+                            'cls-full-site-nav__link' +
+                            (fixLinkChromiumFocusProp || fixChromiumFocus
+                                ? ` cls-full-site-nav__link--fix-chromium-focus`
+                                : '')
+                        }
+                        ref={linkRefs[menuLinkIndex++]}
+                        href={githubUrl}
+                    >
+                        <span
+                            class="cls-full-site-nav__link__border"
+                            aria-hidden
                         >
-                            <span
-                                class="full-site-nav__link__border"
-                                aria-hidden
-                            >
-                                {licenseLinkText}
-                            </span>
-                            {githubLinkText}
-                        </a>
-                    </div>
+                            {licenseLinkText}
+                        </span>
+                        {githubLinkText}
+                    </a>
                 </li>
             </ul>
         </Fragment>

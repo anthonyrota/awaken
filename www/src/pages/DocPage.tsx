@@ -1,38 +1,48 @@
 import { h, Fragment, VNode } from 'preact';
-import { getPagesMetadata } from '../data/docPages';
+import { DeepCoreNode } from '../../script/docs/core/nodes';
+import { PageNode } from '../../script/docs/core/nodes/Page';
+import { getPagesMetadata, ResponseDoneType } from '../data/docPages';
 import { DocumentTitle } from '../Head';
-// import { useDocPagesResponseState } from '../hooks/useDocPagesResponseState';
+import { useDocPagesResponseState } from '../hooks/useDocPagesResponseState';
 
 export interface DocPageProps {
     pageId: string;
 }
 
-export function DocPage({ pageId }: DocPageProps): VNode | null {
-    // const responseState = useDocPagesResponseState();
-    const { pageIdToPageTitle } = getPagesMetadata();
+const { pageIdToPageTitle } = getPagesMetadata();
 
-    pageId;
+export function DocPage({ pageId }: DocPageProps): VNode | null {
+    const responseState = useDocPagesResponseState();
 
     return (
         <Fragment>
             <DocumentTitle title={pageIdToPageTitle[pageId]} />
-            {Array.from({ length: 10 }, () => (
-                <p>
-                    {Array.from(
-                        { length: Math.floor(Math.random() * 300) + 150 },
-                        () =>
-                            [
-                                'foo',
-                                'bar',
-                                'baz',
-                                'lorem',
-                                'ipsum',
-                                'cat',
-                                'dog',
-                            ][Math.floor(Math.random() * 7)],
-                    ).join(' ')}
-                </p>
-            ))}
+            {responseState.type === ResponseDoneType ? (
+                <DocPageContent
+                    page={
+                        responseState.pages.filter(
+                            (page) => page.pageId === pageId,
+                        )[0]
+                    }
+                />
+            ) : null}
         </Fragment>
+    );
+}
+
+interface DocPageContentProps {
+    page: PageNode<DeepCoreNode>;
+}
+
+function DocPageContent({ page }: DocPageContentProps): VNode {
+    return (
+        <div class="cls-page__content__container cls-doc-page">
+            <main class="cls-doc-page__main">
+                <h1 class="cls-doc-page__title">
+                    {pageIdToPageTitle[page.pageId]}
+                </h1>
+            </main>
+            <aside class="cls-doc-page__table-of-contents"></aside>
+        </div>
     );
 }

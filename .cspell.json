@@ -58,6 +58,7 @@
         "opendir",
         "opentag",
         "parceljs",
+        "posthtml",
         "preact",
         "proxying",
         "rollupjs",

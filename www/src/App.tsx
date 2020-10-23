@@ -85,7 +85,7 @@ export function App(props: AppProps): VNode {
         }
     }
 
-    const pageContentRef = useRef<HTMLElement>();
+    const pageContentRef = useRef<HTMLDivElement>();
     const onSkipLinkClick = (event: Event) => {
         event.preventDefault();
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -97,7 +97,7 @@ export function App(props: AppProps): VNode {
     return (
         <Fragment>
             <a
-                class="skip-link"
+                class="cls-skip-link"
                 tabIndex={0}
                 href="#main"
                 alt=""
@@ -106,14 +106,12 @@ export function App(props: AppProps): VNode {
                 Skip to main
             </a>
             <Header enableMenu={docPageId === undefined} />
-            <div class="page">
-                <div class="page__inner">
+            <div class="cls-page">
+                <div class="cls-page__inner">
                     {showSidebar && <Sidebar />}
-                    <main class="page__content" ref={pageContentRef}>
-                        <div class="page__content__container">
-                            <AppPath {...appPathPropsToUse} />
-                        </div>
-                    </main>
+                    <div class="cls-page__content" ref={pageContentRef}>
+                        <AppPath {...appPathPropsToUse} />
+                    </div>
                 </div>
             </div>
         </Fragment>
@@ -166,13 +164,13 @@ function Sidebar(): VNode {
             }
             setStickyClass(
                 document.documentElement.scrollTop >= totalHeaderSpace
-                    ? ' page__sidebar--js-sticky-active'
+                    ? ' cls-page__sidebar--js-sticky-active'
                     : '',
             );
         };
         listener();
         if (supportsSticky) {
-            setStickyClass(' page__sidebar--native-sticky-fix-active');
+            setStickyClass(' cls-page__sidebar--native-sticky-fix-active');
         }
         document.addEventListener('scroll', listener);
         window.addEventListener('resize', listener);
@@ -184,7 +182,7 @@ function Sidebar(): VNode {
 
     return (
         <aside
-            class={`page__sidebar${stickyClass}`}
+            class={`cls-page__sidebar${stickyClass}`}
             style={height && { height }}
         >
             <FullSiteNavigationContents bindKeys={BindKeysRequireFocus} />

@@ -3,6 +3,9 @@ import { promisify } from 'util';
 import * as babel from '@babel/core';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
+import * as postcss from 'postcss';
+import * as postcssSelectorParser from 'postcss-selector-parser';
+import * as posthtml from 'posthtml';
 import * as terser from 'terser';
 import { computeFileHash } from '../computeFileHash';
 import { globAbsolute } from '../docs/util/glob';
@@ -96,16 +99,223 @@ async function fixParcelBuild(): Promise<void> {
         .readFile(path.join(rootDir, 'www/temp/pagesHash'), 'utf-8')
         .then((pagesHash) => `/pages.${pagesHash}.json`);
 
-    const retrieveHtmlAtPath = (path: string) =>
-        Promise.all([
+    const cssTransformP = (async () => {
+        // CSS is inlined the same for each page, so just retrieve the index
+        // page's css.
+        const indexHtml = await fs.readFile(
+            path.join(rootDir, 'www/vercel-public/index.html'),
+            'utf-8',
+        );
+
+        let cssText: string | undefined;
+
+        await posthtml([
+            (tree) => {
+                tree.match({ tag: 'style' }, (node) => {
+                    if (cssText !== undefined) {
+                        throw new Error('Duplicate style tags.');
+                    }
+                    const { content } = node;
+                    if (!content || content.length !== 1) {
+                        throw new Error(
+                            'Unexpected parsed style tag contents.',
+                        );
+                    }
+                    const [cssText_] = content;
+                    if (typeof cssText_ !== 'string') {
+                        throw new Error(
+                            'Unexpected parsed style tag contents.',
+                        );
+                    }
+                    cssText = cssText_;
+                    return node;
+                });
+            },
+        ]).process(indexHtml);
+
+        if (!cssText) {
+            throw new Error('No CSS found.');
+        }
+
+        const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        function numberToLetters(value: number): string {
+            const mod = value % letters.length;
+            let pow = (value / letters.length) | 0;
+            let last: string;
+            if (mod === 0) {
+                pow--;
+                last = letters[letters.length - 1];
+            } else {
+                last = letters[mod - 1];
+            }
+            if (pow !== 0) {
+                return numberToLetters(pow) + last;
+            }
+            return last;
+        }
+
+        const classNameMapping = new Map<string, string>();
+        const {
+            css: transformedCSS,
+        } = await ((postcss as unknown) as postcss.Postcss)([
+            async (root: postcss.Root) => {
+                const rules: postcss.Rule[] = [];
+                root.walkRules((rule) => {
+                    rules.push(rule);
+                });
+                const classNames = new Set<string>();
+                await Promise.all([
+                    rules.map((rule) =>
+                        postcssSelectorParser((selector) => {
+                            selector.walkClasses((node) => {
+                                classNames.add(node.value);
+                            });
+                        }).process(rule),
+                    ),
+                ]);
+                const sortedClassNames = [...classNames];
+                sortedClassNames.sort();
+                sortedClassNames.forEach((className, i) => {
+                    if (!/^cls-[a-zA-Z_-]+$/.test(className)) {
+                        throw new Error(`Invalid CSS class name ${className}`);
+                    }
+                    classNameMapping.set(className, numberToLetters(i + 1));
+                });
+                await Promise.all(
+                    rules.map(async (rule) => {
+                        rule.selector = await postcssSelectorParser(
+                            (selector) => {
+                                selector.walkClasses((node) => {
+                                    // eslint-disable-next-line max-len
+                                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                                    node.value = classNameMapping.get(
+                                        node.value,
+                                    )!;
+                                });
+                            },
+                        ).process(rule);
+                    }),
+                );
+            },
+        ]).process(cssText);
+
+        return {
+            transformedCSS,
+            classNameMapping,
+        };
+    })();
+
+    const transformScriptP = (async () => {
+        const scriptPaths = await globAbsolute('www/vercel-public/script.*.js');
+        if (scriptPaths.length !== 1) {
+            throw new Error('Unexpected number of scripts.');
+        }
+        const [scriptPath] = scriptPaths;
+        let scriptJsText = await fs.readFile(scriptPath, 'utf-8');
+        const { classNameMapping } = await cssTransformP;
+        classNameMapping.forEach((minifiedClassName, originalClassName) => {
+            scriptJsText = scriptJsText.replace(
+                new RegExp(originalClassName + '(?=[^a-zA-Z_-])', 'g'),
+                minifiedClassName,
+            );
+        });
+        const scriptHash = computeFileHash(scriptJsText);
+        return {
+            oldScriptFileDiskPath: scriptPath,
+            oldScriptFileName: path.basename(scriptPath),
+            newScriptJsText: scriptJsText,
+            newScriptFileName: `script.${scriptHash}.js`,
+        };
+    })();
+
+    const replaceScriptP = transformScriptP.then(
+        ({ oldScriptFileDiskPath, newScriptJsText, newScriptFileName }) =>
+            Promise.all([
+                fs.unlink(oldScriptFileDiskPath),
+                fs.writeFile(
+                    path.join(
+                        rootDir,
+                        'www',
+                        'vercel-public',
+                        newScriptFileName,
+                    ),
+                    newScriptJsText,
+                    'utf-8',
+                ),
+            ]),
+    );
+
+    const posthtmlMinifyCssPlugin: posthtml.Plugin<unknown> = async (tree) => {
+        const [
+            { transformedCSS, classNameMapping },
+            { oldScriptFileName, newScriptFileName },
+        ] = await Promise.all([cssTransformP, transformScriptP]);
+        const oldScriptFilePath = `/${oldScriptFileName}`;
+        const newScriptFilePath = `/${newScriptFileName}`;
+        let foundStyleTag = false;
+        tree.walk((node) => {
+            if (
+                node.tag === 'link' &&
+                node.attrs &&
+                node.attrs.href === oldScriptFilePath
+            ) {
+                node.attrs.href = newScriptFilePath;
+                return node;
+            }
+            if (
+                node.tag === 'script' &&
+                node.attrs &&
+                node.attrs.src === oldScriptFilePath
+            ) {
+                node.attrs.src = newScriptFilePath;
+                return node;
+            }
+            if (node.tag === 'style') {
+                if (foundStyleTag) {
+                    throw new Error('Duplicate style tags.');
+                }
+                foundStyleTag = true;
+                node.content = [transformedCSS];
+                return node;
+            }
+            if (!node.attrs) {
+                return node;
+            }
+            const { class: className } = node.attrs;
+            if (className === undefined || className === 'root') {
+                return node;
+            }
+            node.attrs.class = className
+                .split(' ')
+                .filter((str) => str !== '')
+                .map((className) => {
+                    if (!classNameMapping.has(className)) {
+                        throw new Error(
+                            `No class name mapped for ${className}`,
+                        );
+                    }
+                    return classNameMapping.get(className);
+                })
+                .join(' ');
+            return node;
+        });
+        if (!foundStyleTag) {
+            throw new Error('No style tag found.');
+        }
+    };
+
+    const posthtmlMinifyCss = posthtml([posthtmlMinifyCssPlugin]);
+
+    const retrieveHtmlAtPath = async (path: string) => {
+        const [html, relativeManifestPath, pagesPath] = await Promise.all([
             fs.readFile(path, 'utf-8'),
             relativeManifestPathP,
             pagesPathP,
-        ]).then(([html, relativeManifestPath, pagesPath]) =>
-            html
-                .replace('::pages.json::', pagesPath)
-                .replace(relativeManifestPath, newManifestName),
-        );
+        ]);
+        return (await posthtmlMinifyCss.process(html)).html
+            .replace('::pages.json::', pagesPath)
+            .replace(relativeManifestPath, newManifestName);
+    };
 
     const publicHtmlP = (async () => {
         const publicHtmlPaths = await globAbsolute(
@@ -160,7 +370,7 @@ async function fixParcelBuild(): Promise<void> {
         }
 
         const swFilesP = (async () => {
-            await fixManifestP;
+            await Promise.all([fixManifestP, replaceScriptP]);
             const staticFiles = await globP('**/*', {
                 cwd: path.join(rootDir, 'www/vercel-public'),
                 nodir: true,

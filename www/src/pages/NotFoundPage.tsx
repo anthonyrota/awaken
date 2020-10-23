@@ -5,7 +5,7 @@ export function NotFoundPage(): VNode {
     return (
         <Fragment>
             <DocumentTitle title="404: Page not found" />
-            404
+            <main class="cls-page__content__container">404</main>
         </Fragment>
     );
 }

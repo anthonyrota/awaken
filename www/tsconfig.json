@@ -5,6 +5,6 @@
         "paths": {},
         "importHelpers": false
     },
-    "include": ["src/**/*", "api/**/*", "script/**/*"],
+    "include": ["src/**/*", "script/**/*"],
     "exclude": []
 }

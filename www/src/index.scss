@@ -109,9 +109,6 @@ section {
     display: block;
 }
 
-body {
-    line-height: 1;
-}
 ol,
 ul {
     list-style: none;
@@ -138,6 +135,17 @@ table {
 
 $size-small: 700px;
 $size-show-menu: 840px;
+$z-index-skip-link: 1;
+$main-text-size: 16px;
+$spacing: 0.8 * $main-text-size;
+$text-color: rgb(59, 65, 73);
+$link-highlight-color: #f36;
+$light-border: 1px solid #ececec;
+$max-width: 1200px;
+$hover-opacity: 0.7;
+// IMPORTANT: These should mirror the JavaScript variables defined in App.tsx.
+$header-height: 56px;
+$header-border-height: 1px;
 
 *,
 *::before,
@@ -150,8 +158,7 @@ html {
         'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
-    line-height: 1.42857;
-    font-size: 16px;
+    font-size: $main-text-size;
 }
 
 html,
@@ -160,6 +167,7 @@ body {
     padding: 0;
     letter-spacing: 0.025em;
     text-size-adjust: none;
+    line-height: 1.7;
 }
 
 input,
@@ -168,13 +176,10 @@ button {
     background: inherit;
 }
 
-$z-index-header: 1;
-$z-index-skip-link: 2;
-
 // https://web.dev/headings-and-landmarks/#use-landmarks-to-aid-navigation
-.skip-link {
+.cls-skip-link {
     position: absolute;
-    top: -40px;
+    top: -100px;
     left: 8px;
     background: #000000;
     color: white;
@@ -182,19 +187,9 @@ $z-index-skip-link: 2;
     z-index: $z-index-skip-link;
 }
 
-.skip-link:focus {
+.cls-skip-link:focus {
     top: 0;
 }
-
-$spacing: 0.8em;
-$text-color: rgb(59, 65, 73);
-$link-highlight-color: #f36;
-$light-border: 1px solid #ececec;
-$max-width: 1200px;
-$hover-opacity: 0.7;
-// IMPORTANT: These should mirror the JavaScript variables defined in App.tsx.
-$header-height: 56px;
-$header-border-height: 1px;
 
 @mixin navigation-link {
     text-decoration: none;
@@ -210,12 +205,11 @@ $header-border-height: 1px;
     }
 }
 
-.header {
+.cls-header {
     $link-margin: 1px;
     $link-padding: 7px;
     $content-height: 40px;
 
-    line-height: 1.5;
     border-bottom: $light-border;
     display: flex;
     align-items: center;
@@ -225,7 +219,6 @@ $header-border-height: 1px;
     top: 0;
     position: relative;
     font-weight: 500;
-    z-index: $z-index-header;
 
     &__contents {
         display: flex;
@@ -238,6 +231,10 @@ $header-border-height: 1px;
         width: 100%;
         height: $header-height;
 
+        @media screen and (min-width: $size-show-menu) {
+            padding: 0 $spacing;
+        }
+
         &__container {
             display: flex;
             align-items: center;
@@ -246,10 +243,14 @@ $header-border-height: 1px;
     }
 
     &__nav {
-        display: flex;
-        align-items: center;
         height: 100%;
-        padding: 0 calc(#{$spacing} - #{$link-margin} - #{$link-padding});
+
+        &__list {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0 calc(#{$spacing} - #{$link-margin} - #{$link-padding});
+        }
 
         @media screen and (max-width: $size-small) {
             &--left-with-back-button {
@@ -337,7 +338,7 @@ $header-border-height: 1px;
         position: relative;
         flex-grow: 1;
 
-        $icon-size: 1em;
+        $icon-size: $main-text-size;
         $icon-spacing-lg: $spacing;
         $icon-spacing-sm: $spacing/2;
 
@@ -413,14 +414,14 @@ $header-border-height: 1px;
     }
 }
 
-.menu {
+.cls-menu {
     display: none;
     justify-content: center;
 
     @mixin show {
         display: flex;
 
-        & ~ .page {
+        & ~ .cls-page {
             position: absolute;
             top: -9999px;
             left: -9999px;
@@ -444,15 +445,15 @@ $header-border-height: 1px;
     }
 }
 
-.full-site-nav {
+.cls-full-site-nav {
     &__header {
         margin: 0;
         font-weight: bold;
         text-transform: uppercase;
-        font-size: 16px;
+        font-size: $main-text-size;
         margin-top: $spacing * 4;
         &:first-child {
-            margin-top: $spacing;
+            margin-top: 0;
         }
         margin-bottom: 0.5em;
         letter-spacing: 1.9px;
@@ -471,7 +472,7 @@ $header-border-height: 1px;
     &__link-list {
         margin-left: -$link-padding-lr;
         width: calc(100% + #{$link-padding-lr * 2});
-        .menu & {
+        .cls-menu & {
             margin-left: -$link-padding-lr-menu;
             width: calc(100% + #{$link-padding-lr-menu * 2});
         }
@@ -488,7 +489,7 @@ $header-border-height: 1px;
 
     &__link-container--active &__link__border {
         padding: $link-padding;
-        .menu & {
+        .cls-menu & {
             padding: $link-padding-menu;
         }
         display: inline-block;
@@ -500,7 +501,7 @@ $header-border-height: 1px;
             position: absolute;
             left: $link-padding-lr - $link-padding-lr-menu;
             right: $link-padding-lr - $link-padding-lr-menu;
-            .menu & {
+            .cls-menu & {
                 left: 0;
                 right: 0;
             }
@@ -526,14 +527,14 @@ $header-border-height: 1px;
         display: inline-block;
         width: 100%;
         padding: $link-padding;
-        .menu & {
+        .cls-menu & {
             padding: $link-padding-menu;
         }
         @include navigation-link();
     }
 }
 
-.page {
+.cls-page {
     &__inner {
         position: relative;
         display: flex;
@@ -553,7 +554,7 @@ $header-border-height: 1px;
         flex-shrink: 0;
         width: $width-old-browser;
         width: $width-new-browser;
-        padding: $spacing;
+        padding: $spacing * 2;
 
         &--js-sticky-active {
             position: fixed;
@@ -561,7 +562,7 @@ $header-border-height: 1px;
             z-index: 100;
             height: 100vh;
 
-            & ~ .page__content {
+            & ~ .cls-page__content {
                 width: calc(100% - #{$width-old-browser});
                 width: calc(100% - #{$width-new-browser});
                 flex-grow: 0;
@@ -576,7 +577,7 @@ $header-border-height: 1px;
             padding-bottom: $header-height + $header-border-height;
 
             &--native-sticky-fix-active {
-                padding-bottom: 0;
+                padding-bottom: $spacing * 2;
             }
         }
 
@@ -593,12 +594,37 @@ $header-border-height: 1px;
             word-break: break-word;
             overflow-wrap: break-word;
             hyphens: auto;
-            line-height: 1.7;
             color: $text-color;
 
             p:not(:first-child) {
                 margin-top: $spacing * 4;
             }
         }
+    }
+}
+
+.cls-doc-page {
+    display: flex;
+    padding-right: $spacing * 2;
+
+    @media screen and (max-width: $size-show-menu) {
+        padding-right: $spacing;
+    }
+
+    &__main {
+        display: block;
+    }
+
+    &__table-of-contents {
+        display: block;
+    }
+
+    &__title {
+        margin-top: $spacing/2;
+        font-size: 40px;
+        line-height: 40px;
+        border-bottom: 1px solid rgb(240, 240, 242);
+        font-weight: 500;
+        color: #000;
     }
 }
