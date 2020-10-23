@@ -59,7 +59,7 @@ async function main() {
 
     addRenderedHtmlToFolder(renderAppAtPath('/'), 'index.html');
 
-    addRenderedHtmlToFolder(renderAppAtPath('/_notfound'), '404/index.html');
+    addRenderedHtmlToFolder(renderAppAtPath('/_notfound'), '_404/index.html');
 
     for (const { pageId } of pages) {
         const websitePath = pagesMetadata.pageIdToWebsitePath[pageId];
