@@ -12,7 +12,7 @@
         {
             "src": "/(.*).html",
             "status": 404,
-            "dest": "/_404.html"
+            "dest": "/_404/index.html"
         },
         {
             "src": "/(.*)([^/]+).([^/]+).(js|json|png|svg)",
@@ -27,7 +27,7 @@
         {
             "src": "/(.*)",
             "status": 404,
-            "dest": "/_404.html"
+            "dest": "/_404/index.html"
         }
     ]
 }
