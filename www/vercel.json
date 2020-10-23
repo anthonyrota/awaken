@@ -15,6 +15,11 @@
             "dest": "/_404/index.html"
         },
         {
+            "src": "/_404",
+            "status": 404,
+            "dest": "/_404/index.html"
+        },
+        {
             "src": "/(.*)([^/]+).([^/]+).(js|json|png|svg)",
             "headers": {
                 "Cache-Control": "public, max-age=31536000, immutable"
