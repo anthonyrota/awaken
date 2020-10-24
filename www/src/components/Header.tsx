@@ -3,14 +3,18 @@ import { useState, useRef, useEffect, useLayoutEffect } from 'preact/hooks';
 import { getPagesMetadata } from '../data/docPages';
 import { isChromium, isMobile, isStandalone } from '../env';
 import { customHistory, usePath } from '../hooks/useHistory';
+import {
+    BindKeys,
+    BindKeysNoRequireFocus,
+    NoBindKeys,
+    useNavigationListKeyBindings,
+    fixChromiumFocusClass,
+} from '../hooks/useNavigationListKeyBindings';
 import { usePrevious } from '../hooks/usePrevious';
+import { useResetFixChromiumFocus } from '../hooks/useResetFixChromiumFocus';
+import { stopEvent } from '../util/stopEvent';
 import { DocPageLink } from './DocPageLink';
 import { Link, isStringActivePath, isDocPageIdActivePath } from './Link';
-
-function stopEvent(event: Event): void {
-    event.stopPropagation();
-    event.preventDefault();
-}
 
 const {
     pageIdToWebsitePath,
@@ -25,43 +29,6 @@ const githubUrl = github
 
 const licenseLinkText = 'License';
 const githubLinkText = 'GitHub';
-
-interface UseResetFixChromiumFocusParams {
-    fixChromiumFocus: boolean;
-    resetFixChromiumFocus: () => void;
-    isMovingFocusManuallyRef: { current: boolean };
-    linkRefs: { current: HTMLAnchorElement }[];
-}
-
-function useResetFixChromiumFocus(
-    params: UseResetFixChromiumFocusParams,
-): void {
-    const {
-        fixChromiumFocus,
-        resetFixChromiumFocus,
-        isMovingFocusManuallyRef,
-        linkRefs,
-    } = params;
-
-    useEffect(() => {
-        if (!fixChromiumFocus) {
-            return;
-        }
-        const listener = (event: FocusEvent) => {
-            if (
-                fixChromiumFocus &&
-                !isMovingFocusManuallyRef.current &&
-                linkRefs.some((ref) => ref.current === event.target) &&
-                // Moving focus away and back to window reintroduces.
-                document.hasFocus()
-            ) {
-                resetFixChromiumFocus();
-            }
-        };
-        document.addEventListener('focusout', listener);
-        return () => document.removeEventListener('focusout', listener);
-    }, [fixChromiumFocus]);
-}
 
 export interface HeaderProps {
     enableMenu: boolean;
@@ -254,6 +221,11 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                     title="Go to Previous Page"
                                     onClick={goBack}
                                     href=""
+                                    ref={
+                                        showBackButton
+                                            ? firstLinkRef
+                                            : undefined
+                                    }
                                 >
                                     <svg
                                         class="cls-header__nav__icon"
@@ -265,7 +237,9 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                 </a>
                             )}
                             <Link
-                                innerRef={firstLinkRef}
+                                innerRef={
+                                    showBackButton ? undefined : firstLinkRef
+                                }
                                 href="/"
                                 class={
                                     'cls-header__nav__link' +
@@ -430,7 +404,6 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                 searchInputRef.current
                             );
                         }}
-                        manuallySetFocus={manuallySetFocus}
                         isMovingFocusManuallyRef={isMovingFocusManuallyRef}
                         fixLinkChromiumFocus={fixChromiumFocus}
                         linkRefs={menuLinkRefs}
@@ -441,32 +414,9 @@ export function Header({ enableMenu }: HeaderProps): VNode {
     );
 }
 
-// Not supported in IE.
-function findIndex<T>(
-    list: readonly T[],
-    predicate: (value: T) => boolean,
-    startIndex = 0,
-    endIndex = list.length - 1,
-): number {
-    for (let i = startIndex; i <= endIndex; i++) {
-        if (predicate(list[i])) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-export const NoBindKeys = 0;
-export const BindKeysRequireFocus = 1;
-export const BindKeysNoRequireFocus = 2;
-
 export interface FullSiteNavigationContentsProps {
-    bindKeys:
-        | typeof NoBindKeys
-        | typeof BindKeysRequireFocus
-        | typeof BindKeysNoRequireFocus;
+    bindKeys: BindKeys;
     getAllowSingleLetterKeyLinkJumpShortcut?: (() => boolean) | undefined;
-    manuallySetFocus?: (element: HTMLElement) => void;
     isMovingFocusManuallyRef?: { current: boolean };
     fixLinkChromiumFocus?: boolean;
     linkRefs?: { current: HTMLAnchorElement }[];
@@ -474,190 +424,33 @@ export interface FullSiteNavigationContentsProps {
 
 export function FullSiteNavigationContents({
     bindKeys,
-    manuallySetFocus,
-    isMovingFocusManuallyRef,
+    isMovingFocusManuallyRef = useRef(false),
     getAllowSingleLetterKeyLinkJumpShortcut,
     fixLinkChromiumFocus: fixLinkChromiumFocusProp,
     linkRefs = [],
 }: FullSiteNavigationContentsProps): VNode {
-    function getMenuLinkFocusIndex(): number {
-        const focusedElement = document.activeElement;
-        return findIndex(linkRefs, (ref) => ref.current === focusedElement);
-    }
-
-    const menuLinkTexts: string[] = [];
+    const linkTexts: string[] = [];
     pageGroups.forEach((pageGroup) => {
         pageGroup.pageIds.forEach((pageId) => {
-            menuLinkTexts.push(pageIdToPageTitle[pageId]);
+            linkTexts.push(pageIdToPageTitle[pageId]);
         });
     });
 
-    menuLinkTexts.push(licenseLinkText, githubLinkText);
+    linkTexts.push(licenseLinkText, githubLinkText);
 
-    for (let i = 0; i < menuLinkTexts.length; i++) {
+    for (let i = 0; i < linkTexts.length; i++) {
         linkRefs[i] = useRef<HTMLAnchorElement>();
     }
 
-    const isChromiumFocusedElementOnKeyShortcutQuirkyRef = useRef(false);
-    if (isChromium) {
-        useEffect(() => {
-            if (bindKeys === NoBindKeys) {
-                return;
-            }
-            let animationId = requestAnimationFrame(function cb(): void {
-                let isChromiumFocusedElementOnKeyShortcutQuirky = false;
-                if (document.activeElement !== null) {
-                    if ('matches' in document.activeElement) {
-                        try {
-                            // eslint-disable-next-line max-len
-                            isChromiumFocusedElementOnKeyShortcutQuirky = !document.activeElement.matches(
-                                ':focus-visible',
-                            );
-                        } catch (error) {
-                            // Focus visible not supported;
-                        }
-                    }
-                    if (!isChromiumFocusedElementOnKeyShortcutQuirky) {
-                        if (document.activeElement.tagName === 'INPUT') {
-                            isChromiumFocusedElementOnKeyShortcutQuirky = true;
-                        }
-                    }
-                }
-                // eslint-disable-next-line max-len
-                isChromiumFocusedElementOnKeyShortcutQuirkyRef.current = isChromiumFocusedElementOnKeyShortcutQuirky;
-                animationId = requestAnimationFrame(cb);
-            });
-            return () => {
-                cancelAnimationFrame(animationId);
-            };
-        }, [bindKeys === NoBindKeys]);
-    }
+    const { fixChromiumFocus } = useNavigationListKeyBindings({
+        bindKeys,
+        linkRefs,
+        linkTexts,
+        getAllowSingleLetterKeyLinkJumpShortcut,
+        isMovingFocusManuallyRef,
+    });
 
-    const { 0: fixChromiumFocus, 1: setFixChromiumFocus } = useState(false);
-
-    const setFocus = (element: HTMLElement) => {
-        if (
-            findIndex(linkRefs, (ref) => ref.current === element) !== -1 &&
-            isChromiumFocusedElementOnKeyShortcutQuirkyRef.current
-        ) {
-            setFixChromiumFocus(true);
-        }
-
-        if (manuallySetFocus) {
-            manuallySetFocus(element);
-        } else {
-            element.focus();
-        }
-    };
-
-    if (isChromium && isMovingFocusManuallyRef) {
-        useResetFixChromiumFocus({
-            fixChromiumFocus,
-            resetFixChromiumFocus: () => setFixChromiumFocus(false),
-            isMovingFocusManuallyRef,
-            linkRefs,
-        });
-    }
-
-    useEffect(() => {
-        if (!bindKeys) {
-            return;
-        }
-        const listener = (event: KeyboardEvent) => {
-            if (
-                bindKeys === BindKeysRequireFocus &&
-                getMenuLinkFocusIndex() === -1
-            ) {
-                return;
-            }
-
-            if (event.ctrlKey || event.metaKey || event.altKey) {
-                return;
-            }
-
-            if (
-                event.key.length === 1 &&
-                /\S/.test(event.key) &&
-                (!getAllowSingleLetterKeyLinkJumpShortcut ||
-                    getAllowSingleLetterKeyLinkJumpShortcut())
-            ) {
-                const index = getMenuLinkFocusIndex();
-                const predicate = (title: string) =>
-                    title.toLowerCase()[0] === event.key.toLowerCase();
-                let nextIndexStartingWithChar = findIndex(
-                    menuLinkTexts,
-                    predicate,
-                    index + 1,
-                );
-                if (nextIndexStartingWithChar === -1) {
-                    nextIndexStartingWithChar = findIndex(
-                        menuLinkTexts,
-                        predicate,
-                        0,
-                        index - 1,
-                    );
-                }
-                if (nextIndexStartingWithChar === -1) {
-                    return;
-                }
-                setFocus(linkRefs[nextIndexStartingWithChar].current);
-                if (event.shiftKey) {
-                    stopEvent(event);
-                }
-                return;
-            }
-
-            if (event.shiftKey) {
-                return;
-            }
-
-            switch (event.key) {
-                case 'ArrowUp':
-                case 'Up': {
-                    const index = getMenuLinkFocusIndex();
-                    if (index === -1) {
-                        return;
-                    }
-                    setFocus(
-                        linkRefs[index === 0 ? linkRefs.length - 1 : index - 1]
-                            .current,
-                    );
-                    stopEvent(event);
-                    break;
-                }
-                case 'ArrowDown':
-                case 'Down': {
-                    const index = getMenuLinkFocusIndex();
-                    if (index === -1) {
-                        return;
-                    }
-                    setFocus(
-                        linkRefs[index === linkRefs.length - 1 ? 0 : index + 1]
-                            .current,
-                    );
-                    stopEvent(event);
-                    break;
-                }
-                case 'Home':
-                case 'PageUp': {
-                    setFocus(linkRefs[0].current);
-                    stopEvent(event);
-                    break;
-                }
-                case 'End':
-                case 'PageDown': {
-                    setFocus(linkRefs[linkRefs.length - 1].current);
-                    stopEvent(event);
-                }
-            }
-        };
-        document.addEventListener('keydown', listener);
-        return () => {
-            document.removeEventListener('keydown', listener);
-        };
-    }, [bindKeys]);
-
-    let menuLinkIndex = 0;
+    let linkIndex = 0;
 
     return (
         <Fragment>
@@ -692,11 +485,11 @@ export function FullSiteNavigationContents({
                                             'cls-full-site-nav__link' +
                                             (fixLinkChromiumFocusProp ||
                                             fixChromiumFocus
-                                                ? ` cls-full-site-nav__link--fix-chromium-focus`
+                                                ? ` ${fixChromiumFocusClass}`
                                                 : '')
                                         }
                                         pageId={pageId}
-                                        innerRef={linkRefs[menuLinkIndex++]}
+                                        innerRef={linkRefs[linkIndex++]}
                                     >
                                         <span
                                             class="cls-full-site-nav__link__border"
@@ -739,10 +532,10 @@ export function FullSiteNavigationContents({
                             class={
                                 'cls-full-site-nav__link' +
                                 (fixLinkChromiumFocusProp || fixChromiumFocus
-                                    ? ` cls-full-site-nav__link--fix-chromium-focus`
+                                    ? ` ${fixChromiumFocusClass}`
                                     : '')
                             }
-                            innerRef={linkRefs[menuLinkIndex++]}
+                            innerRef={linkRefs[linkIndex++]}
                             href="/license"
                         >
                             <span
@@ -760,10 +553,10 @@ export function FullSiteNavigationContents({
                         class={
                             'cls-full-site-nav__link' +
                             (fixLinkChromiumFocusProp || fixChromiumFocus
-                                ? ` cls-full-site-nav__link--fix-chromium-focus`
+                                ? ` ${fixChromiumFocusClass}`
                                 : '')
                         }
-                        ref={linkRefs[menuLinkIndex++]}
+                        ref={linkRefs[linkIndex++]}
                         href={githubUrl}
                     >
                         <span

@@ -135,15 +135,16 @@ table {
 
 $size-small: 700px;
 $size-show-menu: 840px;
+$size-show-table-of-contents: 1100px;
 $z-index-skip-link: 1;
 $main-text-size: 16px;
 $spacing: 0.8 * $main-text-size;
-$text-color: rgb(59, 65, 73);
+$text-color: #000;
 $link-highlight-color: #f36;
 $light-border: 1px solid #ececec;
-$max-width: 1200px;
+$max-width: 1400px;
 $hover-opacity: 0.7;
-// IMPORTANT: These should mirror the JavaScript variables defined in App.tsx.
+// IMPORTANT: These should mirror the JavaScript variables.
 $header-height: 56px;
 $header-border-height: 1px;
 
@@ -189,6 +190,23 @@ button {
 
 .cls-skip-link:focus {
     top: 0;
+}
+
+$content-link-start-color: lighten($text-color, 30%);
+$content-link-hover-color: $text-color;
+
+@mixin content-link {
+    text-decoration: none;
+    color: $content-link-start-color;
+
+    &:hover,
+    &:focus {
+        color: $content-link-hover-color;
+    }
+
+    &:focus:not(:focus-visible) {
+        color: $content-link-start-color;
+    }
 }
 
 @mixin navigation-link {
@@ -282,7 +300,7 @@ button {
             padding: 0px $link-padding;
             height: $content-height;
 
-            @include navigation-link();
+            @include navigation-link;
         }
 
         &__icon {
@@ -430,12 +448,12 @@ button {
 
     &--open {
         @media screen and (max-width: $size-show-menu) {
-            @include show();
+            @include show;
         }
     }
 
     &--open#{&}--enabled {
-        @include show();
+        @include show;
     }
 
     &__contents {
@@ -443,6 +461,13 @@ button {
         max-width: $max-width;
         padding: $spacing;
     }
+}
+
+// Fix chromium quirk where focusing the link through javascript in specific
+// circumstances does not show an outline.
+.cls-fix-chromium-focus:focus {
+    outline: 2px solid -webkit-focus-ring-color !important;
+    opacity: $hover-opacity !important;
 }
 
 .cls-full-site-nav {
@@ -515,13 +540,6 @@ button {
         color: $link-highlight-color !important;
     }
 
-    // Fix chromium quirk where focusing the link through javascript in specific
-    // circumstances does not show an outline.
-    &__link--fix-chromium-focus:focus {
-        outline: 2px solid -webkit-focus-ring-color !important;
-        opacity: $hover-opacity !important;
-    }
-
     &__link {
         position: relative;
         display: inline-block;
@@ -530,7 +548,19 @@ button {
         .cls-menu & {
             padding: $link-padding-menu;
         }
-        @include navigation-link();
+        @include content-link;
+    }
+}
+
+@mixin sticky-sidebar--js-sticky-active {
+    position: fixed;
+    top: 0;
+    height: 100vh;
+}
+
+@mixin supports-sticky {
+    @supports (position: sticky) {
+        @content;
     }
 }
 
@@ -545,32 +575,31 @@ button {
     }
 
     &__sidebar {
-        $max-width: 275px;
+        $max-width: 260px;
         $min-width: 210px;
         $width-old-browser: ($min-width + $max-width) / 2;
-        $width-new-browser: #{'max' }(#{'min' }(25vw, $max-width), $min-width);
+        $width-new-browser: #{'max' }(#{'min' }(20vw, $max-width), $min-width);
 
-        overflow-y: auto;
         flex-shrink: 0;
         width: $width-old-browser;
         width: $width-new-browser;
         padding: $spacing * 2;
+        overflow-y: auto;
+        margin-right: $spacing;
 
         &--js-sticky-active {
-            position: fixed;
-            top: 0;
-            z-index: 100;
-            height: 100vh;
+            @include sticky-sidebar--js-sticky-active;
 
             & ~ .cls-page__content {
                 width: calc(100% - #{$width-old-browser});
                 width: calc(100% - #{$width-new-browser});
                 flex-grow: 0;
+                padding-left: $spacing;
                 margin-left: auto;
             }
         }
 
-        @supports (position: sticky) {
+        @include supports-sticky {
             position: sticky;
             top: 0;
             max-height: 100vh;
@@ -591,6 +620,7 @@ button {
 
         &__container {
             padding: $spacing;
+            padding-bottom: 0;
             word-break: break-word;
             overflow-wrap: break-word;
             hyphens: auto;
@@ -604,27 +634,101 @@ button {
 }
 
 .cls-doc-page {
-    display: flex;
+    margin-top: $spacing/2;
     padding-right: $spacing * 2;
 
     @media screen and (max-width: $size-show-menu) {
         padding-right: $spacing;
     }
 
-    &__main {
-        width: 100%;
+    &__content {
+        display: flex;
     }
 
-    &__table-of-contents {
-        display: block;
+    $title-spacing-bottom: 40px;
+
+    &__main {
+        flex-grow: 1;
+        padding-top: $title-spacing-bottom;
+    }
+
+    $min-sidebar-width: 260px;
+    $max-sidebar-width: 300px;
+    $non-native-sticky-support-sidebar-width: (
+            $min-sidebar-width + $max-sidebar-width
+        )/2;
+    $sidebar-padding: $spacing * 2;
+
+    &__sidebar-non-native-sticky-support-placeholder {
+        margin-top: $title-spacing-bottom - $sidebar-padding;
+        flex-shrink: 0;
+
+        &--js-sticky-active {
+            width: $non-native-sticky-support-sidebar-width;
+        }
+
+        @media screen and (max-width: $size-show-table-of-contents) {
+            display: none;
+        }
+    }
+
+    &__sidebar {
+        flex-shrink: 0;
+        width: $non-native-sticky-support-sidebar-width;
+        margin-top: $title-spacing-bottom - $sidebar-padding;
+        padding: $sidebar-padding;
+        padding-left: $spacing * 4;
+        overflow-y: auto;
+
+        &--js-sticky-active {
+            @include sticky-sidebar--js-sticky-active;
+            top: -($title-spacing-bottom - $sidebar-padding);
+            right: $sidebar-padding;
+        }
+
+        @include supports-sticky {
+            position: sticky;
+            min-width: $min-sidebar-width;
+            max-width: $max-sidebar-width;
+            max-height: 100vh;
+            top: 0;
+        }
+
+        @media screen and (max-width: $size-show-table-of-contents) {
+            display: none;
+        }
+
+        &__title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: $spacing/2;
+        }
+
+        &__table-of-contents {
+            &__item {
+                $indent: $spacing * 2;
+                padding: $spacing/3 0;
+                margin-left: $indent;
+
+                &:last-child {
+                    padding-bottom: 0;
+                }
+
+                &__main-reference {
+                    margin-left: -$indent;
+                    text-indent: $indent;
+                    outline-offset: $spacing * 0.7;
+                    @include content-link;
+                }
+            }
+        }
     }
 
     &__title {
-        margin-top: $spacing/2;
         font-size: 40px;
-        line-height: 40px;
+        line-height: 1em;
+        padding-bottom: 2px;
         border-bottom: 1px solid rgb(240, 240, 242);
         font-weight: 500;
-        color: #000;
     }
 }

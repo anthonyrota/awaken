@@ -1,19 +1,20 @@
 import { h, Fragment, VNode } from 'preact';
-import { useLayoutEffect, useRef, useState } from 'preact/hooks';
-import {
-    BindKeysRequireFocus,
-    FullSiteNavigationContents,
-    Header,
-} from './components/Header';
+import { useLayoutEffect, useRef } from 'preact/hooks';
+import { FullSiteNavigationContents, Header } from './components/Header';
 import {
     getPagesMetadata,
     ResponseLoadingType,
     getCurrentResponseState,
 } from './data/docPages';
-import { isBrowser } from './env';
 import { useDocPagesResponseState } from './hooks/useDocPagesResponseState';
 import { customHistory, Path, useHistory } from './hooks/useHistory';
+import { BindKeysRequireFocus } from './hooks/useNavigationListKeyBindings';
 import { usePrevious } from './hooks/usePrevious';
+import {
+    useSticky,
+    UseStickyJsStickyActive,
+    UseStickyNativeStickyReady,
+} from './hooks/useSticky';
 import { DocPage } from './pages/DocPage';
 import { IndexPage } from './pages/IndexPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -118,75 +119,26 @@ export function App(props: AppProps): VNode {
     );
 }
 
-// IMPORTANT: These should mirror the SCSS variables.
-const headerHeight = 56;
-const headerBorderHeight = 1;
-const totalHeaderSpace = headerHeight + headerBorderHeight;
-
-const supportsSticky =
-    isBrowser &&
-    (typeof CSS !== 'undefined' && 'supports' in CSS
-        ? CSS.supports('position', 'sticky') ||
-          CSS.supports('position', '-webkit-sticky')
-        : (() => {
-              const tempDiv = document.createElement('div');
-              tempDiv.style.position = 'sticky';
-              if (tempDiv.style.position === 'sticky') {
-                  return true;
-              }
-              tempDiv.style.position = '-webkit-sticky';
-              return tempDiv.style.position === '-webkit-sticky';
-          })());
-
 function Sidebar(): VNode {
-    const { 0: height, 1: setHeight } = useState<string | undefined>(undefined);
-    const { 0: stickyClass, 1: setStickyClass } = useState<string>('');
-
-    useLayoutEffect(() => {
-        const listener = () => {
-            const headerVisibleHeight = Math.max(
-                totalHeaderSpace - document.documentElement.scrollTop,
-                0,
-            );
-            setHeight(
-                // 100vh - headerVisibleHeight.
-                headerVisibleHeight === 0
-                    ? undefined
-                    : `${
-                          Math.max(
-                              document.documentElement.clientHeight,
-                              window.innerHeight || 0,
-                          ) - headerVisibleHeight
-                      }px`,
-            );
-            if (supportsSticky) {
-                return;
-            }
-            setStickyClass(
-                document.documentElement.scrollTop >= totalHeaderSpace
-                    ? ' cls-page__sidebar--js-sticky-active'
-                    : '',
-            );
-        };
-        listener();
-        if (supportsSticky) {
-            setStickyClass(' cls-page__sidebar--native-sticky-fix-active');
-        }
-        document.addEventListener('scroll', listener);
-        window.addEventListener('resize', listener);
-        return () => {
-            document.removeEventListener('scroll', listener);
-            window.addEventListener('resize', listener);
-        };
-    }, []);
+    const { heightStyle, stickyState, elRefCb } = useSticky();
 
     return (
-        <aside
-            class={`cls-page__sidebar${stickyClass}`}
-            style={height && { height }}
-        >
-            <FullSiteNavigationContents bindKeys={BindKeysRequireFocus} />
-        </aside>
+        <Fragment>
+            <span ref={elRefCb} />
+            <aside
+                class={
+                    `cls-page__sidebar` +
+                    (stickyState === UseStickyJsStickyActive
+                        ? ' cls-page__sidebar--js-sticky-active'
+                        : stickyState === UseStickyNativeStickyReady
+                        ? ' cls-page__sidebar--native-sticky-fix-active'
+                        : '')
+                }
+                style={heightStyle && { height: heightStyle }}
+            >
+                <FullSiteNavigationContents bindKeys={BindKeysRequireFocus} />
+            </aside>
+        </Fragment>
     );
 }
 
@@ -213,7 +165,6 @@ function AppPath({ pathname, isDuplicateRender }: AppPathProps): VNode {
             const element = document.getElementById(location.hash);
             if (element) {
                 setFocusBefore(element);
-            } else {
                 return;
             }
         }
@@ -228,7 +179,7 @@ function AppPath({ pathname, isDuplicateRender }: AppPathProps): VNode {
 
     const pageId = getPageIdFromPathname(pathname);
     if (pageId !== undefined) {
-        return <DocPage pageId={pageId} />;
+        return <DocPage pageId={pageId} key={pageId} />;
     }
 
     return <NotFoundPage />;
