@@ -1,155 +1,107 @@
 import { h, Fragment, VNode, JSX } from 'preact';
-import { useState, useRef, useEffect, useLayoutEffect } from 'preact/hooks';
-import { getPagesMetadata } from '../data/docPages';
+import { useState, useRef } from 'preact/hooks';
+import { getGithubUrl, getPagesMetadata } from '../data/docPages';
 import { isChromium, isMobile, isStandalone } from '../env';
+import {
+    useFullScreenOverlayState,
+    FullScreenOverlayOpenTransitionType,
+    FullScreenOverlayCloseWithSettingFocusTransitionType,
+    FullScreenOverlayCloseWithoutSettingFocusTransitionType,
+} from '../hooks/useFullScreenOverlayState';
 import { customHistory, usePath } from '../hooks/useHistory';
 import {
-    BindKeys,
     BindKeysNoRequireFocus,
     NoBindKeys,
-    useNavigationListKeyBindings,
-    fixChromiumFocusClass,
 } from '../hooks/useNavigationListKeyBindings';
+import { useOverlayEscapeKeyBinding } from '../hooks/useOverlayEscapeKeyBinding';
 import { usePrevious } from '../hooks/usePrevious';
 import { useResetFixChromiumFocus } from '../hooks/useResetFixChromiumFocus';
-import { stopEvent } from '../util/stopEvent';
+import { useTrapFocus } from '../hooks/useTrapFocus';
 import { DocPageLink } from './DocPageLink';
+import { FullSiteNavigationContents } from './FullSiteNavigationContents';
 import { Link, isStringActivePath, isDocPageIdActivePath } from './Link';
 
-const {
-    pageIdToWebsitePath,
-    pageIdToPageTitle,
-    pageGroups,
-    github,
-} = getPagesMetadata();
-
-const githubUrl = github
-    ? `https://github.com/${github.org}/${github.repo}/tree/${github.sha}`
-    : 'https://github.com/anthonyrota/microstream';
-
-const licenseLinkText = 'License';
-const githubLinkText = 'GitHub';
+const { pageIdToWebsitePath } = getPagesMetadata();
+const githubUrl = getGithubUrl();
 
 export interface HeaderProps {
     enableMenu: boolean;
 }
 
 export function Header({ enableMenu }: HeaderProps): VNode {
-    // Hack:
-    // undefined -> don't focus anything
-    // false -> regular closing, focus toggle element
-    // true -> regular opening, focus first link.
-    const { 0: isMenuOpen, 1: setIsMenuOpen } = useState<boolean | undefined>(
-        undefined,
-    );
     const { 0: searchValue, 1: setSearchValue } = useState('');
     const { 0: fixChromiumFocus, 1: setFixChromiumFocus } = useState(false);
 
-    const path = usePath();
-    const previousPath = usePrevious(path);
-
-    if (previousPath && previousPath.value !== path) {
-        previousPath.value = path;
-        setIsMenuOpen(undefined);
-    }
+    const searchInputRef = useRef<HTMLInputElement>();
+    const headerRef = useRef<HTMLElement>();
+    const menuRef = useRef<HTMLElement>();
+    const toggleButtonRef = useRef<HTMLButtonElement>();
+    const menuLinkRefs: { current: HTMLAnchorElement }[] = [];
+    const firstFocusableElementRef = useRef<HTMLAnchorElement>();
+    const startFocusPlaceholderRef = useRef<HTMLDivElement>();
+    const endFocusPlaceholderRef = useRef<HTMLDivElement>();
 
     const isMovingFocusManuallyRef = useRef(false);
-
     function manuallySetFocus(element: HTMLElement): void {
         isMovingFocusManuallyRef.current = true;
         element.focus();
         isMovingFocusManuallyRef.current = false;
     }
 
-    const searchInputRef = useRef<HTMLInputElement>();
+    const {
+        isOpen: isMenuOpen,
+        getIsOpen: getIsMenuOpen,
+        transitionState: transitionMenuState,
+    } = useFullScreenOverlayState({
+        setFocusOnOpen: () => manuallySetFocus(menuLinkRefs[0].current),
+        setFocusOnClose: () => manuallySetFocus(toggleButtonRef.current),
+    });
 
-    useEffect(() => {
-        if (!isMenuOpen) {
-            return;
-        }
-        const listener = (event: KeyboardEvent) => {
-            if (
-                event.ctrlKey ||
-                event.metaKey ||
-                event.altKey ||
-                event.shiftKey
-            ) {
-                return;
-            }
+    const path = usePath();
+    const previousPath = usePrevious(path);
 
-            switch (event.key) {
-                case 'Escape':
-                case 'Esc': {
-                    setIsMenuOpen(false);
-                    stopEvent(event);
-                    break;
-                }
-            }
-        };
-        document.addEventListener('keydown', listener);
-        return () => {
-            document.removeEventListener('keydown', listener);
-        };
-    }, [!!isMenuOpen]);
+    if (previousPath && previousPath.value !== path) {
+        previousPath.value = path;
+        transitionMenuState(
+            FullScreenOverlayCloseWithoutSettingFocusTransitionType,
+        );
+    }
 
-    const headerRef = useRef<HTMLElement>();
-    const menuRef = useRef<HTMLElement>();
-    const firstLinkRef = useRef<HTMLAnchorElement>();
-    const menuLinkRefs: { current: HTMLAnchorElement }[] = [];
+    useOverlayEscapeKeyBinding({
+        getIsOpen: () => !!isMenuOpen,
+        close: () =>
+            transitionMenuState(
+                FullScreenOverlayCloseWithSettingFocusTransitionType,
+            ),
+    });
 
-    useEffect(() => {
-        if (!isMenuOpen) {
-            return;
-        }
-        let animationRequestId: number | undefined;
-        const listener = (event: FocusEvent) => {
-            if (isMovingFocusManuallyRef.current) {
-                return;
-            }
-            const target = event.target;
-            if (animationRequestId !== undefined) {
-                cancelAnimationFrame(animationRequestId);
-                animationRequestId = undefined;
-            }
-            const lastLinkRef = menuLinkRefs[menuLinkRefs.length - 1];
-            animationRequestId = requestAnimationFrame(() => {
-                animationRequestId = undefined;
-                const focusedElement = document.activeElement;
-                if (
-                    headerRef.current.contains(focusedElement) ||
-                    menuRef.current.contains(focusedElement) ||
-                    focusedElement === document.body
-                ) {
-                    return;
-                }
-                setIsMenuOpen((isMenuOpen) => {
-                    if (!isMenuOpen) {
-                        return;
-                    }
-                    if (target === firstLinkRef.current) {
-                        manuallySetFocus(lastLinkRef.current);
-                    } else {
-                        manuallySetFocus(firstLinkRef.current);
-                    }
-                    return isMenuOpen;
-                });
-            });
-        };
-        document.addEventListener('focusout', listener);
-        return () => {
-            if (animationRequestId !== undefined) {
-                cancelAnimationFrame(animationRequestId);
-            }
-            document.removeEventListener('focusout', listener);
-        };
-    }, [!!isMenuOpen]);
+    const isNodePartOfComponent = (node: Node) => {
+        return (
+            headerRef.current.contains(node) || menuRef.current.contains(node)
+        );
+    };
+
+    useTrapFocus({
+        getShouldTrapFocus: getIsMenuOpen,
+        shouldIgnoreChangedFocus: isNodePartOfComponent,
+        getStartFocusPlaceholder: () => startFocusPlaceholderRef.current,
+        getEndFocusPlaceholder: () => endFocusPlaceholderRef.current,
+        setFocusStart: () => manuallySetFocus(firstFocusableElementRef.current),
+        setFocusEnd: () =>
+            manuallySetFocus(menuLinkRefs[menuLinkRefs.length - 1].current),
+        onFocusOutside: () =>
+            transitionMenuState(
+                FullScreenOverlayCloseWithoutSettingFocusTransitionType,
+            ),
+    });
 
     if (isChromium) {
         useResetFixChromiumFocus({
             fixChromiumFocus,
             resetFixChromiumFocus: () => setFixChromiumFocus(false),
             isMovingFocusManuallyRef,
-            linkRefs: menuLinkRefs,
+            isEventTargetPartOfComponent: (target) =>
+                target instanceof Node && isNodePartOfComponent(target),
         });
     }
 
@@ -160,27 +112,18 @@ export function Header({ enableMenu }: HeaderProps): VNode {
     const onToggleButtonClick = (
         event: JSX.TargetedMouseEvent<HTMLButtonElement>,
     ) => {
-        setIsMenuOpen((isMenuOpen) => {
-            const isMenuOpenAfterClick = !isMenuOpen;
-            if (isChromium && event.detail !== 0 && isMenuOpenAfterClick) {
-                // Opening with click.
-                setFixChromiumFocus(true);
-            }
-            return isMenuOpenAfterClick;
-        });
-    };
-
-    const toggleButtonRef = useRef<HTMLButtonElement>();
-
-    useLayoutEffect(() => {
-        if (isMenuOpen) {
-            requestAnimationFrame(() => {
-                manuallySetFocus(menuLinkRefs[0].current);
-            });
-        } else if (isMenuOpen === false) {
-            manuallySetFocus(toggleButtonRef.current);
+        const isMenuOpen = getIsMenuOpen();
+        const isMenuOpenAfterClick = !isMenuOpen;
+        if (isChromium && event.detail !== 0 && isMenuOpenAfterClick) {
+            // Opening with click.
+            setFixChromiumFocus(true);
         }
-    }, [isMenuOpen]);
+        transitionMenuState(
+            isMenuOpenAfterClick
+                ? FullScreenOverlayOpenTransitionType
+                : FullScreenOverlayCloseWithSettingFocusTransitionType,
+        );
+    };
 
     const isDocumentationPage = Object.keys(pageIdToWebsitePath).some(
         isDocPageIdActivePath,
@@ -202,6 +145,10 @@ export function Header({ enableMenu }: HeaderProps): VNode {
 
     return (
         <Fragment>
+            <div
+                ref={startFocusPlaceholderRef}
+                tabIndex={isMenuOpen ? 0 : undefined}
+            />
             <header role="banner" class="cls-header" ref={headerRef}>
                 <div class="cls-header__contents">
                     <div class="cls-header__contents__container">
@@ -223,7 +170,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                     href=""
                                     ref={
                                         showBackButton
-                                            ? firstLinkRef
+                                            ? firstFocusableElementRef
                                             : undefined
                                     }
                                 >
@@ -238,7 +185,9 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                             )}
                             <Link
                                 innerRef={
-                                    showBackButton ? undefined : firstLinkRef
+                                    showBackButton
+                                        ? undefined
+                                        : firstFocusableElementRef
                                 }
                                 href="/"
                                 class={
@@ -330,7 +279,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                         class="cls-header__nav__link"
                                         href="/license"
                                     >
-                                        {licenseLinkText}
+                                        License
                                     </Link>
                                 </li>
                             </ul>
@@ -410,165 +359,10 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                     />
                 </div>
             </aside>
-        </Fragment>
-    );
-}
-
-export interface FullSiteNavigationContentsProps {
-    bindKeys: BindKeys;
-    getAllowSingleLetterKeyLinkJumpShortcut?: (() => boolean) | undefined;
-    isMovingFocusManuallyRef?: { current: boolean };
-    fixLinkChromiumFocus?: boolean;
-    linkRefs?: { current: HTMLAnchorElement }[];
-}
-
-export function FullSiteNavigationContents({
-    bindKeys,
-    isMovingFocusManuallyRef = useRef(false),
-    getAllowSingleLetterKeyLinkJumpShortcut,
-    fixLinkChromiumFocus: fixLinkChromiumFocusProp,
-    linkRefs = [],
-}: FullSiteNavigationContentsProps): VNode {
-    const linkTexts: string[] = [];
-    pageGroups.forEach((pageGroup) => {
-        pageGroup.pageIds.forEach((pageId) => {
-            linkTexts.push(pageIdToPageTitle[pageId]);
-        });
-    });
-
-    linkTexts.push(licenseLinkText, githubLinkText);
-
-    for (let i = 0; i < linkTexts.length; i++) {
-        linkRefs[i] = useRef<HTMLAnchorElement>();
-    }
-
-    const { fixChromiumFocus } = useNavigationListKeyBindings({
-        bindKeys,
-        linkRefs,
-        linkTexts,
-        getAllowSingleLetterKeyLinkJumpShortcut,
-        isMovingFocusManuallyRef,
-    });
-
-    let linkIndex = 0;
-
-    return (
-        <Fragment>
-            {pageGroups.map((pageGroup, pageGroupIndex) => (
-                <Fragment key={pageGroupIndex}>
-                    <h2
-                        class={
-                            'cls-full-site-nav__header' +
-                            (pageGroup.pageIds.some(isDocPageIdActivePath)
-                                ? ' cls-full-site-nav__header--active'
-                                : '')
-                        }
-                    >
-                        {pageGroup.title}
-                    </h2>
-                    <ul
-                        role="navigation"
-                        class="cls-full-site-nav__link-list"
-                        aria-label="Documentation Navigation"
-                    >
-                        {pageGroup.pageIds.map((pageId, index) => (
-                            <li key={index} class="cls-full-site-nav__li">
-                                <div
-                                    class={
-                                        isDocPageIdActivePath(pageId)
-                                            ? ' cls-full-site-nav__link-container--active'
-                                            : undefined
-                                    }
-                                >
-                                    <DocPageLink
-                                        class={
-                                            'cls-full-site-nav__link' +
-                                            (fixLinkChromiumFocusProp ||
-                                            fixChromiumFocus
-                                                ? ` ${fixChromiumFocusClass}`
-                                                : '')
-                                        }
-                                        pageId={pageId}
-                                        innerRef={linkRefs[linkIndex++]}
-                                    >
-                                        <span
-                                            class="cls-full-site-nav__link__border"
-                                            aria-hidden
-                                        >
-                                            {pageIdToPageTitle[pageId]}
-                                        </span>
-                                        {pageIdToPageTitle[pageId]}
-                                    </DocPageLink>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </Fragment>
-            ))}
-            <h2
-                class={
-                    'cls-full-site-nav__header' +
-                    (['/license'].some(isStringActivePath)
-                        ? ' cls-full-site-nav__header--active'
-                        : '')
-                }
-            >
-                Resources
-            </h2>
-            <ul
-                role="navigation"
-                class="cls-full-site-nav__link-list"
-                aria-label="Resources Navigation"
-            >
-                <li class="cls-full-site-nav__li">
-                    <div
-                        class={
-                            isStringActivePath('/license')
-                                ? ' cls-full-site-nav__link-container--active'
-                                : undefined
-                        }
-                    >
-                        <Link
-                            class={
-                                'cls-full-site-nav__link' +
-                                (fixLinkChromiumFocusProp || fixChromiumFocus
-                                    ? ` ${fixChromiumFocusClass}`
-                                    : '')
-                            }
-                            innerRef={linkRefs[linkIndex++]}
-                            href="/license"
-                        >
-                            <span
-                                class="cls-full-site-nav__link__border"
-                                aria-hidden
-                            >
-                                {licenseLinkText}
-                            </span>
-                            {licenseLinkText}
-                        </Link>
-                    </div>
-                </li>
-                <li class="cls-full-site-nav__li">
-                    <a
-                        class={
-                            'cls-full-site-nav__link' +
-                            (fixLinkChromiumFocusProp || fixChromiumFocus
-                                ? ` ${fixChromiumFocusClass}`
-                                : '')
-                        }
-                        ref={linkRefs[linkIndex++]}
-                        href={githubUrl}
-                    >
-                        <span
-                            class="cls-full-site-nav__link__border"
-                            aria-hidden
-                        >
-                            {licenseLinkText}
-                        </span>
-                        {githubLinkText}
-                    </a>
-                </li>
-            </ul>
+            <div
+                ref={endFocusPlaceholderRef}
+                tabIndex={isMenuOpen ? 0 : undefined}
+            />
         </Fragment>
     );
 }

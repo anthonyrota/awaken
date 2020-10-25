@@ -625,8 +625,8 @@ $content-link-hover-color: $text-color;
             hyphens: auto;
             color: $text-color;
 
-            p:not(:first-child) {
-                margin-top: $spacing * 4;
+            p:not(:last-child) {
+                margin-bottom: $spacing * 4;
             }
         }
     }
@@ -642,6 +642,7 @@ $content-link-hover-color: $text-color;
 
     &__content {
         display: flex;
+        flex-direction: row-reverse;
     }
 
     $title-spacing-bottom: 40px;

@@ -11,6 +11,13 @@ import {
 export const getPagesMetadata = (): PagesMetadata =>
     global[globalPagesMetadataKey] as PagesMetadata;
 
+export const getGithubUrl = (): string => {
+    const { github } = getPagesMetadata();
+    return github
+        ? `https://github.com/${github.org}/${github.repo}/tree/${github.sha}`
+        : 'https://github.com/anthonyrota/microstream';
+};
+
 export const ResponseLoadingType = 0;
 export const ResponseHttpStatusErrorType = 1;
 export const ResponseJSONParsingErrorType = 2;

@@ -4,7 +4,7 @@ export interface UseResetFixChromiumFocusParams {
     fixChromiumFocus: boolean;
     resetFixChromiumFocus: () => void;
     isMovingFocusManuallyRef: { current: boolean };
-    linkRefs: { current: HTMLAnchorElement }[];
+    isEventTargetPartOfComponent: (element: EventTarget) => boolean;
 }
 
 export function useResetFixChromiumFocus(
@@ -14,7 +14,7 @@ export function useResetFixChromiumFocus(
         fixChromiumFocus,
         resetFixChromiumFocus,
         isMovingFocusManuallyRef,
-        linkRefs,
+        isEventTargetPartOfComponent,
     } = params;
 
     useEffect(() => {
@@ -25,7 +25,8 @@ export function useResetFixChromiumFocus(
             if (
                 fixChromiumFocus &&
                 !isMovingFocusManuallyRef.current &&
-                linkRefs.some((ref) => ref.current === event.target) &&
+                event.target &&
+                isEventTargetPartOfComponent(event.target) &&
                 // Moving focus away and back to window reintroduces.
                 document.hasFocus()
             ) {

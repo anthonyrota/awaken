@@ -13,14 +13,15 @@ import {
     useNavigationListKeyBindings,
 } from '../hooks/useNavigationListKeyBindings';
 import { useSticky, UseStickyJsStickyActive } from '../hooks/useSticky';
+import { AppPathBaseProps } from './base';
 
-export interface DocPageProps {
+export interface DocPageProps extends AppPathBaseProps {
     pageId: string;
 }
 
 const { pageIdToPageTitle } = getPagesMetadata();
 
-export function DocPage({ pageId }: DocPageProps): VNode | null {
+export function DocPage({ mainRef, pageId }: DocPageProps): VNode | null {
     const responseState = useDocPagesResponseState();
 
     return (
@@ -28,6 +29,7 @@ export function DocPage({ pageId }: DocPageProps): VNode | null {
             <DocumentTitle title={pageIdToPageTitle[pageId]} />
             {responseState.type === ResponseDoneType ? (
                 <DocPageContent
+                    mainRef={mainRef}
                     page={
                         responseState.pages.filter(
                             (page) => page.pageId === pageId,
@@ -40,17 +42,19 @@ export function DocPage({ pageId }: DocPageProps): VNode | null {
 }
 
 interface DocPageContentProps {
+    mainRef: AppPathBaseProps['mainRef'];
     page: PageNode<DeepCoreNode>;
 }
 
-function DocPageContent({ page }: DocPageContentProps): VNode {
+function DocPageContent({ mainRef, page }: DocPageContentProps): VNode {
     return (
         <div class="cls-page__content__container cls-doc-page">
             <h1 class="cls-doc-page__title">
                 {pageIdToPageTitle[page.pageId]}
             </h1>
             <div class="cls-doc-page__content">
-                <main class="cls-doc-page__main">
+                <DocPageSidebar page={page} />
+                <main class="cls-doc-page__main" ref={mainRef}>
                     {Array.from({ length: 10 }, () => (
                         <p>
                             {Array.from(
@@ -72,7 +76,6 @@ function DocPageContent({ page }: DocPageContentProps): VNode {
                         </p>
                     ))}
                 </main>
-                <DocPageSidebar page={page} />
             </div>
         </div>
     );

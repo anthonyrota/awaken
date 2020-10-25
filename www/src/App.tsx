@@ -1,6 +1,7 @@
 import { h, Fragment, VNode } from 'preact';
 import { useLayoutEffect, useRef } from 'preact/hooks';
-import { FullSiteNavigationContents, Header } from './components/Header';
+import { FullSiteNavigationContents } from './components/FullSiteNavigationContents';
+import { Header } from './components/Header';
 import {
     getPagesMetadata,
     ResponseLoadingType,
@@ -15,12 +16,37 @@ import {
     UseStickyJsStickyActive,
     UseStickyNativeStickyReady,
 } from './hooks/useSticky';
+import { AppPathBaseProps } from './pages/base';
 import { DocPage } from './pages/DocPage';
 import { IndexPage } from './pages/IndexPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
-export interface AppProps {
-    path?: Path;
+function setFocusBefore(element?: ChildNode): void {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const parentEl = element ? element.parentElement! : document.body;
+    const tempDiv = document.createElement('div');
+    tempDiv.setAttribute('tabindex', '0');
+    parentEl.insertBefore(tempDiv, element || document.body.firstChild);
+    tempDiv.focus();
+    parentEl.removeChild(tempDiv);
+
+    if (element && document.activeElement === document.body) {
+        // There are no focusable elements >= the element and so the browser
+        // reset the page's focus when tempDiv was removed.
+        parentEl.insertBefore(tempDiv, element);
+        tempDiv.focus();
+        tempDiv.addEventListener('focusout', () => {
+            parentEl.removeChild(tempDiv);
+        });
+    }
+
+    if (element) {
+        if (element instanceof Element) {
+            element.scrollIntoView();
+        }
+    } else {
+        window.scrollTo(0, 0);
+    }
 }
 
 function getPageIdFromPathname(pathname: string): string | void {
@@ -33,31 +59,19 @@ function getPageIdFromPathname(pathname: string): string | void {
     }
 }
 
-function setFocusBefore(element?: ChildNode): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const parentEl = element ? element.parentElement! : document.body;
-    const tempDiv = document.createElement('div');
-    tempDiv.setAttribute('tabindex', '0');
-    parentEl.insertBefore(tempDiv, element || document.body.firstChild);
-    tempDiv.focus();
-    parentEl.removeChild(tempDiv);
-
-    if (element) {
-        if (element instanceof Element) {
-            element.scrollIntoView();
-        }
-    } else {
-        window.scrollTo(0, 0);
-    }
+export interface AppProps {
+    path?: Path;
 }
 
 export function App(props: AppProps): VNode {
     const { path } = useHistory({ path: props.path });
-    const appPathProps: AppPathProps = {
+    const appPathProps: Omit<AppPathProps, 'mainRef'> = {
         pathname: path.pathname,
         isDuplicateRender: false,
     };
-    const nextPreviousAppPathPropsBox: [AppPathProps] = [appPathProps];
+    const nextPreviousAppPathPropsBox: [Omit<AppPathProps, 'mainRef'>] = [
+        appPathProps,
+    ];
     const previousAppPathPropsBox = usePrevious(nextPreviousAppPathPropsBox);
 
     // Needed in the below case where we are blocking the page transition.
@@ -86,11 +100,11 @@ export function App(props: AppProps): VNode {
         }
     }
 
-    const pageContentRef = useRef<HTMLDivElement>();
+    const mainRef = useRef<HTMLElement>();
     const onSkipLinkClick = (event: Event) => {
         event.preventDefault();
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        setFocusBefore(pageContentRef.current.firstChild!);
+        setFocusBefore(mainRef.current.firstChild!);
     };
 
     const showSidebar = docPageId !== undefined;
@@ -110,8 +124,8 @@ export function App(props: AppProps): VNode {
             <div class="cls-page">
                 <div class="cls-page__inner">
                     {showSidebar && <Sidebar />}
-                    <div class="cls-page__content" ref={pageContentRef}>
-                        <AppPath {...appPathPropsToUse} />
+                    <div class="cls-page__content">
+                        <AppPath mainRef={mainRef} {...appPathPropsToUse} />
                     </div>
                 </div>
             </div>
@@ -142,12 +156,16 @@ function Sidebar(): VNode {
     );
 }
 
-interface AppPathProps {
+interface AppPathProps extends AppPathBaseProps {
     pathname: string;
     isDuplicateRender: boolean;
 }
 
-function AppPath({ pathname, isDuplicateRender }: AppPathProps): VNode {
+function AppPath({
+    mainRef,
+    pathname,
+    isDuplicateRender,
+}: AppPathProps): VNode {
     const { location } = customHistory;
     const isFirstRenderRef = useRef(true);
 
@@ -174,13 +192,13 @@ function AppPath({ pathname, isDuplicateRender }: AppPathProps): VNode {
     }, [location, isDuplicateRender]);
 
     if (pathname === '/') {
-        return <IndexPage />;
+        return <IndexPage mainRef={mainRef} />;
     }
 
     const pageId = getPageIdFromPathname(pathname);
     if (pageId !== undefined) {
-        return <DocPage pageId={pageId} key={pageId} />;
+        return <DocPage mainRef={mainRef} pageId={pageId} key={pageId} />;
     }
 
-    return <NotFoundPage />;
+    return <NotFoundPage mainRef={mainRef} />;
 }

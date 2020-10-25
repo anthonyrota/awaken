@@ -47,7 +47,7 @@ export function useNavigationListKeyBindings({
     linkRefs,
 }: UseNavigationListKeyBindingsParams): UseNavigationListKeyBindingsResult {
     const { 0: fixChromiumFocus, 1: setFixChromiumFocus } = useState(false);
-    const isChromiumFocusedElementOnKeyShortcutQuirkyRef = useRef(false);
+    const isChromiumFocusedElementOnKeyShortcutQuirkyRef = useRef(0);
 
     if (isChromium) {
         useEffect(() => {
@@ -55,21 +55,27 @@ export function useNavigationListKeyBindings({
                 return;
             }
             let animationId = requestAnimationFrame(function cb(): void {
-                let isChromiumFocusedElementOnKeyShortcutQuirky = false;
+                let isChromiumFocusedElementOnKeyShortcutQuirky = 0;
                 if (document.activeElement !== null) {
-                    if ('matches' in document.activeElement) {
+                    if (document.activeElement.tagName === 'INPUT') {
+                        isChromiumFocusedElementOnKeyShortcutQuirky = 2;
+                    } else if ('matches' in document.activeElement) {
+                        let matchesFocusVisible: boolean | undefined;
                         try {
                             // eslint-disable-next-line max-len
-                            const matchesFocusVisible = document.activeElement.matches(
+                            matchesFocusVisible = document.activeElement.matches(
                                 ':focus-visible',
                             );
-                            // eslint-disable-next-line max-len
-                            isChromiumFocusedElementOnKeyShortcutQuirky = !matchesFocusVisible;
+                        } catch (error) {
+                            // Focus visible not supported;
+                        }
+                        if (matchesFocusVisible) {
                             // This callback should be called synchronously.
                             setFixChromiumFocus((value) => {
                                 if (
                                     // eslint-disable-next-line max-len
-                                    isChromiumFocusedElementOnKeyShortcutQuirkyRef.current &&
+                                    isChromiumFocusedElementOnKeyShortcutQuirkyRef.current ===
+                                        1 &&
                                     matchesFocusVisible &&
                                     !value
                                 ) {
@@ -79,17 +85,12 @@ export function useNavigationListKeyBindings({
                                     // :focus-visible but no outline will be
                                     // shown.
                                     // eslint-disable-next-line max-len
-                                    isChromiumFocusedElementOnKeyShortcutQuirky = true;
+                                    isChromiumFocusedElementOnKeyShortcutQuirky = 1;
                                 }
                                 return value;
                             });
-                        } catch (error) {
-                            // Focus visible not supported;
-                        }
-                    }
-                    if (!isChromiumFocusedElementOnKeyShortcutQuirky) {
-                        if (document.activeElement.tagName === 'INPUT') {
-                            isChromiumFocusedElementOnKeyShortcutQuirky = true;
+                        } else if (matchesFocusVisible !== undefined) {
+                            isChromiumFocusedElementOnKeyShortcutQuirky = 1;
                         }
                     }
                 }
@@ -121,7 +122,8 @@ export function useNavigationListKeyBindings({
             fixChromiumFocus,
             resetFixChromiumFocus: () => setFixChromiumFocus(false),
             isMovingFocusManuallyRef,
-            linkRefs,
+            isEventTargetPartOfComponent: (target) =>
+                linkRefs.some((ref) => ref.current === target),
         });
     }
 
