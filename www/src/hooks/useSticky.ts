@@ -17,9 +17,9 @@ const supportsSticky =
               return tempDiv.style.position === '-webkit-sticky';
           })());
 
-export const UseStickyNativeStickyReady = 1;
-export const UseStickyJsStickyActive = 2;
-export const UseStickyNativeNotReadyOrJsStickyNotActive = 0;
+export const UseStickyNativeStickyReady = 0;
+export const UseStickyJsStickyActive = 1;
+export const UseStickyNativeNotReadyOrJsStickyNotActive = 2;
 
 export interface UseStickyResult<El extends HTMLElement> {
     heightStyle: string | undefined;
@@ -30,7 +30,15 @@ export interface UseStickyResult<El extends HTMLElement> {
     elRefCb: RefCallback<El>;
 }
 
-export function useSticky<El extends HTMLElement>(): UseStickyResult<El> {
+export interface UseStickyParams {
+    useNativeSticky?: boolean;
+    calculateHeight?: boolean;
+}
+
+export function useSticky<El extends HTMLElement>({
+    useNativeSticky = supportsSticky,
+    calculateHeight = true,
+}: UseStickyParams = {}): UseStickyResult<El> {
     const { 0: heightStyle, 1: setHeightStyle } = useState<string | undefined>(
         undefined,
     );
@@ -41,14 +49,16 @@ export function useSticky<El extends HTMLElement>(): UseStickyResult<El> {
     const setup = (el: El) => {
         const listener = () => {
             const elementTop = el.getBoundingClientRect().top;
-            const _100vh = Math.max(
-                document.documentElement.clientHeight,
-                window.innerHeight || 0,
-            );
-            setHeightStyle(
-                elementTop > 0 ? `${_100vh - elementTop}px` : undefined,
-            );
-            if (supportsSticky) {
+            if (calculateHeight) {
+                const _100vh = Math.max(
+                    document.documentElement.clientHeight,
+                    window.innerHeight || 0,
+                );
+                setHeightStyle(
+                    elementTop > 0 ? `${_100vh - elementTop}px` : undefined,
+                );
+            }
+            if (useNativeSticky) {
                 return;
             }
             setStickyState(
@@ -60,7 +70,7 @@ export function useSticky<El extends HTMLElement>(): UseStickyResult<El> {
         requestAnimationFrame(() => {
             listener();
         });
-        if (supportsSticky) {
+        if (useNativeSticky) {
             setStickyState(UseStickyNativeStickyReady);
         }
         document.addEventListener('scroll', listener);

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'preact/hooks';
+import { useRef, useEffect, useState, StateUpdater } from 'preact/hooks';
 import { isChromium } from '../env';
 import { stopEvent } from '../util/stopEvent';
 import { useResetFixChromiumFocus } from './useResetFixChromiumFocus';
@@ -32,6 +32,7 @@ export interface UseNavigationListKeyBindingsParams {
     isMovingFocusManuallyRef?: { current: boolean };
     linkTexts: string[];
     linkRefs: { current: HTMLAnchorElement }[];
+    fixChromiumFocus?: [boolean, StateUpdater<boolean>];
 }
 
 export const fixChromiumFocusClass = 'cls-fix-chromium-focus';
@@ -45,9 +46,14 @@ export function useNavigationListKeyBindings({
     isMovingFocusManuallyRef = useRef(false),
     linkTexts,
     linkRefs,
+    fixChromiumFocus: fixChromiumFocusParam,
 }: UseNavigationListKeyBindingsParams): UseNavigationListKeyBindingsResult {
-    const { 0: fixChromiumFocus, 1: setFixChromiumFocus } = useState(false);
-    const isChromiumFocusedElementOnKeyShortcutQuirkyRef = useRef(0);
+    const { 0: fixChromiumFocus, 1: setFixChromiumFocus } =
+        fixChromiumFocusParam || useState<boolean>(false);
+    const isChromiumFocusedElementOnKeyShortcutQuirkyRef = useRef({
+        value: false,
+        activeElement: null as Element | null,
+    });
 
     if (isChromium) {
         useEffect(() => {
@@ -55,10 +61,10 @@ export function useNavigationListKeyBindings({
                 return;
             }
             let animationId = requestAnimationFrame(function cb(): void {
-                let isChromiumFocusedElementOnKeyShortcutQuirky = 0;
-                if (document.activeElement !== null) {
+                let isChromiumFocusedElementOnKeyShortcutQuirky = false;
+                if (document.activeElement) {
                     if (document.activeElement.tagName === 'INPUT') {
-                        isChromiumFocusedElementOnKeyShortcutQuirky = 2;
+                        isChromiumFocusedElementOnKeyShortcutQuirky = true;
                     } else if ('matches' in document.activeElement) {
                         let matchesFocusVisible: boolean | undefined;
                         try {
@@ -74,8 +80,12 @@ export function useNavigationListKeyBindings({
                             setFixChromiumFocus((value) => {
                                 if (
                                     // eslint-disable-next-line max-len
-                                    isChromiumFocusedElementOnKeyShortcutQuirkyRef.current ===
-                                        1 &&
+                                    isChromiumFocusedElementOnKeyShortcutQuirkyRef
+                                        .current.value &&
+                                    document.activeElement ===
+                                        // eslint-disable-next-line max-len
+                                        isChromiumFocusedElementOnKeyShortcutQuirkyRef
+                                            .current.activeElement &&
                                     matchesFocusVisible &&
                                     !value
                                 ) {
@@ -85,17 +95,20 @@ export function useNavigationListKeyBindings({
                                     // :focus-visible but no outline will be
                                     // shown.
                                     // eslint-disable-next-line max-len
-                                    isChromiumFocusedElementOnKeyShortcutQuirky = 1;
+                                    isChromiumFocusedElementOnKeyShortcutQuirky = true;
                                 }
                                 return value;
                             });
                         } else if (matchesFocusVisible !== undefined) {
-                            isChromiumFocusedElementOnKeyShortcutQuirky = 1;
+                            isChromiumFocusedElementOnKeyShortcutQuirky = true;
                         }
                     }
                 }
                 // eslint-disable-next-line max-len
-                isChromiumFocusedElementOnKeyShortcutQuirkyRef.current = isChromiumFocusedElementOnKeyShortcutQuirky;
+                isChromiumFocusedElementOnKeyShortcutQuirkyRef.current = {
+                    value: isChromiumFocusedElementOnKeyShortcutQuirky,
+                    activeElement: document.activeElement,
+                };
                 animationId = requestAnimationFrame(cb);
             });
             return () => {
@@ -107,7 +120,7 @@ export function useNavigationListKeyBindings({
     const setFocus = (element: HTMLElement) => {
         if (
             findIndex(linkRefs, (ref) => ref.current === element) !== -1 &&
-            isChromiumFocusedElementOnKeyShortcutQuirkyRef.current
+            isChromiumFocusedElementOnKeyShortcutQuirkyRef.current.value
         ) {
             setFixChromiumFocus(true);
         }
@@ -117,7 +130,7 @@ export function useNavigationListKeyBindings({
         isMovingFocusManuallyRef.current = false;
     };
 
-    if (isChromium) {
+    if (isChromium && !fixChromiumFocusParam) {
         useResetFixChromiumFocus({
             fixChromiumFocus,
             resetFixChromiumFocus: () => setFixChromiumFocus(false),

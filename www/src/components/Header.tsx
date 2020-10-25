@@ -1,5 +1,5 @@
 import { h, Fragment, VNode, JSX } from 'preact';
-import { useState, useRef } from 'preact/hooks';
+import { useState, useRef, useLayoutEffect } from 'preact/hooks';
 import { getGithubUrl, getPagesMetadata } from '../data/docPages';
 import { isChromium, isMobile, isStandalone } from '../env';
 import {
@@ -16,6 +16,7 @@ import {
 import { useOverlayEscapeKeyBinding } from '../hooks/useOverlayEscapeKeyBinding';
 import { usePrevious } from '../hooks/usePrevious';
 import { useResetFixChromiumFocus } from '../hooks/useResetFixChromiumFocus';
+import { useSticky, UseStickyJsStickyActive } from '../hooks/useSticky';
 import { useTrapFocus } from '../hooks/useTrapFocus';
 import { DocPageLink } from './DocPageLink';
 import { FullSiteNavigationContents } from './FullSiteNavigationContents';
@@ -28,9 +29,16 @@ export interface HeaderProps {
     enableMenu: boolean;
 }
 
+const toggleButtonLabel = 'Toggle Navigation Menu';
+const githubLinkLabel = 'Open GitHub Repository';
+
 export function Header({ enableMenu }: HeaderProps): VNode {
     const { 0: searchValue, 1: setSearchValue } = useState('');
-    const { 0: fixChromiumFocus, 1: setFixChromiumFocus } = useState(false);
+    const fixChromiumFocusContainer = useState(false);
+    const {
+        0: fixChromiumFocus,
+        1: setFixChromiumFocus,
+    } = fixChromiumFocusContainer;
 
     const searchInputRef = useRef<HTMLInputElement>();
     const headerRef = useRef<HTMLElement>();
@@ -40,6 +48,14 @@ export function Header({ enableMenu }: HeaderProps): VNode {
     const firstFocusableElementRef = useRef<HTMLAnchorElement>();
     const startFocusPlaceholderRef = useRef<HTMLDivElement>();
     const endFocusPlaceholderRef = useRef<HTMLDivElement>();
+
+    const {
+        stickyState: menuStickyToggleState,
+        elRefCb: menuStickyMeasureRef,
+    } = useSticky({
+        useNativeSticky: false,
+        calculateHeight: false,
+    });
 
     const isMovingFocusManuallyRef = useRef(false);
     function manuallySetFocus(element: HTMLElement): void {
@@ -77,7 +93,10 @@ export function Header({ enableMenu }: HeaderProps): VNode {
 
     const isNodePartOfComponent = (node: Node) => {
         return (
-            headerRef.current.contains(node) || menuRef.current.contains(node)
+            headerRef.current.contains(node) ||
+            menuRef.current.contains(node) ||
+            // In case the sticky one is being shown.
+            node === toggleButtonRef.current
         );
     };
 
@@ -86,13 +105,17 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         shouldIgnoreChangedFocus: isNodePartOfComponent,
         getStartFocusPlaceholder: () => startFocusPlaceholderRef.current,
         getEndFocusPlaceholder: () => endFocusPlaceholderRef.current,
-        setFocusStart: () => manuallySetFocus(firstFocusableElementRef.current),
-        setFocusEnd: () =>
-            manuallySetFocus(menuLinkRefs[menuLinkRefs.length - 1].current),
-        onFocusOutside: () =>
+        setFocusStart: () => {
+            manuallySetFocus(firstFocusableElementRef.current);
+        },
+        setFocusEnd: () => {
+            manuallySetFocus(menuLinkRefs[menuLinkRefs.length - 1].current);
+        },
+        onFocusOutside: () => {
             transitionMenuState(
                 FullScreenOverlayCloseWithoutSettingFocusTransitionType,
-            ),
+            );
+        },
     });
 
     if (isChromium) {
@@ -140,14 +163,48 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         window.history.state.idx !== 0;
 
-    const toggleButtonLabel = 'Toggle Navigation Menu';
-    const githubLinkLabel = 'Open GitHub Repository';
+    const showMenuStickyToggle =
+        menuStickyToggleState === UseStickyJsStickyActive && !isMenuOpen;
+
+    const previousShowMenuStickyToggle = usePrevious(showMenuStickyToggle);
+    const toggleButtonOnSwitchShouldFocusRef = useRef(false);
+    if (
+        previousShowMenuStickyToggle &&
+        previousShowMenuStickyToggle.value !== showMenuStickyToggle &&
+        document.activeElement === toggleButtonRef.current
+    ) {
+        toggleButtonOnSwitchShouldFocusRef.current = true;
+    }
+    useLayoutEffect(() => {
+        if (toggleButtonOnSwitchShouldFocusRef.current) {
+            requestAnimationFrame(() => {
+                toggleButtonOnSwitchShouldFocusRef.current = false;
+                toggleButtonRef.current.focus();
+            });
+        }
+    });
+
+    const previousIsMenuOpen = usePrevious(isMenuOpen);
+    const previousScrollTopRef = useRef(0);
+    if ((!previousIsMenuOpen || !previousIsMenuOpen.value) && isMenuOpen) {
+        previousScrollTopRef.current =
+            (window.pageYOffset || document.documentElement.scrollTop) -
+            (document.documentElement.clientTop || 0);
+        console.log('new value', previousScrollTopRef.current);
+    }
+    useLayoutEffect(() => {
+        if (isMenuOpen) {
+            window.scrollTo(0, 0);
+        } else {
+            window.scrollTo(0, previousScrollTopRef.current);
+        }
+    }, [isMenuOpen]);
 
     return (
         <Fragment>
             <div
                 ref={startFocusPlaceholderRef}
-                tabIndex={isMenuOpen ? 0 : undefined}
+                tabIndex={isMenuOpen ? 0 : -1}
             />
             <header role="banner" class="cls-header" ref={headerRef}>
                 <div class="cls-header__contents">
@@ -308,29 +365,54 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                         : '')
                                 }
                                 type="button"
+                                tabIndex={showMenuStickyToggle ? -1 : 0}
+                                disabled={showMenuStickyToggle}
+                                aria-hidden={showMenuStickyToggle}
                                 aria-expanded={isMenuOpen}
                                 aria-label={toggleButtonLabel}
-                                tabIndex={0}
                                 title={toggleButtonLabel}
                                 onClick={onToggleButtonClick}
-                                ref={toggleButtonRef}
+                                ref={
+                                    showMenuStickyToggle
+                                        ? undefined
+                                        : toggleButtonRef
+                                }
                             >
-                                <svg
+                                <ToggleButtonSvg
                                     class="cls-header__nav__icon cls-header__nav__icon--menu"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <title>{toggleButtonLabel}</title>
-                                    {isMenuOpen ? (
-                                        <path d="M4,18h11c0.55,0,1-0.45,1-1v0c0-0.55-0.45-1-1-1H4c-0.55,0-1,0.45-1,1v0C3,17.55,3.45,18,4,18z M4,13h8c0.55,0,1-0.45,1-1v0 c0-0.55-0.45-1-1-1H4c-0.55,0-1,0.45-1,1v0C3,12.55,3.45,13,4,13z M3,7L3,7c0,0.55,0.45,1,1,1h11c0.55,0,1-0.45,1-1v0 c0-0.55-0.45-1-1-1H4C3.45,6,3,6.45,3,7z M20.3,14.88L17.42,12l2.88-2.88c0.39-0.39,0.39-1.02,0-1.41l0,0 c-0.39-0.39-1.02-0.39-1.41,0l-3.59,3.59c-0.39,0.39-0.39,1.02,0,1.41l3.59,3.59c0.39,0.39,1.02,0.39,1.41,0l0,0 C20.68,15.91,20.69,15.27,20.3,14.88z" />
-                                    ) : (
-                                        <path d="M4 18h16c.55 0 1-.45 1-1s-.45-1-1-1H4c-.55 0-1 .45-1 1s.45 1 1 1zm0-5h16c.55 0 1-.45 1-1s-.45-1-1-1H4c-.55 0-1 .45-1 1s.45 1 1 1zM3 7c0 .55.45 1 1 1h16c.55 0 1-.45 1-1s-.45-1-1-1H4c-.55 0-1 .45-1 1z" />
-                                    )}
-                                </svg>
+                                    isMenuOpen={isMenuOpen}
+                                />
                             </button>
                         </div>
                     </div>
                 </div>
             </header>
+            <span ref={menuStickyMeasureRef} />
+            <button
+                class={
+                    'cls-header__menu-toggle-button cls-header__sticky-menu-toggle-button' +
+                    (showMenuStickyToggle
+                        ? ' cls-header__sticky-menu-toggle-button--show'
+                        : '') +
+                    (enableMenu
+                        ? ' cls-header__menu-toggle-button--enabled'
+                        : '')
+                }
+                type="button"
+                tabIndex={showMenuStickyToggle ? 0 : -1}
+                disabled={!showMenuStickyToggle}
+                aria-hidden={!showMenuStickyToggle}
+                aria-expanded={isMenuOpen}
+                aria-label={toggleButtonLabel}
+                title={toggleButtonLabel}
+                onClick={onToggleButtonClick}
+                ref={showMenuStickyToggle ? toggleButtonRef : undefined}
+            >
+                <ToggleButtonSvg
+                    class="cls-header__sticky-menu-toggle-button__icon"
+                    isMenuOpen={isMenuOpen}
+                />
+            </button>
             <aside
                 ref={menuRef}
                 class={
@@ -356,13 +438,32 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                         isMovingFocusManuallyRef={isMovingFocusManuallyRef}
                         fixLinkChromiumFocus={fixChromiumFocus}
                         linkRefs={menuLinkRefs}
+                        fixChromiumFocus={fixChromiumFocusContainer}
                     />
                 </div>
             </aside>
-            <div
-                ref={endFocusPlaceholderRef}
-                tabIndex={isMenuOpen ? 0 : undefined}
-            />
+            <div ref={endFocusPlaceholderRef} tabIndex={isMenuOpen ? 0 : -1} />
         </Fragment>
+    );
+}
+
+interface ToggleButtonSvgProps {
+    class: string;
+    isMenuOpen: boolean;
+}
+
+function ToggleButtonSvg({
+    class: className,
+    isMenuOpen,
+}: ToggleButtonSvgProps): VNode {
+    return (
+        <svg class={className} viewBox="0 0 24 24">
+            <title>{toggleButtonLabel}</title>
+            {isMenuOpen ? (
+                <path d="M4,18h11c0.55,0,1-0.45,1-1v0c0-0.55-0.45-1-1-1H4c-0.55,0-1,0.45-1,1v0C3,17.55,3.45,18,4,18z M4,13h8c0.55,0,1-0.45,1-1v0 c0-0.55-0.45-1-1-1H4c-0.55,0-1,0.45-1,1v0C3,12.55,3.45,13,4,13z M3,7L3,7c0,0.55,0.45,1,1,1h11c0.55,0,1-0.45,1-1v0 c0-0.55-0.45-1-1-1H4C3.45,6,3,6.45,3,7z M20.3,14.88L17.42,12l2.88-2.88c0.39-0.39,0.39-1.02,0-1.41l0,0 c-0.39-0.39-1.02-0.39-1.41,0l-3.59,3.59c-0.39,0.39-0.39,1.02,0,1.41l3.59,3.59c0.39,0.39,1.02,0.39,1.41,0l0,0 C20.68,15.91,20.69,15.27,20.3,14.88z" />
+            ) : (
+                <path d="M4 18h16c.55 0 1-.45 1-1s-.45-1-1-1H4c-.55 0-1 .45-1 1s.45 1 1 1zm0-5h16c.55 0 1-.45 1-1s-.45-1-1-1H4c-.55 0-1 .45-1 1s.45 1 1 1zM3 7c0 .55.45 1 1 1h16c.55 0 1-.45 1-1s-.45-1-1-1H4c-.55 0-1 .45-1 1z" />
+            )}
+        </svg>
     );
 }

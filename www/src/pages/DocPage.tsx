@@ -160,7 +160,14 @@ function TableOfContentsList({
                 linkRefs[linkIndexBox[0]] = useRef();
                 linkTexts[linkIndexBox[0]] = text;
                 return (
-                    <li class="cls-doc-page__sidebar__table-of-contents__item">
+                    <li
+                        class={
+                            'cls-doc-page__sidebar__table-of-contents__item' +
+                            (nestedReferences
+                                ? ' cls-doc-page__sidebar__table-of-contents__item--has-nested-references'
+                                : '')
+                        }
+                    >
                         <DocPageLink
                             class={
                                 'cls-doc-page__sidebar__table-of-contents__item__main-reference' +

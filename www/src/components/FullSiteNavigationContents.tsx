@@ -1,5 +1,5 @@
 import { h, Fragment, VNode } from 'preact';
-import { useRef } from 'preact/hooks';
+import { StateUpdater, useRef } from 'preact/hooks';
 import { getGithubUrl, getPagesMetadata } from '../data/docPages';
 import {
     BindKeys,
@@ -15,6 +15,7 @@ export interface FullSiteNavigationContentsProps {
     isMovingFocusManuallyRef?: { current: boolean };
     fixLinkChromiumFocus?: boolean;
     linkRefs?: { current: HTMLAnchorElement }[];
+    fixChromiumFocus?: [boolean, StateUpdater<boolean>];
 }
 
 const { pageIdToPageTitle, pageGroups } = getPagesMetadata();
@@ -28,6 +29,7 @@ export function FullSiteNavigationContents({
     getAllowSingleLetterKeyLinkJumpShortcut,
     fixLinkChromiumFocus: fixLinkChromiumFocusProp,
     linkRefs = [],
+    fixChromiumFocus: fixChromiumFocusParam,
 }: FullSiteNavigationContentsProps): VNode {
     const linkTexts: string[] = [];
     pageGroups.forEach((pageGroup) => {
@@ -48,6 +50,7 @@ export function FullSiteNavigationContents({
         linkTexts,
         getAllowSingleLetterKeyLinkJumpShortcut,
         isMovingFocusManuallyRef,
+        fixChromiumFocus: fixChromiumFocusParam,
     });
 
     let linkIndex = 0;

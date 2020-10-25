@@ -113,7 +113,6 @@ export function App(props: AppProps): VNode {
         <Fragment>
             <a
                 class="cls-skip-link"
-                tabIndex={0}
                 href="#main"
                 alt=""
                 onClick={onSkipLinkClick}

@@ -135,8 +135,9 @@ table {
 
 $size-small: 700px;
 $size-show-menu: 840px;
-$size-show-table-of-contents: 1100px;
+$size-sidebar-right: 1100px;
 $z-index-skip-link: 1;
+$z-index-sticky-menu-toggle-button: 1;
 $main-text-size: 16px;
 $spacing: 0.8 * $main-text-size;
 $text-color: #000;
@@ -151,6 +152,8 @@ $header-border-height: 1px;
 *::before,
 *::after {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 html {
@@ -163,8 +166,6 @@ html {
 
 html,
 body {
-    margin: 0;
-    padding: 0;
     letter-spacing: 0.025em;
     text-size-adjust: none;
     line-height: 1.7;
@@ -429,6 +430,42 @@ $content-link-hover-color: $text-color;
             }
         }
     }
+
+    &__sticky-menu-toggle-button {
+        position: fixed;
+        $padding: $spacing/2;
+        $size: 24px;
+        bottom: $spacing - $padding;
+        right: $spacing - $padding;
+        height: $size + $padding * 2;
+        width: $size + $padding * 2;
+        z-index: $z-index-sticky-menu-toggle-button;
+        cursor: pointer;
+        background-color: transparent;
+        transform: translateY(4px);
+        $transition: 0.1s ease-out;
+        $transition-out-type: ease-out;
+        transition: background-color $transition, transform $transition;
+
+        &--show {
+            background-color: rgba(255, 255, 255, 0.7);
+            transform: translateY(0);
+        }
+
+        &__icon {
+            box-sizing: content-box;
+            padding: $padding;
+            opacity: 0;
+            fill: $text-color;
+            height: $size;
+            width: $size;
+            transition: opacity $transition;
+        }
+
+        &--show &__icon {
+            opacity: 1;
+        }
+    }
 }
 
 .cls-menu {
@@ -440,8 +477,8 @@ $content-link-hover-color: $text-color;
 
         & ~ .cls-page {
             position: absolute;
-            top: -9999px;
-            left: -9999px;
+            top: -99999px;
+            left: -99999px;
         }
     }
 
@@ -459,6 +496,10 @@ $content-link-hover-color: $text-color;
         width: 100%;
         max-width: $max-width;
         padding: $spacing;
+
+        @media screen and (min-width: $size-show-menu) {
+            padding: $spacing * 2;
+        }
     }
 }
 
@@ -571,6 +612,11 @@ $content-link-hover-color: $text-color;
         max-width: $max-width;
         margin-left: auto;
         margin-right: auto;
+        padding: 0 $spacing;
+
+        @media screen and (max-width: $size-show-menu) {
+            padding: 0;
+        }
     }
 
     &__sidebar {
@@ -583,6 +629,7 @@ $content-link-hover-color: $text-color;
         width: $width-old-browser;
         width: $width-new-browser;
         padding: $spacing * 2;
+        padding-left: $spacing;
         overflow-y: auto;
         margin-right: $spacing;
 
@@ -634,26 +681,27 @@ $content-link-hover-color: $text-color;
 
 .cls-doc-page {
     margin-top: $spacing/2;
-    padding-right: $spacing * 2;
-
-    @media screen and (max-width: $size-show-menu) {
-        padding-right: $spacing;
-    }
+    padding-right: 0;
 
     &__content {
         display: flex;
         flex-direction: row-reverse;
     }
 
-    $title-spacing-bottom: 40px;
+    $title-spacing-bottom: 25px;
 
     &__main {
         flex-grow: 1;
         padding-top: $title-spacing-bottom;
+        padding-right: $spacing;
+
+        @media screen and (min-width: $size-sidebar-right) {
+            padding-right: 0;
+        }
     }
 
     $min-sidebar-width: 260px;
-    $max-sidebar-width: 300px;
+    $max-sidebar-width: 400px;
     $non-native-sticky-support-sidebar-width: (
             $min-sidebar-width + $max-sidebar-width
         )/2;
@@ -667,7 +715,7 @@ $content-link-hover-color: $text-color;
             width: $non-native-sticky-support-sidebar-width;
         }
 
-        @media screen and (max-width: $size-show-table-of-contents) {
+        @media screen and (max-width: $size-sidebar-right) {
             display: none;
         }
     }
@@ -677,8 +725,10 @@ $content-link-hover-color: $text-color;
         width: $non-native-sticky-support-sidebar-width;
         margin-top: $title-spacing-bottom - $sidebar-padding;
         padding: $sidebar-padding;
-        padding-left: $spacing * 4;
+        padding-left: $spacing * 6;
+        padding-right: $spacing;
         overflow-y: auto;
+        scrollbar-width: thin;
 
         &--js-sticky-active {
             @include sticky-sidebar--js-sticky-active;
@@ -688,13 +738,14 @@ $content-link-hover-color: $text-color;
 
         @include supports-sticky {
             position: sticky;
+            width: auto;
             min-width: $min-sidebar-width;
             max-width: $max-sidebar-width;
             max-height: 100vh;
             top: 0;
         }
 
-        @media screen and (max-width: $size-show-table-of-contents) {
+        @media screen and (max-width: $size-sidebar-right) {
             display: none;
         }
 
@@ -707,8 +758,14 @@ $content-link-hover-color: $text-color;
         &__table-of-contents {
             &__item {
                 $indent: $spacing * 2;
-                padding: $spacing/3 0;
+                padding: $spacing/5 0;
                 margin-left: $indent;
+                font-size: 14px;
+                text-decoration: underline;
+
+                &--has-nested-references {
+                    padding: $spacing/2 0;
+                }
 
                 &:last-child {
                     padding-bottom: 0;
