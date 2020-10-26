@@ -190,7 +190,6 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         previousScrollTopRef.current =
             (window.pageYOffset || document.documentElement.scrollTop) -
             (document.documentElement.clientTop || 0);
-        console.log('new value', previousScrollTopRef.current);
     }
     useLayoutEffect(() => {
         if (isMenuOpen) {
