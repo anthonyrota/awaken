@@ -687,6 +687,11 @@ $content-link-hover-color: $text-color;
         flex-grow: 1;
         padding-top: $title-spacing-bottom;
         padding-right: $spacing;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-all;
+        word-break: break-word;
+        hyphens: auto;
 
         @media screen and (min-width: $size-sidebar-right) {
             padding-right: 0;
@@ -846,12 +851,13 @@ $content-link-hover-color: $text-color;
     &-rich-code-block {
         font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono,
             Oxygen Mono, Liberation Mono, monospace;
-        font-size: 1em;
+        font-size: 14px;
         white-space: pre-wrap;
         overflow-wrap: break-word;
         word-wrap: break-word;
         word-break: break-all;
         word-break: break-word;
+        hyphens: none;
         // max-width: 100%;
     }
 
