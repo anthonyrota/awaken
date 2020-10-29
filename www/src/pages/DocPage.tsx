@@ -3,6 +3,7 @@ import { useRef } from 'preact/hooks';
 import { DeepCoreNode } from '../../script/docs/core/nodes';
 import { PageNode } from '../../script/docs/core/nodes/Page';
 import { TableOfContentsMainReference } from '../../script/docs/types';
+import { DeepCoreNodeComponent } from '../components/DeepCoreNode';
 import { DocPageLink } from '../components/DocPageLink';
 import { getPagesMetadata, ResponseDoneType } from '../data/docPages';
 import { DocumentTitle } from '../Head';
@@ -55,25 +56,8 @@ function DocPageContent({ mainRef, page }: DocPageContentProps): VNode {
             <div class="cls-doc-page__content">
                 <DocPageSidebar page={page} />
                 <main class="cls-doc-page__main" ref={mainRef}>
-                    {Array.from({ length: 10 }, () => (
-                        <p>
-                            {Array.from(
-                                {
-                                    length:
-                                        Math.floor(Math.random() * 300) + 150,
-                                },
-                                () =>
-                                    [
-                                        'foo',
-                                        'bar',
-                                        'baz',
-                                        'lorem',
-                                        'ipsum',
-                                        'cat',
-                                        'dog',
-                                    ][Math.floor(Math.random() * 7)],
-                            ).join(' ')}
-                        </p>
+                    {page.children.map((childNode) => (
+                        <DeepCoreNodeComponent node={childNode} />
                     ))}
                 </main>
             </div>

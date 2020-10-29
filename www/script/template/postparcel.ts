@@ -176,7 +176,7 @@ async function fixParcelBuild(): Promise<void> {
                 const sortedClassNames = [...classNames];
                 sortedClassNames.sort();
                 sortedClassNames.forEach((className, i) => {
-                    if (!/^cls-[a-zA-Z_-]+$/.test(className)) {
+                    if (!/^cls-[a-zA-Z0-9_-]+$/.test(className)) {
                         throw new Error(`Invalid CSS class name ${className}`);
                     }
                     classNameMapping.set(className, numberToLetters(i + 1));
@@ -215,7 +215,7 @@ async function fixParcelBuild(): Promise<void> {
         const { classNameMapping } = await cssTransformP;
         classNameMapping.forEach((minifiedClassName, originalClassName) => {
             scriptJsText = scriptJsText.replace(
-                new RegExp(originalClassName + '(?=[^a-zA-Z_-])', 'g'),
+                new RegExp(originalClassName + '(?=[^a-zA-Z0-9_-])', 'g'),
                 minifiedClassName,
             );
         });

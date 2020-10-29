@@ -2,6 +2,7 @@ import { h, Fragment, VNode } from 'preact';
 import { useLayoutEffect, useRef } from 'preact/hooks';
 import { FullSiteNavigationContents } from './components/FullSiteNavigationContents';
 import { Header } from './components/Header';
+import { memo } from './components/memo';
 import {
     getPagesMetadata,
     ResponseLoadingType,
@@ -40,10 +41,8 @@ function setFocusBefore(element?: ChildNode): void {
         });
     }
 
-    if (element) {
-        if (element instanceof Element) {
-            element.scrollIntoView();
-        }
+    if (element && element instanceof Element) {
+        element.scrollIntoView();
     } else {
         window.scrollTo(0, 0);
     }
@@ -159,7 +158,6 @@ interface AppPathProps extends AppPathBaseProps {
     pathname: string;
     isDuplicateRender: boolean;
 }
-
 function AppPath({
     mainRef,
     pathname,
@@ -179,7 +177,7 @@ function AppPath({
         }
 
         if (location.hash) {
-            const element = document.getElementById(location.hash);
+            const element = document.getElementById(location.hash.slice(1));
             if (element) {
                 setFocusBefore(element);
                 return;
@@ -190,14 +188,27 @@ function AppPath({
         setFocusBefore();
     }, [location, isDuplicateRender]);
 
-    if (pathname === '/') {
-        return <IndexPage mainRef={mainRef} />;
-    }
-
-    const pageId = getPageIdFromPathname(pathname);
-    if (pageId !== undefined) {
-        return <DocPage mainRef={mainRef} pageId={pageId} key={pageId} />;
-    }
-
-    return <NotFoundPage mainRef={mainRef} />;
+    return <AppPathContent mainRef={mainRef} pathname={pathname} />;
 }
+
+interface AppPathContentProps extends AppPathBaseProps {
+    pathname: string;
+}
+
+const AppPathContent = memo(
+    function AppPathContent({ mainRef, pathname }: AppPathContentProps): VNode {
+        if (pathname === '/') {
+            return <IndexPage mainRef={mainRef} />;
+        }
+
+        const pageId = getPageIdFromPathname(pathname);
+        if (pageId !== undefined) {
+            return <DocPage mainRef={mainRef} pageId={pageId} key={pageId} />;
+        }
+
+        return <NotFoundPage mainRef={mainRef} />;
+    },
+    (previousProps, currentProps) =>
+        previousProps.pathname !== currentProps.pathname ||
+        previousProps.mainRef !== currentProps.mainRef,
+);
