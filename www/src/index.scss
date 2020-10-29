@@ -730,6 +730,9 @@ $content-link-hover-color: $text-color;
         padding-right: $spacing * 2;
         overflow-y: auto;
         scrollbar-width: thin;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
 
         &--js-sticky-active {
             @include sticky-sidebar--js-sticky-active;
@@ -845,7 +848,11 @@ $content-link-hover-color: $text-color;
             Oxygen Mono, Liberation Mono, monospace;
         font-size: 1em;
         white-space: pre-wrap;
+        overflow-wrap: break-word;
         word-wrap: break-word;
+        word-break: break-all;
+        word-break: break-word;
+        // max-width: 100%;
     }
 
     &-code-span {
