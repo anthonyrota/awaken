@@ -11,12 +11,12 @@ import {
 export const getPagesMetadata = (): PagesMetadata =>
     global[globalPagesMetadataKey] as PagesMetadata;
 
-export const getGithubUrl = (subpath?: string): string => {
+export const getGithubUrl = (subPath?: string): string => {
     const { github } = getPagesMetadata();
-    return subpath !== undefined
+    return subPath !== undefined
         ? github
-            ? `https://github.com/${github.org}/${github.repo}/blob/${github.sha}/${subpath}`
-            : `https://github.com/anthonyrota/microstream/blob/master/${subpath}`
+            ? `https://github.com/${github.org}/${github.repo}/blob/${github.sha}/${subPath}`
+            : `https://github.com/anthonyrota/microstream/blob/master/${subPath}`
         : github
         ? `https://github.com/${github.org}/${github.repo}/tree/${github.sha}`
         : 'https://github.com/anthonyrota/microstream';
