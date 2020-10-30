@@ -14,7 +14,7 @@ consumption of event sources.
 ## Motivation {#motivation}
 
 A fundamental part of programming which we use in many of the tasks we come
-across is the **manipulation and transformation of lists/streams of data**.
+across is the manipulation and transformation of lists/streams of data.
 There are various existing built-in patterns we use when programming to handle
 such lists of data and events.
 
@@ -25,18 +25,18 @@ methods, including `filter`, `map` and `reduce`.
 
 ### Iterators
 
-When the data is **continuously generated** or the shape of the list is **not
-known ahead of time**, we may go to using [Iterators][iterator]. The values of
-an iterator can be *pulled* by a consumer *on demand* through the `.next()`
+When the data is continuously generated or the shape of the list is not
+known ahead of time, we may go to using [Iterators][iterator]. The values of
+an iterator can be pulled by a consumer on demand through the `.next()`
 method.
 
 [iterator]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators
 
 ### Asynchronous Iterators
 
-When we start dealing with **asynchronous lists of data** the problem becomes
+When we start dealing with asynchronous lists of data the problem becomes
 more complicated, and we can sometimes resort to using
-[async iterators][async iterator] instead which we can once again *pull* data
+[async iterators][async iterator] instead which we can once again pull data
 from.
 
 [async iterator]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for-await...of
@@ -47,25 +47,25 @@ While these previously described solutions are perfectly suitable for many
 scenarios, the problem with them is that the transformation of such iterators
 (both synchronous and asynchronous), combined with the managing of their
 associated subscriptions (for example, cleaning up every event listener you
-subscribed to, or closing all of the files you opened a connection to) **can
+subscribed to, or closing all of the files you opened a connection to) can
 easily become difficult to manage and can grow out of control easily without a
-solid framework to build around**.
+solid framework to build around.
 
 As well as this, the problem becomes much more complicated when we introduce
-lists of data (potentially asynchronous) which *cannot be pulled from* (ie. they
+lists of data (potentially asynchronous) which cannot be pulled from (ie. they
 cannot be accessed on demand, eg. a stream containing the coordinates of mouse
 movements — the user controls them, not the programmer). In this case the
 production / creation of the data cannot be strictly controlled by us. This is
-where the concept of **reactive programming** comes in to play, and is the
+where the concept of reactive programming comes in to play, and is the
 problem that {{LibName}} aims to solve, by providing an easy way to manage,
 transform, and subscribe to created streams of events.
 
 ### Reactive Programming
 
 Reactive programming with {{LibName}} provides a few new primary data
-structures: the **Source**, which describes both synchronous and asynchronous
-streams of events, the **Sink**, which is used to subscribe to sources, and the
-**Operator**, allowing for the aggregation and transformation of sources.
+structures: the Source, which describes both synchronous and asynchronous
+streams of events, the Sink, which is used to subscribe to sources, and the
+Operator, allowing for the aggregation and transformation of sources.
 
 This allows us to transform collections of complicated asynchronous events as
 simply as we would filter the values in an array.
@@ -102,7 +102,7 @@ a simple way to manage sequences of events.
 
    > <details>
    >
-   > <summary>1. <a href="#lodash-quote-footnote-link" name="lodash-quote-footnote">^</a></summary><br>
+   > <summary>1. <a href="#lodash-quote-footnote-link" name="lodash-quote-footnote">^</a></summary>
    >
    > This quote is shamelessly stolen from the RxJS documentation. The original
    > quote had RxJS instead of {{LibName}}... Sorry! I couldn't resist.
@@ -115,15 +115,15 @@ a simple way to manage sequences of events.
 
 ### Why use Reactive Programming?
 
-When programming, we often come across situations where we have to **subscribe to
-and transform sequences of events out of our control** (a classic example being
+When programming, we often come across situations where we have to subscribe to
+and transform sequences of events out of our control (a classic example being
 when you need to react to a sequence of user keystrokes in a text input in order
 to build a typeahead). Managing all of the subscriptions and data sources, the
 relationship between them, their transformation and their cleanup / disposal can
-**quickly become complicated and turn our code into a mess of spaghetti which
-can become hard to deal with using traditional programming techniques**.
+quickly become complicated and turn our code into a mess of spaghetti which
+can become hard to deal with using traditional programming techniques.
 
-This is where *reactive programming* shines. We implement the Reactive
+This is where reactive programming shines. We implement the Reactive
 Programming paradigm through the following core types:
 
 - **`Source`** - represents a series of future events which can be subscribed
@@ -142,19 +142,19 @@ Programming paradigm through the following core types:
 - **`ScheduleFunction`** - used to schedule events and in general callbacks (for
   example, to tell a source to emit an event every 100ms).
 
-These structures all combine to allow for the **easy creation, transformation /
-composition, and subscription to event streams**. The 100+ operators we provide
+These structures all combine to allow for the easy creation, transformation /
+composition, and subscription to event streams. The 100+ operators we provide
 allow for you to efficiently filter, aggregate, transform and compose sources of
 events, and much more.
 
 Using reactive programming with {{LibName}} has the following advantages:
 
-- {{LibName}} provides a model to **drastically simplify dealing with
-  asynchronous data**.
+- {{LibName}} provides a model to drastically simplify dealing with
+  asynchronous data.
 - {{LibName}} allows your code, which handles complex ideas (such as the
-  transformation and aggregation of different streams of events), to **remain
-  readable and understandable** to both you and others.
-- {{LibName}} **simplifies the cleanup and disposal of the subscriptions used**
+  transformation and aggregation of different streams of events), to remain
+  readable and understandable to both you and others.
+- {{LibName}} simplifies the cleanup and disposal of the subscriptions used
   (eg. cleaning up open files, event listeners, etc.), which in the majority of
   cases is done automatically upon unsubscription.
 
@@ -177,7 +177,7 @@ readability of your code and thereby reducing the risk to bugs.
 ### Composability
 
 Using existing solutions such as chains of promises, event emitters and/or
-simply callbacks may be straightforward for *very* simple operations, but they
+simply callbacks may be straightforward for very simple operations, but they
 quickly become non-trivial and complex when their usage is nested or extended to
 more complex situations and interactions.
 
@@ -186,7 +186,7 @@ compose and aggregate such streams of events in a simple and effective manner
 while keeping track of their subscriptions and automatically cleaning them up
 upon unsubscription.
 
-This is an area in which {{LibName}} *shines*, as it is **intended** for
+This is an area in which {{LibName}} shines, as it is intended for
 composing sequences of asynchronous data while abstracting away the cleanup of
 all side effects involved in creating the source of data so that in most cases
 you don't even have to think about it.
@@ -194,30 +194,30 @@ you don't even have to think about it.
 ### Flexibility
 
 {{LibName}} Sources are not just built for the streaming of singular values
-(although they can very well be used for that purpose), but are also **used for
-the streaming of multiple or even infinite values**.
+(although they can very well be used for that purpose), but are also used for
+the streaming of multiple or even infinite values.
 
-Similarly, Sources can not only be used for **synchronous streams of data**, but
-can also be used for **asynchronous streams of data** (such as intervals, or
+Similarly, Sources can not only be used for synchronous streams of data, but
+can also be used for asynchronous streams of data (such as intervals, or
 user interactions).
 
 Sources also allow for not just the transformation of values (described as
-"Push") events, but also allow for the **transformation of emitted error and
-complete events**, allowing for situations such as the recovery from such errors
+"Push") events, but also allow for the transformation of emitted error and
+complete events, allowing for situations such as the recovery from such errors
 (eg. retrying network requests), as well as for example the repetition of a
 given source upon completion.
 
 ### Declarative
 
 While traditional bare-bones callback solutions to streams of events are highly
-imperative, Sources are **inherently declarative and abstract away the handling
-of the underlying subscriptions** used to create the data source.
+imperative, Sources are inherently declarative and abstract away the handling
+of the underlying subscriptions used to create the data source.
 
 <!-- TODO: add example(s), eg. imperative vs declarative typeahead -->
 
 ### Tiny Bundle Size
 
-We wouldn't be able to use the word *micro* in the name of our library if it
+We wouldn't be able to use the word micro in the name of our library if it
 wasn't for {{LibName}}'s absurdly tiny bundle size.
 
 The current version of `{{LibCoreImportPath}}` is
@@ -234,7 +234,7 @@ functionality are all significantly larger in size.
    > <details>
    >
    > <summary>2. <a href="#how-is-size-calculated-footnote-link" name="how-is-size-calculated-footnote">^</a>
-   > How is the size calculated?</summary><br>
+   > How is the size calculated?</summary>
    >
    > The size of this library is calculated as the size of the entire es5
    > transpiled and minified version of `{{LibCoreImportPath}}`'s es-module code
