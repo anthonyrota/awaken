@@ -25,20 +25,17 @@ import { NotFoundPage } from './pages/NotFoundPage';
 function setFocusBefore(element?: ChildNode): void {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const parentEl = element ? element.parentElement! : document.body;
-    const tempDiv = document.createElement('div');
-    tempDiv.setAttribute('tabindex', '0');
-    parentEl.insertBefore(tempDiv, element || document.body.firstChild);
-    tempDiv.focus();
-    parentEl.removeChild(tempDiv);
+    const tempSpan = document.createElement('span');
+    tempSpan.setAttribute('tabindex', '0');
+    parentEl.insertBefore(tempSpan, element || document.body.firstChild);
+    tempSpan.focus();
 
-    if (element && document.activeElement === document.body) {
-        // There are no focusable elements >= the element and so the browser
-        // reset the page's focus when tempDiv was removed.
-        parentEl.insertBefore(tempDiv, element);
-        tempDiv.focus();
-        tempDiv.addEventListener('focusout', () => {
-            parentEl.removeChild(tempDiv);
+    if (element) {
+        tempSpan.addEventListener('focusout', () => {
+            parentEl.removeChild(tempSpan);
         });
+    } else {
+        parentEl.removeChild(tempSpan);
     }
 
     if (element && element instanceof Element) {
