@@ -8,7 +8,11 @@ import {
     FullScreenOverlayCloseWithSettingFocusTransitionType,
     FullScreenOverlayCloseWithoutSettingFocusTransitionType,
 } from '../hooks/useFullScreenOverlayState';
-import { customHistory, usePath } from '../hooks/useHistory';
+import {
+    customHistory,
+    usePath,
+    whileIgnoringChange,
+} from '../hooks/useHistory';
 import {
     BindKeysNoRequireFocus,
     NoBindKeys,
@@ -18,6 +22,7 @@ import { usePrevious } from '../hooks/usePrevious';
 import { useResetFixChromiumFocus } from '../hooks/useResetFixChromiumFocus';
 import { useSticky, UseStickyJsStickyActive } from '../hooks/useSticky';
 import { useTrapFocus } from '../hooks/useTrapFocus';
+import { getScrollTop } from '../util/getScrollTop';
 import { DocPageLink } from './DocPageLink';
 import { FullSiteNavigationContents } from './FullSiteNavigationContents';
 import { Link, isStringActivePath, isDocPageIdActivePath } from './Link';
@@ -68,6 +73,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         isOpen: isMenuOpen,
         getIsOpen: getIsMenuOpen,
         transitionState: transitionMenuState,
+        getTransitionType: getMenuTransitionType,
     } = useFullScreenOverlayState({
         setFocusOnOpen: () => manuallySetFocus(menuLinkRefs[0].current),
         setFocusOnClose: () => manuallySetFocus(toggleButtonRef.current),
@@ -75,7 +81,6 @@ export function Header({ enableMenu }: HeaderProps): VNode {
 
     const path = usePath();
     const previousPath = usePrevious(path);
-
     if (previousPath && previousPath.value !== path) {
         previousPath.value = path;
         transitionMenuState(
@@ -187,16 +192,45 @@ export function Header({ enableMenu }: HeaderProps): VNode {
     const previousIsMenuOpen = usePrevious(isMenuOpen);
     const previousScrollTopRef = useRef(0);
     if ((!previousIsMenuOpen || !previousIsMenuOpen.value) && isMenuOpen) {
-        previousScrollTopRef.current =
-            (window.pageYOffset || document.documentElement.scrollTop) -
-            (document.documentElement.clientTop || 0);
+        previousScrollTopRef.current = getScrollTop();
     }
-    useLayoutEffect(() => {
+    useLayoutEffect((): (() => void) | void => {
         if (isMenuOpen) {
+            whileIgnoringChange(() => {
+                customHistory.replace(customHistory.location, {
+                    beforeMenuOpenScrollTop: previousScrollTopRef.current,
+                });
+            });
             window.scrollTo(0, 0);
-        } else {
+            let mql: MediaQueryList | null = window.matchMedia(
+                'screen and (max-width: 840px)',
+            );
+            const listener = () => {
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                if (!mql!.matches && !enableMenu) {
+                    transitionMenuState(
+                        FullScreenOverlayCloseWithSettingFocusTransitionType,
+                    );
+                }
+            };
+            mql.addEventListener('change', listener);
+            return () => {
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                mql!.removeEventListener('change', listener);
+                mql = null;
+            };
+        }
+        if (
+            getMenuTransitionType() ===
+            FullScreenOverlayCloseWithSettingFocusTransitionType
+        ) {
             window.scrollTo(0, previousScrollTopRef.current);
         }
+        whileIgnoringChange(() => {
+            customHistory.replace(customHistory.location, null);
+        });
     }, [isMenuOpen]);
 
     return (

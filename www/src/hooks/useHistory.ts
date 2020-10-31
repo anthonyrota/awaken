@@ -1,8 +1,12 @@
-import { History, createBrowserHistory } from 'history';
+import { History, createBrowserHistory, Action } from 'history';
 import { useState, useEffect } from 'preact/hooks';
 import { isBrowser } from '../env';
 
-export let customHistory!: History;
+export type HistoryState = {
+    beforeMenuOpenScrollTop?: number;
+} | null;
+
+export let customHistory!: History<HistoryState>;
 if (isBrowser) {
     customHistory = createBrowserHistory();
 }
@@ -23,7 +27,13 @@ function endsWithExcessTrailingSlash(path: Path): boolean {
     );
 }
 
-let isRemovingTrailingSlash = false;
+let ignoreChange = false;
+export function whileIgnoringChange(cb: () => void) {
+    const before = ignoreChange;
+    ignoreChange = true;
+    cb();
+    ignoreChange = before;
+}
 
 function cleanTrailingSlash(path: Path, replace?: boolean): Path {
     if (!endsWithExcessTrailingSlash(path)) {
@@ -34,11 +44,11 @@ function cleanTrailingSlash(path: Path, replace?: boolean): Path {
         path = { ...path, pathname: path.pathname.slice(0, -1) };
     } while (endsWithExcessTrailingSlash(path));
 
-    isRemovingTrailingSlash = true;
     if (replace) {
-        customHistory.replace(path);
+        whileIgnoringChange(() => {
+            customHistory.replace(path);
+        });
     }
-    isRemovingTrailingSlash = false;
 
     return path;
 }
@@ -54,6 +64,7 @@ function normalizePath(path: Path, replace?: boolean): Path {
 
 export interface UseHistoryParams {
     path?: Path;
+    _watchOnly?: boolean;
 }
 
 export interface UseHistoryResult {
@@ -61,37 +72,40 @@ export interface UseHistoryResult {
 }
 
 export function useHistory(params: UseHistoryParams): UseHistoryResult {
-    const { 0: result, 1: setResult } = useState<UseHistoryResult>({
-        path: normalizePath(params.path || customHistory.location, true),
-    });
-
-    useEffect(() => {
-        return customHistory.listen(({ location }) => {
-            if (isRemovingTrailingSlash) {
-                return;
-            }
-            setResult({
-                path: normalizePath(location, true),
-            });
-        });
-    });
-
-    return result;
-}
-
-export function usePath(): Path {
     const { 0: path, 1: setPath } = useState(
-        normalizePath(customHistory.location),
+        normalizePath(params.path || customHistory.location, true),
     );
 
     useEffect(() => {
-        return customHistory.listen(({ location }) => {
-            if (isRemovingTrailingSlash) {
+        return customHistory.listen(({ location, action }) => {
+            if (ignoreChange) {
                 return;
             }
-            setPath(normalizePath(location));
+            setPath(normalizePath(location, !params._watchOnly));
+            if (
+                action === Action.Pop &&
+                location.state &&
+                location.state.beforeMenuOpenScrollTop !== undefined
+            ) {
+                const { beforeMenuOpenScrollTop: scrollTop } = location.state;
+                // TODO (hack: preact schedules on requestAnimationFrame).
+                requestAnimationFrame(() => {
+                    window.scrollTo(0, scrollTop);
+                    whileIgnoringChange(() => {
+                        customHistory.replace(customHistory.location, null);
+                    });
+                });
+            }
         });
     });
 
-    return path;
+    return {
+        path,
+    };
+}
+
+export function usePath(): Path {
+    return useHistory({
+        _watchOnly: true,
+    }).path;
 }

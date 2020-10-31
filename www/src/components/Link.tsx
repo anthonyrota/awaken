@@ -36,7 +36,10 @@ export function Link({
         event.stopPropagation();
         event.preventDefault();
         const newHref = parsePathDefaultingToEmptyString(href);
-        if (isActivePath(newHref)) {
+        if (
+            isActivePath(newHref) &&
+            newHref.hash === customHistory.location.hash
+        ) {
             customHistory.replace(newHref);
         } else {
             customHistory.push(newHref);

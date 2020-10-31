@@ -155,12 +155,13 @@ interface AppPathProps extends AppPathBaseProps {
     pathname: string;
     isDuplicateRender: boolean;
 }
+
 function AppPath({
     mainRef,
     pathname,
     isDuplicateRender,
 }: AppPathProps): VNode {
-    const { location } = customHistory;
+    const { hash } = customHistory.location;
     const isFirstRenderRef = useRef(true);
 
     useLayoutEffect(() => {
@@ -173,8 +174,8 @@ function AppPath({
             return;
         }
 
-        if (location.hash) {
-            const element = document.getElementById(location.hash.slice(1));
+        if (hash) {
+            const element = document.getElementById(hash.slice(1));
             if (element) {
                 setFocusBefore(element);
                 return;
@@ -183,7 +184,7 @@ function AppPath({
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         setFocusBefore();
-    }, [location, isDuplicateRender]);
+    }, [hash, isDuplicateRender]);
 
     return <AppPathContent mainRef={mainRef} pathname={pathname} />;
 }

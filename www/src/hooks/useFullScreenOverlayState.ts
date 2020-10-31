@@ -17,6 +17,7 @@ export interface UseFullScreenOverlayStateResult {
     isOpen: boolean;
     getIsOpen: () => boolean;
     transitionState: (transitionType: FullScreenOverlayTransitionType) => void;
+    getTransitionType: () => FullScreenOverlayTransitionType;
 }
 
 export function useFullScreenOverlayState({
@@ -53,5 +54,16 @@ export function useFullScreenOverlayState({
             return isOpen;
         },
         transitionState: setState,
+        getTransitionType: () => {
+            let transitionState: FullScreenOverlayTransitionType | undefined;
+            setState((state) => {
+                transitionState = state;
+                return state;
+            });
+            if (transitionState === undefined) {
+                throw new Error();
+            }
+            return transitionState;
+        },
     };
 }
