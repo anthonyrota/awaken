@@ -441,15 +441,14 @@ $content-link-hover-color: $text-color;
         width: $size + $padding * 2;
         z-index: $z-index-sticky-menu-toggle-button;
         cursor: pointer;
-        background-color: transparent;
+        background: transparent;
         transform: translateY(4px);
-        $transition: 0.1s ease-out;
-        $transition-out-type: ease-out;
-        transition: background-color $transition, transform $transition;
+        $transition: 0.1s ease;
+        transition: background $transition, transform $transition;
 
         &--show {
-            background-color: rgba(255, 255, 255, 0.7);
-            transform: translateY(0);
+            background: radial-gradient(circle, #fff 0%, transparent 70%);
+            transform: none;
         }
 
         &__icon {
