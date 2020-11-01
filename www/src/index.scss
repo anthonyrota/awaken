@@ -248,9 +248,10 @@ $content-link-hover-color: $text-color;
         position: relative;
         width: 100%;
         height: $header-height;
+        padding: 0 $spacing;
 
-        @media screen and (min-width: $size-show-menu) {
-            padding: 0 $spacing;
+        @media screen and (max-width: $size-show-menu) {
+            padding: 0;
         }
 
         &__container {
@@ -424,10 +425,14 @@ $content-link-hover-color: $text-color;
     }
 
     &__menu-toggle-button {
-        &:not(&--enabled) {
-            @media screen and (min-width: $size-show-menu) {
-                display: none;
-            }
+        display: none;
+
+        &--enabled {
+            display: flex;
+        }
+
+        @media screen and (max-width: $size-show-menu) {
+            display: flex;
         }
     }
 
@@ -494,10 +499,10 @@ $content-link-hover-color: $text-color;
     &__contents {
         width: 100%;
         max-width: $max-width;
-        padding: $spacing;
+        padding: $spacing * 2;
 
-        @media screen and (min-width: $size-show-menu) {
-            padding: $spacing * 2;
+        @media screen and (max-width: $size-show-menu) {
+            padding: $spacing;
         }
     }
 }
@@ -685,15 +690,16 @@ $content-link-hover-color: $text-color;
     &__main {
         flex-grow: 1;
         padding-top: $title-spacing-bottom;
-        padding-right: $spacing;
+        padding-right: 0;
+
         overflow-wrap: break-word;
         word-wrap: break-word;
         word-break: break-all;
         word-break: break-word;
         hyphens: auto;
 
-        @media screen and (min-width: $size-sidebar-right) {
-            padding-right: 0;
+        @media screen and (max-width: $size-sidebar-right) {
+            padding-right: $spacing;
         }
 
         > :first-child {

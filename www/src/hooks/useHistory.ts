@@ -87,10 +87,10 @@ export function useHistory(params: UseHistoryParams): UseHistoryResult {
                 location.state &&
                 location.state.beforeMenuOpenScrollTop !== undefined
             ) {
-                const { beforeMenuOpenScrollTop: scrollTop } = location.state;
+                const { beforeMenuOpenScrollTop } = location.state;
                 // TODO (hack: preact schedules on requestAnimationFrame).
                 requestAnimationFrame(() => {
-                    window.scrollTo(0, scrollTop);
+                    window.scrollTo(0, beforeMenuOpenScrollTop);
                     whileIgnoringChange(() => {
                         customHistory.replace(customHistory.location, null);
                     });

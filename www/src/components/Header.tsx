@@ -53,6 +53,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
     const firstFocusableElementRef = useRef<HTMLAnchorElement>();
     const startFocusPlaceholderRef = useRef<HTMLDivElement>();
     const endFocusPlaceholderRef = useRef<HTMLDivElement>();
+    const previousScrollTopRef = useRef(0);
 
     const {
         stickyState: menuStickyToggleState,
@@ -146,6 +147,14 @@ export function Header({ enableMenu }: HeaderProps): VNode {
             // Opening with click.
             setFixChromiumFocus(true);
         }
+        if (isMenuOpenAfterClick) {
+            previousScrollTopRef.current = getScrollTop();
+            whileIgnoringChange(() => {
+                customHistory.replace(customHistory.location, {
+                    beforeMenuOpenScrollTop: previousScrollTopRef.current,
+                });
+            });
+        }
         transitionMenuState(
             isMenuOpenAfterClick
                 ? FullScreenOverlayOpenTransitionType
@@ -189,18 +198,8 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         }
     });
 
-    const previousIsMenuOpen = usePrevious(isMenuOpen);
-    const previousScrollTopRef = useRef(0);
-    if ((!previousIsMenuOpen || !previousIsMenuOpen.value) && isMenuOpen) {
-        previousScrollTopRef.current = getScrollTop();
-    }
     useLayoutEffect((): (() => void) | void => {
         if (isMenuOpen) {
-            whileIgnoringChange(() => {
-                customHistory.replace(customHistory.location, {
-                    beforeMenuOpenScrollTop: previousScrollTopRef.current,
-                });
-            });
             window.scrollTo(0, 0);
             let mql: MediaQueryList | null = window.matchMedia(
                 'screen and (max-width: 840px)',
