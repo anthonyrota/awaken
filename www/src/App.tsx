@@ -184,7 +184,7 @@ function AppPath({
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         setFocusBefore();
-    }, [hash, isDuplicateRender]);
+    });
 
     return <AppPathContent mainRef={mainRef} pathname={pathname} />;
 }
