@@ -69,14 +69,6 @@ async function main() {
         apiModel.loadPackage(apiModelFilePath);
     }
 
-    const coreApiBasicsId = 'core--api--basics';
-    const coreApiSourcesId = 'core--api--sources';
-    const coreApiOperatorsId = 'core--api--operators';
-    const coreApiSubjectsId = 'core--api--subjects';
-    const coreApiScheduleFunctionsId = 'core--api--schedule-functions';
-    const coreApiUtilsId = 'core--api--utils';
-    const testingApiId = 'testing--api';
-
     function coreIdentifier(exportName: string): ExportIdentifier {
         return {
             packageName: '@microstream/core',
@@ -91,7 +83,7 @@ async function main() {
         };
     }
 
-    const coreBasicsExports: PageExports = [
+    const apiBasics: PageExports = [
         {
             main: coreIdentifier('Disposable'),
             nested: [
@@ -114,7 +106,10 @@ async function main() {
                 coreIdentifier('EndType'),
             ],
         },
-        { main: coreIdentifier('Sink'), nested: [coreIdentifier('isSink')] },
+        {
+            main: coreIdentifier('Sink'),
+            nested: [coreIdentifier('isSink')],
+        },
         {
             main: coreIdentifier('Source'),
             nested: [coreIdentifier('isSource'), coreIdentifier('subscribe')],
@@ -127,21 +122,9 @@ async function main() {
                 coreIdentifier('flow'),
             ],
         },
-        {
-            main: coreIdentifier('Subject'),
-            nested: [
-                coreIdentifier('isSubject'),
-                coreIdentifier('SubjectDistributionSinkDisposalError'),
-                coreIdentifier(
-                    'SubjectDistributionSinkDisposalErrorConstructor',
-                ),
-                coreIdentifier('markAsSubject'),
-            ],
-        },
-        { main: coreIdentifier('ScheduleFunction') },
     ];
 
-    const coreSourcesExports: PageExports = [
+    const apiSources: PageExports = [
         { main: coreIdentifier('all') },
         { main: coreIdentifier('animationFrames') },
         { main: coreIdentifier('combineSources') },
@@ -176,7 +159,7 @@ async function main() {
         { main: coreIdentifier('zipSources') },
     ];
 
-    const coreOperatorsExports: PageExports = [
+    const apiOperators: PageExports = [
         { main: coreIdentifier('at') },
         { main: coreIdentifier('catchError') },
         { main: coreIdentifier('collect') },
@@ -314,7 +297,18 @@ async function main() {
         { main: coreIdentifier('zipWith') },
     ];
 
-    const coreSubjectsExports: PageExports = [
+    const apiSubjects: PageExports = [
+        {
+            main: coreIdentifier('Subject'),
+            nested: [
+                coreIdentifier('isSubject'),
+                coreIdentifier('SubjectDistributionSinkDisposalError'),
+                coreIdentifier(
+                    'SubjectDistributionSinkDisposalErrorConstructor',
+                ),
+                coreIdentifier('markAsSubject'),
+            ],
+        },
         { main: coreIdentifier('CurrentValueSubject') },
         { main: coreIdentifier('FinalValueSubject') },
         {
@@ -324,7 +318,8 @@ async function main() {
         { main: coreIdentifier('SubjectBase') },
     ];
 
-    const coreScheduleFunctionsExports: PageExports = [
+    const apiScheduleFunctions: PageExports = [
+        { main: coreIdentifier('ScheduleFunction') },
         { main: coreIdentifier('ScheduleAnimationFrameQueued') },
         { main: coreIdentifier('ScheduleInterval') },
         { main: coreIdentifier('ScheduleQueued') },
@@ -336,7 +331,7 @@ async function main() {
         { main: coreIdentifier('scheduleSync') },
     ];
 
-    const coreUtilsExports: PageExports = [
+    const apiUtils: PageExports = [
         { main: coreIdentifier('setTimeout') },
         { main: coreIdentifier('setInterval') },
         { main: coreIdentifier('requestAnimationFrame') },
@@ -344,7 +339,7 @@ async function main() {
         { main: coreIdentifier('TimeProvider') },
     ];
 
-    const testingExports: PageExports = [
+    const apiTesting: PageExports = [
         { main: testingIdentifier('TestSource') },
         { main: testingIdentifier('SharedTestSource') },
         { main: testingIdentifier('TestSourceEvent') },
@@ -383,20 +378,30 @@ async function main() {
         return pageId;
     }
 
-    const exportsWithIds = [
-        [coreBasicsExports, coreApiBasicsId],
-        [coreSourcesExports, coreApiSourcesId],
-        [coreOperatorsExports, coreApiOperatorsId],
-        [coreSubjectsExports, coreApiSubjectsId],
-        [coreScheduleFunctionsExports, coreApiScheduleFunctionsId],
-        [coreUtilsExports, coreApiUtilsId],
-        [testingExports, testingApiId],
-    ] as const;
+    const apiPages = ([
+        ['Basics', apiBasics],
+        ['Sources', apiSources],
+        ['Operators', apiOperators],
+        ['Subjects', apiSubjects],
+        ['Schedule Functions', apiScheduleFunctions],
+        ['Utils', apiUtils],
+        ['Testing', apiTesting],
+    ] as const).map(
+        ([title, exports]) =>
+            [
+                `API - ${title}`,
+                exports.map((export_) => ({
+                    title: export_.main.exportName,
+                    id: `api--${title}--${export_.main.exportName}`,
+                    exportGroup: export_,
+                })),
+            ] as const,
+    );
 
-    for (const [exports, id] of exportsWithIds) {
-        for (const exportGroup of exports) {
+    for (const [, group] of apiPages) {
+        for (const { id, exportGroup } of group) {
             mapExportIdentifierToPageId(exportGroup.main, id);
-            if ('nested' in exportGroup && exportGroup.nested !== undefined) {
+            if (exportGroup.nested) {
                 for (const identifier of exportGroup.nested) {
                     mapExportIdentifierToPageId(identifier, id);
                 }
@@ -475,67 +480,30 @@ async function main() {
         getApiItemsByExportIdentifier,
     });
 
-    const pages: Pages = [
-        buildApiPage({
-            context: analyzeContext,
-            pageId: coreApiBasicsId,
-            pageExports: coreBasicsExports,
-        }),
-        buildApiPage({
-            context: analyzeContext,
-            pageId: coreApiSourcesId,
-            pageExports: coreSourcesExports,
-        }),
-        buildApiPage({
-            context: analyzeContext,
-            pageId: coreApiOperatorsId,
-            pageExports: coreOperatorsExports,
-        }),
-        buildApiPage({
-            context: analyzeContext,
-            pageId: coreApiSubjectsId,
-            pageExports: coreSubjectsExports,
-        }),
-        buildApiPage({
-            context: analyzeContext,
-            pageId: coreApiScheduleFunctionsId,
-            pageExports: coreScheduleFunctionsExports,
-        }),
-        buildApiPage({
-            context: analyzeContext,
-            pageId: coreApiUtilsId,
-            pageExports: coreUtilsExports,
-        }),
-        buildApiPage({
-            context: analyzeContext,
-            pageId: testingApiId,
-            pageExports: testingExports,
-        }),
-    ];
+    const pages: Pages = apiPages.flatMap(([, group]) =>
+        group.map(({ id, exportGroup }) =>
+            buildApiPage({
+                context: analyzeContext,
+                pageId: id,
+                pageExports: [exportGroup],
+            }),
+        ),
+    );
 
-    const pageIdToWebsitePath: Record<string, string> = {
-        [coreApiBasicsId]: 'docs/api-basics',
-        [coreApiSourcesId]: 'docs/api-sources',
-        [coreApiOperatorsId]: 'docs/api-operators',
-        [coreApiSubjectsId]: 'docs/api-subjects',
-        [coreApiScheduleFunctionsId]: 'docs/api-schedule-functions',
-        [coreApiUtilsId]: 'docs/api-utils',
-        [testingApiId]: 'docs/api-testing',
-    };
-    const pageIdToPageTitle: Record<string, string> = {
-        [coreApiBasicsId]: 'Basics',
-        [coreApiSourcesId]: 'Sources',
-        [coreApiOperatorsId]: 'Operators',
-        [coreApiSubjectsId]: 'Subjects',
-        [coreApiScheduleFunctionsId]: 'Schedule Functions',
-        [coreApiUtilsId]: 'Utils',
-        [testingApiId]: 'Testing',
-    };
+    const pageIdToWebsitePath: Record<string, string> = Object.fromEntries(
+        apiPages.flatMap(([, group]) =>
+            group.map(({ title, id }) => [id, `docs/api/${title}`]),
+        ),
+    );
+    const pageIdToPageTitle: Record<string, string> = Object.fromEntries(
+        apiPages.flatMap(([, group]) =>
+            group.map(({ title, id }) => [id, title]),
+        ),
+    );
     const pageIdToMdPagePath: Record<string, string> = Object.fromEntries(
-        Object.entries(pageIdToWebsitePath).map(([pageId, websitePath]) => [
-            pageId,
-            `${websitePath}.md`,
-        ]),
+        apiPages.flatMap(([, group]) =>
+            group.map(({ title, id }) => [id, `docs/${title}.md`]),
+        ),
     );
 
     const docsSource = await buildDocsSourceDirectoryToApiPages();
@@ -559,7 +527,10 @@ async function main() {
 
     const pageGroups: PageGroup[] = [
         { title: 'Documentation', pageIds: ['core--introduction'] },
-        { title: 'API', pageIds: exportsWithIds.map(([, id]) => id) },
+        ...apiPages.map(([title, group]) => ({
+            title,
+            pageIds: group.map(({ id }) => id),
+        })),
     ];
 
     const allPageGroupIds = pageGroups.flatMap(
@@ -621,7 +592,12 @@ async function main() {
         );
 
         const insideDocsPath = mdPath.slice(docsDirectoryName.length + 1);
-        return `${docsDirectoryName}/${pageGroupPrefix}-${inPageGroupPrefix}-${insideDocsPath}`;
+        return `${docsDirectoryName}/${pageGroupPrefix}-${pageGroups[
+            pageGroupIndex
+        ].title
+            .toLowerCase()
+            .split(/\W+/)
+            .join('-')}/${inPageGroupPrefix}-${insideDocsPath}`;
     }
 
     enum FooterCellRole {

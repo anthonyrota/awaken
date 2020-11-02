@@ -640,6 +640,11 @@ $content-link-hover-color: $text-color;
         padding-left: $spacing;
         overflow-y: auto;
         margin-right: $spacing;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-all;
+        word-break: break-word;
+        hyphens: auto;
 
         &--js-sticky-active {
             @include sticky-sidebar--js-sticky-active;
@@ -695,7 +700,6 @@ $content-link-hover-color: $text-color;
         flex-grow: 1;
         padding-top: $title-spacing-bottom;
         padding-right: 0;
-
         overflow-wrap: break-word;
         word-wrap: break-word;
         word-break: break-all;
