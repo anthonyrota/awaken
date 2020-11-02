@@ -392,7 +392,9 @@ async function main() {
                 `API - ${title}`,
                 exports.map((export_) => ({
                     title: export_.main.exportName,
-                    id: `api--${title}--${export_.main.exportName}`,
+                    id: `api--${title.toLowerCase().split(/\W+/).join('-')}--${
+                        export_.main.exportName
+                    }`,
                     exportGroup: export_,
                 })),
             ] as const,
