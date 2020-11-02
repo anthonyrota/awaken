@@ -54,6 +54,13 @@ export function FullSiteNavigationContents({
     });
 
     let linkIndex = 0;
+    const linkClass =
+        'cls-full-site-nav__link' +
+        (fixLinkChromiumFocusProp || fixChromiumFocus
+            ? ` ${fixChromiumFocusClass}`
+            : '');
+
+    const isLicenseActivePath = isStringActivePath('/license');
 
     return (
         <Fragment>
@@ -74,44 +81,34 @@ export function FullSiteNavigationContents({
                         class="cls-full-site-nav__link-list"
                         aria-label="Documentation Navigation"
                     >
-                        {pageGroup.pageIds.map((pageId, index) => (
-                            <li key={index} class="cls-full-site-nav__li">
-                                <div
-                                    class={
-                                        isDocPageIdActivePath(pageId)
-                                            ? ' cls-full-site-nav__link-container--active'
-                                            : undefined
-                                    }
+                        {pageGroup.pageIds.map((pageId, index) => {
+                            const isActive = isDocPageIdActivePath(pageId);
+                            return (
+                                <FullSiteNavigationLi
+                                    key={index}
+                                    isActive={isActive}
                                 >
                                     <DocPageLink
-                                        class={
-                                            'cls-full-site-nav__link' +
-                                            (fixLinkChromiumFocusProp ||
-                                            fixChromiumFocus
-                                                ? ` ${fixChromiumFocusClass}`
-                                                : '')
-                                        }
+                                        class={linkClass}
                                         pageId={pageId}
                                         innerRef={linkRefs[linkIndex++]}
                                     >
-                                        <span
-                                            class="cls-full-site-nav__link__border"
-                                            aria-hidden
+                                        <FullSiteNavigationLiLinkContents
+                                            isActive={isActive}
                                         >
                                             {pageIdToPageTitle[pageId]}
-                                        </span>
-                                        {pageIdToPageTitle[pageId]}
+                                        </FullSiteNavigationLiLinkContents>
                                     </DocPageLink>
-                                </div>
-                            </li>
-                        ))}
+                                </FullSiteNavigationLi>
+                            );
+                        })}
                     </ul>
                 </Fragment>
             ))}
             <h2
                 class={
                     'cls-full-site-nav__header' +
-                    (['/license'].some(isStringActivePath)
+                    (isLicenseActivePath
                         ? ' cls-full-site-nav__header--active'
                         : '')
                 }
@@ -123,55 +120,80 @@ export function FullSiteNavigationContents({
                 class="cls-full-site-nav__link-list"
                 aria-label="Resources Navigation"
             >
-                <li class="cls-full-site-nav__li">
-                    <div
-                        class={
-                            isStringActivePath('/license')
-                                ? ' cls-full-site-nav__link-container--active'
-                                : undefined
-                        }
+                <FullSiteNavigationLi isActive={isLicenseActivePath}>
+                    <Link
+                        class={linkClass}
+                        innerRef={linkRefs[linkIndex++]}
+                        href="/license"
                     >
-                        <Link
-                            class={
-                                'cls-full-site-nav__link' +
-                                (fixLinkChromiumFocusProp || fixChromiumFocus
-                                    ? ` ${fixChromiumFocusClass}`
-                                    : '')
-                            }
-                            innerRef={linkRefs[linkIndex++]}
-                            href="/license"
+                        <FullSiteNavigationLiLinkContents
+                            isActive={isLicenseActivePath}
                         >
-                            <span
-                                class="cls-full-site-nav__link__border"
-                                aria-hidden
-                            >
-                                {licenseLinkText}
-                            </span>
                             {licenseLinkText}
-                        </Link>
-                    </div>
-                </li>
-                <li class="cls-full-site-nav__li">
+                        </FullSiteNavigationLiLinkContents>
+                    </Link>
+                </FullSiteNavigationLi>
+                <FullSiteNavigationLi isActive={false}>
                     <a
-                        class={
-                            'cls-full-site-nav__link' +
-                            (fixLinkChromiumFocusProp || fixChromiumFocus
-                                ? ` ${fixChromiumFocusClass}`
-                                : '')
-                        }
+                        class={linkClass}
                         ref={linkRefs[linkIndex++]}
                         href={githubUrl}
                     >
-                        <span
-                            class="cls-full-site-nav__link__border"
-                            aria-hidden
-                        >
-                            {licenseLinkText}
-                        </span>
-                        {githubLinkText}
+                        <FullSiteNavigationLiLinkContents isActive={false}>
+                            {githubLinkText}
+                        </FullSiteNavigationLiLinkContents>
                     </a>
-                </li>
+                </FullSiteNavigationLi>
             </ul>
+        </Fragment>
+    );
+}
+
+interface FullSiteNavigationLiProps {
+    isActive: boolean;
+    children: preact.ComponentChildren;
+}
+
+function FullSiteNavigationLi({
+    isActive,
+    children,
+}: FullSiteNavigationLiProps): VNode {
+    return (
+        <li class="cls-full-site-nav__li">
+            {isActive ? (
+                <div
+                    class={
+                        isActive
+                            ? 'cls-full-site-nav__link-container--active'
+                            : undefined
+                    }
+                >
+                    {children}
+                </div>
+            ) : (
+                children
+            )}
+        </li>
+    );
+}
+
+interface FullSiteNavigationLiLinkContentsProps {
+    isActive: boolean;
+    children: preact.ComponentChildren;
+}
+
+function FullSiteNavigationLiLinkContents({
+    isActive,
+    children,
+}: FullSiteNavigationLiLinkContentsProps): VNode {
+    return (
+        <Fragment>
+            {isActive && (
+                <span class="cls-full-site-nav__link__border" aria-hidden>
+                    {children}
+                </span>
+            )}
+            {children}
         </Fragment>
     );
 }

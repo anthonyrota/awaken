@@ -490,13 +490,11 @@ $content-link-hover-color: $text-color;
         }
     }
 
-    &--open {
-        @media screen and (max-width: $size-show-menu) {
-            @include show;
-        }
+    @media screen and (max-width: $size-show-menu) {
+        @include show;
     }
 
-    &--open#{&}--enabled {
+    &--enabled {
         @include show;
     }
 
@@ -554,10 +552,6 @@ $content-link-hover-color: $text-color;
     &__li {
         margin-top: 4px;
         line-height: 24px;
-    }
-
-    &__link__border {
-        display: none;
     }
 
     &__link-container--active &__link__border {

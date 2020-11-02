@@ -445,35 +445,35 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                     isMenuOpen={isMenuOpen}
                 />
             </button>
-            <aside
-                ref={menuRef}
-                class={
-                    'cls-menu' +
-                    (isMenuOpen ? ' cls-menu--open' : '') +
-                    (enableMenu ? ' cls-menu--enabled' : '')
-                }
-                role="dialog"
-                aria-modal="true"
-                aria-label="Site Navigation"
-            >
-                <div class="cls-menu__contents">
-                    <FullSiteNavigationContents
-                        bindKeys={
-                            isMenuOpen ? BindKeysNoRequireFocus : NoBindKeys
-                        }
-                        getAllowSingleLetterKeyLinkJumpShortcut={() => {
-                            return (
-                                document.activeElement !==
-                                searchInputRef.current
-                            );
-                        }}
-                        isMovingFocusManuallyRef={isMovingFocusManuallyRef}
-                        fixLinkChromiumFocus={fixChromiumFocus}
-                        linkRefs={menuLinkRefs}
-                        fixChromiumFocus={fixChromiumFocusContainer}
-                    />
-                </div>
-            </aside>
+            {isMenuOpen && (
+                <aside
+                    ref={menuRef}
+                    class={
+                        'cls-menu' + (enableMenu ? ' cls-menu--enabled' : '')
+                    }
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Site Navigation"
+                >
+                    <div class="cls-menu__contents">
+                        <FullSiteNavigationContents
+                            bindKeys={
+                                isMenuOpen ? BindKeysNoRequireFocus : NoBindKeys
+                            }
+                            getAllowSingleLetterKeyLinkJumpShortcut={() => {
+                                return (
+                                    document.activeElement !==
+                                    searchInputRef.current
+                                );
+                            }}
+                            isMovingFocusManuallyRef={isMovingFocusManuallyRef}
+                            fixLinkChromiumFocus={fixChromiumFocus}
+                            linkRefs={menuLinkRefs}
+                            fixChromiumFocus={fixChromiumFocusContainer}
+                        />
+                    </div>
+                </aside>
+            )}
             <div ref={endFocusPlaceholderRef} tabIndex={isMenuOpen ? 0 : -1} />
         </Fragment>
     );
