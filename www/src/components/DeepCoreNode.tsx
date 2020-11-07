@@ -277,7 +277,7 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
             );
         }
         case CoreNodeType.NamedAnchor: {
-            return <a id={node.name} />;
+            return <span id={node.name} />;
         }
         case CoreNodeType.LineBreak: {
             return <br />;
