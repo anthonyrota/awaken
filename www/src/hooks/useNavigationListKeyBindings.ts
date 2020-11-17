@@ -1,22 +1,9 @@
 import { useRef, useEffect, useState, StateUpdater } from 'preact/hooks';
 import { isChromium } from '../env';
+import { findIndex } from '../util/findIndex';
 import { stopEvent } from '../util/stopEvent';
+import { useIsChromiumFocusedElementOnKeyShortcutQuirky } from './useIsChromiumFocusedElementOnKeyShortcutQuirky';
 import { useResetFixChromiumFocus } from './useResetFixChromiumFocus';
-
-// Not supported in IE.
-function findIndex<T>(
-    list: readonly T[],
-    predicate: (value: T) => boolean,
-    startIndex = 0,
-    endIndex = list.length - 1,
-): number {
-    for (let i = startIndex; i <= endIndex; i++) {
-        if (predicate(list[i])) {
-            return i;
-        }
-    }
-    return -1;
-}
 
 export const NoBindKeys = 0;
 export const BindKeysRequireFocus = 1;
@@ -50,77 +37,29 @@ export function useNavigationListKeyBindings({
 }: UseNavigationListKeyBindingsParams): UseNavigationListKeyBindingsResult {
     const { 0: fixChromiumFocus, 1: setFixChromiumFocus } =
         fixChromiumFocusParam || useState<boolean>(false);
-    const isChromiumFocusedElementOnKeyShortcutQuirkyRef = useRef({
-        value: false,
-        activeElement: null as Element | null,
-    });
 
-    if (isChromium) {
-        useEffect(() => {
-            if (bindKeys === NoBindKeys) {
-                return;
-            }
-            let animationId = requestAnimationFrame(function cb(): void {
-                let isChromiumFocusedElementOnKeyShortcutQuirky = false;
-                if (document.activeElement) {
-                    if (document.activeElement.tagName === 'INPUT') {
-                        isChromiumFocusedElementOnKeyShortcutQuirky = true;
-                    } else if ('matches' in document.activeElement) {
-                        let matchesFocusVisible: boolean | undefined;
-                        try {
-                            // eslint-disable-next-line max-len
-                            matchesFocusVisible = document.activeElement.matches(
-                                ':focus-visible',
-                            );
-                        } catch (error) {
-                            // Focus visible not supported;
-                        }
-                        if (matchesFocusVisible) {
-                            // This callback should be called synchronously.
-                            setFixChromiumFocus((value) => {
-                                if (
-                                    // eslint-disable-next-line max-len
-                                    isChromiumFocusedElementOnKeyShortcutQuirkyRef
-                                        .current.value &&
-                                    document.activeElement ===
-                                        // eslint-disable-next-line max-len
-                                        isChromiumFocusedElementOnKeyShortcutQuirkyRef
-                                            .current.activeElement &&
-                                    matchesFocusVisible &&
-                                    !value
-                                ) {
-                                    // Example case: when the anchor is focused
-                                    // but does not match :focus-visible and the
-                                    // user hits a key, the anchor will match
-                                    // :focus-visible but no outline will be
-                                    // shown.
-                                    // eslint-disable-next-line max-len
-                                    isChromiumFocusedElementOnKeyShortcutQuirky = true;
-                                }
-                                return value;
-                            });
-                        } else if (matchesFocusVisible !== undefined) {
-                            isChromiumFocusedElementOnKeyShortcutQuirky = true;
-                        }
-                    }
+    // eslint-disable-next-line max-len
+    const isChromiumFocusedElementOnKeyShortcutQuirky = useIsChromiumFocusedElementOnKeyShortcutQuirky(
+        {
+            isKeyShortcutActive: bindKeys === NoBindKeys,
+            getFixChromiumFocus: (): boolean => {
+                let fixChromiumFocus: boolean | undefined;
+                setFixChromiumFocus((value) => {
+                    fixChromiumFocus = value;
+                    return value;
+                });
+                if (fixChromiumFocus === undefined) {
+                    throw new Error();
                 }
-                // eslint-disable-next-line max-len
-                isChromiumFocusedElementOnKeyShortcutQuirkyRef.current = {
-                    value: isChromiumFocusedElementOnKeyShortcutQuirky,
-                    activeElement: document.activeElement,
-                };
-                animationId = requestAnimationFrame(cb);
-            });
-            return () => {
-                cancelAnimationFrame(animationId);
-            };
-        }, [bindKeys === NoBindKeys]);
-    }
+                return fixChromiumFocus;
+            },
+        },
+    );
 
     const setFocus = (element: HTMLElement) => {
         if (
             findIndex(linkRefs, (ref) => ref.current === element) !== -1 &&
-            isChromiumFocusedElementOnKeyShortcutQuirkyRef.current.value
+            isChromiumFocusedElementOnKeyShortcutQuirky()
         ) {
             setFixChromiumFocus(true);
         }
@@ -150,22 +89,19 @@ export function useNavigationListKeyBindings({
             return;
         }
         const listener = (event: KeyboardEvent) => {
-            if (
-                bindKeys === BindKeysRequireFocus &&
-                getLinkFocusIndex() === -1
-            ) {
-                return;
-            }
-
             if (event.ctrlKey || event.metaKey || event.altKey) {
                 return;
             }
 
+            const keysDisabled =
+                bindKeys === BindKeysRequireFocus && getLinkFocusIndex() === -1;
+
             if (
                 event.key.length === 1 &&
                 /\S/.test(event.key) &&
-                (!getAllowSingleLetterKeyLinkJumpShortcut ||
-                    getAllowSingleLetterKeyLinkJumpShortcut())
+                (!keysDisabled ||
+                    (getAllowSingleLetterKeyLinkJumpShortcut &&
+                        getAllowSingleLetterKeyLinkJumpShortcut()))
             ) {
                 const index = getLinkFocusIndex();
                 const predicate = (title: string) =>
@@ -190,6 +126,10 @@ export function useNavigationListKeyBindings({
                 if (event.shiftKey) {
                     stopEvent(event);
                 }
+                return;
+            }
+
+            if (keysDisabled) {
                 return;
             }
 

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+
 /*
  * http://meyerweb.com/eric/tools/css/reset/
  * v2.0 | 20110126
@@ -157,8 +159,8 @@ $header-border-height: 1px;
 }
 
 html {
-    font-family: BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-        'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Open Sans', BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     font-size: $main-text-size;
@@ -236,7 +238,7 @@ $content-link-hover-color: $text-color;
     left: 0;
     top: 0;
     position: relative;
-    font-weight: 500;
+    font-weight: 600;
 
     &__contents {
         display: flex;
@@ -408,7 +410,6 @@ $content-link-hover-color: $text-color;
         flex-direction: column;
         justify-content: center;
         color: $text-color;
-        letter-spacing: 0;
     }
 
     @media screen and (max-width: $size-small) {
@@ -476,6 +477,12 @@ $content-link-hover-color: $text-color;
     }
 }
 
+@mixin hidden {
+    position: absolute;
+    top: -99999px;
+    left: -99999px;
+}
+
 .cls-menu {
     display: none;
     justify-content: center;
@@ -484,9 +491,7 @@ $content-link-hover-color: $text-color;
         display: flex;
 
         & ~ .cls-page {
-            position: absolute;
-            top: -99999px;
-            left: -99999px;
+            @include hidden;
         }
     }
 
@@ -516,25 +521,91 @@ $content-link-hover-color: $text-color;
     opacity: $hover-opacity !important;
 }
 
+@mixin minimal-scrollbar {
+    scrollbar-width: thin;
+
+    // https://gist.github.com/adamblank/7896758 thx.
+
+    &::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    &::-webkit-scrollbar-track-piece {
+        background-color: #fff;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #cbcbcb;
+        outline: 2px solid #fff;
+        outline-offset: -2px;
+        border: 0.1px solid #b7b7b7;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: #909090;
+    }
+}
+
 .cls-full-site-nav {
+    &__link-list-container {
+        position: relative;
+
+        & + & {
+            margin-top: $spacing;
+        }
+
+        &--open + & {
+            margin-top: $spacing * 2;
+        }
+    }
+
+    &__link-list-checkbox {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        height: 100%;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    &__link-list-checkbox:focus + &__header {
+        outline-offset: $spacing/4;
+        outline: 2px solid -webkit-focus-ring-color;
+    }
+
+    &__link-list-checkbox:focus:not(:focus-visible) &__header {
+        outline: none;
+    }
+
     &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         margin: 0;
-        font-weight: bold;
+        font-weight: 600;
         text-transform: uppercase;
         font-size: $main-text-size;
-        margin-top: $spacing * 4;
-        &:first-child {
-            margin-top: 0;
-        }
-        margin-bottom: 0.5em;
-        letter-spacing: 1.9px;
 
         &--active {
             color: $link-highlight-color;
         }
+
+        &__svg {
+            width: 10px;
+            height: 10px;
+
+            &--closed {
+                transform: scaleY(-1);
+            }
+
+            path {
+                vector-effect: non-scaling-stroke;
+            }
+        }
     }
 
-    $link-padding-tb: $spacing / 2;
+    $link-padding-tb: 10px / 2;
     $link-padding-lr: $spacing / 2;
     $link-padding-lr-menu: $spacing / 4;
     $link-padding: $link-padding-tb $link-padding-lr;
@@ -547,39 +618,14 @@ $content-link-hover-color: $text-color;
             margin-left: -$link-padding-lr-menu;
             width: calc(100% + #{$link-padding-lr-menu * 2});
         }
+
+        &--closed {
+            @include hidden;
+        }
     }
 
     &__li {
-        margin-top: 4px;
-        line-height: 24px;
-    }
-
-    &__link-container--active &__link__border {
-        padding: $link-padding;
-        .cls-menu & {
-            padding: $link-padding-menu;
-        }
-        display: inline-block;
-        position: absolute;
-        top: 0;
-        left: 0;
-
-        &::after {
-            position: absolute;
-            left: $link-padding-lr - $link-padding-lr-menu;
-            right: $link-padding-lr - $link-padding-lr-menu;
-            .cls-menu & {
-                left: 0;
-                right: 0;
-            }
-            bottom: 3px;
-            content: '';
-            border-bottom: 2px solid $link-highlight-color;
-        }
-    }
-
-    &__link-container--active &__link {
-        color: $link-highlight-color !important;
+        line-height: 20px;
     }
 
     &__link {
@@ -591,6 +637,11 @@ $content-link-hover-color: $text-color;
             padding: $link-padding-menu;
         }
         @include content-link;
+        text-decoration: underline;
+    }
+
+    &__link-container--active &__link {
+        color: $link-highlight-color !important;
     }
 }
 
@@ -622,8 +673,8 @@ $content-link-hover-color: $text-color;
     }
 
     &__sidebar {
-        $max-width: 260px;
-        $min-width: 210px;
+        $max-width: 280px;
+        $min-width: 240px;
         $width-old-browser: ($min-width + $max-width) / 2;
         $width-new-browser: #{'max' }(#{'min' }(20vw, $max-width), $min-width);
 
@@ -638,6 +689,8 @@ $content-link-hover-color: $text-color;
         word-wrap: break-word;
         word-break: break-all;
         word-break: break-word;
+        hyphens: auto;
+        @include minimal-scrollbar;
 
         &--js-sticky-active {
             @include sticky-sidebar--js-sticky-active;
@@ -704,6 +757,9 @@ $content-link-hover-color: $text-color;
         }
 
         > :first-child {
+            &.cls-temp-focus-span + * {
+                margin-top: 0;
+            }
             margin-top: 0;
         }
 
@@ -740,7 +796,7 @@ $content-link-hover-color: $text-color;
         padding-left: $spacing * 6;
         padding-right: $spacing * 2;
         overflow-y: auto;
-        scrollbar-width: thin;
+        @include minimal-scrollbar;
         overflow-wrap: break-word;
         word-wrap: break-word;
         hyphens: auto;
@@ -801,8 +857,8 @@ $content-link-hover-color: $text-color;
         line-height: 1em;
         padding-bottom: 2px;
         margin-right: $spacing;
-        border-bottom: 1px solid rgb(240, 240, 242);
-        font-weight: 500;
+        border-bottom: 1px solid #efefef;
+        font-weight: 600;
     }
 }
 
@@ -845,7 +901,7 @@ $content-link-hover-color: $text-color;
     }
 
     &-bold {
-        font-weight: bold;
+        font-weight: 600;
     }
 
     &-strikethrough {
@@ -864,14 +920,13 @@ $content-link-hover-color: $text-color;
         word-break: break-all;
         word-break: break-word;
         hyphens: none;
-        // max-width: 100%;
     }
 
     &-code-span {
         padding: 0.2em 0.4em;
         margin: 0;
         font-size: 85%;
-        background-color: rgba(27, 31, 35, 0.05);
+        background-color: rgba(255, 229, 100, 0.2);
         border-radius: 3px;
     }
 
@@ -954,7 +1009,7 @@ $content-link-hover-color: $text-color;
     &-header-1,
     &-header-2 {
         padding-bottom: 0.3em;
-        border-bottom: 1px solid #eaecef;
+        border-bottom: 1px solid #efefef;
     }
 
     &-header-2 {
@@ -997,6 +1052,9 @@ $content-link-hover-color: $text-color;
 
         td {
             > :first-child {
+                &.cls-temp-focus-span + * {
+                    margin-top: 0;
+                }
                 margin-top: 0;
             }
 
@@ -1063,6 +1121,9 @@ $content-link-hover-color: $text-color;
         border-left: 0.25em solid #dfe2e5;
 
         > :first-child {
+            &.cls-temp-focus-span + * {
+                margin-top: 0;
+            }
             margin-top: 0;
         }
 

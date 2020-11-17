@@ -31,6 +31,7 @@ function setFocusBefore(element?: ChildNode): void {
     tempSpan.focus();
 
     if (element) {
+        tempSpan.classList.add('cls-temp-focus-span');
         tempSpan.addEventListener('focusout', () => {
             parentEl.removeChild(tempSpan);
         });

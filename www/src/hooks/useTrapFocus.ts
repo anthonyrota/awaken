@@ -23,40 +23,29 @@ export function useTrapFocus({
         if (!getShouldTrapFocus()) {
             return;
         }
-        let animationRequestId: number | undefined;
         const listener = () => {
-            if (animationRequestId !== undefined) {
-                cancelAnimationFrame(animationRequestId);
-                animationRequestId = undefined;
+            if (!getShouldTrapFocus()) {
+                return;
             }
-            animationRequestId = requestAnimationFrame(() => {
-                animationRequestId = undefined;
-                if (!getShouldTrapFocus()) {
-                    return;
-                }
-                const focusedElement = document.activeElement;
-                if (
-                    !focusedElement ||
-                    focusedElement === document.body ||
-                    shouldIgnoreChangedFocus(focusedElement)
-                ) {
-                    return;
-                }
-                if (focusedElement === getStartFocusPlaceholder()) {
-                    setFocusEnd();
-                } else if (focusedElement === getEndFocusPlaceholder()) {
-                    setFocusStart();
-                } else {
-                    onFocusOutside();
-                }
-            });
+            const focusedElement = document.activeElement;
+            if (
+                !focusedElement ||
+                focusedElement === document.body ||
+                shouldIgnoreChangedFocus(focusedElement)
+            ) {
+                return;
+            }
+            if (focusedElement === getStartFocusPlaceholder()) {
+                setFocusEnd();
+            } else if (focusedElement === getEndFocusPlaceholder()) {
+                setFocusStart();
+            } else {
+                onFocusOutside();
+            }
         };
-        document.addEventListener('focusout', listener);
+        document.addEventListener('focusin', listener);
         return () => {
-            if (animationRequestId !== undefined) {
-                cancelAnimationFrame(animationRequestId);
-            }
-            document.removeEventListener('focusout', listener);
+            document.removeEventListener('focusin', listener);
         };
     }, [getShouldTrapFocus()]);
 }

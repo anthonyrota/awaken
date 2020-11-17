@@ -1,7 +1,7 @@
 import { h, Fragment, VNode, JSX } from 'preact';
 import { useState, useRef, useLayoutEffect } from 'preact/hooks';
 import { getGithubUrl, getPagesMetadata } from '../data/docPages';
-import { isChromium, isMobile, isStandalone } from '../env';
+import { isMobile, isStandalone } from '../env';
 import {
     useFullScreenOverlayState,
     FullScreenOverlayOpenTransitionType,
@@ -19,7 +19,6 @@ import {
 } from '../hooks/useNavigationListKeyBindings';
 import { useOverlayEscapeKeyBinding } from '../hooks/useOverlayEscapeKeyBinding';
 import { usePrevious } from '../hooks/usePrevious';
-import { useResetFixChromiumFocus } from '../hooks/useResetFixChromiumFocus';
 import { useSticky, UseStickyJsStickyActive } from '../hooks/useSticky';
 import { useTrapFocus } from '../hooks/useTrapFocus';
 import { getScrollTop } from '../util/getScrollTop';
@@ -39,12 +38,6 @@ const githubLinkLabel = 'Open GitHub Repository';
 
 export function Header({ enableMenu }: HeaderProps): VNode {
     const { 0: searchValue, 1: setSearchValue } = useState('');
-    const fixChromiumFocusContainer = useState(false);
-    const {
-        0: fixChromiumFocus,
-        1: setFixChromiumFocus,
-    } = fixChromiumFocusContainer;
-
     const searchInputRef = useRef<HTMLInputElement>();
     const headerRef = useRef<HTMLElement>();
     const menuRef = useRef<HTMLElement>();
@@ -124,29 +117,13 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         },
     });
 
-    if (isChromium) {
-        useResetFixChromiumFocus({
-            fixChromiumFocus,
-            resetFixChromiumFocus: () => setFixChromiumFocus(false),
-            isMovingFocusManuallyRef,
-            isEventTargetPartOfComponent: (target) =>
-                target instanceof Node && isNodePartOfComponent(target),
-        });
-    }
-
     const onSearchInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {
         setSearchValue(e.currentTarget.value);
     };
 
-    const onToggleButtonClick = (
-        event: JSX.TargetedMouseEvent<HTMLButtonElement>,
-    ) => {
+    const onToggleButtonClick = () => {
         const isMenuOpen = getIsMenuOpen();
         const isMenuOpenAfterClick = !isMenuOpen;
-        if (isChromium && event.detail !== 0 && isMenuOpenAfterClick) {
-            // Opening with click.
-            setFixChromiumFocus(true);
-        }
         if (isMenuOpenAfterClick) {
             previousScrollTopRef.current = getScrollTop();
             whileIgnoringChange(() => {
@@ -467,9 +444,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                 );
                             }}
                             isMovingFocusManuallyRef={isMovingFocusManuallyRef}
-                            fixLinkChromiumFocus={fixChromiumFocus}
                             linkRefs={menuLinkRefs}
-                            fixChromiumFocus={fixChromiumFocusContainer}
                         />
                     </div>
                 </aside>
