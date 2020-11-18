@@ -4,10 +4,10 @@ import { getGithubUrl, getPagesMetadata } from '../data/docPages';
 import { usePath } from '../hooks/useHistory';
 import {
     BindKeys,
-    fixChromiumFocusClass,
     useNavigationListKeyBindings,
 } from '../hooks/useNavigationListKeyBindings';
 import { usePrevious } from '../hooks/usePrevious';
+import { generateUniqueA11yId } from '../util/a11y';
 import { findIndex } from '../util/findIndex';
 import { stopEvent } from '../util/stopEvent';
 import { DocPageLink } from './DocPageLink';
@@ -241,7 +241,7 @@ export function FullSiteNavigationContents({
                 }
                 case 'Home':
                 case 'PageUp': {
-                    if (getFocusedLinkListIndex() === -1) {
+                    if (getFocusedLinkListToggleIndex() === -1) {
                         return;
                     }
                     setFocus(checkboxRefs[0].current);
@@ -251,7 +251,7 @@ export function FullSiteNavigationContents({
                 }
                 case 'End':
                 case 'PageDown': {
-                    if (getFocusedLinkListIndex() === -1) {
+                    if (getFocusedLinkListToggleIndex() === -1) {
                         return;
                     }
                     setFocus(checkboxRefs[checkboxRefs.length - 1].current);
@@ -280,12 +280,12 @@ export function FullSiteNavigationContents({
     });
 
     let linkIndex = 0;
-    const linkClass = `cls-full-site-nav__link ${fixChromiumFocusClass}`;
+    const linkClass = `cls-full-site-nav__link`;
 
     const isLicenseActivePath = isStringActivePath('/license');
 
     return (
-        <Fragment>
+        <ul>
             {pageGroups.map((pageGroup) => (
                 <FullSiteNavigationLinkList
                     isActive={pageGroup.pageIds.some(isDocPageIdActivePath)}
@@ -359,7 +359,7 @@ export function FullSiteNavigationContents({
                     </a>
                 </FullSiteNavigationLi>
             </FullSiteNavigationLinkList>
-        </Fragment>
+        </ul>
     );
 }
 
@@ -383,6 +383,8 @@ function FullSiteNavigationLinkList({
     children,
 }: FullSiteNavigationLinkListProps): VNode {
     const { 0: isOpen, 1: setIsOpen } = useState(isActive);
+    // cspell:disable-next-line
+    const id = useMemo(() => generateUniqueA11yId('fsnll'), []);
 
     const path = usePath();
     const previousPath = usePrevious(path);
@@ -405,9 +407,13 @@ function FullSiteNavigationLinkList({
         }
     }
 
+    function onCheckboxChange() {
+        setIsOpen(!isOpen);
+    }
+
     return (
         <Fragment>
-            <div
+            <li
                 class={
                     'cls-full-site-nav__link-list-container' +
                     (isOpen
@@ -419,17 +425,16 @@ function FullSiteNavigationLinkList({
                     ref={checkboxRef}
                     type="checkbox"
                     checked={isOpen}
-                    value={description}
                     class="cls-full-site-nav__link-list-checkbox"
-                    onChange={() => {
-                        setIsOpen(!isOpen);
-                    }}
+                    onChange={onCheckboxChange}
+                    aria-labelledby={id}
                 />
                 <h2
                     class={
                         'cls-full-site-nav__header' +
                         (isActive ? ' cls-full-site-nav__header--active' : '')
                     }
+                    id={id}
                 >
                     {headerText}
                     <svg
@@ -440,6 +445,7 @@ function FullSiteNavigationLinkList({
                                 ? ''
                                 : ' cls-full-site-nav__header__svg--closed')
                         }
+                        aria-hidden="true"
                     >
                         <path
                             fill="none"
@@ -461,7 +467,7 @@ function FullSiteNavigationLinkList({
                 >
                     {children}
                 </ul>
-            </div>
+            </li>
         </Fragment>
     );
 }

@@ -638,6 +638,10 @@ $content-link-hover-color: $text-color;
         }
         @include content-link;
         text-decoration: underline;
+        &:focus {
+            outline: none;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
     }
 
     &__link-container--active &__link {
