@@ -27,7 +27,11 @@ export async function createBuildHtmlFileFunction(): Promise<
                 '::preloadPagesLink::',
                 isDev
                     ? ''
-                    : '<link rel="preload" href="::pages.json::" as="fetch" crossorigin="anonymous" />',
+                    : [
+                          '<link rel="preload" href="/static/fonts/open-sans-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>',
+                          '<link rel="preload" href="/static/fonts/open-sans-v18-latin-600.woff2" as="font" type="font/woff2" crossorigin>',
+                          '<link rel="preload" href="::pages.json::" as="fetch" crossorigin="anonymous" />',
+                      ].join('\n'),
             )
             .replace(
                 '::manifestLink::',
