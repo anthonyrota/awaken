@@ -76,6 +76,7 @@
         "unist",
         "unsubscription",
         "vercel",
+        "woff",
         "yarnpkg"
     ],
     "overrides": []
