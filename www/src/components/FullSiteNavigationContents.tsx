@@ -7,7 +7,6 @@ import {
     useNavigationListKeyBindings,
 } from '../hooks/useNavigationListKeyBindings';
 import { usePrevious } from '../hooks/usePrevious';
-import { generateUniqueA11yId } from '../util/a11y';
 import { findIndex } from '../util/findIndex';
 import { stopEvent } from '../util/stopEvent';
 import { DocPageLink } from './DocPageLink';
@@ -299,6 +298,7 @@ export function FullSiteNavigationContents({
                         () => [forceCloseIndex[0] === _checkboxRefIndex],
                         [forceCloseIndex],
                     )}
+                    index={_checkboxRefIndex}
                     checkboxRef={(checkboxRefs[_checkboxRefIndex++] = useRef())}
                 >
                     {pageGroup.pageIds.map((pageId, index) => {
@@ -336,6 +336,7 @@ export function FullSiteNavigationContents({
                     () => [forceCloseIndex[0] === _checkboxRefIndex],
                     [forceCloseIndex],
                 )}
+                index={_checkboxRefIndex}
                 checkboxRef={(checkboxRefs[_checkboxRefIndex++] = useRef())}
             >
                 <FullSiteNavigationLi isActive={isLicenseActivePath}>
@@ -369,6 +370,7 @@ interface FullSiteNavigationLinkListProps {
     headerText: string;
     forceOpen: [boolean];
     forceClose: [boolean];
+    index: number;
     checkboxRef: { current: HTMLInputElement };
     children: preact.ComponentChildren;
 }
@@ -379,12 +381,13 @@ function FullSiteNavigationLinkList({
     headerText,
     forceOpen,
     forceClose,
+    index,
     checkboxRef,
     children,
 }: FullSiteNavigationLinkListProps): VNode {
     const { 0: isOpen, 1: setIsOpen } = useState(isActive);
     // cspell:disable-next-line
-    const id = useMemo(() => generateUniqueA11yId('fsnll'), []);
+    const id = `a11y-fsnll-${index}`;
 
     const path = usePath();
     const previousPath = usePrevious(path);

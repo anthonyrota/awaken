@@ -155,9 +155,7 @@ async function fixParcelBuild(): Promise<void> {
         }
 
         const classNameMapping = new Map<string, string>();
-        const {
-            css: transformedCSS,
-        } = await ((postcss as unknown) as postcss.Postcss)([
+        const { css } = await ((postcss as unknown) as postcss.Postcss)([
             async (root: postcss.Root) => {
                 const rules: postcss.Rule[] = [];
                 root.walkRules((rule) => {
@@ -200,7 +198,7 @@ async function fixParcelBuild(): Promise<void> {
         ]).process(cssText);
 
         return {
-            transformedCSS,
+            transformedCSS: css.replace(/(?<=url\().*?\)/g, '/$&'),
             classNameMapping,
         };
     })();
@@ -371,11 +369,13 @@ async function fixParcelBuild(): Promise<void> {
 
         const swFilesP = (async () => {
             await Promise.all([fixManifestP, replaceScriptP]);
-            const staticFiles = await globP('**/*', {
-                cwd: path.join(rootDir, 'www/vercel-public'),
-                nodir: true,
-                ignore: ['sw.js', newManifestName, '**/*.html'],
-            });
+            const staticFiles = (
+                await globP('**/*', {
+                    cwd: path.join(rootDir, 'www/vercel-public'),
+                    nodir: true,
+                    ignore: ['sw.js', newManifestName, '**/*.html'],
+                })
+            ).filter((filePath) => path.extname(filePath) !== '.woff');
             staticFiles.sort();
             const isSecondaryStaticFilesFilterList = await Promise.all(
                 staticFiles.map(isSecondaryStaticPath),
