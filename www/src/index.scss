@@ -592,6 +592,7 @@ $content-link-hover-color: $text-color;
 
     &__link-list-checkbox:focus + &__header {
         outline-offset: $spacing/4;
+        outline: 2px dotted black;
         outline: 2px solid -webkit-focus-ring-color;
     }
 
