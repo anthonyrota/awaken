@@ -129,6 +129,7 @@ export function FullSiteNavigationContents({
     }, [forceOpenIndexChangeRef.current]);
 
     useEffect(() => {
+        let animationId: number | undefined;
         const listener = (event: KeyboardEvent) => {
             if (event.ctrlKey || event.metaKey || event.altKey) {
                 return;
@@ -203,25 +204,44 @@ export function FullSiteNavigationContents({
                 }
                 case 'Tab': {
                     const focusedLinkListIndex = getFocusedLinkListIndex();
-                    if (focusedLinkListIndex === -1) {
-                        return;
-                    }
 
                     if (event.shiftKey) {
-                        if (getFocusedLinkListIndexFromFocusedLink() !== -1) {
-                            stopEvent(event);
-                            setFocus(
-                                checkboxRefs[focusedLinkListIndex].current,
-                            );
-                            break;
+                        if (focusedLinkListIndex !== -1) {
+                            if (
+                                getFocusedLinkListIndexFromFocusedLink() !== -1
+                            ) {
+                                stopEvent(event);
+                                setFocus(
+                                    checkboxRefs[focusedLinkListIndex].current,
+                                );
+                                break;
+                            }
+                            if (focusedLinkListIndex !== 0) {
+                                stopEvent(event);
+                                setFocus(
+                                    checkboxRefs[focusedLinkListIndex - 1]
+                                        .current,
+                                );
+                                setForceCloseIndex([focusedLinkListIndex]);
+                                break;
+                            }
                         }
-                        if (focusedLinkListIndex !== 0) {
-                            stopEvent(event);
-                            setFocus(
-                                checkboxRefs[focusedLinkListIndex - 1].current,
-                            );
-                            setForceCloseIndex([focusedLinkListIndex]);
-                        }
+                        animationId = requestAnimationFrame(() => {
+                            if (
+                                document.activeElement ===
+                                linkRefs[linkRefs.length - 1].current
+                            ) {
+                                setFocus(
+                                    checkboxRefs[checkboxRefs.length - 1]
+                                        .current,
+                                );
+                                setForceCloseIndex([checkboxRefs.length - 1]);
+                            }
+                        });
+                        break;
+                    }
+
+                    if (focusedLinkListIndex === -1) {
                         break;
                     }
 
@@ -263,6 +283,9 @@ export function FullSiteNavigationContents({
         document.addEventListener('keydown', listener);
         return () => {
             document.removeEventListener('keydown', listener);
+            if (animationId !== undefined) {
+                cancelAnimationFrame(animationId);
+            }
         };
     }, []);
 
@@ -283,6 +306,14 @@ export function FullSiteNavigationContents({
 
     const isLicenseActivePath = isStringActivePath('/license');
 
+    const onCheckboxClickOpen = (index: number) => {
+        requestAnimationFrame(() => {
+            linkRefs[
+                getFirstLinkRefIndexFromLinkListIndex(index)
+            ].current.focus();
+        });
+    };
+
     return (
         <ul>
             {pageGroups.map((pageGroup) => (
@@ -290,6 +321,11 @@ export function FullSiteNavigationContents({
                     isActive={pageGroup.pageIds.some(isDocPageIdActivePath)}
                     headerText={pageGroup.title}
                     description={`${pageGroup.title} Navigation Links`}
+                    onCheckboxClick={(() => {
+                        const cri = _checkboxRefIndex;
+                        return (newIsOpen) =>
+                            newIsOpen && onCheckboxClickOpen(cri);
+                    })()}
                     forceOpen={useMemo(
                         () => [forceOpenIndex[0] === _checkboxRefIndex],
                         [forceOpenIndex],
@@ -328,6 +364,9 @@ export function FullSiteNavigationContents({
                 isActive={isLicenseActivePath}
                 headerText="Resources"
                 description="Resources Navigation Links"
+                onCheckboxClick={(newIsOpen) =>
+                    newIsOpen && onCheckboxClickOpen(_checkboxRefIndex - 1)
+                }
                 forceOpen={useMemo(
                     () => [forceOpenIndex[0] === _checkboxRefIndex],
                     [forceOpenIndex],
@@ -368,6 +407,7 @@ interface FullSiteNavigationLinkListProps {
     isActive: boolean;
     description: string;
     headerText: string;
+    onCheckboxClick: (newIsOpen) => void;
     forceOpen: [boolean];
     forceClose: [boolean];
     index: number;
@@ -379,6 +419,7 @@ function FullSiteNavigationLinkList({
     isActive,
     description,
     headerText,
+    onCheckboxClick,
     forceOpen,
     forceClose,
     index,
@@ -414,6 +455,10 @@ function FullSiteNavigationLinkList({
         setIsOpen(!isOpen);
     }
 
+    const onCheckboxClick_ = () => {
+        onCheckboxClick(!isOpen);
+    };
+
     return (
         <Fragment>
             <li
@@ -431,6 +476,8 @@ function FullSiteNavigationLinkList({
                     class="cls-full-site-nav__link-list-checkbox"
                     onChange={onCheckboxChange}
                     aria-labelledby={id}
+                    onClick={onCheckboxClick_}
+                    onMouseDown={onCheckboxClick_}
                 />
                 <h2
                     class={
