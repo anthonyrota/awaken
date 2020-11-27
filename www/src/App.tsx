@@ -1,5 +1,5 @@
 import { h, Fragment, VNode } from 'preact';
-import { useLayoutEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef } from 'preact/hooks';
 import { FullSiteNavigationContents } from './components/FullSiteNavigationContents';
 import { Header } from './components/Header';
 import { memo } from './components/memo';
@@ -166,11 +166,9 @@ function AppPath({
     const { hash } = customHistory.location;
     const isFirstRenderRef = useRef(true);
 
-    useLayoutEffect(() => {
-        if (isFirstRenderRef.current) {
-            isFirstRenderRef.current = false;
-            return;
-        }
+    useEffect(() => {
+        const isFirstRender = isFirstRenderRef.current;
+        isFirstRenderRef.current = false;
 
         if (isDuplicateRender) {
             return;
@@ -179,9 +177,18 @@ function AppPath({
         if (hash) {
             const element = document.getElementById(hash.slice(1));
             if (element) {
-                setFocusBefore(element);
+                // IDK. This works though.
+                requestAnimationFrame(() =>
+                    requestAnimationFrame(() =>
+                        requestAnimationFrame(() => setFocusBefore(element)),
+                    ),
+                );
                 return;
             }
+        }
+
+        if (isFirstRender) {
+            return;
         }
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

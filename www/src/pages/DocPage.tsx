@@ -1,5 +1,5 @@
 import { h, Fragment, VNode } from 'preact';
-import { useRef } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { DeepCoreNode } from '../../script/docs/core/nodes';
 import { PageNode } from '../../script/docs/core/nodes/Page';
 import { TableOfContentsMainReference } from '../../script/docs/types';
@@ -53,16 +53,23 @@ export function DocPageContent({
     page,
     title,
 }: DocPageContentProps): VNode {
+    const headingRefs: { current: HTMLHeadingElement }[] = [];
+
     return (
         <div class="cls-page__content__container cls-doc-page">
             <h1 class="cls-doc-page__title">
                 {title !== undefined ? title : pageIdToPageTitle[page.pageId]}
             </h1>
             <div class="cls-doc-page__content">
-                {page.tableOfContents && <DocPageSidebar page={page} />}
+                {page.tableOfContents && (
+                    <DocPageSidebar page={page} headingRefs={headingRefs} />
+                )}
                 <main class="cls-doc-page__main" ref={mainRef}>
                     {page.children.map((childNode) => (
-                        <DeepCoreNodeComponent node={childNode} />
+                        <DeepCoreNodeComponent
+                            node={childNode}
+                            headingRefs={headingRefs}
+                        />
                     ))}
                 </main>
             </div>
@@ -72,9 +79,10 @@ export function DocPageContent({
 
 interface DocPageSidebarProps {
     page: PageNode<DeepCoreNode>;
+    headingRefs: { current: HTMLElement }[];
 }
 
-function DocPageSidebar({ page }: DocPageSidebarProps): VNode {
+function DocPageSidebar({ page, headingRefs }: DocPageSidebarProps): VNode {
     const { heightStyle, stickyState, elRefCb } = useSticky();
 
     const linkRefs: { current: HTMLAnchorElement }[] = [];
@@ -85,6 +93,49 @@ function DocPageSidebar({ page }: DocPageSidebarProps): VNode {
         linkRefs: linkRefs,
         linkTexts,
     });
+
+    const { 0: highlightedHeadingId, 1: setHighlightedHeadingId } = useState<
+        string | null
+    >(null);
+
+    useEffect(() => {
+        const headingIds: string[] = [];
+        function getPageIds(reference: TableOfContentsMainReference) {
+            headingIds.push(reference.urlHashText);
+            if (reference.nestedReferences) {
+                reference.nestedReferences.forEach(getPageIds);
+            }
+        }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        page.tableOfContents!.forEach(getPageIds);
+        const listener = () => {
+            let previousHeadingId: string | null = null;
+            for (let i = 0; i < headingRefs.length; i++) {
+                const headingRef = headingRefs[i];
+                const headingElement = headingRef.current;
+                const headingId = headingElement.id;
+                if (headingIds.indexOf(headingId) === -1) {
+                    continue;
+                }
+                const headingTop = headingElement.getBoundingClientRect().top;
+                if (headingTop >= 35) {
+                    if (previousHeadingId === null) {
+                        previousHeadingId = headingElement.id;
+                    }
+                    break;
+                }
+                previousHeadingId = headingElement.id;
+            }
+            setHighlightedHeadingId(previousHeadingId);
+        };
+        listener();
+        document.addEventListener('scroll', listener);
+        window.addEventListener('resize', listener);
+        return () => {
+            document.removeEventListener('scroll', listener);
+            window.addEventListener('resize', listener);
+        };
+    }, []);
 
     return (
         <Fragment>
@@ -106,21 +157,24 @@ function DocPageSidebar({ page }: DocPageSidebarProps): VNode {
                 }
                 style={heightStyle && { height: heightStyle }}
             >
-                {page.tableOfContents && (
+                {
                     <Fragment>
                         <h2 class="cls-doc-page__sidebar__title">
                             {pageIdToPageTitle[page.pageId]}
                         </h2>
                         {TableOfContentsList({
                             pageId: page.pageId,
-                            references: page.tableOfContents,
+                            // eslint-disable-next-line max-len
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            references: page.tableOfContents!,
                             linkRefs,
                             linkTexts,
                             linkIndexBox,
                             fixChromiumFocus,
+                            highlightedHeadingId,
                         })}
                     </Fragment>
-                )}
+                }
             </aside>
         </Fragment>
     );
@@ -133,6 +187,7 @@ interface TableOfContentsListParams {
     linkTexts: string[];
     linkIndexBox: [number];
     fixChromiumFocus: boolean;
+    highlightedHeadingId: string | null;
 }
 
 function TableOfContentsList({
@@ -142,6 +197,7 @@ function TableOfContentsList({
     linkTexts,
     linkIndexBox,
     fixChromiumFocus,
+    highlightedHeadingId,
 }: TableOfContentsListParams): VNode {
     return (
         <ul>
@@ -160,6 +216,9 @@ function TableOfContentsList({
                         <DocPageLink
                             class={
                                 'cls-doc-page__sidebar__table-of-contents__item__main-reference' +
+                                (highlightedHeadingId === urlHashText
+                                    ? ' cls-doc-page__sidebar__table-of-contents__item__main-reference--active'
+                                    : '') +
                                 (fixChromiumFocus
                                     ? ` ${fixChromiumFocusClass}`
                                     : '')
@@ -178,6 +237,7 @@ function TableOfContentsList({
                                 linkTexts,
                                 linkIndexBox,
                                 fixChromiumFocus,
+                                highlightedHeadingId,
                             })}
                     </li>
                 );

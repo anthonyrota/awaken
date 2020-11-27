@@ -1,17 +1,11 @@
 import { Fragment, h, VNode } from 'preact';
+import { useRef } from 'preact/hooks';
 import { DeepCoreNode, CoreNodeType } from '../../script/docs/core/nodes';
 import { ListType } from '../../script/docs/core/nodes/List';
 import { getGithubUrl } from '../data/docPages';
 import { customHistory } from '../hooks/useHistory';
 import { DocPageLink } from './DocPageLink';
 import { Link } from './Link';
-
-export interface DeepCoreNodeProps {
-    node: DeepCoreNode;
-}
-
-const mapChildren = (children: DeepCoreNode[]): VNode[] =>
-    children.map((childNode) => <DeepCoreNodeComponent node={childNode} />);
 
 const linkClass = 'cls-node-link';
 
@@ -40,10 +34,28 @@ function relativeToRootPath(relativePath: string): string {
     return currentPath + '/' + relativePath;
 }
 
-export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
+const mapChildren = (
+    children: DeepCoreNode[],
+    headingRefs: { current: HTMLHeadingElement }[] | undefined,
+): VNode[] =>
+    children.map((childNode) => (
+        <DeepCoreNodeComponent node={childNode} headingRefs={headingRefs} />
+    ));
+
+export interface DeepCoreNodeComponentProps {
+    node: DeepCoreNode;
+    headingRefs?: { current: HTMLHeadingElement }[];
+}
+
+export function DeepCoreNodeComponent({
+    node,
+    headingRefs,
+}: DeepCoreNodeComponentProps): VNode {
     switch (node.type) {
         case CoreNodeType.Container: {
-            return <Fragment>{mapChildren(node.children)}</Fragment>;
+            return (
+                <Fragment>{mapChildren(node.children, headingRefs)}</Fragment>
+            );
         }
         case CoreNodeType.PlainText: {
             return <Fragment>{node.text}</Fragment>;
@@ -54,7 +66,7 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
         case CoreNodeType.BlockQuote: {
             return (
                 <blockquote class="cls-node-blockquote">
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </blockquote>
             );
         }
@@ -62,22 +74,30 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
             throw new Error();
         }
         case CoreNodeType.Italics: {
-            return <i class="cls-node-italics">{mapChildren(node.children)}</i>;
+            return (
+                <i class="cls-node-italics">
+                    {mapChildren(node.children, headingRefs)}
+                </i>
+            );
         }
         case CoreNodeType.Bold: {
-            return <b class="cls-node-bold">{mapChildren(node.children)}</b>;
+            return (
+                <b class="cls-node-bold">
+                    {mapChildren(node.children, headingRefs)}
+                </b>
+            );
         }
         case CoreNodeType.Strikethrough: {
             return (
                 <del class="cls-node-strikethrough">
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </del>
             );
         }
         case CoreNodeType.CodeSpan: {
             return (
                 <span class="cls-node-code-span">
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </span>
             );
         }
@@ -87,7 +107,7 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
         case CoreNodeType.RichCodeBlock: {
             return (
                 <pre class="cls-node-rich-code-block">
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </pre>
             );
         }
@@ -106,7 +126,7 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
             }
             return (
                 <Comp class={linkClass} href={href} title={node.title}>
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </Comp>
             );
         }
@@ -118,7 +138,7 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
                     hash={node.hash}
                     title={node.title}
                 >
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </DocPageLink>
             );
         }
@@ -129,7 +149,7 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
                     href={getGithubUrl(node.pathFromRoot)}
                     title={node.title}
                 >
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </a>
             );
         }
@@ -138,7 +158,9 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
         }
         case CoreNodeType.Paragraph: {
             return (
-                <p class="cls-node-paragraph">{mapChildren(node.children)}</p>
+                <p class="cls-node-paragraph">
+                    {mapChildren(node.children, headingRefs)}
+                </p>
             );
         }
         case CoreNodeType.Heading123456: {
@@ -149,6 +171,8 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
                 | 'h4'
                 | 'h5'
                 | 'h6';
+            const ref = useRef<HTMLHeadingElement>();
+            headingRefs?.push(ref);
             return (
                 <Comp
                     class={
@@ -167,8 +191,9 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
                             : 'cls-node-header-6'
                     }
                     id={node.alternateId}
+                    ref={ref}
                 >
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </Comp>
             );
         }
@@ -181,6 +206,7 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
                         level: 2,
                         children: node.children,
                     }}
+                    headingRefs={headingRefs}
                 />
             );
         }
@@ -193,6 +219,7 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
                         level: 3,
                         children: node.children,
                     }}
+                    headingRefs={headingRefs}
                 />
             );
         }
@@ -205,13 +232,17 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
                         level: 4,
                         children: node.children,
                     }}
+                    headingRefs={headingRefs}
                 />
             );
         }
         case CoreNodeType.List: {
             const children = node.children.map((childNode) => (
                 <li class="cls-node-list__item">
-                    <DeepCoreNodeComponent node={childNode} />
+                    <DeepCoreNodeComponent
+                        node={childNode}
+                        headingRefs={headingRefs}
+                    />
                 </li>
             ));
             return node.listType.type === ListType.Ordered ? (
@@ -229,7 +260,10 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
                         <tr>
                             {node.header.children.map((childNode) => (
                                 <td>
-                                    <DeepCoreNodeComponent node={childNode} />
+                                    <DeepCoreNodeComponent
+                                        node={childNode}
+                                        headingRefs={headingRefs}
+                                    />
                                 </td>
                             ))}
                         </tr>
@@ -241,6 +275,7 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
                                     <td>
                                         <DeepCoreNodeComponent
                                             node={childNode}
+                                            headingRefs={headingRefs}
                                         />
                                     </td>
                                 ))}
@@ -255,24 +290,27 @@ export function DeepCoreNodeComponent({ node }: DeepCoreNodeProps): VNode {
                 <details class="cls-node-collapsible-section">
                     {node.summaryNode && (
                         <summary class="cls-node-collapsible-section__summary">
-                            <DeepCoreNodeComponent node={node.summaryNode} />
+                            <DeepCoreNodeComponent
+                                node={node.summaryNode}
+                                headingRefs={headingRefs}
+                            />
                         </summary>
                     )}
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </details>
             );
         }
         case CoreNodeType.Subscript: {
             return (
                 <sub class="cls-node-subscript">
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </sub>
             );
         }
         case CoreNodeType.Superscript: {
             return (
                 <sup class="cls-node-superscript">
-                    {mapChildren(node.children)}
+                    {mapChildren(node.children, headingRefs)}
                 </sup>
             );
         }

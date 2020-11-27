@@ -92,10 +92,10 @@ const licensePageNode = PageNode<DeepCoreNode>({
                 type: ListType.Unordered,
             },
             children: [
-                'Commercial use - you may use this commercially',
-                'Modification - you may make changes to the source code',
-                'Distribution - you are free to distribute the source code',
-                'Private use - you can use the code for private use',
+                'Commercial use - you may use this commercially.',
+                'Modification - you may make changes to the source code.',
+                'Distribution - you are free to distribute the source code.',
+                'Private use - you can use the code for private use.',
             ].map((text) =>
                 ParagraphNode({
                     children: [
@@ -118,8 +118,8 @@ const licensePageNode = PageNode<DeepCoreNode>({
                 type: ListType.Unordered,
             },
             children: [
-                'No liability - the code is provided "as is"',
-                'No warranty',
+                'No liability - the code is provided "as is".',
+                'No warranty.',
             ].map((text) =>
                 ParagraphNode({
                     children: [
@@ -142,8 +142,8 @@ const licensePageNode = PageNode<DeepCoreNode>({
                 type: ListType.Unordered,
             },
             children: [
-                'Copyright notice - it would be appreciated if you include the copyright notice in all copies or substantial uses of this project',
-                'License notice - it would be appreciated if you include the license notice in all copies or substantial uses of this project',
+                'Copyright notice - it would be appreciated if you include the copyright notice in all copies or substantial uses of this project.',
+                'License notice - it would be appreciated if you include the license notice in all copies or substantial uses of this project.',
             ].map((text) =>
                 ParagraphNode({
                     children: [

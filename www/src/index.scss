@@ -885,6 +885,10 @@ $content-link-hover-color: $text-color;
                     text-indent: $indent;
                     outline-offset: $spacing * 0.7;
                     @include content-link;
+
+                    &--active {
+                        color: $link-highlight-color;
+                    }
                 }
             }
         }
