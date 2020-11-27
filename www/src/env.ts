@@ -5,6 +5,8 @@ export const isChromium =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     isBrowser && !!(window as any).chrome;
 
+export const isChromebook = isBrowser && /\bCrOS\b/.test(navigator.userAgent);
+
 // eslint-disable-next-line max-len
 export const isMobile =
     isBrowser &&

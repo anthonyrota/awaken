@@ -203,20 +203,33 @@ async function fixParcelBuild(): Promise<void> {
         };
     })();
 
+    const replaceClasses = (
+        text: string,
+        classNameMapping: Map<string, string>,
+    ) => {
+        classNameMapping.forEach((minifiedClassName, originalClassName) => {
+            text = text.replace(
+                new RegExp(originalClassName + '(?=[^a-zA-Z0-9_-])', 'g'),
+                minifiedClassName,
+            );
+        });
+        return text;
+    };
+
     const transformScriptP = (async () => {
         const scriptPaths = await globAbsolute('www/vercel-public/script.*.js');
         if (scriptPaths.length !== 1) {
             throw new Error('Unexpected number of scripts.');
         }
         const [scriptPath] = scriptPaths;
-        let scriptJsText = await fs.readFile(scriptPath, 'utf-8');
-        const { classNameMapping } = await cssTransformP;
-        classNameMapping.forEach((minifiedClassName, originalClassName) => {
-            scriptJsText = scriptJsText.replace(
-                new RegExp(originalClassName + '(?=[^a-zA-Z0-9_-])', 'g'),
-                minifiedClassName,
-            );
-        });
+        const [originalScriptJsText, { classNameMapping }] = await Promise.all([
+            fs.readFile(scriptPath, 'utf-8'),
+            cssTransformP,
+        ]);
+        const scriptJsText = replaceClasses(
+            originalScriptJsText,
+            classNameMapping,
+        );
         const scriptHash = computeFileHash(scriptJsText);
         return {
             oldScriptFileDiskPath: scriptPath,
@@ -266,6 +279,17 @@ async function fixParcelBuild(): Promise<void> {
                 node.attrs.src === oldScriptFilePath
             ) {
                 node.attrs.src = newScriptFilePath;
+                return node;
+            }
+            if (node.tag === 'script' && (!node.attrs || !node.attrs.src)) {
+                const { content } = node;
+                if (!content) {
+                    throw new Error('Unexpected parsed script tag contents.');
+                }
+                const javascriptText = content.join('');
+                node.content = [
+                    replaceClasses(javascriptText, classNameMapping),
+                ];
                 return node;
             }
             if (node.tag === 'style') {

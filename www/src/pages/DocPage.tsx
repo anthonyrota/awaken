@@ -14,44 +14,74 @@ import {
     useNavigationListKeyBindings,
 } from '../hooks/useNavigationListKeyBindings';
 import { useSticky, UseStickyJsStickyActive } from '../hooks/useSticky';
+import { findIndex } from '../util/findIndex';
 import { AppPathBaseProps } from './base';
 
 export interface DocPageProps extends AppPathBaseProps {
     pageId: string;
 }
 
-const { pageIdToPageTitle } = getPagesMetadata();
+const { pageIdToPageTitle, pageGroups } = getPagesMetadata();
+
+const pageOrder: string[] = [];
+pageGroups.forEach((group) => {
+    group.pageIds.forEach((pageId) => {
+        pageOrder.push(pageId);
+    });
+});
 
 export function DocPage({ mainRef, pageId }: DocPageProps): VNode | null {
     const responseState = useDocPagesResponseState();
+    const titleEl = <DocumentTitle title={pageIdToPageTitle[pageId]} />;
+
+    if (responseState.type !== ResponseDoneType) {
+        return titleEl;
+    }
+
+    const pageOrderIndex = findIndex(
+        pageOrder,
+        (pageId_) => pageId === pageId_,
+    );
 
     return (
         <Fragment>
-            <DocumentTitle title={pageIdToPageTitle[pageId]} />
-            {responseState.type === ResponseDoneType ? (
-                <DocPageContent
-                    mainRef={mainRef}
-                    page={
-                        responseState.pages.filter(
-                            (page) => page.pageId === pageId,
-                        )[0]
-                    }
-                />
-            ) : null}
+            {titleEl}
+            <DocPageContent
+                mainRef={mainRef}
+                page={
+                    responseState.pages.filter(
+                        (page) => page.pageId === pageId,
+                    )[0]
+                }
+                previousPageId={
+                    pageOrderIndex === 0
+                        ? undefined
+                        : pageOrder[pageOrderIndex - 1]
+                }
+                nextPageId={
+                    pageOrderIndex === pageOrder.length - 1
+                        ? undefined
+                        : pageOrder[pageOrderIndex + 1]
+                }
+            />
         </Fragment>
     );
 }
 
 export interface DocPageContentProps {
     mainRef: AppPathBaseProps['mainRef'];
-    page: PageNode<DeepCoreNode>;
     title?: string;
+    page: PageNode<DeepCoreNode>;
+    previousPageId?: string;
+    nextPageId?: string;
 }
 
 export function DocPageContent({
     mainRef,
-    page,
     title,
+    page,
+    previousPageId,
+    nextPageId,
 }: DocPageContentProps): VNode {
     const headingRefs: { current: HTMLHeadingElement }[] = [];
 
@@ -71,6 +101,68 @@ export function DocPageContent({
                             headingRefs={headingRefs}
                         />
                     ))}
+                    {(previousPageId !== undefined ||
+                        nextPageId !== undefined) && (
+                        <nav class="cls-doc-page__prev-next">
+                            {previousPageId !== undefined && (
+                                <DocPageLink
+                                    pageId={previousPageId}
+                                    class="cls-doc-page__prev-next__prev"
+                                >
+                                    <svg
+                                        viewBox="0 0 14 24"
+                                        class="cls-doc-page__prev-next__icon"
+                                    >
+                                        <path
+                                            fill="none"
+                                            fill-rule="evenodd"
+                                            stroke="currentColor"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12.5.75L1.78 11.47a.749.749 0 0 0-.001 1.059l.001.001L12.5 23.25"
+                                        ></path>
+                                    </svg>
+                                    <div class="cls-doc-page__prev-next__prev-container">
+                                        <div class="cls-doc-page__prev-next__prev-label">
+                                            Previous
+                                        </div>
+                                        <div class="cls-doc-page__prev-next__prev-title">
+                                            {pageIdToPageTitle[previousPageId]}
+                                        </div>
+                                    </div>
+                                </DocPageLink>
+                            )}
+                            {nextPageId !== undefined && (
+                                <DocPageLink
+                                    pageId={nextPageId}
+                                    class="cls-doc-page__prev-next__next"
+                                >
+                                    <div class="cls-doc-page__prev-next__next-container">
+                                        <div class="cls-doc-page__prev-next__next-label">
+                                            Next
+                                        </div>
+                                        <div class="cls-doc-page__prev-next__next-title">
+                                            {pageIdToPageTitle[nextPageId]}
+                                        </div>
+                                    </div>
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        class="cls-doc-page__prev-next__icon"
+                                    >
+                                        <path
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M5.5.75l10.72 10.72a.749.749 0 0 1 .001 1.059l-.001.001L5.5 23.25"
+                                        ></path>
+                                    </svg>
+                                </DocPageLink>
+                            )}
+                        </nav>
+                    )}
                 </main>
             </div>
         </div>

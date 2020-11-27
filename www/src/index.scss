@@ -543,27 +543,29 @@ $content-link-hover-color: $text-color;
 }
 
 @mixin minimal-scrollbar {
-    scrollbar-width: thin;
+    body:not(.cls-chromium-chromebook) {
+        scrollbar-width: thin;
 
-    // https://gist.github.com/adamblank/7896758 thx.
+        // https://gist.github.com/adamblank/7896758 thx.
 
-    &::-webkit-scrollbar {
-        width: 10px;
-    }
+        &::-webkit-scrollbar {
+            width: 10px;
+        }
 
-    &::-webkit-scrollbar-track-piece {
-        background-color: #fff;
-    }
+        &::-webkit-scrollbar-track-piece {
+            background-color: #fff;
+        }
 
-    &::-webkit-scrollbar-thumb {
-        background-color: #cbcbcb;
-        outline: 2px solid #fff;
-        outline-offset: -2px;
-        border: 0.1px solid #b7b7b7;
-    }
+        &::-webkit-scrollbar-thumb {
+            background-color: #cbcbcb;
+            outline: 2px solid #fff;
+            outline-offset: -2px;
+            border: 0.1px solid #b7b7b7;
+        }
 
-    &::-webkit-scrollbar-thumb:hover {
-        background-color: #909090;
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: #909090;
+        }
     }
 }
 
@@ -806,6 +808,55 @@ $content-link-hover-color: $text-color;
         }
     }
 
+    &__prev-next {
+        line-height: 1.4;
+        display: flex;
+        padding-top: $spacing * 3;
+        padding-bottom: $spacing * 5;
+
+        &__icon {
+            height: 16px;
+            width: 16px;
+        }
+
+        &__prev,
+        &__next {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            outline-offset: $spacing/2;
+
+            &-label {
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                font-size: 14px;
+            }
+
+            &-title {
+                color: rgba(0, 0, 0, 0.8);
+            }
+
+            &:hover,
+            &:focus {
+                opacity: 0.6;
+            }
+        }
+
+        &__prev-container {
+            margin-left: $spacing;
+        }
+
+        &__next {
+            margin-left: auto;
+
+            &-container {
+                margin-right: $spacing;
+                text-align: right;
+            }
+        }
+    }
+
     $min-sidebar-width: 260px;
     $max-sidebar-width: 400px;
     $non-native-sticky-support-sidebar-width: (
@@ -883,7 +934,7 @@ $content-link-hover-color: $text-color;
                 &__main-reference {
                     margin-left: -$indent;
                     text-indent: $indent;
-                    outline-offset: $spacing * 0.7;
+                    outline-offset: $spacing / 3;
                     @include content-link;
 
                     &--active {
@@ -901,6 +952,9 @@ $content-link-hover-color: $text-color;
         margin-right: $spacing;
         border-bottom: 1px solid #efefef;
         font-weight: 600;
+        max-width: calc(100vw - #{$spacing * 2});
+        overflow-x: auto;
+        overflow-y: hidden;
     }
 }
 
