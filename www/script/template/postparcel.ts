@@ -161,7 +161,7 @@ async function fixParcelBuild(): Promise<void> {
                 root.walkRules((rule) => {
                     rules.push(rule);
                 });
-                const classNames = new Set<string>();
+                const classNames = new Set<string>(['cls-root']);
                 await Promise.all([
                     rules.map((rule) =>
                         postcssSelectorParser((selector) => {
