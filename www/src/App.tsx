@@ -20,6 +20,7 @@ import {
 import { AppPathBaseProps } from './pages/base';
 import { DocPage } from './pages/DocPage';
 import { IndexPage } from './pages/IndexPage';
+import { LicensePage } from './pages/LicensePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 function setFocusBefore(element?: ChildNode): void {
@@ -198,6 +199,10 @@ const AppPathContent = memo(
     function AppPathContent({ mainRef, pathname }: AppPathContentProps): VNode {
         if (pathname === '/') {
             return <IndexPage mainRef={mainRef} />;
+        }
+
+        if (pathname === '/license') {
+            return <LicensePage mainRef={mainRef} />;
         }
 
         const pageId = getPageIdFromPathname(pathname);

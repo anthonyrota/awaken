@@ -124,9 +124,8 @@ async function buildDocsSourceSubdirectoryToApiPages(
                     : `docs/` + path.join(subPath, name);
             const defaultWebsitePath = mdPagePath.slice(0, -ext.length);
             pageIdToMdPagePath[pageId] = mdPagePath;
-            (pageIdToPageTitle[pageId] = title),
-                (pageIdToWebsitePath[pageId] =
-                    websitePath ?? defaultWebsitePath);
+            pageIdToPageTitle[pageId] = title;
+            pageIdToWebsitePath[pageId] = websitePath ?? defaultWebsitePath;
 
             substituteDynamicTextValues(
                 rootContainer,

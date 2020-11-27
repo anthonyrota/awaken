@@ -59,6 +59,8 @@ async function main() {
 
     addRenderedHtmlToFolder(renderAppAtPath('/'), 'index.html');
 
+    addRenderedHtmlToFolder(renderAppAtPath('/license'), 'license/index.html');
+
     addRenderedHtmlToFolder(renderAppAtPath('/_notfound'), '_404/index.html');
 
     for (const { pageId } of pages) {

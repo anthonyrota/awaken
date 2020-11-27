@@ -42,19 +42,24 @@ export function DocPage({ mainRef, pageId }: DocPageProps): VNode | null {
     );
 }
 
-interface DocPageContentProps {
+export interface DocPageContentProps {
     mainRef: AppPathBaseProps['mainRef'];
     page: PageNode<DeepCoreNode>;
+    title?: string;
 }
 
-function DocPageContent({ mainRef, page }: DocPageContentProps): VNode {
+export function DocPageContent({
+    mainRef,
+    page,
+    title,
+}: DocPageContentProps): VNode {
     return (
         <div class="cls-page__content__container cls-doc-page">
             <h1 class="cls-doc-page__title">
-                {pageIdToPageTitle[page.pageId]}
+                {title !== undefined ? title : pageIdToPageTitle[page.pageId]}
             </h1>
             <div class="cls-doc-page__content">
-                <DocPageSidebar page={page} />
+                {page.tableOfContents && <DocPageSidebar page={page} />}
                 <main class="cls-doc-page__main" ref={mainRef}>
                     {page.children.map((childNode) => (
                         <DeepCoreNodeComponent node={childNode} />
