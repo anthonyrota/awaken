@@ -543,7 +543,7 @@ $content-link-hover-color: $text-color;
 }
 
 @mixin minimal-scrollbar {
-    body:not(.cls-chromium-chromebook) {
+    body:not(.cls-chromium-chromebook) & {
         scrollbar-width: thin;
 
         // https://gist.github.com/adamblank/7896758 thx.
@@ -826,6 +826,7 @@ $content-link-hover-color: $text-color;
             text-decoration: none;
             color: inherit;
             outline-offset: $spacing/2;
+            max-width: 40vw;
 
             &-label {
                 letter-spacing: 0.12em;
