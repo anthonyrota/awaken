@@ -167,8 +167,10 @@ function AppPath({
     const isFirstRenderRef = useRef(true);
 
     useEffect(() => {
-        const isFirstRender = isFirstRenderRef.current;
-        isFirstRenderRef.current = false;
+        if (isFirstRenderRef.current) {
+            isFirstRenderRef.current = false;
+            return;
+        }
 
         if (isDuplicateRender) {
             return;
@@ -177,18 +179,9 @@ function AppPath({
         if (hash) {
             const element = document.getElementById(hash.slice(1));
             if (element) {
-                // IDK. This works though.
-                requestAnimationFrame(() =>
-                    requestAnimationFrame(() =>
-                        requestAnimationFrame(() => setFocusBefore(element)),
-                    ),
-                );
+                setFocusBefore(element);
                 return;
             }
-        }
-
-        if (isFirstRender) {
-            return;
         }
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
