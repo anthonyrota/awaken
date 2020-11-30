@@ -1,3 +1,4 @@
+import { Action } from 'history';
 import { h, Fragment, VNode } from 'preact';
 import { useEffect, useRef } from 'preact/hooks';
 import { FullSiteNavigationContents } from './components/FullSiteNavigationContents';
@@ -9,7 +10,12 @@ import {
     getCurrentResponseState,
 } from './data/docPages';
 import { useDocPagesResponseState } from './hooks/useDocPagesResponseState';
-import { customHistory, Path, useHistory } from './hooks/useHistory';
+import {
+    customHistory,
+    Path,
+    useHistory,
+    useHistoryAction,
+} from './hooks/useHistory';
 import { BindKeysRequireFocus } from './hooks/useNavigationListKeyBindings';
 import { usePrevious } from './hooks/usePrevious';
 import {
@@ -165,14 +171,17 @@ function AppPath({
 }: AppPathProps): VNode {
     const { hash } = customHistory.location;
     const isFirstRenderRef = useRef(true);
+    const action = useHistoryAction();
+    const actionRef = useRef<Action | null>();
+    actionRef.current = action;
 
     useEffect(() => {
-        if (isFirstRenderRef.current) {
+        if (
+            isFirstRenderRef.current ||
+            isDuplicateRender ||
+            (actionRef.current && actionRef.current === Action.Pop)
+        ) {
             isFirstRenderRef.current = false;
-            return;
-        }
-
-        if (isDuplicateRender) {
             return;
         }
 

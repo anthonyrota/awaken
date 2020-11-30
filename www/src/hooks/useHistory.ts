@@ -1,6 +1,7 @@
 import { History, createBrowserHistory, Action } from 'history';
 import { useState, useEffect } from 'preact/hooks';
 import { isBrowser } from '../env';
+import { usePrevious } from './usePrevious';
 
 export type HistoryState = {
     beforeMenuOpenScrollTop?: number;
@@ -73,7 +74,10 @@ export interface UseHistoryResult {
 
 export function useHistory(params: UseHistoryParams): UseHistoryResult {
     const { 0: path, 1: setPath } = useState(
-        normalizePath(params.path || customHistory.location, true),
+        normalizePath(
+            params.path || customHistory.location,
+            !params._watchOnly,
+        ),
     );
 
     useEffect(() => {
@@ -88,12 +92,12 @@ export function useHistory(params: UseHistoryParams): UseHistoryResult {
                 location.state.beforeMenuOpenScrollTop !== undefined
             ) {
                 const { beforeMenuOpenScrollTop } = location.state;
-                // TODO (hack: preact schedules on requestAnimationFrame).
+                whileIgnoringChange(() => {
+                    customHistory.replace(customHistory.location, null);
+                });
+                // TODO.
                 requestAnimationFrame(() => {
                     window.scrollTo(0, beforeMenuOpenScrollTop);
-                    whileIgnoringChange(() => {
-                        customHistory.replace(customHistory.location, null);
-                    });
                 });
             }
         });
@@ -108,4 +112,29 @@ export function usePath(): Path {
     return useHistory({
         _watchOnly: true,
     }).path;
+}
+
+export function useDidPathChange(): boolean {
+    const path = usePath();
+    const previousPath = usePrevious(path);
+    if (previousPath && previousPath.value !== path) {
+        previousPath.value = path;
+        return true;
+    }
+    return false;
+}
+
+export function useHistoryAction(): Action | null {
+    const { 0: action, 1: setAction } = useState<Action | null>(null);
+
+    useEffect(() => {
+        return customHistory.listen(({ action }) => {
+            if (ignoreChange) {
+                return;
+            }
+            setAction(action);
+        });
+    });
+
+    return action;
 }

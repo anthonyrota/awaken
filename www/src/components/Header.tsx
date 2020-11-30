@@ -10,8 +10,8 @@ import {
 } from '../hooks/useFullScreenOverlayState';
 import {
     customHistory,
-    usePath,
     whileIgnoringChange,
+    useDidPathChange,
 } from '../hooks/useHistory';
 import {
     BindKeysNoRequireFocus,
@@ -73,10 +73,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         setFocusOnClose: () => manuallySetFocus(toggleButtonRef.current),
     });
 
-    const path = usePath();
-    const previousPath = usePrevious(path);
-    if (previousPath && previousPath.value !== path) {
-        previousPath.value = path;
+    if (useDidPathChange()) {
         transitionMenuState(
             FullScreenOverlayCloseWithoutSettingFocusTransitionType,
         );

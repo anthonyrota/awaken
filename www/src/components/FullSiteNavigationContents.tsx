@@ -1,7 +1,7 @@
 import { h, Fragment, VNode } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { getGithubUrl, getPagesMetadata } from '../data/docPages';
-import { usePath } from '../hooks/useHistory';
+import { useDidPathChange } from '../hooks/useHistory';
 import {
     BindKeys,
     useNavigationListKeyBindings,
@@ -302,7 +302,7 @@ export function FullSiteNavigationContents({
     });
 
     let linkIndex = 0;
-    const linkClass = `cls-full-site-nav__link`;
+    const linkClass = 'cls-full-site-nav__link';
 
     const isLicenseActivePath = isStringActivePath('/license');
 
@@ -430,10 +430,7 @@ function FullSiteNavigationLinkList({
     // cspell:disable-next-line
     const id = `a11y-fsnll-${index}`;
 
-    const path = usePath();
-    const previousPath = usePrevious(path);
-    if (previousPath && previousPath.value !== path) {
-        previousPath.value = path;
+    if (useDidPathChange()) {
         setIsOpen(isActive);
     }
 
@@ -477,7 +474,7 @@ function FullSiteNavigationLinkList({
                     onChange={onCheckboxChange}
                     aria-labelledby={id}
                     onClick={onCheckboxClick_}
-                    onMouseDown={onCheckboxClick_}
+                    // onMouseDown={onCheckboxClick_}
                 />
                 <h2
                     class={
