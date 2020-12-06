@@ -1050,20 +1050,15 @@ $content-link-hover-color: $text-color;
     &-code-block {
         padding: $spacing * 2/3;
         border-radius: 0.3em;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-all;
+        word-break: break-word;
+        hyphens: none;
 
         .cls-doc-page__main > & {
             padding: $spacing;
-        }
-
-        @media screen and (min-width: $size-small) {
-            .cls-doc-page__main > & {
-                white-space: pre-wrap;
-                overflow-wrap: break-word;
-                word-wrap: break-word;
-                word-break: break-all;
-                word-break: break-word;
-                hyphens: none;
-            }
         }
 
         @media screen and (max-width: $size-small) {
@@ -1075,6 +1070,11 @@ $content-link-hover-color: $text-color;
                 margin-left: 0;
                 margin-right: 0;
                 border-radius: 0;
+                white-space: pre;
+                overflow-wrap: normal;
+                word-wrap: normal;
+                word-break: normal;
+                word-break: normal;
             }
         }
 
