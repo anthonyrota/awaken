@@ -8,7 +8,6 @@
         "preparcel": "rimraf template && ts-node --project ./tsconfig.ts-node.json ./script/template/preparcel.tsx",
         "vercel-build": "cd .. && npm install && npm run build && cd www && npm run build:docs && npm run build:public",
         "start": "npm run preparcel -- --dev && rimraf .parcel-cache && parcel 'src/__auto_generated__index.html' --open --dist-dir parcel-public --detailed-report && rimraf parcel-public .parcel-cache src/__auto_generated__index.html",
-        "prod": "node ./script/dev/prod.js",
         "postinstall": "cd node_modules/@parcel/transformer-postcss && npm install -E postcss@latest"
     },
     "dependencies": {
@@ -49,6 +48,7 @@
         "mdast-util-definitions": "3.0.1",
         "npc": "0.0.1",
         "open": "7.2.1",
+        "p-limit": "3.1.0",
         "parcel": "2.0.0-beta.1",
         "postcss": "8.1.1",
         "postcss-selector-parser": "6.0.4",
@@ -69,6 +69,8 @@
         "typescript": "4.0.2",
         "unified": "9.2.0",
         "uuid": "8.3.0",
+        "vscode-oniguruma": "1.4.0",
+        "vscode-textmate": "5.2.0",
         "yaml": "1.10.0"
     }
 }

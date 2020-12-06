@@ -7,6 +7,7 @@ import {
     ApiPackage,
 } from '@microsoft/api-extractor-model';
 import * as fs from 'fs-extra';
+import * as pLimit from 'p-limit';
 import * as rimraf from 'rimraf';
 import { computeFileHash } from '../computeFileHash';
 import { exit } from '../exit';
@@ -20,7 +21,8 @@ import {
 import { generateSourceMetadata } from './analyze/sourceMetadata';
 import { getApiItemIdentifier } from './analyze/util/getApiItemIdentifier';
 import { UnsupportedApiItemError } from './analyze/util/UnsupportedApiItemError';
-import { DeepCoreNode } from './core/nodes';
+import { DeepCoreNode, CoreNodeType } from './core/nodes';
+import { $HACK_SYMBOL } from './core/nodes/CodeBlock';
 import { DocPageLinkNode } from './core/nodes/DocPageLink';
 import { HtmlElementNode } from './core/nodes/HtmlElement';
 import { LineBreakNode } from './core/nodes/LineBreak';
@@ -28,6 +30,7 @@ import { PageNode } from './core/nodes/Page';
 import { PlainTextNode } from './core/nodes/PlainText';
 import { TableNode, TableRow } from './core/nodes/Table';
 import { collapseDeepCoreNodeWhitespace } from './core/nodes/util/simplify';
+import { walkDeepCoreNode } from './core/nodes/util/walk';
 import { renderDeepRenderMarkdownNodeAsMarkdown } from './core/render/markdown';
 import { buildDocsSourceDirectoryToApiPages } from './docsSource';
 import { getDynamicTextVariableReplacementP } from './getDynamicTextVariableReplacement';
@@ -38,6 +41,11 @@ import {
     writeFolderToDirectoryPath,
 } from './util/Folder';
 import { globAbsolute } from './util/glob';
+import {
+    TokenizeLanguage,
+    tokenizeText,
+    codeBlockStyle,
+} from './util/tokenizeText';
 import { createProgram } from './util/ts';
 
 const rimrafP = promisify(rimraf);
@@ -494,7 +502,7 @@ async function main() {
 
     const pageIdToWebsitePath: Record<string, string> = Object.fromEntries(
         apiPages.flatMap(([, group]) =>
-            group.map(({ title, id }) => [id, `docs/api/${title}`]),
+            group.map(({ title, id }) => [id, `api/${title}`]),
         ),
     );
     const pageIdToPageTitle: Record<string, string> = Object.fromEntries(
@@ -695,10 +703,86 @@ async function main() {
         );
     }
 
+    const limitTokenization = pLimit(25);
+
+    await Promise.all(
+        pages.map((page) => {
+            const promises: Promise<unknown>[] = [];
+            walkDeepCoreNode(page, (node) => {
+                if (node.type === CoreNodeType.CodeBlock) {
+                    if (node.language !== 'ts') {
+                        console.log('unknown language', node.language);
+                        return;
+                    }
+                    if (!node.code) {
+                        return;
+                    }
+                    const prefixText =
+                        node[$HACK_SYMBOL]?.syntaxHighlightingPrefix || '';
+                    const suffixText =
+                        node[$HACK_SYMBOL]?.syntaxHighlightingSuffix || '';
+                    const promise = limitTokenization(() =>
+                        tokenizeText(
+                            prefixText + node.code + suffixText,
+                            TokenizeLanguage.TypeScript,
+                        ),
+                    ).then((tokenizedLines) => {
+                        if (suffixText) {
+                            const lastLine =
+                                tokenizedLines.lines[
+                                    tokenizedLines.lines.length - 1
+                                ];
+                            for (
+                                let i = lastLine.tokens.length - 1;
+                                i >= 0;
+                                i--
+                            ) {
+                                const token = lastLine.tokens[i];
+                                const distanceFromEnd =
+                                    lastLine.endIndex -
+                                    (lastLine.startIndex + token.startIndex);
+                                if (distanceFromEnd >= suffixText.length) {
+                                    break;
+                                }
+                                lastLine.tokens.pop();
+                            }
+                            lastLine.endIndex -= suffixText.length;
+                        }
+                        if (prefixText) {
+                            const firstLine = tokenizedLines.lines[0];
+                            while (firstLine.tokens.length > 1) {
+                                if (
+                                    firstLine.tokens[1].startIndex >
+                                    prefixText.length
+                                ) {
+                                    break;
+                                }
+                                firstLine.tokens.shift();
+                            }
+                            firstLine.tokens[0].startIndex = 0;
+                            for (const token of firstLine.tokens.slice(1)) {
+                                token.startIndex -= prefixText.length;
+                            }
+                            firstLine.endIndex -= prefixText.length;
+                            for (const line of tokenizedLines.lines.slice(1)) {
+                                line.startIndex -= prefixText.length;
+                                line.endIndex -= prefixText.length;
+                            }
+                        }
+                        node.tokenizedLines = tokenizedLines;
+                    });
+                    promises.push(promise);
+                }
+            });
+            return Promise.all(promises);
+        }),
+    );
+
     const pagesMetadata: PagesMetadata = {
         pageIdToWebsitePath,
         pageIdToPageTitle,
         pageGroups,
+        codeBlockStyle,
         github:
             process.env.VERCEL_GITHUB_DEPLOYMENT === '1'
                 ? {

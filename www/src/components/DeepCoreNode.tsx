@@ -2,7 +2,7 @@ import { Fragment, h, VNode } from 'preact';
 import { useRef } from 'preact/hooks';
 import { DeepCoreNode, CoreNodeType } from '../../script/docs/core/nodes';
 import { ListType } from '../../script/docs/core/nodes/List';
-import { getGithubUrl } from '../data/docPages';
+import { getGithubUrl, getPagesMetadata } from '../data/docPages';
 import { customHistory } from '../hooks/useHistory';
 import { DocPageLink } from './DocPageLink';
 import { Link } from './Link';
@@ -102,12 +102,209 @@ export function DeepCoreNodeComponent({
             );
         }
         case CoreNodeType.CodeBlock: {
-            return <pre class="cls-node-code-block">{node.code}</pre>;
-        }
-        case CoreNodeType.RichCodeBlock: {
+            const {
+                foreground,
+                background,
+            } = getPagesMetadata().codeBlockStyle;
+            const { code, tokenizedLines, codeLinks } = node;
+            const ChildNodeType$Text = 1;
+            const ChildNodeType$Link = 0;
+            interface ChildText {
+                type: typeof ChildNodeType$Text;
+                text: string;
+                style: preact.JSX.HTMLAttributes<HTMLSpanElement>['style'];
+            }
+            interface ChildLink {
+                type: typeof ChildNodeType$Link;
+                pageId: string;
+                hash?: string;
+                children: ChildText[];
+            }
+            type ChildNode = ChildText | ChildLink;
+            const childNodes: ChildNode[] = [];
+            if (tokenizedLines) {
+                tokenizedLines.lines.forEach((line, lineIndex) => {
+                    line.tokens.forEach((token, tokenIndex) => {
+                        childNodes.push({
+                            type: ChildNodeType$Text,
+                            text: code.slice(
+                                line.startIndex + token.startIndex,
+                                tokenIndex === line.tokens.length - 1
+                                    ? lineIndex ===
+                                      tokenizedLines.lines.length - 1
+                                        ? code.length
+                                        : tokenizedLines.lines[lineIndex + 1]
+                                              .startIndex
+                                    : line.startIndex +
+                                          line.tokens[tokenIndex + 1]
+                                              .startIndex,
+                            ),
+                            style: {
+                                color:
+                                    token.color === undefined
+                                        ? foreground
+                                        : token.color,
+                                fontStyle: (token.isItalic
+                                    ? 'italic'
+                                    : undefined) as string,
+                                fontWeight: (token.isBold
+                                    ? 'bold'
+                                    : undefined) as string,
+                                textDecoration: (token.isUnderline
+                                    ? 'underline'
+                                    : undefined) as string,
+                            },
+                        });
+                    });
+                });
+            } else {
+                childNodes.push({
+                    type: ChildNodeType$Text,
+                    text: code,
+                    style: {
+                        color: foreground,
+                    },
+                });
+            }
+            const getChildNodeLength = (childNode: ChildNode) => {
+                if (childNode.type === ChildNodeType$Link) {
+                    let childNodeLength = 0;
+                    childNode.children.forEach((textNode) => {
+                        childNodeLength += textNode.text.length;
+                    });
+                    return childNodeLength;
+                }
+                return childNode.text.length;
+            };
+            if (codeLinks) {
+                codeLinks.forEach(({ startIndex, endIndex, pageId, hash }) => {
+                    let i = 0;
+                    let codePos = 0;
+                    while (true) {
+                        const childNodeLength = getChildNodeLength(
+                            childNodes[i],
+                        );
+                        if (codePos + childNodeLength > startIndex) {
+                            break;
+                        }
+                        codePos += childNodeLength;
+                        i++;
+                    }
+                    const linkChildren: ChildText[] = [];
+                    const startNode = childNodes[i] as ChildText;
+                    childNodes.splice(i + 1, 0, {
+                        type: ChildNodeType$Link,
+                        children: linkChildren,
+                        pageId,
+                        hash,
+                    });
+                    if (codePos === startIndex) {
+                        childNodes.splice(i, 1);
+                    } else {
+                        childNodes[i] = {
+                            type: ChildNodeType$Text,
+                            style: startNode.style,
+                            text: startNode.text.slice(0, startIndex - codePos),
+                        };
+                        i++;
+                    }
+                    i++;
+                    linkChildren.push({
+                        type: ChildNodeType$Text,
+                        style: startNode.style,
+                        text: startNode.text.slice(
+                            startIndex - codePos,
+                            endIndex - codePos,
+                        ),
+                    });
+                    if (endIndex <= codePos + startNode.text.length) {
+                        const endText = startNode.text.slice(
+                            endIndex - codePos,
+                        );
+                        if (endText) {
+                            childNodes.splice(i, 0, {
+                                type: ChildNodeType$Text,
+                                style: startNode.style,
+                                text: endText,
+                            });
+                        }
+                        return;
+                    }
+                    codePos += getChildNodeLength(startNode);
+                    while (true) {
+                        const childNode = childNodes[i];
+                        const childNodeLength = getChildNodeLength(childNode);
+                        if (codePos + childNodeLength > endIndex) {
+                            break;
+                        }
+                        childNodes.splice(i, 1);
+                        linkChildren.push(childNode as ChildText);
+                        codePos += childNodeLength;
+                    }
+                    const endNode = childNodes[i] as ChildText;
+                    if (codePos === endIndex) {
+                        return;
+                    }
+                    linkChildren.push({
+                        type: ChildNodeType$Text,
+                        style: endNode.style,
+                        text: endNode.text.slice(0, endIndex - codePos),
+                    });
+                    childNodes.splice(i, 1, {
+                        type: ChildNodeType$Text,
+                        style: endNode.style,
+                        text: endNode.text.slice(endIndex - codePos),
+                    });
+                });
+            }
+            const renderChildNode = (childNode: ChildNode) => {
+                if (childNode.type === ChildNodeType$Text) {
+                    return (
+                        <span style={childNode.style}>{childNode.text}</span>
+                    );
+                }
+                return (
+                    <DocPageLink
+                        class="cls-node-code-block__link"
+                        pageId={childNode.pageId}
+                        hash={childNode.hash}
+                    >
+                        {childNode.children.map(renderChildNode)}
+                    </DocPageLink>
+                );
+            };
             return (
-                <pre class="cls-node-rich-code-block">
-                    {mapChildren(node.children, headingRefs)}
+                <pre
+                    class="cls-node-code-block"
+                    style={{
+                        backgroundColor: background,
+                    }}
+                >
+                    {childNodes.map((childNode) => {
+                        if (childNode.type === ChildNodeType$Text) {
+                            return (
+                                <span style={childNode.style}>
+                                    {childNode.text}
+                                </span>
+                            );
+                        }
+                        return (
+                            <DocPageLink
+                                class="cls-node-code-block__link"
+                                pageId={childNode.pageId}
+                                hash={childNode.hash}
+                            >
+                                {childNode.children.map((childText) => (
+                                    <span
+                                        class="cls-node-code-block__link__text"
+                                        style={childText.style}
+                                    >
+                                        {childText.text}
+                                    </span>
+                                ))}
+                            </DocPageLink>
+                        );
+                    })}
                 </pre>
             );
         }

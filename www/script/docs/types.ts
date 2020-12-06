@@ -9,10 +9,16 @@ export interface PageGroup {
     pageIds: PageIds;
 }
 
+export interface CodeBlockStyle {
+    foreground: string;
+    background: string;
+}
+
 export interface PagesMetadata {
     pageIdToWebsitePath: Record<string, string>;
     pageIdToPageTitle: Record<string, string>;
     pageGroups: PageGroup[];
+    codeBlockStyle: CodeBlockStyle;
     github: null | {
         org: string;
         repo: string;

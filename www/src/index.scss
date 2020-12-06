@@ -765,7 +765,12 @@ $content-link-hover-color: $text-color;
         flex-grow: 1;
 
         &__container {
-            padding: $spacing;
+            padding-top: $spacing;
+            padding-bottom: $spacing;
+            &:not(.cls-doc-page) {
+                padding-left: $spacing;
+                padding-right: $spacing;
+            }
             padding-bottom: 0;
             color: $text-color;
         }
@@ -792,10 +797,6 @@ $content-link-hover-color: $text-color;
         word-break: break-all;
         word-break: break-word;
 
-        @media screen and (max-width: $size-sidebar-right) {
-            padding-right: $spacing;
-        }
-
         > :first-child {
             &.cls-temp-focus-span + * {
                 margin-top: 0;
@@ -812,7 +813,9 @@ $content-link-hover-color: $text-color;
         line-height: 1.4;
         display: flex;
         padding-top: $spacing * 3;
-        padding-bottom: $spacing * 5;
+        padding-bottom: $spacing * 6;
+        padding-left: $spacing;
+        padding-right: $spacing;
 
         &__icon {
             height: 16px;
@@ -829,9 +832,8 @@ $content-link-hover-color: $text-color;
             max-width: 40vw;
 
             &-label {
-                letter-spacing: 0.12em;
                 text-transform: uppercase;
-                font-size: 14px;
+                font-size: 15px;
             }
 
             &-title {
@@ -950,16 +952,37 @@ $content-link-hover-color: $text-color;
         font-size: 40px;
         line-height: 1em;
         padding-bottom: 2px;
-        margin-right: $spacing;
+        margin-left: $spacing;
+        margin-right: $spacing * 2;
         border-bottom: 1px solid #efefef;
         font-weight: 600;
         max-width: calc(100vw - #{$spacing * 2});
+        max-width: calc(100vw - var(--scrollbar-width, 0px) - #{$spacing * 2});
         overflow-x: auto;
         overflow-y: hidden;
     }
 }
 
 .cls-node {
+    &-blockquote,
+    &-collapsible-section,
+    &-ordered-list,
+    &-unordered-list,
+    &-paragraph,
+    &-code-block,
+    &-table,
+    &-header-1,
+    &-header-2,
+    &-header-3,
+    &-header-4,
+    &-header-5,
+    &-header-6 {
+        .cls-doc-page__main > & {
+            margin-left: $spacing;
+            margin-right: $spacing;
+        }
+    }
+
     &-link:not([href]) {
         color: inherit;
         text-decoration: none;
@@ -971,7 +994,6 @@ $content-link-hover-color: $text-color;
     &-unordered-list,
     &-paragraph,
     &-code-block,
-    &-rich-code-block,
     &-table {
         margin-top: 0;
         margin-bottom: 16px;
@@ -1006,11 +1028,17 @@ $content-link-hover-color: $text-color;
     }
 
     &-code-span,
-    &-code-block,
-    &-rich-code-block {
+    &-code-block {
         font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono,
             Oxygen Mono, Liberation Mono, monospace;
         font-size: 14px;
+    }
+
+    &-code-span {
+        padding: 0.2em 0.4em;
+        margin: 0;
+        font-size: 85%;
+        background-color: rgba(255, 229, 100, 0.2);
         white-space: pre-wrap;
         overflow-wrap: break-word;
         word-wrap: break-word;
@@ -1019,12 +1047,45 @@ $content-link-hover-color: $text-color;
         hyphens: none;
     }
 
-    &-code-span {
-        padding: 0.2em 0.4em;
-        margin: 0;
-        font-size: 85%;
-        background-color: rgba(255, 229, 100, 0.2);
-        border-radius: 3px;
+    &-code-block {
+        padding: $spacing * 2/3;
+        border-radius: 0.3em;
+
+        .cls-doc-page__main > & {
+            padding: $spacing;
+        }
+
+        @media screen and (min-width: $size-small) {
+            .cls-doc-page__main > & {
+                white-space: pre-wrap;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                word-break: break-all;
+                word-break: break-word;
+                hyphens: none;
+            }
+        }
+
+        @media screen and (max-width: $size-small) {
+            .cls-doc-page__main > & {
+                overflow-x: auto;
+                overflow-y: hidden;
+                max-width: 100vw;
+                max-width: calc(100vw - var(--scrollbar-width, 0px));
+                margin-left: 0;
+                margin-right: 0;
+                border-radius: 0;
+            }
+        }
+
+        &__link {
+            text-decoration: none;
+            color: inherit;
+
+            &__text {
+                text-decoration: underline;
+            }
+        }
     }
 
     &-link {
@@ -1131,11 +1192,15 @@ $content-link-hover-color: $text-color;
     }
 
     &-table {
-        border-spacing: 0;
-        border-collapse: collapse;
         display: block;
         width: 100%;
+        max-width: calc(100vw - #{$spacing * 2});
+        max-width: calc(100vw - var(--scrollbar-width, 0px) - #{$spacing * 2});
         overflow: auto;
+        overflow-wrap: normal;
+        word-wrap: normal;
+        word-break: normal;
+        word-break: normal;
 
         th {
             font-weight: 600;

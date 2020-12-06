@@ -7,28 +7,8 @@ import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationRefer
 import * as colors from 'colors';
 import { AnalyzeContext } from '../Context';
 
-export const enum FoundExcerptTokenReferenceResultType {
-    Export,
-    LocalSignatureTokens,
-}
-
 export interface FoundApiItemReference {
-    type: FoundExcerptTokenReferenceResultType.Export;
     apiItem: ApiItem;
-}
-
-export interface FoundLocalSignatureReference {
-    type: FoundExcerptTokenReferenceResultType.LocalSignatureTokens;
-    tokens: ExcerptToken[];
-}
-
-function findLocalReferenceTokens(
-    canonicalReference: DeclarationReference,
-    context: AnalyzeContext,
-): FoundLocalSignatureReference {
-    context;
-    console.log(canonicalReference.toString());
-    return (null as unknown) as FoundLocalSignatureReference;
 }
 
 const eventRegexp = /core!~?Event(_2)?:type$/;
@@ -38,7 +18,7 @@ export function getExcerptTokenReference(
     debugTokenText: string,
     debugExcerptText: string,
     context: AnalyzeContext,
-): FoundApiItemReference | FoundLocalSignatureReference | null {
+): FoundApiItemReference | null {
     if (
         token.kind !== ExcerptTokenKind.Reference ||
         !token.canonicalReference ||
@@ -55,8 +35,9 @@ export function getExcerptTokenReference(
             return null;
         }
         // Local reference.
-        return findLocalReferenceTokens(token.canonicalReference, context);
+        return null;
     }
+
     // Event type shadows the global type so api-extractor replaces it with
     // Event_2, but doesn't bother changing the references to the updated name.
     // Also, for some reason Event is declared to be a local reference in the
@@ -89,7 +70,6 @@ export function getExcerptTokenReference(
 
     if (result.resolvedApiItem) {
         return {
-            type: FoundExcerptTokenReferenceResultType.Export,
             apiItem: result.resolvedApiItem,
         };
     }

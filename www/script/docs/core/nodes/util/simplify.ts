@@ -168,7 +168,6 @@ export function collapseDeepCoreNodeWhitespace(rootNode: DeepCoreNode): void {
                     HtmlTagClassification.Inline) ||
             node.type === CoreNodeType.BlockQuote ||
             node.type === CoreNodeType.CodeBlock ||
-            node.type === CoreNodeType.RichCodeBlock ||
             node.type === CoreNodeType.Image ||
             node.type === CoreNodeType.Paragraph ||
             node.type === CoreNodeType.Heading123456 ||
@@ -201,10 +200,6 @@ export function collapseDeepCoreNodeWhitespace(rootNode: DeepCoreNode): void {
             lastTextNodes.push(node);
         } else if (isBlock(node)) {
             lastTextNodes = [];
-            if (node.type === CoreNodeType.RichCodeBlock) {
-                // Don't walk over children.
-                return true;
-            }
         } else if (isInlineVoid(node)) {
             if (lastTextNodes.length === 0) {
                 textBlocks.push(lastTextNodes);

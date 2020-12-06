@@ -20,7 +20,6 @@ import { PageNode } from './Page';
 import { PageTitleNode } from './PageTitle';
 import { ParagraphNode } from './Paragraph';
 import { PlainTextNode } from './PlainText';
-import { RichCodeBlockNode } from './RichCodeBlock';
 import { StrikethroughNode } from './Strikethrough';
 import { SubheadingNode } from './Subheading';
 import { SubscriptNode } from './Subscript';
@@ -48,7 +47,6 @@ export type ContainerCoreNode<ChildType extends Node> =
     | BoldNode<ChildType>
     | StrikethroughNode<ChildType>
     | CodeSpanNode<ChildType>
-    | RichCodeBlockNode<ChildType>
     | LinkNode<ChildType>
     | DocPageLinkNode<ChildType>
     | GithubSourceLinkNode<ChildType>
@@ -81,7 +79,6 @@ export type DeepCoreNode =
     | BoldNode<DeepCoreNode>
     | StrikethroughNode<DeepCoreNode>
     | CodeSpanNode<DeepCoreNode>
-    | RichCodeBlockNode<DeepCoreNode>
     | LinkNode<DeepCoreNode>
     | DocPageLinkNode<DeepCoreNode>
     | GithubSourceLinkNode<DeepCoreNode>
@@ -109,7 +106,6 @@ export enum CoreNodeType {
     Strikethrough = 'core/Strikethrough',
     CodeSpan = 'core/CodeSpan',
     CodeBlock = 'core/CodeBlock',
-    RichCodeBlock = 'core/RichCodeBlock',
     Link = 'core/Link',
     DocPageLink = 'core/DocPageLink',
     GithubSourceLink = 'core/GithubSourceLink',

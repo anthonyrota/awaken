@@ -17,7 +17,6 @@ import { NamedAnchorNode } from '../../../nodes/NamedAnchor';
 import { PageNode } from '../../../nodes/Page';
 import { PageTitleNode } from '../../../nodes/PageTitle';
 import { ParagraphNode } from '../../../nodes/Paragraph';
-import { RichCodeBlockNode } from '../../../nodes/RichCodeBlock';
 import { StrikethroughNode } from '../../../nodes/Strikethrough';
 import { SubheadingNode } from '../../../nodes/Subheading';
 import { SuperscriptNode } from '../../../nodes/Superscript';
@@ -55,7 +54,6 @@ export type DeepRenderMarkdownNode =
     | BoldNode<DeepRenderMarkdownNode>
     | StrikethroughNode<DeepRenderMarkdownNode>
     | CodeSpanNode<DeepRenderMarkdownNode>
-    | RichCodeBlockNode<DeepRenderMarkdownNode>
     | LinkNode<DeepRenderMarkdownNode>
     | DocPageLinkNode<DeepRenderMarkdownNode>
     | GithubSourceLinkNode<DeepRenderMarkdownNode>

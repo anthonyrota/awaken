@@ -42,6 +42,17 @@
             }
         </script>
         <script>
+            requestAnimationFrame(function loop() {
+                document.documentElement.style.setProperty(
+                    '--scrollbar-width',
+                    window.innerWidth -
+                        document.documentElement.clientWidth +
+                        'px',
+                );
+                requestAnimationFrame(loop);
+            });
+        </script>
+        <script>
             import { makeRequest } from '/data/docPages';
             makeRequest();
         </script>

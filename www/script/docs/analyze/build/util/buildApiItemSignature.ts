@@ -10,25 +10,23 @@ import {
     ApiTypeAlias,
     ApiVariable,
     Excerpt,
-    ExcerptToken,
 } from '@microsoft/api-extractor-model';
-import { CoreNodeType, DeepCoreNode } from '../../../core/nodes';
-import { CodeBlockNode } from '../../../core/nodes/CodeBlock';
+import { DeepCoreNode } from '../../../core/nodes';
+import {
+    CodeBlockNode,
+    CodeLink,
+    CodeLinkType,
+} from '../../../core/nodes/CodeBlock';
 import { ContainerNode } from '../../../core/nodes/Container';
-import { DocPageLinkNode } from '../../../core/nodes/DocPageLink';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
-import { RichCodeBlockNode } from '../../../core/nodes/RichCodeBlock';
 import { TitleNode } from '../../../core/nodes/Title';
-import { formatCodeContainer } from '../../../core/nodes/util/formatCodeContainer';
-import { simplifyDeepCoreNode } from '../../../core/nodes/util/simplify';
+import { format, formatWithCursor, Language } from '../../../util/prettier';
 import { AnalyzeContext } from '../../Context';
 import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
-import {
-    FoundExcerptTokenReferenceResultType,
-    getExcerptTokenReference,
-} from '../../util/getExcerptTokenReference';
+import { getExcerptTokenReference } from '../../util/getExcerptTokenReference';
 import { hideDocTag } from '../../util/tsdocUtil';
 import { UnsupportedApiItemError } from '../../util/UnsupportedApiItemError';
+
 import { getApiItemAnchorName } from './buildApiItemAnchor';
 
 export interface BuildApiItemSignatureExcerptParameters {
@@ -70,12 +68,12 @@ export function buildApiItemSignature(
 function buildExcerpt(
     excerpt: Excerpt,
     context: AnalyzeContext,
-): DeepCoreNode[] {
-    const nodes: DeepCoreNode[] = [];
-    const spannedTokens = excerpt.spannedTokens.slice();
-    let token: ExcerptToken | undefined;
+    codeLinks: CodeLink[],
+    startIndex: number,
+): string {
+    let text = '';
 
-    while ((token = spannedTokens.shift())) {
+    for (const token of excerpt.spannedTokens) {
         let tokenText = token.text;
         if (token === excerpt.spannedTokens[0]) {
             tokenText = removeExportDeclare(tokenText);
@@ -86,28 +84,24 @@ function buildExcerpt(
             excerpt.text,
             context,
         );
-        if (result === null) {
-            nodes.push(PlainTextNode({ text: tokenText }));
-        } else if (
-            result.type === FoundExcerptTokenReferenceResultType.Export
-        ) {
+
+        if (result !== null) {
             const { apiItem } = result;
             const identifier = getApiItemIdentifier(apiItem);
             const pageId = context.getPageIdFromExportIdentifier(identifier);
-            nodes.push(
-                DocPageLinkNode({
-                    pageId,
-                    hash: getApiItemAnchorName({ apiItem, context }),
-                    children: [PlainTextNode({ text: tokenText })],
-                }),
-            );
-        } else {
-            // Local signature reference.
-            spannedTokens.unshift(...result.tokens);
+            codeLinks.push({
+                type: CodeLinkType.DocPage,
+                pageId,
+                hash: getApiItemAnchorName({ apiItem, context }),
+                startIndex: startIndex + text.length,
+                endIndex: startIndex + text.length + tokenText.length,
+            });
         }
+
+        text += tokenText;
     }
 
-    return nodes;
+    return text;
 }
 
 export interface BuildApiItemExcerptParameters {
@@ -124,17 +118,19 @@ function buildApiItemExcerpt(
         throw new Error(`Received excerpt with no declaration.`);
     }
 
-    const richCodeBlock = RichCodeBlockNode<DeepCoreNode>({ language: 'ts' });
+    let text = '';
+    const codeLinks: CodeLink[] = [];
 
     if (apiItem.kind === ApiItemKind.Variable) {
-        richCodeBlock.children.push(PlainTextNode({ text: 'var ' }));
+        text += 'var ';
     }
 
-    richCodeBlock.children.push(...buildExcerpt(excerpt, context));
+    text += buildExcerpt(excerpt, context, codeLinks, text.length);
 
     if (apiItem.kind === ApiItemKind.Interface) {
         const interface_ = apiItem as ApiInterface;
-        const memberSignatures: DeepCoreNode[][] = [];
+        // const memberSignatures: DeepCoreNode[][] = [];
+        text += '{';
         for (const member of interface_.members) {
             switch (member.kind) {
                 case ApiItemKind.PropertySignature:
@@ -151,17 +147,17 @@ function buildApiItemExcerpt(
                             hideDocTag,
                         )
                     ) {
-                        break;
+                        continue;
                     }
-                    memberSignatures.push(
-                        buildExcerpt(
-                            (member as
-                                | ApiPropertySignature
-                                | ApiMethodSignature
-                                | ApiConstructSignature
-                                | ApiCallSignature).excerpt,
-                            context,
-                        ),
+                    text += buildExcerpt(
+                        (member as
+                            | ApiPropertySignature
+                            | ApiMethodSignature
+                            | ApiConstructSignature
+                            | ApiCallSignature).excerpt,
+                        context,
+                        codeLinks,
+                        text.length,
                     );
                     break;
                 }
@@ -172,37 +168,39 @@ function buildApiItemExcerpt(
                     );
                 }
             }
-        }
-        richCodeBlock.children.push(PlainTextNode({ text: '{' }));
-        for (const signatureNodes of memberSignatures) {
-            richCodeBlock.children.push(...signatureNodes);
-            const lastSignatureNode = signatureNodes[signatureNodes.length - 1];
-            if (!lastSignatureNode) {
-                throw new Error('Empty member signature.');
-            }
-            if (
-                lastSignatureNode.type !== CoreNodeType.PlainText ||
-                !lastSignatureNode.text.trimEnd().endsWith(';')
-            ) {
-                richCodeBlock.children.push(PlainTextNode({ text: ';' }));
+            if (!text.trimEnd().endsWith(';')) {
+                text += ';';
             }
         }
-        richCodeBlock.children.push(PlainTextNode({ text: '}' }));
+        text += '}';
     }
 
-    formatCodeContainer(richCodeBlock);
-    simplifyDeepCoreNode(richCodeBlock);
-    if (richCodeBlock.children.length === 1) {
-        const onlyChild = richCodeBlock.children[0];
-        if (onlyChild.type === CoreNodeType.PlainText) {
-            return CodeBlockNode({
-                language: 'ts',
-                code: onlyChild.text,
-            });
-        }
+    for (const codeLink of codeLinks) {
+        codeLink.startIndex = formatWithCursor(
+            text,
+            codeLink.startIndex,
+            Language.TypeScript,
+            {
+                semi: false,
+            },
+        ).cursorOffset;
+        codeLink.endIndex = formatWithCursor(
+            text,
+            codeLink.endIndex,
+            Language.TypeScript,
+            {
+                semi: false,
+            },
+        ).cursorOffset;
     }
 
-    return richCodeBlock;
+    return CodeBlockNode({
+        language: 'ts',
+        code: format(text, Language.TypeScript, {
+            semi: false,
+        }).trimEnd(),
+        codeLinks,
+    });
 }
 
 function removeExportDeclare(tokenText: string): string {

@@ -1,4 +1,6 @@
+import { DeepCoreNode } from '../../nodes';
 import { CodeBlockBase } from '../../nodes/CodeBlock';
+import { DocPageLinkNode } from '../../nodes/DocPageLink';
 import { HtmlElementNode } from '../../nodes/HtmlElement';
 import { PlainTextNode } from '../../nodes/PlainText';
 import { MarkdownOutput } from './MarkdownOutput';
@@ -9,6 +11,59 @@ export function writeCodeBlock(
     output: MarkdownOutput,
     writeRenderMarkdownNode: ParamWriteRenderMarkdownNode,
 ): void {
+    const { codeLinks } = codeBlock;
+    if (codeLinks && codeLinks.length !== 0) {
+        const children: DeepCoreNode[] = [];
+        const firstCodeLink = codeLinks[0];
+        if (firstCodeLink.startIndex !== 0) {
+            children.push(
+                PlainTextNode({
+                    text: codeBlock.code.slice(0, firstCodeLink.startIndex),
+                }),
+            );
+        }
+        codeLinks.forEach((codeLink, i) => {
+            children.push(
+                DocPageLinkNode({
+                    pageId: codeLink.pageId,
+                    hash: codeLink.hash,
+                    children: [
+                        PlainTextNode({
+                            text: codeBlock.code.slice(
+                                codeLink.startIndex,
+                                codeLink.endIndex,
+                            ),
+                        }),
+                    ],
+                }),
+            );
+            const nextCodeLink = codeLinks[i + 1];
+            const nextStartIndex = nextCodeLink
+                ? nextCodeLink.startIndex
+                : codeBlock.code.length;
+            if (codeLink.endIndex !== nextStartIndex) {
+                children.push(
+                    PlainTextNode({
+                        text: codeBlock.code.slice(
+                            codeLink.endIndex,
+                            nextStartIndex,
+                        ),
+                    }),
+                );
+            }
+        });
+
+        writeDeepRenderMarkdownNode(
+            HtmlElementNode({
+                tagName: 'pre',
+                children,
+            }),
+            output,
+            writeRenderMarkdownNode,
+        );
+        return;
+    }
+
     if (output.constrainedToSingleLine) {
         let attributes: Record<string, string> | undefined = undefined;
         if (

@@ -31,7 +31,6 @@ import { writePage } from './Page';
 import { writePageTitle } from './PageTitle';
 import { writeParagraph } from './Paragraph';
 import { writePlainText } from './PlainText';
-import { writeRichCodeBlock } from './RichCodeBlock';
 import { writeStrikethrough } from './Strikethrough';
 import { writeSubheading } from './Subheading';
 import { writeSubscript } from './Subscript';
@@ -158,15 +157,6 @@ export function writeRenderMarkdownNode<ChildNode extends Node>(
         }
         case CoreNodeType.CodeBlock: {
             writeCodeBlock(node, output, writeRenderMarkdownNode);
-            break;
-        }
-        case CoreNodeType.RichCodeBlock: {
-            writeRichCodeBlock(
-                node,
-                output,
-                writeRenderMarkdownNode,
-                writeChildNode!,
-            );
             break;
         }
         case CoreNodeType.Link: {
