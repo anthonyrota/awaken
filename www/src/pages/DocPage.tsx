@@ -21,7 +21,11 @@ export interface DocPageProps extends AppPathBaseProps {
     pageId: string;
 }
 
-const { pageIdToPageTitle, pageGroups } = getPagesMetadata();
+const {
+    pageIdToPageTitle,
+    pageIdToWebsitePath,
+    pageGroups,
+} = getPagesMetadata();
 
 const pageOrder: string[] = [];
 pageGroups.forEach((group) => {
@@ -72,6 +76,7 @@ export interface DocPageContentProps {
     mainRef: AppPathBaseProps['mainRef'];
     title?: string;
     page: PageNode<DeepCoreNode>;
+    pagePath?: string;
     previousPageId?: string;
     nextPageId?: string;
 }
@@ -80,6 +85,7 @@ export function DocPageContent({
     mainRef,
     title,
     page,
+    pagePath,
     previousPageId,
     nextPageId,
 }: DocPageContentProps): VNode {
@@ -98,6 +104,11 @@ export function DocPageContent({
                     {page.children.map((childNode) => (
                         <DeepCoreNodeComponent
                             node={childNode}
+                            pagePath={
+                                pagePath !== undefined
+                                    ? pagePath
+                                    : `/${pageIdToWebsitePath[page.pageId]}`
+                            }
                             headingRefs={headingRefs}
                         />
                     ))}

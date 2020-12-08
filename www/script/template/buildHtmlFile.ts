@@ -28,8 +28,6 @@ export async function createBuildHtmlFileFunction(): Promise<
                 isDev
                     ? ''
                     : [
-                          '<link rel="preload" href="/static/fonts/open-sans-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>',
-                          '<link rel="preload" href="/static/fonts/open-sans-v18-latin-600.woff2" as="font" type="font/woff2" crossorigin>',
                           '<link rel="preload" href="::pages.json::" as="fetch" crossorigin="anonymous" />',
                       ].join('\n'),
             )

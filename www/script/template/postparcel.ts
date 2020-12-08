@@ -399,7 +399,14 @@ async function fixParcelBuild(): Promise<void> {
                     nodir: true,
                     ignore: ['sw.js', newManifestName, '**/*.html'],
                 })
-            ).filter((filePath) => path.extname(filePath) !== '.woff');
+            ).filter((filePath) => {
+                const ext = path.extname(filePath);
+                return (
+                    ext !== '.woff' &&
+                    // Modern browsers load FiraCode-VF instead.
+                    !path.basename(filePath, ext).startsWith('FiraCode-Regular')
+                );
+            });
             staticFiles.sort();
             const isSecondaryStaticFilesFilterList = await Promise.all(
                 staticFiles.map(isSecondaryStaticPath),
