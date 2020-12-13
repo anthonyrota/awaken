@@ -1,25 +1,26 @@
 @use "sass:selector";
 
-@font-face {
-    font-family: 'Fira Code';
-    src: url('../node_modules/firacode/distr/woff2/FiraCode-Regular.woff2')
-            format('woff2'),
-        url('../node_modules/firacode/distr/woff/FiraCode-Regular.woff')
-            format('woff');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
+// Disabling for two reasons: no italic support and large file size.
 
-@font-face {
-    font-family: 'Fira Code VF';
-    src: url('../node_modules/firacode/distr/woff2/FiraCode-VF.woff2')
-        format('woff2-variations');
-    /* font-weight requires a range: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Fonts/Variable_Fonts_Guide#Using_a_variable_font_font-face_changes */
-    font-weight: 300 700;
-    font-style: normal;
-    font-display: swap;
-}
+// @font-face {
+//     font-family: 'Fira Code';
+//     src: url('../node_modules/firacode/distr/woff2/FiraCode-Regular.woff2')
+//             format('woff2'),
+//         url('../node_modules/firacode/distr/woff/FiraCode-Regular.woff')
+//             format('woff');
+//     font-weight: 400;
+//     font-style: normal;
+//     font-display: swap;
+// }
+
+// @font-face {
+//     font-family: 'Fira Code VF';
+//     src: url('../node_modules/firacode/distr/woff2/FiraCode-VF.woff2')
+//         format('woff2-variations');
+//     font-weight: 100 900;
+//     font-style: normal;
+//     font-display: swap;
+// }
 
 /*
  * http://meyerweb.com/eric/tools/css/reset/
@@ -677,7 +678,7 @@ button {
                 background: radial-gradient(
                     circle,
                     t($bg0) 0%,
-                    rgba(255, 255, 255, 0) 70%
+                    /* Safari doesn't like transparent. */ rgba(t($bg0), 0) 70%
                 );
             }
             transform: none;
@@ -1135,12 +1136,12 @@ button {
     &-paragraph,
     &-code-block,
     &-table,
-    &-header-1,
-    &-header-2,
-    &-header-3,
-    &-header-4,
-    &-header-5,
-    &-header-6 {
+    &-heading-1,
+    &-heading-2,
+    &-heading-3,
+    &-heading-4,
+    &-heading-5,
+    &-heading-6 {
         .cls-doc-page__main > & {
             margin-left: $spacing;
             margin-right: $spacing;
@@ -1193,12 +1194,8 @@ button {
 
     &-code-span,
     &-code-block {
-        $fallback-fonts: Menlo, Consolas, Roboto Mono, Ubuntu Monospace,
-            Noto Mono, Oxygen Mono, Liberation Mono, monospace;
-        font-family: 'Fira Code', $fallback-fonts;
-        @supports (font-variation-settings: normal) {
-            font-family: 'Fira Code VF', $fallback-fonts;
-        }
+        font-family: Menlo, Consolas, Roboto Mono, Ubuntu Monospace, Noto Mono,
+            Oxygen Mono, Liberation Mono, monospace;
         font-size: 14px;
     }
 
@@ -1220,6 +1217,7 @@ button {
     &-code-block {
         padding: $spacing * 2/3;
         border-radius: 0.3em;
+        line-height: 24px;
 
         .cls-doc-page__main > & {
             white-space: pre-wrap;
@@ -1272,7 +1270,7 @@ button {
         outline-offset: $spacing / 4;
     }
 
-    &-header__anchor {
+    &-heading__anchor {
         opacity: 0;
         text-decoration: none;
         float: left;
@@ -1284,31 +1282,38 @@ button {
         }
     }
 
-    &-header-1,
-    &-header-2,
-    &-header-3,
-    &-header-4,
-    &-header-5,
-    &-header-6 {
+    &-heading__clickable-content {
+        text-decoration: none;
+        @include themed {
+            color: t($text-primary);
+        }
+    }
+
+    &-heading-1,
+    &-heading-2,
+    &-heading-3,
+    &-heading-4,
+    &-heading-5,
+    &-heading-6 {
         margin-top: 0;
         margin-bottom: 0;
 
-        &:hover .cls-node-header__anchor {
+        &:hover .cls-node-heading__anchor {
             opacity: 1;
         }
     }
 
-    &-header-1 {
+    &-heading-1 {
         font-size: 32px;
         margin-top: $spacing * 5;
     }
 
-    &-header-1,
-    &-header-2 {
+    &-heading-1,
+    &-heading-2 {
         font-weight: 600;
     }
 
-    &-header-2 {
+    &-heading-2 {
         font-size: 24px;
 
         &:not(:first-child)::before {
@@ -1322,53 +1327,53 @@ button {
         }
     }
 
-    &-header-3 {
+    &-heading-3 {
         font-size: 20px;
     }
 
-    &-header-3,
-    &-header-4 {
+    &-heading-3,
+    &-heading-4 {
         font-weight: 600;
     }
 
-    &-header-4 {
+    &-heading-4 {
         font-size: 16px;
     }
 
-    &-header-5 {
+    &-heading-5 {
         font-size: 14px;
     }
 
-    &-header-5,
-    &-header-6 {
+    &-heading-5,
+    &-heading-6 {
         font-weight: 600;
     }
 
-    &-header-6 {
+    &-heading-6 {
         font-size: 12px;
     }
 
-    &-header-3,
-    &-header-4,
-    &-header-5,
-    &-header-6 {
+    &-heading-3,
+    &-heading-4,
+    &-heading-5,
+    &-heading-6 {
         margin-top: $spacing * 3.5;
         font-weight: 600;
         line-height: 1.25;
     }
 
-    &-header-4 {
+    &-heading-4 {
         font-size: 16px;
         @include themed {
             color: t($text-primary-accent);
         }
     }
 
-    &-header-5 {
+    &-heading-5 {
         font-size: 15px;
     }
 
-    &-header-6 {
+    &-heading-6 {
         font-size: 14px;
     }
 

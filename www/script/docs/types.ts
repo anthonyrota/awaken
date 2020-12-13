@@ -1,3 +1,4 @@
+import type { Theme } from '../../src/theme';
 import type { DeepCoreNode } from './core/nodes';
 import type { PageNode } from './core/nodes/Page';
 
@@ -14,11 +15,13 @@ export interface CodeBlockStyle {
     background: string;
 }
 
+export type CodeBlockStyleMap = Record<Theme, CodeBlockStyle>;
+
 export interface PagesMetadata {
     pageIdToWebsitePath: Record<string, string>;
     pageIdToPageTitle: Record<string, string>;
     pageGroups: PageGroup[];
-    codeBlockStyle: CodeBlockStyle;
+    codeBlockStyleMap: CodeBlockStyleMap;
     github: null | {
         org: string;
         repo: string;

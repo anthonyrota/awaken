@@ -1,9 +1,11 @@
 import { Fragment, h, VNode } from 'preact';
-import { useRef } from 'preact/hooks';
+import { useRef, useState } from 'preact/hooks';
 import { DeepCoreNode, CoreNodeType } from '../../script/docs/core/nodes';
 import { ListType } from '../../script/docs/core/nodes/List';
 import { getGithubUrl, getPagesMetadata } from '../data/docPages';
 import { customHistory } from '../hooks/useHistory';
+import { useSizeShowMenuChange } from '../hooks/useSizeShowMenu';
+import { useTheme } from '../hooks/useTheme';
 import { DocPageLink } from './DocPageLink';
 import { Link } from './Link';
 
@@ -111,11 +113,10 @@ export function DeepCoreNodeComponent({
             );
         }
         case CoreNodeType.CodeBlock: {
-            const {
-                foreground,
-                background,
-            } = getPagesMetadata().codeBlockStyle;
-            const { code, tokenizedLines, codeLinks } = node;
+            const theme = useTheme();
+            const codeBlockStyleMap = getPagesMetadata().codeBlockStyleMap;
+            const { foreground, background } = codeBlockStyleMap[theme];
+            const { code, tokenizedLinesMap, codeLinks } = node;
             const ChildNodeType$Text = 1;
             const ChildNodeType$Link = 0;
             interface ChildText {
@@ -131,7 +132,8 @@ export function DeepCoreNodeComponent({
             }
             type ChildNode = ChildText | ChildLink;
             const childNodes: ChildNode[] = [];
-            if (tokenizedLines) {
+            if (tokenizedLinesMap) {
+                const tokenizedLines = tokenizedLinesMap[theme];
                 tokenizedLines.lines.forEach((line, lineIndex) => {
                     line.tokens.forEach((token, tokenIndex) => {
                         childNodes.push({
@@ -266,22 +268,6 @@ export function DeepCoreNodeComponent({
                     });
                 });
             }
-            const renderChildNode = (childNode: ChildNode) => {
-                if (childNode.type === ChildNodeType$Text) {
-                    return (
-                        <span style={childNode.style}>{childNode.text}</span>
-                    );
-                }
-                return (
-                    <DocPageLink
-                        class="cls-node-code-block__link"
-                        pageId={childNode.pageId}
-                        hash={childNode.hash}
-                    >
-                        {childNode.children.map(renderChildNode)}
-                    </DocPageLink>
-                );
-            };
             return (
                 <pre
                     class="cls-node-code-block"
@@ -379,47 +365,72 @@ export function DeepCoreNodeComponent({
                 | 'h6';
             const ref = useRef<HTMLHeadingElement>();
             headingRefs?.push(ref);
+
+            const { 0: isSizeShowMenu, 1: setIsSizeShowMenu } = useState(true);
+
+            useSizeShowMenuChange(
+                (isSizeShowMenu) => {
+                    setIsSizeShowMenu(isSizeShowMenu);
+                },
+                node.alternateId !== undefined,
+                true,
+            );
+
+            const children = mapChildren(node.children, pagePath, headingRefs);
+
             return (
                 <Comp
                     class={
                         // Needs to be statically analyzed and replaced to
                         // to minified class names during production.
                         node.level === 1
-                            ? 'cls-node-header-1'
+                            ? 'cls-node-heading-1'
                             : node.level === 2
-                            ? 'cls-node-header-2'
+                            ? 'cls-node-heading-2'
                             : node.level === 3
-                            ? 'cls-node-header-3'
+                            ? 'cls-node-heading-3'
                             : node.level === 4
-                            ? 'cls-node-header-4'
+                            ? 'cls-node-heading-4'
                             : node.level === 5
-                            ? 'cls-node-header-5'
-                            : 'cls-node-header-6'
+                            ? 'cls-node-heading-5'
+                            : 'cls-node-heading-6'
                     }
                     id={node.alternateId}
                     ref={ref}
                 >
-                    {node.alternateId !== undefined && (
+                    {node.alternateId === undefined ? (
+                        children
+                    ) : isSizeShowMenu ? (
                         <a
                             href={`${pagePath}#${node.alternateId}`}
-                            aria-hidden="true"
-                            class="cls-node-header__anchor"
+                            class="cls-node-heading__clickable-content"
                             tabIndex={-1}
                         >
-                            <svg
-                                height="16"
-                                version="1.1"
-                                viewBox="0 0 16 16"
-                                width="16"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"
-                                ></path>
-                            </svg>
+                            {children}
                         </a>
+                    ) : (
+                        <Fragment>
+                            <a
+                                href={`${pagePath}#${node.alternateId}`}
+                                aria-hidden="true"
+                                class="cls-node-heading__anchor"
+                                tabIndex={-1}
+                            >
+                                <svg
+                                    height="16"
+                                    version="1.1"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"
+                                    ></path>
+                                </svg>
+                            </a>
+                            {children}
+                        </Fragment>
                     )}
-                    {mapChildren(node.children, pagePath, headingRefs)}
                 </Comp>
             );
         }

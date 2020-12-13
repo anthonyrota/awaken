@@ -25,6 +25,7 @@ export function LicensePage({ mainRef }: LicensePageProps): VNode {
                 page={licensePageNode}
                 pagePath={'/license'}
                 title={'The MIT License (MIT)'}
+                nextPageId="core--introduction"
             />
         </Fragment>
     );

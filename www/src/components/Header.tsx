@@ -19,6 +19,7 @@ import {
 } from '../hooks/useNavigationListKeyBindings';
 import { useOverlayEscapeKeyBinding } from '../hooks/useOverlayEscapeKeyBinding';
 import { usePrevious } from '../hooks/usePrevious';
+import { useSizeShowMenuChange } from '../hooks/useSizeShowMenu';
 import { useSticky, UseStickyJsStickyActive } from '../hooks/useSticky';
 import { useTrapFocus } from '../hooks/useTrapFocus';
 import { ThemeDark, ThemeLight, getTheme, setTheme } from '../theme';
@@ -177,25 +178,6 @@ export function Header({ enableMenu }: HeaderProps): VNode {
     useLayoutEffect((): (() => void) | void => {
         if (isMenuOpen) {
             window.scrollTo(0, 0);
-            let mql: MediaQueryList | null = window.matchMedia(
-                'screen and (max-width: 840px)',
-            );
-            const listener = () => {
-                // eslint-disable-next-line max-len
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                if (!mql!.matches && !enableMenu) {
-                    transitionMenuState(
-                        FullScreenOverlayCloseWithSettingFocusTransitionType,
-                    );
-                }
-            };
-            mql.addEventListener('change', listener);
-            return () => {
-                // eslint-disable-next-line max-len
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                mql!.removeEventListener('change', listener);
-                mql = null;
-            };
         }
         if (
             getMenuTransitionType() ===
@@ -207,6 +189,16 @@ export function Header({ enableMenu }: HeaderProps): VNode {
             customHistory.replace(customHistory.location, null);
         });
     }, [isMenuOpen]);
+
+    useSizeShowMenuChange((isSizeShowMenu) => {
+        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        if (!isSizeShowMenu && !enableMenu) {
+            transitionMenuState(
+                FullScreenOverlayCloseWithSettingFocusTransitionType,
+            );
+        }
+    }, isMenuOpen);
 
     const { 0: theme, 1: setThemeState } = useState(getTheme());
 

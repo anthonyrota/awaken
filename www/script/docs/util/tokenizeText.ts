@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as oniguruma from 'vscode-oniguruma';
 import * as vscodeTextmate from 'vscode-textmate';
+import { Theme, ThemeLight, ThemeDark } from '../../../src/theme';
 import { rootDir } from '../../rootDir';
 import { CodeBlockStyle } from '../types';
 
@@ -54,16 +55,36 @@ const registry = new vscodeTextmate.Registry({
     },
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const themeJson: {
+const themePaths = {
+    [ThemeLight]: `${rootDir}/www/vendor/vsc-material-theme/Material-Theme-Lighter.json`,
+    [ThemeDark]: `${rootDir}/www/vendor/vsc-material-theme/Material-Theme-Ocean.json`,
+};
+
+function mapObject<K extends string | number | symbol, T, U>(
+    object: Record<K, T>,
+    transform: (v: T) => U,
+): Record<K, U> {
+    return Object.fromEntries(
+        Object.entries(object).map(([k, v]) => [k, transform(v as T)]),
+    ) as Record<K, U>;
+}
+
+// cspell:disable-next-line
+const themeJsons = mapObject(themePaths, (themePath): {
     name: string;
     tokenColors: vscodeTextmate.IRawThemeSetting[];
     colors: { 'editor.foreground': string; 'editor.background': string };
-} = fs.readJSONSync(`${rootDir}/www/vendor/OneDark-Pro.json`);
-registry.setTheme({
-    name: themeJson.name,
-    settings: themeJson.tokenColors,
-});
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+} => fs.readJSONSync(themePath));
+
+const themes = mapObject(
+    // cspell:disable-next-line
+    themeJsons,
+    (themeJson): vscodeTextmate.IRawTheme => ({
+        name: themeJson.name,
+        settings: themeJson.tokenColors,
+    }),
+);
 
 export interface Token {
     startIndex: number;
@@ -83,17 +104,25 @@ export interface TokenizedLines {
     lines: TokenizedLine[];
 }
 
-export const codeBlockStyle: CodeBlockStyle = {
-    foreground: themeJson.colors['editor.foreground'],
-    background: themeJson.colors['editor.background'],
-};
+export type TokenizedLinesMap = Record<Theme, TokenizedLines>;
+
+export const codeBlockStyleMap = mapObject(
+    // cspell:disable-next-line
+    themeJsons,
+    (themeJson): CodeBlockStyle => ({
+        foreground: themeJson.colors['editor.foreground'],
+        background: themeJson.colors['editor.background'],
+    }),
+);
 
 // Is tokenize the right terminology? Idk.
 export async function tokenizeText(
     text: string,
     language: TokenizeLanguage,
+    theme: Theme,
 ): Promise<TokenizedLines> {
     const grammar = await registry.loadGrammar(language);
+    registry.setTheme(themes[theme]);
     if (!grammar) {
         throw new Error(`No grammar found for scope ${language}`);
     }

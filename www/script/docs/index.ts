@@ -9,9 +9,11 @@ import {
 import * as fs from 'fs-extra';
 import * as pLimit from 'p-limit';
 import * as rimraf from 'rimraf';
+import { ThemeDark, ThemeLight, Theme } from '../../src/theme';
 import { computeFileHash } from '../computeFileHash';
 import { exit } from '../exit';
 import { rootDir } from '../rootDir';
+
 import { buildApiPage, PageExports } from './analyze/build/buildApiPage';
 import { AnalyzeContext } from './analyze/Context';
 import {
@@ -44,7 +46,9 @@ import { globAbsolute } from './util/glob';
 import {
     TokenizeLanguage,
     tokenizeText,
-    codeBlockStyle,
+    codeBlockStyleMap,
+    TokenizedLinesMap,
+    TokenizedLines,
 } from './util/tokenizeText';
 import { createProgram } from './util/ts';
 
@@ -709,70 +713,76 @@ async function main() {
         pages.map((page) => {
             const promises: Promise<unknown>[] = [];
             walkDeepCoreNode(page, (node) => {
-                if (node.type === CoreNodeType.CodeBlock) {
-                    if (node.language !== 'ts') {
-                        console.log('unknown language', node.language);
-                        return;
-                    }
-                    if (!node.code) {
-                        return;
-                    }
-                    const prefixText =
-                        node[$HACK_SYMBOL]?.syntaxHighlightingPrefix || '';
-                    const suffixText =
-                        node[$HACK_SYMBOL]?.syntaxHighlightingSuffix || '';
-                    const promise = limitTokenization(() =>
-                        tokenizeText(
-                            prefixText + node.code + suffixText,
-                            TokenizeLanguage.TypeScript,
-                        ),
-                    ).then((tokenizedLines) => {
-                        if (suffixText) {
-                            const lastLine =
-                                tokenizedLines.lines[
-                                    tokenizedLines.lines.length - 1
-                                ];
-                            for (
-                                let i = lastLine.tokens.length - 1;
-                                i >= 0;
-                                i--
-                            ) {
-                                const token = lastLine.tokens[i];
-                                const distanceFromEnd =
-                                    lastLine.endIndex -
-                                    (lastLine.startIndex + token.startIndex);
-                                if (distanceFromEnd >= suffixText.length) {
-                                    break;
-                                }
-                                lastLine.tokens.pop();
-                            }
-                            lastLine.endIndex -= suffixText.length;
-                        }
-                        if (prefixText) {
-                            const firstLine = tokenizedLines.lines[0];
-                            while (firstLine.tokens.length > 1) {
-                                if (
-                                    firstLine.tokens[1].startIndex >
-                                    prefixText.length
-                                ) {
-                                    break;
-                                }
-                                firstLine.tokens.shift();
-                            }
-                            firstLine.tokens[0].startIndex = 0;
-                            for (const token of firstLine.tokens.slice(1)) {
-                                token.startIndex -= prefixText.length;
-                            }
-                            firstLine.endIndex -= prefixText.length;
-                            for (const line of tokenizedLines.lines.slice(1)) {
-                                line.startIndex -= prefixText.length;
-                                line.endIndex -= prefixText.length;
-                            }
-                        }
-                        node.tokenizedLines = tokenizedLines;
-                    });
-                    promises.push(promise);
+                if (node.type !== CoreNodeType.CodeBlock) {
+                    return;
                 }
+                if (node.language !== 'ts') {
+                    console.log('unknown language', node.language);
+                    return;
+                }
+                if (!node.code) {
+                    return;
+                }
+                const { code } = node;
+                const tokenizedLinesMap: TokenizedLinesMap =
+                    node.tokenizedLinesMap ||
+                    (node.tokenizedLinesMap = {} as Record<
+                        Theme,
+                        TokenizedLines
+                    >);
+                const prefixText =
+                    node[$HACK_SYMBOL]?.syntaxHighlightingPrefix || '';
+                const suffixText =
+                    node[$HACK_SYMBOL]?.syntaxHighlightingSuffix || '';
+                async function mapTheme(theme: Theme): Promise<void> {
+                    const tokenizedLines = await limitTokenization(() =>
+                        tokenizeText(
+                            prefixText + code + suffixText,
+                            TokenizeLanguage.TypeScript,
+                            theme,
+                        ),
+                    );
+                    if (suffixText) {
+                        const lastLine =
+                            tokenizedLines.lines[
+                                tokenizedLines.lines.length - 1
+                            ];
+                        for (let i = lastLine.tokens.length - 1; i >= 0; i--) {
+                            const token = lastLine.tokens[i];
+                            const distanceFromEnd =
+                                lastLine.endIndex -
+                                (lastLine.startIndex + token.startIndex);
+                            if (distanceFromEnd >= suffixText.length) {
+                                break;
+                            }
+                            lastLine.tokens.pop();
+                        }
+                        lastLine.endIndex -= suffixText.length;
+                    }
+                    if (prefixText) {
+                        const firstLine = tokenizedLines.lines[0];
+                        while (firstLine.tokens.length > 1) {
+                            if (
+                                firstLine.tokens[1].startIndex >
+                                prefixText.length
+                            ) {
+                                break;
+                            }
+                            firstLine.tokens.shift();
+                        }
+                        firstLine.tokens[0].startIndex = 0;
+                        for (const token_1 of firstLine.tokens.slice(1)) {
+                            token_1.startIndex -= prefixText.length;
+                        }
+                        firstLine.endIndex -= prefixText.length;
+                        for (const line of tokenizedLines.lines.slice(1)) {
+                            line.startIndex -= prefixText.length;
+                            line.endIndex -= prefixText.length;
+                        }
+                    }
+                    tokenizedLinesMap[theme] = tokenizedLines;
+                }
+                promises.push(mapTheme(ThemeLight), mapTheme(ThemeDark));
             });
             return Promise.all(promises);
         }),
@@ -782,7 +792,7 @@ async function main() {
         pageIdToWebsitePath,
         pageIdToPageTitle,
         pageGroups,
-        codeBlockStyle,
+        codeBlockStyleMap,
         github:
             process.env.VERCEL_GITHUB_DEPLOYMENT === '1'
                 ? {
