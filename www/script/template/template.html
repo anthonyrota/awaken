@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="cls-theme-dark" lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,10 +36,19 @@
     <body>
         <div class="cls-root">::ssr::</div>
         <script>
-            import { isChromium, isChromebook } from '/env';
-            if (isChromium && isChromebook) {
-                document.body.classList.add('cls-chromium-chromebook');
+            import { isChromium, isChromebook, isMobile } from '/env';
+            if (isChromium) {
+                document.documentElement.classList.add('cls-chromium');
             }
+            if (!isChromebook && !isMobile) {
+                document.documentElement.classList.add(
+                    'cls-not-mobile-or-chromebook',
+                );
+            }
+        </script>
+        <script>
+            import { setupTheme } from '/theme';
+            setupTheme();
         </script>
         <script>
             requestAnimationFrame(function loop() {

@@ -138,9 +138,7 @@ export function DocPageContent({
                                         <div class="cls-doc-page__prev-next__prev-label">
                                             Previous
                                         </div>
-                                        <div class="cls-doc-page__prev-next__prev-title">
-                                            {pageIdToPageTitle[previousPageId]}
-                                        </div>
+                                        {pageIdToPageTitle[previousPageId]}
                                     </div>
                                 </DocPageLink>
                             )}
@@ -153,9 +151,7 @@ export function DocPageContent({
                                         <div class="cls-doc-page__prev-next__next-label">
                                             Next
                                         </div>
-                                        <div class="cls-doc-page__prev-next__next-title">
-                                            {pageIdToPageTitle[nextPageId]}
-                                        </div>
+                                        {pageIdToPageTitle[nextPageId]}
                                     </div>
                                     <svg
                                         viewBox="0 0 24 24"
@@ -216,6 +212,9 @@ function DocPageSidebar({ page, headingRefs }: DocPageSidebarProps): VNode {
             for (let i = 0; i < headingRefs.length; i++) {
                 const headingRef = headingRefs[i];
                 const headingElement = headingRef.current;
+                if (!headingElement) {
+                    continue;
+                }
                 const headingId = headingElement.id;
                 if (headingIds.indexOf(headingId) === -1) {
                     continue;
