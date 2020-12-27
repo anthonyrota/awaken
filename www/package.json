@@ -4,21 +4,22 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build:docs": "ts-node --project ./tsconfig.ts-node.json ./script/docs/index.ts",
-        "build:public": "rimraf template && npm run preparcel && del-cli 'vercel-public/**/*' '!vercel-public/pages.*.json' && rimraf .parcel-cache && parcel build 'template/**/*.html' --dist-dir vercel-public --detailed-report --no-source-maps --no-cache && rimraf .parcel-cache template && ts-node --project ./tsconfig.ts-node.json ./script/template/postparcel.ts",
+        "build:template": "rimraf template src/__auto_generated__index.html && npm run preparcel",
+        "build:parcel": "del-cli 'vercel-public/**/*' '!vercel-public/pages.*.json' && rimraf .parcel-cache && parcel build 'template/**/*.html' --dist-dir vercel-public --detailed-report --no-source-maps --no-cache && rimraf .parcel-cache template",
+        "build:fix-parcel": "ts-node --project ./tsconfig.ts-node.json ./script/template/postparcel.ts",
+        "build:public": "npm run build:template && npm run build:parcel && npm run build:fix-parcel",
         "preparcel": "rimraf template && ts-node --project ./tsconfig.ts-node.json ./script/template/preparcel.tsx",
         "vercel-build": "cd .. && npm install && npm run build && cd www && npm run build:docs && npm run build:public",
         "start": "npm run preparcel -- --dev && rimraf .parcel-cache && parcel 'src/__auto_generated__index.html' --open --dist-dir parcel-public --detailed-report && rimraf parcel-public .parcel-cache src/__auto_generated__index.html",
-        "postinstall": "cd node_modules/@parcel/transformer-postcss && npm install -E postcss@latest"
+        "postinstall": "npm run postinstall:postcss && npm run postinstall:fastest-levenshtein && npm run postinstall:flexsearch",
+        "postinstall:postcss": "cd node_modules/@parcel/transformer-postcss && npm install -E postcss@latest",
+        "postinstall:fastest-levenshtein": "cpy .browserslistrc node_modules/fastest-levenshtein",
+        "postinstall:flexsearch": "cpy .browserslistrc node_modules/flexsearch"
     },
     "dependencies": {
-        "@hapi/accept": "5.0.1",
-        "@types/etag": "1.8.0",
-        "@types/fresh": "0.5.0",
-        "@types/sharp": "^0.26.0",
-        "@types/webpack-env": "1.15.3",
-        "etag": "1.8.1",
+        "fastest-levenshtein": "1.0.12",
         "firacode": "5.2.0",
-        "fresh": "0.5.2",
+        "flexsearch": "0.6.32",
         "history": "5.0.0"
     },
     "devDependencies": {
@@ -35,6 +36,7 @@
         "@types/ncp": "2.0.4",
         "@types/service_worker_api": "0.0.9",
         "@types/uuid": "8.3.0",
+        "@types/webpack-env": "1.15.3",
         "@vercel/node": "1.8.1",
         "autoprefixer": "10.0.1",
         "chokidar": "3.4.2",
@@ -63,7 +65,6 @@
         "remark-squeeze-paragraphs": "4.0.0",
         "rimraf": "3.0.2",
         "sass": "1.26.11",
-        "sharp": "0.26.1",
         "terser": "5.3.4",
         "tree-kill": "1.2.2",
         "ts-node": "9.0.0",

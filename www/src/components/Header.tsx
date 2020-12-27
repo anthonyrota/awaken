@@ -1,7 +1,31 @@
-import { h, Fragment, VNode, JSX } from 'preact';
-import { useState, useRef, useLayoutEffect } from 'preact/hooks';
-import { getGithubUrl, getPagesMetadata } from '../data/docPages';
-import { isMobile, isStandalone } from '../env';
+import { distance } from 'fastest-levenshtein';
+import FlexSearch from 'flexsearch';
+import {
+    h,
+    Fragment,
+    VNode,
+    JSX,
+    ComponentChildren,
+    ComponentChild,
+} from 'preact';
+import {
+    useState,
+    useRef,
+    useLayoutEffect,
+    useMemo,
+    useEffect,
+} from 'preact/hooks';
+import { CoreNodeType, DeepCoreNode } from '../../script/docs/core/nodes';
+import { extractTextNodes } from '../../script/docs/core/nodes/util/extractTextNodes';
+import { isBlock } from '../../script/docs/core/nodes/util/isBlock';
+import { Pages } from '../../script/docs/types';
+import {
+    getGithubUrl,
+    getPagesMetadata,
+    ResponseDoneType,
+} from '../data/docPages';
+import { isBrowser, isMobile, isStandalone } from '../env';
+import { useDocPagesResponseState } from '../hooks/useDocPagesResponseState';
 import {
     useFullScreenOverlayState,
     FullScreenOverlayOpenTransitionType,
@@ -23,13 +47,841 @@ import { useSizeShowMenuChange } from '../hooks/useSizeShowMenu';
 import { useSticky, UseStickyJsStickyActive } from '../hooks/useSticky';
 import { useTrapFocus } from '../hooks/useTrapFocus';
 import { ThemeDark, ThemeLight, getTheme, setTheme } from '../theme';
+import { Cancelable, CancelToken } from '../util/Cancelable';
+import { findIndex } from '../util/findIndex';
 import { getScrollTop } from '../util/getScrollTop';
+import { ScheduleQueue } from '../util/ScheduleQueue';
+import { stopEvent } from '../util/stopEvent';
 import { DocPageLink } from './DocPageLink';
 import { FullSiteNavigationContents } from './FullSiteNavigationContents';
-import { Link, isStringActivePath, isDocPageIdActivePath } from './Link';
+import {
+    Link,
+    isStringActivePath,
+    isDocPageIdActivePath,
+    navigateTo,
+} from './Link';
 
-const { pageIdToWebsitePath } = getPagesMetadata();
+const { pageIdToPageTitle, pageIdToWebsitePath } = getPagesMetadata();
 const githubUrl = getGithubUrl();
+const maxSnippetLength = 150;
+const padWords = 5;
+const maxPadLength = 50;
+const maxResults = 15;
+
+interface ExtractedTextRegion {
+    heading: {
+        hash: string;
+        text: string;
+    } | null;
+    contentText: string;
+}
+
+function getCurrentTextRegion(
+    textRegions: ExtractedTextRegion[] = [],
+): ExtractedTextRegion {
+    if (textRegions.length === 0) {
+        const currentTextRegion: ExtractedTextRegion = {
+            heading: null,
+            contentText: '',
+        };
+        textRegions[0] = currentTextRegion;
+        return currentTextRegion;
+    }
+    return textRegions[textRegions.length - 1];
+}
+
+function extractTextRegions(
+    node: DeepCoreNode,
+    textRegions: ExtractedTextRegion[] = [],
+    documentTitle: string,
+): ExtractedTextRegion[] {
+    if (
+        (node.type === CoreNodeType.Heading123456 ||
+            node.type === CoreNodeType.Heading ||
+            node.type === CoreNodeType.Subheading ||
+            node.type === CoreNodeType.Title) &&
+        node.alternateId !== undefined
+    ) {
+        const text = extractTextNodes(node, [], {
+            includeCodeBlocks: false,
+        })
+            .map((textNode) => textNode.text)
+            .join('');
+        if (text.trim() !== documentTitle.trim()) {
+            textRegions.push({
+                heading: {
+                    hash: node.alternateId,
+                    text,
+                },
+                contentText: '',
+            });
+        }
+    } else if ('children' in node) {
+        for (let i = 0; i < node.children.length; i++) {
+            const childNode = node.children[i];
+            if (
+                childNode.type === CoreNodeType.Title &&
+                childNode.children.length === 1 &&
+                !childNode.alternateId
+            ) {
+                const onlyChild = childNode.children[0];
+                if (onlyChild.type === CoreNodeType.PlainText) {
+                    if (
+                        onlyChild.text === 'Signature' ||
+                        onlyChild.text === 'Parameters' ||
+                        onlyChild.text === 'Returns' ||
+                        onlyChild.text === 'Example Usage'
+                    ) {
+                        continue;
+                    }
+                    if (onlyChild.text === 'See Also') {
+                        i++;
+                        continue;
+                    }
+                }
+            }
+            extractTextRegions(childNode, textRegions, documentTitle);
+        }
+    }
+
+    switch (node.type) {
+        case CoreNodeType.CollapsibleSection: {
+            if (node.summaryNode) {
+                extractTextRegions(
+                    node.summaryNode,
+                    textRegions,
+                    documentTitle,
+                );
+                getCurrentTextRegion(textRegions).contentText += '\n';
+            }
+            break;
+        }
+        case CoreNodeType.Table: {
+            node.header.children.forEach((cellNode) => {
+                if (
+                    cellNode.type === CoreNodeType.PlainText &&
+                    ['Parameter', 'Type', 'Description'].indexOf(
+                        cellNode.text,
+                    ) !== -1
+                ) {
+                    return;
+                }
+                extractTextRegions(cellNode, textRegions, documentTitle);
+                getCurrentTextRegion(textRegions).contentText += '\n';
+            });
+            node.rows.forEach((row) => {
+                row.children.forEach((cellNode) => {
+                    extractTextRegions(cellNode, textRegions, documentTitle);
+                    getCurrentTextRegion(textRegions).contentText += '\n';
+                });
+            });
+            break;
+        }
+        case CoreNodeType.PlainText: {
+            if (
+                node.text.startsWith('Source Location') ||
+                node.text.includes('#L')
+            ) {
+                break;
+            }
+            getCurrentTextRegion(textRegions).contentText += node.text;
+            break;
+        }
+    }
+
+    if (isBlock(node)) {
+        getCurrentTextRegion(textRegions).contentText += '\n';
+    }
+
+    return textRegions;
+}
+
+interface IndexablePageContent {
+    id: string;
+    title: string;
+    content: string;
+    textRegions: ExtractedTextRegion[];
+}
+
+function buildIndexableContent(pages: Pages): IndexablePageContent[] {
+    return pages.map((page) => {
+        const textRegions = extractTextRegions(
+            page,
+            [],
+            pageIdToPageTitle[page.pageId],
+        );
+        let content = '';
+        textRegions.forEach((textRegion) => {
+            if (textRegion.heading) {
+                content += textRegion.heading.text + '\n';
+            }
+            textRegion.contentText = textRegion.contentText
+                .trim()
+                .replace(/\n+/g, '\n');
+            content += textRegion.contentText;
+        });
+        return {
+            id: page.pageId,
+            title: pageIdToPageTitle[page.pageId],
+            content: content,
+            textRegions,
+        };
+    });
+}
+
+function buildIndex(indexableContent: IndexablePageContent[]) {
+    const flexSearch = FlexSearch.create<IndexablePageContent>({
+        async: false,
+        doc: {
+            id: 'id',
+            field: {
+                title: {
+                    // cspell:disable-next-line
+                    encode: 'icase',
+                    tokenize: 'full',
+                    resolution: 9,
+                },
+                content: {
+                    // cspell:disable-next-line
+                    encode: 'icase',
+                    tokenize: 'full',
+                    threshold: 1,
+                    resolution: 3,
+                },
+            },
+        },
+    });
+    indexableContent.forEach((item) => {
+        flexSearch.add(item);
+    });
+    return flexSearch;
+}
+
+const stopWords = [
+    'a',
+    'an',
+    'and',
+    'are',
+    'as',
+    'at',
+    'be',
+    'but',
+    'by',
+    'for',
+    'if',
+    'in',
+    'into',
+    'is',
+    'it',
+    'no',
+    'not',
+    'of',
+    'on',
+    'or',
+    'such',
+    'that',
+    'the',
+    'their',
+    'then',
+    'there',
+    'these',
+    'they',
+    'this',
+    'to',
+    'was',
+    'will',
+    'with',
+];
+
+// TODO: cleanup.
+interface MatchTextRange {
+    startIndex: number;
+    endIndex: number;
+    originalWord: string;
+    matchedSubstr: string;
+    keepIfFullWordMatch: boolean;
+    score: number;
+}
+
+interface MatchTextResult {
+    matchRanges: MatchTextRange[];
+}
+
+interface CachedWordMatchResult {
+    startIndex: number;
+    originalWord: string;
+    matchedSubstr: string;
+    keepIfFullWordMatch: boolean;
+    score: number;
+}
+
+type WordMatchCache = Record<string, CachedWordMatchResult | null>;
+
+function findRoughMatchRangesInText(
+    cancelToken: CancelToken,
+    text: string,
+    queryTokens: string[],
+    wordCache: WordMatchCache,
+    callback: (result: MatchTextResult) => void,
+) {
+    const tokenBoundaryRegexp = /\w+/g;
+    const matchRanges: (MatchTextRange & {
+        keepIfFullWordMatch: boolean;
+    })[] = [];
+    let hasFullWordMatch = false;
+    const queue = new ScheduleQueue(cancelToken);
+    function queueNext(): void {
+        match = tokenBoundaryRegexp.exec(text);
+        while (match && stopWords.indexOf(match[0].toLowerCase()) !== -1) {
+            match = tokenBoundaryRegexp.exec(text);
+        }
+        if (match) {
+            queue.queueTask(task);
+        } else if (!cancelToken.canceled) {
+            callback({
+                matchRanges: hasFullWordMatch
+                    ? matchRanges.filter(
+                          (matchRange) => matchRange.keepIfFullWordMatch,
+                      )
+                    : matchRanges,
+            });
+        }
+    }
+    let match: RegExpExecArray | null;
+    function task(): void {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const word = match![0].toLowerCase();
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const { index } = match!;
+        const cached = wordCache[word];
+        if (cached !== undefined) {
+            if (cached === null) {
+                queueNext();
+                return;
+            }
+            const isFullWordMatch = cached.matchedSubstr.length === word.length;
+            matchRanges.push({
+                startIndex: index + cached.startIndex,
+                endIndex:
+                    index + cached.startIndex + cached.matchedSubstr.length,
+                originalWord: word,
+                matchedSubstr: cached.matchedSubstr,
+                keepIfFullWordMatch: cached.keepIfFullWordMatch,
+                score: cached.score,
+            });
+            if (isFullWordMatch) {
+                hasFullWordMatch = true;
+            }
+            queueNext();
+            return;
+        }
+        if (queryTokens.indexOf(word) !== -1) {
+            const matchScore = word.length * 2;
+            wordCache[word] = {
+                startIndex: 0,
+                originalWord: word,
+                matchedSubstr: word,
+                keepIfFullWordMatch: true,
+                score: matchScore,
+            };
+            matchRanges.push({
+                startIndex: index,
+                endIndex: index + word.length,
+                originalWord: word,
+                matchedSubstr: word,
+                keepIfFullWordMatch: true,
+                score: matchScore,
+            });
+            hasFullWordMatch = true;
+            queueNext();
+            return;
+        }
+        let bestSubstrScore: number | undefined;
+        let bestSubstr: string | undefined;
+        let bestSubstrStartIndex: number | undefined;
+        // eslint-disable-next-line no-inner-declarations
+        function onSubstr(substr: string, startIndex: number): boolean {
+            for (let i = 0; i < queryTokens.length; i++) {
+                const queryToken = queryTokens[i];
+                const substrScore =
+                    distance(queryToken, substr) / substr.length;
+                if (
+                    bestSubstrScore === undefined ||
+                    substrScore < bestSubstrScore
+                ) {
+                    bestSubstrScore = substrScore;
+                    bestSubstr = substr;
+                    bestSubstrStartIndex = startIndex;
+                    if (bestSubstrScore === 0) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        const substrScoreCutoff = 0.2;
+        const wordFirstChar = word[0];
+        for (let i = 0; i < queryTokens.length; i++) {
+            const token = queryTokens[i];
+            if (wordFirstChar === token) {
+                bestSubstrScore = substrScoreCutoff;
+                bestSubstr = wordFirstChar;
+                bestSubstrStartIndex = 0;
+                break;
+            }
+        }
+        let didBreak = false;
+        for (let j = 2; j <= word.length; j++) {
+            if (onSubstr(word.slice(0, j), 0)) {
+                didBreak = true;
+                break;
+            }
+        }
+        if (!didBreak) {
+            outer: for (let i = 1; i < word.length; i++) {
+                for (let j = i + 3; j <= word.length; j++) {
+                    if (onSubstr(word.slice(i, j), i)) {
+                        didBreak = true;
+                        break outer;
+                    }
+                }
+            }
+            if (bestSubstrScore === undefined) {
+                onSubstr(word, 0);
+            }
+        }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        if (bestSubstrScore! <= substrScoreCutoff) {
+            const matchScore =
+                bestSubstrScore === 0
+                    ? // eslint-disable-next-line max-len
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      bestSubstr!.length / 2
+                    : // eslint-disable-next-line max-len
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      0.5 / bestSubstrScore!;
+            const keepIfFullWordMatch = // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                (bestSubstrStartIndex! === 0 && bestSubstr!.length > 2) ||
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                (bestSubstrStartIndex! === 1 && bestSubstr!.length > 4);
+            wordCache[word] = {
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                startIndex: bestSubstrStartIndex!,
+                originalWord: word,
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                matchedSubstr: bestSubstr!,
+                keepIfFullWordMatch,
+                score: matchScore,
+            };
+            matchRanges.push({
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                startIndex: index + bestSubstrStartIndex!,
+                endIndex:
+                    // eslint-disable-next-line max-len
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    index + bestSubstrStartIndex! + bestSubstr!.length,
+                originalWord: word,
+                // eslint-disable-next-line max-len
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                matchedSubstr: bestSubstr!,
+                keepIfFullWordMatch,
+                score: matchScore,
+            });
+        } else {
+            wordCache[word] = null;
+        }
+        queueNext();
+    }
+    queueNext();
+}
+
+interface DocumentMatch {
+    region: ExtractedTextRegion;
+    regionHeadingMatches: MatchTextRange[] | null;
+    textRanges: MatchTextRange[];
+}
+
+function findDocumentMatch(
+    cancelToken: CancelToken,
+    textRegions: ExtractedTextRegion[],
+    queryTokens: string[],
+    wordCache: WordMatchCache,
+    callback: (documentMatch: DocumentMatch) => void,
+): void {
+    if (textRegions.length === 0) {
+        return;
+    }
+
+    const results: {
+        result: MatchTextResult;
+        headingResult?: MatchTextResult;
+    }[] = [];
+    let finished = 0;
+
+    textRegions.forEach((textRegion, i) => {
+        function cb(result: MatchTextResult): void {
+            if (textRegion.heading) {
+                findRoughMatchRangesInText(
+                    cancelToken,
+                    textRegion.heading.text,
+                    queryTokens,
+                    wordCache,
+                    (headingResult) => {
+                        results[i] = {
+                            result,
+                            headingResult,
+                        };
+                        onResult();
+                    },
+                );
+            } else {
+                results[i] = {
+                    result,
+                };
+                onResult();
+            }
+        }
+        findRoughMatchRangesInText(
+            cancelToken,
+            textRegion.contentText,
+            queryTokens,
+            wordCache,
+            cb,
+        );
+    });
+
+    function onResult(): void {
+        if (++finished !== textRegions.length) {
+            return;
+        }
+
+        const doesMatchTextResultHasFullWordMatch = (
+            matchTextResult: MatchTextResult,
+        ) =>
+            matchTextResult.matchRanges.some(
+                (matchRange) =>
+                    matchRange.endIndex - matchRange.startIndex ===
+                    matchRange.originalWord.length,
+            );
+
+        const hasFullWordMatch = results.some(
+            (result) =>
+                doesMatchTextResultHasFullWordMatch(result.result) ||
+                (result.headingResult &&
+                    doesMatchTextResultHasFullWordMatch(result.headingResult)),
+        );
+
+        let bestTextRegion: ExtractedTextRegion;
+        let bestRegionHeadingMatches: MatchTextRange[] | null = null;
+        let bestMatchRanges: MatchTextRange[];
+        let bestScore = -1;
+
+        function getMatchedMultiplier(
+            key: string,
+            matchedWords: Record<string, number>,
+        ): number {
+            if (key[key.length - 1] === 's') {
+                key = key.slice(0, -1);
+            }
+            if (key in matchedWords) {
+                matchedWords[key] *= 4;
+                return 1 / matchedWords[key];
+            }
+            matchedWords[key] = 1;
+            return 1;
+        }
+
+        function calculateScoreFromMatchRanges(
+            ranges: MatchTextRange[],
+        ): number {
+            const matchedWords: Record<string, number> = {};
+            let score = 0;
+            for (let i = 0; i < ranges.length; i++) {
+                const range = ranges[i];
+                if (hasFullWordMatch && !range.keepIfFullWordMatch) {
+                    continue;
+                }
+                score +=
+                    range.score *
+                    getMatchedMultiplier(
+                        range.originalWord + ':' + range.matchedSubstr,
+                        matchedWords,
+                    );
+            }
+            return score;
+        }
+
+        results.forEach((result, i) => {
+            let score = calculateScoreFromMatchRanges(
+                result.result.matchRanges,
+            );
+            if (result.headingResult) {
+                score +=
+                    2 *
+                    calculateScoreFromMatchRanges(
+                        result.headingResult.matchRanges,
+                    );
+            }
+            if (score > bestScore) {
+                bestTextRegion = textRegions[i];
+                bestMatchRanges = result.result.matchRanges;
+                bestRegionHeadingMatches = result.headingResult
+                    ? result.headingResult.matchRanges
+                    : null;
+                bestScore = score;
+            }
+        });
+
+        callback({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            region: bestTextRegion!,
+            regionHeadingMatches: bestRegionHeadingMatches,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            textRanges: bestMatchRanges!,
+        });
+    }
+}
+
+interface SearchMatch {
+    document: IndexablePageContent;
+    titleMatchRanges: MatchTextRange[];
+    heading: {
+        text: string;
+        hash: string;
+        matchRanges: MatchTextRange[];
+    } | null;
+    contentSnippetStartIndex: number;
+    contentSnippet: string;
+    contentSnippetMatchRanges: MatchTextRange[];
+}
+
+function getContentSnippet(
+    content: string,
+    matchRanges: MatchTextRange[],
+): {
+    contentSnippet: string;
+    contentSnippetStartIndex: number;
+    contentSnippetMatchRanges: MatchTextRange[];
+} {
+    if (matchRanges.length === 0) {
+        return {
+            contentSnippetStartIndex: 0,
+            contentSnippet: content.slice(0, maxSnippetLength),
+            contentSnippetMatchRanges: [],
+        };
+    }
+    let maximumMatchScore = 0;
+    let bestStartMatchRange: MatchTextRange;
+    let bestStartMatchRangeIndex: number;
+    let bestEndMatchRange: MatchTextRange;
+    let bestEndMatchRangeIndex: number;
+    for (let i = 0; i < matchRanges.length; i++) {
+        const startMatchRange = matchRanges[i];
+        let endMatchRange: MatchTextRange;
+        let endMatchRangeIndex: number;
+        let matchScore = 0;
+        for (let j = i; j < matchRanges.length; j++) {
+            endMatchRange = matchRanges[j];
+            endMatchRangeIndex = j;
+            matchScore += endMatchRange.score;
+            if (j !== i) {
+                const distance =
+                    endMatchRange.startIndex - matchRanges[j - 1].endIndex;
+                if (distance < 6) {
+                    matchScore += endMatchRange.score * 2;
+                }
+            }
+            if (
+                endMatchRange.endIndex - startMatchRange.startIndex >=
+                maxSnippetLength
+            ) {
+                if (j !== i) {
+                    endMatchRange = matchRanges[j - 1];
+                    endMatchRangeIndex--;
+                }
+                break;
+            }
+        }
+        if (matchScore > maximumMatchScore) {
+            maximumMatchScore = matchScore;
+            bestStartMatchRange = startMatchRange;
+            bestStartMatchRangeIndex = i;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            bestEndMatchRange = endMatchRange!;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            bestEndMatchRangeIndex = endMatchRangeIndex!;
+        }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const startIndex = bestStartMatchRange!.startIndex;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const endIndex = bestEndMatchRange!.endIndex;
+    const lastNWordsRegexp = RegExp(`\\S+(?:\\s+\\S+){0,${padWords - 1}}\\s*$`);
+    const firstNWordsRegexp = /^\s*(?:\S+\s+\n?){0,3}[^\s]*/;
+    const padStartTextMatch = lastNWordsRegexp.exec(
+        content.substring(startIndex - maxPadLength, startIndex),
+    );
+    const padStartText = padStartTextMatch ? padStartTextMatch[0] : '';
+    const startIndexIncludingPadStartText = startIndex - padStartText.length;
+    const padEndTextMatch = firstNWordsRegexp.exec(
+        content.slice(endIndex, endIndex + maxPadLength),
+    );
+    const padEndText = padEndTextMatch ? padEndTextMatch[0] : '';
+    return {
+        contentSnippetStartIndex: startIndexIncludingPadStartText,
+        contentSnippet:
+            padStartText + content.slice(startIndex, endIndex) + padEndText,
+        contentSnippetMatchRanges: matchRanges
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            .slice(bestStartMatchRangeIndex!, bestEndMatchRangeIndex! + 1)
+            .map((matchRange) => ({
+                startIndex:
+                    matchRange.startIndex - startIndexIncludingPadStartText,
+                endIndex: matchRange.endIndex - startIndexIncludingPadStartText,
+                keepIfFullWordMatch: matchRange.keepIfFullWordMatch,
+                matchedSubstr: matchRange.matchedSubstr,
+                originalWord: matchRange.originalWord,
+                score: matchRange.score,
+            })),
+    };
+}
+
+function useSearch():
+    | ((
+          query: string,
+          cancelToken: CancelToken,
+          callback: (matches: SearchMatch[]) => void,
+      ) => void)
+    | null {
+    if (!isBrowser) {
+        return null;
+    }
+    const responseState = useDocPagesResponseState();
+    const index = useMemo(
+        () =>
+            responseState.type === ResponseDoneType
+                ? buildIndex(buildIndexableContent(responseState.pages))
+                : null,
+        [responseState.type],
+    );
+    if (index === null) {
+        return null;
+    }
+    return (query: string, cancelToken, callback) => {
+        function indexCallback(content: IndexablePageContent[]): void {
+            if (content.length === 0) {
+                callback([]);
+            }
+            const queryTokensSet = new Set<string>();
+            query.split(/\W+/).map((token) => {
+                queryTokensSet.add(token.toLowerCase());
+            });
+            const queryTokens: string[] = [];
+            queryTokensSet.forEach((queryToken) => {
+                queryTokens.push(queryToken);
+            });
+            if (cancelToken.canceled) {
+                return;
+            }
+            const searchMatches: SearchMatch[] = [];
+            const titleMatchRangesList: MatchTextRange[][] = [];
+            const contentMatchList: DocumentMatch[] = [];
+            let completed = 0;
+            function checkHasAllMatchRanges(): void {
+                if (completed === content.length * 2) {
+                    onHasAllMatchRanges();
+                }
+            }
+            function onTitleMatch(
+                documentMatch: DocumentMatch,
+                i: number,
+            ): void {
+                completed++;
+                titleMatchRangesList[i] = documentMatch.textRanges;
+                checkHasAllMatchRanges();
+            }
+            function onContentMatch(
+                documentMatch: DocumentMatch,
+                i: number,
+            ): void {
+                completed++;
+                contentMatchList[i] = documentMatch;
+                checkHasAllMatchRanges();
+            }
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const wordCache: WordMatchCache = Object.create(null);
+            for (let i = 0; i < content.length; i++) {
+                const document = content[i];
+                findDocumentMatch(
+                    cancelToken,
+                    [
+                        {
+                            heading: null,
+                            contentText: document.title,
+                        },
+                    ],
+                    queryTokens,
+                    wordCache,
+                    (documentMatch) => onTitleMatch(documentMatch, i),
+                );
+                findDocumentMatch(
+                    cancelToken,
+                    document.textRegions,
+                    queryTokens,
+                    wordCache,
+                    (documentMatch) => onContentMatch(documentMatch, i),
+                );
+            }
+            function onHasAllMatchRanges(): void {
+                for (let i = 0; i < content.length; i++) {
+                    const document = content[i];
+                    const titleMatchRanges = titleMatchRangesList[i];
+                    const contentDocumentMatch = contentMatchList[i];
+                    const contentMatchRanges = contentDocumentMatch.textRanges;
+                    const {
+                        contentSnippetStartIndex,
+                        contentSnippet,
+                        contentSnippetMatchRanges,
+                    } = getContentSnippet(
+                        contentDocumentMatch.region.contentText,
+                        contentMatchRanges,
+                    );
+                    searchMatches.push({
+                        document,
+                        titleMatchRanges,
+                        heading: contentDocumentMatch.region.heading && {
+                            hash: contentDocumentMatch.region.heading.hash,
+                            text: contentDocumentMatch.region.heading.text,
+                            // eslint-disable-next-line max-len
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, max-len
+                            matchRanges: contentDocumentMatch.regionHeadingMatches!,
+                        },
+                        contentSnippetStartIndex,
+                        contentSnippet,
+                        contentSnippetMatchRanges,
+                    });
+                    if (cancelToken.canceled) {
+                        return;
+                    }
+                }
+                callback(searchMatches);
+            }
+        }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        index.search(
+            query,
+            {
+                limit: maxResults,
+            },
+            indexCallback,
+        );
+    };
+}
 
 export interface HeaderProps {
     enableMenu: boolean;
@@ -40,7 +892,6 @@ const themeSwitchLabel = 'Toggle Dark Mode';
 const toggleButtonLabel = 'Toggle Navigation Menu';
 
 export function Header({ enableMenu }: HeaderProps): VNode {
-    const { 0: searchValue, 1: setSearchValue } = useState('');
     const searchInputRef = useRef<HTMLInputElement>();
     const headerRef = useRef<HTMLElement>();
     const menuRef = useRef<HTMLElement>();
@@ -50,6 +901,19 @@ export function Header({ enableMenu }: HeaderProps): VNode {
     const startFocusPlaceholderRef = useRef<HTMLDivElement>();
     const endFocusPlaceholderRef = useRef<HTMLDivElement>();
     const previousScrollTopRef = useRef(0);
+
+    const { 0: searchValue, 1: setSearchValue } = useState('');
+    const { 0: searchMatches, 1: setSearchMatches } = useState<SearchMatch[]>(
+        [],
+    );
+    const {
+        0: selectedSearchResultIndex,
+        1: setSelectedSearchResultIndex,
+    } = useState(-1);
+    const { 0: isSearchFocused, 1: setIsSearchFocused } = useState(false);
+    const search = useSearch();
+    const searchQueryCancelableRef = useRef<Cancelable | undefined>();
+    const searchListItemRefsRef = useRef<(HTMLLIElement | null)[]>([]);
 
     const {
         stickyState: menuStickyToggleState,
@@ -80,6 +944,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         transitionMenuState(
             FullScreenOverlayCloseWithoutSettingFocusTransitionType,
         );
+        setIsSearchFocused(false);
     }
 
     useOverlayEscapeKeyBinding({
@@ -117,9 +982,156 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         },
     });
 
+    const previousIsSearchFocused = usePrevious(isSearchFocused);
+    if (!previousIsSearchFocused?.value && isSearchFocused) {
+        setSelectedSearchResultIndex(0);
+    }
+
+    useEffect(() => {
+        if (isSearchFocused) {
+            return;
+        }
+        const listener = (event: KeyboardEvent): void => {
+            if (
+                event.ctrlKey ||
+                event.metaKey ||
+                event.altKey ||
+                event.shiftKey
+            ) {
+                return;
+            }
+
+            switch (event.key) {
+                case '/': {
+                    focusSearch();
+                    searchInputRef.current.setSelectionRange(
+                        0,
+                        searchValue.length,
+                    );
+                    stopEvent(event);
+                    break;
+                }
+            }
+        };
+        document.addEventListener('keydown', listener);
+        return () => {
+            document.removeEventListener('keydown', listener);
+        };
+    }, [isSearchFocused]);
+
+    useEffect(() => {
+        if (!isSearchFocused || searchMatches.length === 0) {
+            return;
+        }
+        const listener = (event: KeyboardEvent): void => {
+            if (
+                event.ctrlKey ||
+                event.metaKey ||
+                event.altKey ||
+                event.shiftKey
+            ) {
+                return;
+            }
+
+            switch (event.key) {
+                case 'ArrowUp':
+                case 'Up': {
+                    setSelectedSearchResultIndex(
+                        selectedSearchResultIndex === 0 ||
+                            selectedSearchResultIndex === -1
+                            ? searchMatches.length - 1
+                            : selectedSearchResultIndex - 1,
+                    );
+                    stopEvent(event);
+                    break;
+                }
+                case 'ArrowDown':
+                case 'Down': {
+                    setSelectedSearchResultIndex(
+                        selectedSearchResultIndex ===
+                            searchMatches.length - 1 ||
+                            selectedSearchResultIndex === -1
+                            ? 0
+                            : selectedSearchResultIndex + 1,
+                    );
+                    stopEvent(event);
+                    break;
+                }
+                case 'Enter': {
+                    if (selectedSearchResultIndex !== -1) {
+                        const match = searchMatches[selectedSearchResultIndex];
+                        navigateTo({
+                            pathname: `/${
+                                pageIdToWebsitePath[match.document.id]
+                            }`,
+                            hash: match.heading ? `#${match.heading.hash}` : '',
+                            search: '',
+                        });
+                        stopEvent(event);
+                    }
+                    break;
+                }
+            }
+        };
+        document.addEventListener('keydown', listener);
+        return () => {
+            document.removeEventListener('keydown', listener);
+        };
+    }, [isSearchFocused, searchMatches, selectedSearchResultIndex]);
+
+    useLayoutEffect(() => {
+        if (isSearchFocused) {
+            window.scrollTo(0, 0);
+        }
+    }, [isSearchFocused]);
+
+    function searchQuery(
+        search: (
+            query: string,
+            cancelToken: CancelToken,
+            callback: (matches: SearchMatch[]) => void,
+        ) => void,
+        query: string,
+    ): void {
+        if (searchQueryCancelableRef.current) {
+            searchQueryCancelableRef.current.cancel();
+        }
+        searchQueryCancelableRef.current = new Cancelable();
+        search(query, searchQueryCancelableRef.current.token, (matches) => {
+            setSearchMatches(matches);
+            setSelectedSearchResultIndex(0);
+        });
+    }
+
+    const previousSearch = usePrevious(search);
+    if (!previousSearch && search && isSearchFocused) {
+        searchQuery(search, searchValue);
+    }
+
     const onSearchInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {
-        setSearchValue(e.currentTarget.value);
+        const { value } = e.currentTarget;
+        if (search) {
+            searchQuery(search, value);
+        }
+        setSearchValue(value);
     };
+
+    const focusSearch = () => {
+        searchInputRef.current.focus();
+    };
+
+    const closeSearch = () => {
+        searchInputRef.current.blur();
+    };
+
+    useOverlayEscapeKeyBinding({
+        getIsOpen: () => {
+            return (
+                isBrowser && document.activeElement === searchInputRef.current
+            );
+        },
+        close: closeSearch,
+    });
 
     const onToggleButtonClick = () => {
         const isMenuOpen = getIsMenuOpen();
@@ -211,10 +1223,25 @@ export function Header({ enableMenu }: HeaderProps): VNode {
     return (
         <Fragment>
             <div
-                ref={startFocusPlaceholderRef}
                 tabIndex={isMenuOpen ? 0 : -1}
+                ref={startFocusPlaceholderRef}
             />
-            <header role="banner" class="cls-header" ref={headerRef}>
+            <div
+                class={
+                    'cls-header__search__results-overlay' +
+                    (isSearchFocused
+                        ? ''
+                        : ' cls-header__search__results-overlay--hidden')
+                }
+            ></div>
+            <header
+                role="banner"
+                class={
+                    'cls-header' +
+                    (isSearchFocused ? ' cls-header--search-focused' : '')
+                }
+                ref={headerRef}
+            >
                 <div class="cls-header__contents">
                     <div class="cls-header__contents__container">
                         <div
@@ -293,13 +1320,37 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                             </Link>
                         </div>
                     </div>
-                    <div class="cls-header__search">
+                    <div
+                        class="cls-header__search"
+                        role="search"
+                        aria-label="Site wide"
+                    >
                         <input
+                            type="search"
                             placeholder="Search..."
+                            maxLength={100}
                             aria-label="Search Website"
                             class="cls-header__search__input"
                             value={searchValue}
                             onInput={onSearchInput}
+                            onFocus={() => {
+                                setIsSearchFocused(true);
+                            }}
+                            onBlur={() => {
+                                requestAnimationFrame(() => {
+                                    if (
+                                        findIndex(
+                                            searchListItemRefsRef.current,
+                                            // TODO.
+                                            (listItem) =>
+                                                document.activeElement ===
+                                                listItem?.querySelector('a'),
+                                        ) === -1
+                                    ) {
+                                        setIsSearchFocused(false);
+                                    }
+                                });
+                            }}
                             ref={searchInputRef}
                         />
                         <div class="cls-header__search__icon">
@@ -310,8 +1361,20 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                 <path d="M12.9 14.32a8 8 0 1 1 1.41-1.41l5.35 5.33-1.42 1.42-5.33-5.34zM8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"></path>
                             </svg>
                         </div>
+                        {isSearchFocused &&
+                            searchMatches &&
+                            searchMatches.length !== 0 && (
+                                <SearchResults
+                                    searchMatches={searchMatches}
+                                    selectedIndex={selectedSearchResultIndex}
+                                    resetSelectedIndex={() => {
+                                        setSelectedSearchResultIndex(-1);
+                                    }}
+                                    listItemRefsRef={searchListItemRefsRef}
+                                ></SearchResults>
+                            )}
                     </div>
-                    <div class="cls-header__contents__container">
+                    <div class="cls-header__contents__container cls-header__contents__container--right-nav">
                         <nav
                             class="cls-header__nav"
                             aria-label="Quick Site Navigation Links"
@@ -362,7 +1425,9 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                     checked={theme === ThemeDark}
                                     onInput={onThemeSwitchButtonClick}
                                 />
-                                {theme === ThemeLight ? 'Light' : 'Dark'}
+                                <span class="cls-header__theme-checkbox-input-label-text">
+                                    {theme === ThemeLight ? 'Light' : 'Dark'}
+                                </span>
                             </label>
                             <a
                                 class="cls-header__nav__link"
@@ -464,6 +1529,162 @@ export function Header({ enableMenu }: HeaderProps): VNode {
             <div ref={endFocusPlaceholderRef} tabIndex={isMenuOpen ? 0 : -1} />
         </Fragment>
     );
+}
+
+interface SearchResultsProps {
+    searchMatches: SearchMatch[];
+    selectedIndex: number;
+    resetSelectedIndex: () => void;
+    listItemRefsRef: { current: (HTMLLIElement | null)[] };
+}
+
+function SearchResults({
+    searchMatches,
+    selectedIndex,
+    resetSelectedIndex,
+    listItemRefsRef,
+}: SearchResultsProps): VNode {
+    const scrollingContainerRef = useRef<HTMLUListElement>();
+    const isOnMouseOverDisabled = useRef(false);
+
+    const setScrollTop = (scrollTop: number) => {
+        isOnMouseOverDisabled.current = true;
+        scrollingContainerRef.current.scrollTop = scrollTop;
+        requestAnimationFrame(() => {
+            isOnMouseOverDisabled.current = false;
+        });
+    };
+
+    useEffect(() => {
+        if (listItemRefsRef.current.length !== searchMatches.length) {
+            listItemRefsRef.current = listItemRefsRef.current.slice(
+                0,
+                searchMatches.length,
+            );
+        }
+        const selectedListItem = listItemRefsRef.current[selectedIndex];
+        if (selectedListItem) {
+            const { offsetTop, offsetHeight } = selectedListItem;
+            const containerScrollTop = scrollingContainerRef.current.scrollTop;
+            const containerOffsetHeight =
+                scrollingContainerRef.current.offsetHeight;
+            if (
+                offsetTop + offsetHeight >
+                containerScrollTop + containerOffsetHeight
+            ) {
+                setScrollTop(offsetTop);
+            } else if (offsetTop < containerScrollTop) {
+                setScrollTop(
+                    offsetTop - (containerOffsetHeight - offsetHeight),
+                );
+            }
+        }
+    }, [searchMatches.length, selectedIndex]);
+
+    const onMouseOver = () => {
+        if (!isOnMouseOverDisabled.current) {
+            resetSelectedIndex();
+        }
+    };
+
+    return (
+        <ul class="cls-header__search__results" ref={scrollingContainerRef}>
+            {searchMatches.map((match, i) => (
+                <li
+                    class={
+                        'cls-header__search__results__result' +
+                        (selectedIndex === i
+                            ? ' cls-header__search__results__result--selected'
+                            : '')
+                    }
+                    onMouseOver={onMouseOver}
+                    ref={(el) => (listItemRefsRef.current[i] = el)}
+                    key={match.document.id}
+                >
+                    <DocPageLink
+                        pageId={match.document.id}
+                        hash={match.heading ? match.heading.hash : undefined}
+                        tabIndex={-1}
+                        class="cls-header__search__results__result__anchor-wrapper"
+                    >
+                        <h2 class="cls-header__search__results__result__title">
+                            {highlightSnippet(
+                                match.document.title,
+                                0,
+                                match.document.title.length,
+                                match.titleMatchRanges,
+                            )}
+                        </h2>
+                        {match.heading && (
+                            <h3 class="cls-header__search__results__result__heading">
+                                {highlightSnippet(
+                                    match.heading.text,
+                                    0,
+                                    match.heading.text.length,
+                                    match.heading.matchRanges,
+                                )}
+                            </h3>
+                        )}
+                        <p class="cls-header__search__results__result__content-snippet">
+                            {highlightSnippet(
+                                match.contentSnippet,
+                                match.contentSnippetStartIndex,
+                                match.document.content.length,
+                                match.contentSnippetMatchRanges,
+                            )}
+                        </p>
+                    </DocPageLink>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
+function highlightSnippet(
+    snippet: string,
+    snippetStartIndex: number,
+    originalTextLength: number,
+    matchRanges: MatchTextRange[],
+): ComponentChildren {
+    if (matchRanges.length === 0) {
+        return (
+            (snippetStartIndex !== 0 ? '...' : '') +
+            snippet +
+            (snippetStartIndex + snippet.length !== originalTextLength &&
+            snippet.length > 0
+                ? '...'
+                : '')
+        );
+    }
+    const nodes: ComponentChild[] = [];
+    if (snippetStartIndex !== 0) {
+        nodes.push('...');
+    }
+    if (matchRanges[0].startIndex !== 0) {
+        nodes.push(snippet.slice(0, matchRanges[0].startIndex));
+    }
+    matchRanges.forEach((matchRange, i) => {
+        nodes.push(
+            <strong class="cls-header__search__results__result__match-text">
+                {snippet.slice(matchRange.startIndex, matchRange.endIndex)}
+            </strong>,
+        );
+        const nextMatch = matchRanges[i + 1];
+        const text = snippet.slice(
+            matchRange.endIndex,
+            nextMatch && nextMatch.startIndex,
+        );
+        if (text) {
+            nodes.push(text);
+        }
+    });
+    if (
+        snippetStartIndex + snippet.length !== originalTextLength &&
+        snippet.length > 0
+    ) {
+        nodes.push('...');
+    }
+    return nodes;
 }
 
 interface ToggleButtonSvgProps {

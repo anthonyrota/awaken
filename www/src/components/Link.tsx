@@ -36,14 +36,7 @@ export function Link({
         event.stopPropagation();
         event.preventDefault();
         const newHref = parsePathDefaultingToEmptyString(href);
-        if (
-            isActivePath(newHref) &&
-            newHref.hash === customHistory.location.hash
-        ) {
-            customHistory.replace(newHref);
-        } else {
-            customHistory.push(newHref);
-        }
+        navigateTo(newHref);
         return false;
     };
 
@@ -69,4 +62,12 @@ export function isDocPageIdActivePath(docPageId: string): boolean {
     return isStringActivePath(
         `/${getPagesMetadata().pageIdToWebsitePath[docPageId]}`,
     );
+}
+
+export function navigateTo(path: Required<PartialPath>): void {
+    if (isActivePath(path) && path.hash === customHistory.location.hash) {
+        customHistory.replace(path);
+    } else {
+        customHistory.push(path);
+    }
 }

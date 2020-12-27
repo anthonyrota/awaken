@@ -8,6 +8,6 @@ temp
 .vercel/project.json
 www/vercel-public
 www/public
-www/template
+# www/template
 www/src/__auto_generated__index.html
 www/parcel-public

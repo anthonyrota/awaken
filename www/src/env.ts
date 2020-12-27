@@ -8,14 +8,18 @@ export const isChromium = /*@__PURE__*/ (() =>
 export const isChromebook = /*@__PURE__*/ (() =>
     isBrowser && /\bCrOS\b/.test(navigator.userAgent))();
 
-export const isMobile = /*@__PURE__*/ (() =>
+export const isIOS = /*@__PURE__*/ (() =>
     isBrowser &&
-    // eslint-disable-next-line max-len
-    (/\b(BlackBerry|webOS|iPhone|IEMobile|Android|Windows Phone|iPad|iPod)\b/i.test(
-        navigator.userAgent,
-    ) ||
+    (/\b(iPhone|iPad|iPod)\b/i.test(navigator.userAgent) ||
         // Newer iPad.
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)))();
+
+export const isMobile = /*@__PURE__*/ (() =>
+    isBrowser &&
+    (isIOS ||
+        /\b(BlackBerry|webOS|IEMobile|Android|Windows Phone)\b/i.test(
+            navigator.userAgent,
+        )))();
 
 export const isStandalone = /*@__PURE__*/ (() =>
     isBrowser &&

@@ -1,3 +1,5 @@
+// eslint-disable-next-line import/order
+import { pages, pagesMetadata } from './setGlobalAppVars';
 import * as path from 'path';
 import { promisify } from 'util';
 import * as babel from '@babel/core';
@@ -7,12 +9,65 @@ import * as postcss from 'postcss';
 import * as postcssSelectorParser from 'postcss-selector-parser';
 import * as posthtml from 'posthtml';
 import * as terser from 'terser';
+import { getSSRHeadValues } from '../../src/Head';
 import { computeFileHash } from '../computeFileHash';
+import {
+    addFileToFolder,
+    Folder,
+    writeFolderToDirectoryPath,
+} from '../docs/util/Folder';
 import { globAbsolute } from '../docs/util/glob';
 import { exit } from '../exit';
 import { rootDir } from '../rootDir';
+import { insertSsr } from './buildTemplate';
+import { renderAppAtPath } from './renderAppAtPath';
 
 const globP = promisify(glob);
+
+async function buildSsr(): Promise<void> {
+    const outFolder = Folder();
+    const vercelPublicPath = path.join(rootDir, 'www', 'vercel-public');
+    const templatePath = path.join(vercelPublicPath, 'template.html');
+    const template = await fs.readFile(templatePath, 'utf-8');
+
+    addFileToFolder(
+        outFolder,
+        'index.html',
+        insertSsr(template, renderAppAtPath('/'), getSSRHeadValues()),
+    );
+
+    addFileToFolder(
+        outFolder,
+        'license/index.html',
+        insertSsr(template, renderAppAtPath('/license'), getSSRHeadValues()),
+    );
+
+    addFileToFolder(
+        outFolder,
+        '_404/index.html',
+        insertSsr(template, renderAppAtPath('/_notfound'), getSSRHeadValues()),
+    );
+
+    for (const { pageId } of pages) {
+        const websitePath = pagesMetadata.pageIdToWebsitePath[pageId];
+        addFileToFolder(
+            outFolder,
+            `${websitePath}/index.html`,
+            insertSsr(
+                template,
+                renderAppAtPath(`/${websitePath}`),
+                getSSRHeadValues(),
+            ),
+        );
+    }
+
+    addFileToFolder(outFolder, '_spa.html', insertSsr(template, ''));
+
+    await Promise.all([
+        writeFolderToDirectoryPath(outFolder, vercelPublicPath),
+        fs.unlink(templatePath),
+    ]);
+}
 
 async function fixParcelBuild(): Promise<void> {
     const manifestPathP = (async () => {
@@ -521,6 +576,7 @@ async function fixParcelBuild(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+    await buildSsr();
     await fixParcelBuild();
 }
 

@@ -36,7 +36,7 @@
     <body>
         <div class="cls-root">::ssr::</div>
         <script>
-            import { isChromium, isChromebook, isMobile } from '/env';
+            import { isChromium, isChromebook, isIOS, isMobile } from '/env';
             if (isChromium) {
                 document.documentElement.classList.add('cls-chromium');
             }
@@ -44,6 +44,9 @@
                 document.documentElement.classList.add(
                     'cls-not-mobile-or-chromebook',
                 );
+            }
+            if (isIOS) {
+                document.documentElement.classList.add('cls-ios');
             }
         </script>
         <script>

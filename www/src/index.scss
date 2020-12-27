@@ -1,173 +1,19 @@
 @use "sass:selector";
 
-// Disabling for two reasons: no italic support and large file size.
-
-// @font-face {
-//     font-family: 'Fira Code';
-//     src: url('../node_modules/firacode/distr/woff2/FiraCode-Regular.woff2')
-//             format('woff2'),
-//         url('../node_modules/firacode/distr/woff/FiraCode-Regular.woff')
-//             format('woff');
-//     font-weight: 400;
-//     font-style: normal;
-//     font-display: swap;
-// }
-
-// @font-face {
-//     font-family: 'Fira Code VF';
-//     src: url('../node_modules/firacode/distr/woff2/FiraCode-VF.woff2')
-//         format('woff2-variations');
-//     font-weight: 100 900;
-//     font-style: normal;
-//     font-display: swap;
-// }
-
-/*
- * http://meyerweb.com/eric/tools/css/reset/
- * v2.0 | 20110126
- * License: none (public domain)
- */
-
-html,
-body,
-div,
-span,
-applet,
-object,
-iframe,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-blockquote,
-pre,
-a,
-abbr,
-acronym,
-address,
-big,
-cite,
-code,
-del,
-dfn,
-em,
-img,
-ins,
-kbd,
-q,
-s,
-samp,
-small,
-strike,
-strong,
-sub,
-sup,
-tt,
-var,
-b,
-u,
-i,
-center,
-dl,
-dt,
-dd,
-ol,
-ul,
-li,
-fieldset,
-form,
-label,
-legend,
-table,
-caption,
-tbody,
-tfoot,
-thead,
-tr,
-th,
-td,
-article,
-aside,
-canvas,
-details,
-embed,
-figure,
-figcaption,
-footer,
-header,
-hgroup,
-menu,
-nav,
-output,
-ruby,
-section,
-summary,
-time,
-mark,
-audio,
-input,
-video {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-size: 100%;
-    font: inherit;
-    vertical-align: baseline;
-}
-
-// HTML5 display-role reset for older browsers
-article,
-aside,
-details,
-figcaption,
-figure,
-footer,
-header,
-hgroup,
-menu,
-nav,
-section {
-    display: block;
-}
-
-ol,
-ul {
-    list-style: none;
-}
-blockquote,
-q {
-    quotes: none;
-}
-blockquote:before,
-blockquote:after,
-q:before,
-q:after {
-    content: '';
-    content: none;
-}
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 $size-small: 740px;
 $size-show-menu: 840px;
 $size-sidebar-right: 1100px;
-$z-index-skip-link: 1;
-$z-index-sticky-menu-toggle-button: 1;
+$z-index-search-overlay: 1;
+$z-index-search: 2;
+$z-index-skip-link: 3;
+$z-index-sticky-menu-toggle-button: 3;
 $main-text-size: 16px;
 $spacing: 0.8 * $main-text-size;
 $max-width: 1400px;
 $hover-opacity: 0.7;
 $header-height: 56px;
 $header-border-height: 1px;
+$box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px;
 
 $text-primary: 'text-primary';
 $text-primary-accent: 'text-primary-accent';
@@ -324,6 +170,149 @@ $theme-map: null;
     }
 }
 
+@mixin sticky-sidebar--js-sticky-active {
+    position: fixed;
+    top: 0;
+    height: 100vh;
+}
+
+@mixin supports-sticky {
+    @supports (position: sticky) {
+        @content;
+    }
+}
+
+/*
+ * http://meyerweb.com/eric/tools/css/reset/
+ * v2.0 | 20110126
+ * License: none (public domain)
+ */
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+input,
+video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+// HTML5 display-role reset for older browsers
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+    display: block;
+}
+
+ol,
+ul {
+    list-style: none;
+}
+blockquote,
+q {
+    quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
 html.cls-not-mobile-or-chromebook {
     @include theme-self($dark) {
         ::-webkit-scrollbar {
@@ -357,18 +346,6 @@ html.cls-not-mobile-or-chromebook {
         ::-webkit-scrollbar-corner {
             background-color: transparent;
         }
-    }
-}
-
-@mixin sticky-sidebar--js-sticky-active {
-    position: fixed;
-    top: 0;
-    height: 100vh;
-}
-
-@mixin supports-sticky {
-    @supports (position: sticky) {
-        @content;
     }
 }
 
@@ -421,6 +398,13 @@ button {
 
 .cls-skip-link:focus {
     top: 0;
+}
+
+// Fix chromium quirk where focusing the link through javascript in specific
+// circumstances does not show an outline.
+.cls-fix-chromium-focus:focus {
+    outline: 2px solid -webkit-focus-ring-color !important;
+    opacity: $hover-opacity !important;
 }
 
 .cls-header {
@@ -569,12 +553,24 @@ button {
     &__search {
         position: relative;
         flex-grow: 1;
+        z-index: $z-index-search;
+        .cls-header--search-focused & {
+            @media screen and (max-width: $size-show-menu) {
+                margin-right: $spacing;
+            }
+        }
+        @include themed {
+            background: t($bg0);
+        }
+        border-radius: $content-height;
 
         $icon-size: $main-text-size;
         $icon-spacing-lg: $spacing;
         $icon-spacing-sm: $spacing/2;
+        $focus-border-color: #74b0f4;
 
         &__input {
+            z-index: $z-index-search;
             font-weight: 400;
             display: block;
             overflow: hidden;
@@ -582,17 +578,32 @@ button {
             white-space: nowrap;
             width: 100%;
             height: $content-height;
-
+            @include themed {
+                color: t($text-primary);
+            }
             padding-left: $icon-size + $icon-spacing-lg * 2;
             padding-right: $icon-spacing-lg;
             @media screen and (max-width: $size-small) {
                 padding-left: $icon-size + $icon-spacing-sm * 2;
                 padding-right: $icon-spacing-sm;
             }
+            border-radius: $content-height;
+            outline: none;
 
             &::placeholder {
                 @include themed {
                     color: t($text-primary);
+                }
+            }
+
+            &:focus {
+                border: 1px solid $focus-border-color;
+                box-shadow: $box-shadow;
+
+                &::placeholder {
+                    @include themed {
+                        color: rgba(t($text-primary), $hover-opacity);
+                    }
                 }
             }
         }
@@ -618,6 +629,124 @@ button {
                 height: $icon-size;
             }
         }
+
+        &__results-overlay {
+            z-index: $z-index-search-overlay;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            position: fixed;
+            background-color: rgba(90, 98, 112, 0.5);
+            transition-property: opacity, visibility;
+            transition-duration: 50ms;
+            transition-timing-function: ease-in-out;
+
+            @media (prefers-reduced-motion) {
+                transition: none;
+            }
+
+            &--hidden {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        &__results {
+            $vertical-spacing: $spacing;
+            z-index: $z-index-search;
+            $max-vw: 0.7;
+            position: absolute;
+            top: $content-height + ($header-height - $content-height)/2 +
+                $vertical-spacing;
+            left: 0;
+            width: 100%;
+            width: Min(Max(100%, $max-vw * 100vw), $max-vw * $max-width);
+            @include themed {
+                background-color: t($bg0);
+                box-shadow: $box-shadow;
+            }
+            $max-height-subtract: $header-height + $vertical-spacing * 2 +
+                ($header-height - $content-height) / 2 + $header-border-height;
+            max-height: calc(100vh - #{$max-height-subtract});
+            html.cls-ios & {
+                max-height: calc(50vh - #{$max-height-subtract});
+            }
+            overflow: auto;
+            border-radius: 6px;
+            @include minimal-scrollbar();
+
+            &__result {
+                & + & {
+                    @include themed {
+                        border-top: t($light-border);
+                    }
+                }
+
+                &--selected,
+                &:hover {
+                    @include themed {
+                        background: t($bg1);
+                    }
+                }
+
+                $padding: $spacing * 2;
+                $focus-border-size: 2px;
+
+                &__anchor-wrapper {
+                    display: block;
+                    text-decoration: none;
+                    padding: $padding;
+                    outline: none;
+                }
+
+                &--selected &__anchor-wrapper,
+                &__anchor-wrapper:focus {
+                    border: $focus-border-size solid $focus-border-color;
+                    border-radius: 6px;
+                    padding: $padding - $focus-border-size;
+                }
+
+                &__title {
+                    text-decoration: underline;
+                    font-size: 20px;
+                    margin-bottom: $spacing/2;
+                    @include themed {
+                        color: t($text-primary);
+                    }
+                }
+
+                &__title &__match-text {
+                    text-decoration: underline;
+                }
+
+                &__heading {
+                    text-decoration: none;
+                    @include themed {
+                        color: t($text-primary);
+                    }
+                }
+
+                &__content-snippet {
+                    white-space: pre-wrap;
+                    @include themed {
+                        color: t($text-primary-accent);
+                    }
+                }
+
+                &__match-text {
+                    @include themed {
+                        color: t($accent);
+                    }
+                }
+            }
+        }
+    }
+
+    @media screen and (max-width: 1000px) {
+        &--search-focused &__contents__container--right-nav {
+            @include hidden;
+        }
     }
 
     &__version {
@@ -626,6 +755,10 @@ button {
         justify-content: center;
         @include themed {
             color: t($text-primary);
+        }
+
+        @media screen and (max-width: 370px) {
+            @include hidden;
         }
     }
 
@@ -644,6 +777,11 @@ button {
 
     &__theme-checkbox-input {
         @include hidden;
+        &:focus + &-label-text {
+            outline-offset: $spacing/2;
+            outline: 2px solid -webkit-focus-ring-color !important;
+            opacity: $hover-opacity !important;
+        }
     }
 
     &__menu-toggle-button {
@@ -731,13 +869,6 @@ button {
             padding: $spacing;
         }
     }
-}
-
-// Fix chromium quirk where focusing the link through javascript in specific
-// circumstances does not show an outline.
-.cls-fix-chromium-focus:focus {
-    outline: 2px solid -webkit-focus-ring-color !important;
-    opacity: $hover-opacity !important;
 }
 
 .cls-full-site-nav {
@@ -835,11 +966,14 @@ button {
             padding: $link-padding-menu;
         }
         @include content-link;
-        text-decoration: underline;
         &:focus {
             html.cls-chromium & {
                 outline: 2px solid -webkit-focus-ring-color !important;
             }
+        }
+        &:hover,
+        &:focus {
+            text-decoration: underline;
         }
     }
 
@@ -869,7 +1003,7 @@ button {
         $max-width: 280px;
         $min-width: 240px;
         $width-old-browser: ($min-width + $max-width) / 2;
-        $width-new-browser: #{'max' }(#{'min' }(20vw, $max-width), $min-width);
+        $width-new-browser: Max(Min(20vw, $max-width), $min-width);
 
         flex-shrink: 0;
         width: $width-old-browser;
@@ -953,7 +1087,7 @@ button {
 
         > :first-child {
             &.cls-temp-focus-span + * {
-                margin-top: 0;
+                margin-top: 40px;
             }
             margin-top: 40px;
         }
@@ -1380,7 +1514,7 @@ button {
     &-table &-code-block {
         white-space: pre-wrap;
         min-width: 150px;
-        min-width: min(150px, 40vw);
+        min-width: Min(150px, 40vw);
         @media screen and (max-width: $size-show-menu) {
             white-space: pre;
             min-width: 0;

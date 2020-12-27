@@ -15,7 +15,8 @@ export type BindKeys =
 
 export interface UseNavigationListKeyBindingsParams {
     bindKeys: BindKeys;
-    getAllowSingleLetterKeyLinkJumpShortcut?: (() => boolean) | undefined;
+    bindKeysRequireFocusAllowAnyways?: () => boolean;
+    getAllowSingleLetterKeyLinkJumpShortcut?: () => boolean;
     isMovingFocusManuallyRef?: { current: boolean };
     linkTexts: string[];
     linkRefs: { current: HTMLAnchorElement }[];
@@ -29,6 +30,7 @@ export interface UseNavigationListKeyBindingsResult {
 
 export function useNavigationListKeyBindings({
     bindKeys,
+    bindKeysRequireFocusAllowAnyways,
     getAllowSingleLetterKeyLinkJumpShortcut,
     isMovingFocusManuallyRef = useRef(false),
     linkTexts,
@@ -93,15 +95,22 @@ export function useNavigationListKeyBindings({
                 return;
             }
 
-            const keysDisabled =
-                bindKeys === BindKeysRequireFocus && getLinkFocusIndex() === -1;
+            if (
+                bindKeys === BindKeysRequireFocus &&
+                !(
+                    bindKeysRequireFocusAllowAnyways &&
+                    bindKeysRequireFocusAllowAnyways()
+                ) &&
+                getLinkFocusIndex() === -1
+            ) {
+                return;
+            }
 
             if (
                 event.key.length === 1 &&
                 /\S/.test(event.key) &&
-                (!keysDisabled ||
-                    (getAllowSingleLetterKeyLinkJumpShortcut &&
-                        getAllowSingleLetterKeyLinkJumpShortcut()))
+                getAllowSingleLetterKeyLinkJumpShortcut &&
+                getAllowSingleLetterKeyLinkJumpShortcut()
             ) {
                 const index = getLinkFocusIndex();
                 const predicate = (title: string) =>
@@ -126,10 +135,6 @@ export function useNavigationListKeyBindings({
                 if (event.shiftKey) {
                     stopEvent(event);
                 }
-                return;
-            }
-
-            if (keysDisabled) {
                 return;
             }
 

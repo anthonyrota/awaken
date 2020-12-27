@@ -291,6 +291,15 @@ export function FullSiteNavigationContents({
 
     useNavigationListKeyBindings({
         bindKeys,
+        bindKeysRequireFocusAllowAnyways: () => {
+            const focusedElement = document.activeElement;
+            return (
+                findIndex(
+                    checkboxRefs,
+                    (ref) => ref.current === focusedElement,
+                ) !== -1
+            );
+        },
         linkRefs,
         linkTexts,
         getAllowSingleLetterKeyLinkJumpShortcut: () =>
