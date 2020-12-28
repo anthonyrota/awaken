@@ -2,6 +2,7 @@ import { Fragment, h, VNode } from 'preact';
 import { useRef, useState } from 'preact/hooks';
 import { DeepCoreNode, CoreNodeType } from '../../script/docs/core/nodes';
 import { ListType } from '../../script/docs/core/nodes/List';
+import { unencodedTokenizedLines } from '../../script/docs/util/tokenizeText/util';
 import { getGithubUrl, getPagesMetadata } from '../data/docPages';
 import { customHistory } from '../hooks/useHistory';
 import { useSizeShowMenuChange } from '../hooks/useSizeShowMenu';
@@ -115,7 +116,9 @@ export function DeepCoreNodeComponent({
         case CoreNodeType.CodeBlock: {
             const theme = useTheme();
             const codeBlockStyleMap = getPagesMetadata().codeBlockStyleMap;
-            const { foreground, background } = codeBlockStyleMap[theme];
+            const { foreground, background, colorMap } = codeBlockStyleMap[
+                theme
+            ];
             const { code, tokenizedLinesMap, codeLinks } = node;
             const ChildNodeType$Text = 1;
             const ChildNodeType$Link = 0;
@@ -133,7 +136,9 @@ export function DeepCoreNodeComponent({
             type ChildNode = ChildText | ChildLink;
             const childNodes: ChildNode[] = [];
             if (tokenizedLinesMap) {
-                const tokenizedLines = tokenizedLinesMap[theme];
+                const tokenizedLines = unencodedTokenizedLines(
+                    tokenizedLinesMap[theme],
+                );
                 tokenizedLines.lines.forEach((line, lineIndex) => {
                     line.tokens.forEach((token, tokenIndex) => {
                         childNodes.push({
@@ -151,18 +156,9 @@ export function DeepCoreNodeComponent({
                                               .startIndex,
                             ),
                             style: {
-                                color:
-                                    token.color === undefined
-                                        ? foreground
-                                        : token.color,
+                                color: colorMap[token.color],
                                 fontStyle: (token.isItalic
                                     ? 'italic'
-                                    : undefined) as string,
-                                fontWeight: (token.isBold
-                                    ? 'bold'
-                                    : undefined) as string,
-                                textDecoration: (token.isUnderline
-                                    ? 'underline'
                                     : undefined) as string,
                             },
                         });

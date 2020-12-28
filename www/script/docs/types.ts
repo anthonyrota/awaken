@@ -13,6 +13,7 @@ export interface PageGroup {
 export interface CodeBlockStyle {
     foreground: string;
     background: string;
+    colorMap: string[];
 }
 
 export type CodeBlockStyleMap = Record<Theme, CodeBlockStyle>;

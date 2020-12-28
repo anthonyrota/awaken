@@ -13,7 +13,6 @@ import { ThemeDark, ThemeLight, Theme } from '../../src/theme';
 import { computeFileHash } from '../computeFileHash';
 import { exit } from '../exit';
 import { rootDir } from '../rootDir';
-
 import { buildApiPage, PageExports } from './analyze/build/buildApiPage';
 import { AnalyzeContext } from './analyze/Context';
 import {
@@ -47,9 +46,12 @@ import {
     TokenizeLanguage,
     tokenizeText,
     codeBlockStyleMap,
-    TokenizedLinesMap,
-    TokenizedLines,
 } from './util/tokenizeText';
+import {
+    EncodedTokenizedLines,
+    EncodedTokenizedLinesMap,
+    encodeTokenizedLines,
+} from './util/tokenizeText/util';
 import { createProgram } from './util/ts';
 
 const rimrafP = promisify(rimraf);
@@ -724,11 +726,11 @@ async function main() {
                     return;
                 }
                 const { code } = node;
-                const tokenizedLinesMap: TokenizedLinesMap =
+                const encodedTokenizedLinesMap: EncodedTokenizedLinesMap =
                     node.tokenizedLinesMap ||
                     (node.tokenizedLinesMap = {} as Record<
                         Theme,
-                        TokenizedLines
+                        EncodedTokenizedLines
                     >);
                 const prefixText =
                     node[$HACK_SYMBOL]?.syntaxHighlightingPrefix || '';
@@ -780,7 +782,9 @@ async function main() {
                             line.endIndex -= prefixText.length;
                         }
                     }
-                    tokenizedLinesMap[theme] = tokenizedLines;
+                    encodedTokenizedLinesMap[theme] = encodeTokenizedLines(
+                        tokenizedLines,
+                    );
                 }
                 promises.push(mapTheme(ThemeLight), mapTheme(ThemeDark));
             });

@@ -2,9 +2,14 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as oniguruma from 'vscode-oniguruma';
 import * as vscodeTextmate from 'vscode-textmate';
-import { Theme, ThemeLight, ThemeDark } from '../../../src/theme';
-import { rootDir } from '../../rootDir';
-import { CodeBlockStyle } from '../types';
+import { Theme, ThemeLight, ThemeDark } from '../../../../src/theme';
+import { rootDir } from '../../../rootDir';
+import { CodeBlockStyle } from '../../types';
+import {
+    UnencodedTokenizedLines,
+    UnencodedTokenizedLine,
+    UnencodedToken,
+} from './util';
 
 async function loadVscodeOnigurumaLib(): Promise<vscodeTextmate.IOnigLib> {
     const wasmArrayBuffer = (
@@ -62,10 +67,10 @@ const themePaths = {
 
 function mapObject<K extends string | number | symbol, T, U>(
     object: Record<K, T>,
-    transform: (v: T) => U,
+    transform: (v: T, k: K) => U,
 ): Record<K, U> {
     return Object.fromEntries(
-        Object.entries(object).map(([k, v]) => [k, transform(v as T)]),
+        Object.entries(object).map(([k, v]) => [k, transform(v as T, k as K)]),
     ) as Record<K, U>;
 }
 
@@ -86,33 +91,21 @@ const themes = mapObject(
     }),
 );
 
-export interface Token {
-    startIndex: number;
-    isItalic?: true;
-    isBold?: true;
-    isUnderline?: true;
-    color?: string;
-}
-
-export interface TokenizedLine {
-    startIndex: number;
-    endIndex: number;
-    tokens: Token[];
-}
-
-export interface TokenizedLines {
-    lines: TokenizedLine[];
-}
-
-export type TokenizedLinesMap = Record<Theme, TokenizedLines>;
-
 export const codeBlockStyleMap = mapObject(
     // cspell:disable-next-line
     themeJsons,
-    (themeJson): CodeBlockStyle => ({
-        foreground: themeJson.colors['editor.foreground'],
-        background: themeJson.colors['editor.background'],
-    }),
+    (themeJson, key): CodeBlockStyle => {
+        const theme = themes[key];
+        registry.setTheme(theme);
+        const foreground = themeJson.colors['editor.foreground'];
+        const background = themeJson.colors['editor.background'];
+        const colorMap = [foreground, ...registry.getColorMap().slice(2)];
+        return {
+            foreground,
+            background,
+            colorMap,
+        };
+    },
 );
 
 // Is tokenize the right terminology? Idk.
@@ -120,18 +113,18 @@ export async function tokenizeText(
     text: string,
     language: TokenizeLanguage,
     theme: Theme,
-): Promise<TokenizedLines> {
+): Promise<UnencodedTokenizedLines> {
     const grammar = await registry.loadGrammar(language);
     registry.setTheme(themes[theme]);
     if (!grammar) {
         throw new Error(`No grammar found for scope ${language}`);
     }
     let ruleStack = vscodeTextmate.INITIAL;
-    const tokenizedLines: TokenizedLine[] = [];
+    const tokenizedLines: UnencodedTokenizedLine[] = [];
     let lineStartIndex = 0;
     text.split('\n').forEach((line) => {
         const result = grammar.tokenizeLine2(line, ruleStack);
-        const lineTokens: Token[] = [];
+        const lineTokens: UnencodedToken[] = [];
         for (let i = 0; i < result.tokens.length; i += 2) {
             const startIndex = result.tokens[i];
             const metadata = result.tokens[i + 1];
@@ -139,17 +132,13 @@ export async function tokenizeText(
                 (metadata & vscodeTextmate.MetadataConsts.FONT_STYLE_MASK) >>
                 vscodeTextmate.MetadataConsts.FONT_STYLE_OFFSET;
             const foreground =
-                (metadata & vscodeTextmate.MetadataConsts.FOREGROUND_MASK) >>
-                vscodeTextmate.MetadataConsts.FOREGROUND_OFFSET;
+                ((metadata & vscodeTextmate.MetadataConsts.FOREGROUND_MASK) >>
+                    vscodeTextmate.MetadataConsts.FOREGROUND_OFFSET) -
+                1;
             lineTokens.push({
                 startIndex,
                 isItalic: fontStyle & 1 ? true : undefined,
-                isBold: fontStyle & 2 ? true : undefined,
-                isUnderline: fontStyle & 4 ? true : undefined,
-                color:
-                    foreground === 1
-                        ? undefined
-                        : registry.getColorMap()[foreground],
+                color: foreground,
             });
         }
         tokenizedLines.push({

@@ -1,4 +1,4 @@
-import { TokenizedLinesMap } from '../../util/tokenizeText';
+import { EncodedTokenizedLinesMap } from '../../util/tokenizeText/util';
 import { Node, CoreNodeType } from '.';
 
 export enum CodeLinkType {
@@ -28,7 +28,7 @@ export interface CodeBlockParameters {
     language?: string;
     code: string;
     codeLinks?: CodeLink[];
-    tokenizedLinesMap?: TokenizedLinesMap;
+    tokenizedLinesMap?: EncodedTokenizedLinesMap;
     [$HACK_SYMBOL]?: $HackValues;
 }
 
@@ -36,7 +36,7 @@ export interface CodeBlockBase {
     language?: string;
     code: string;
     codeLinks?: CodeLink[];
-    tokenizedLinesMap?: TokenizedLinesMap;
+    tokenizedLinesMap?: EncodedTokenizedLinesMap;
     [$HACK_SYMBOL]?: $HackValues;
 }
 
