@@ -233,6 +233,6 @@ fromArray(1, 2, 3)(Sink(event => console.log(event)))
 
 <div align="right">
 
-| [Next \(Disposable\)](..\/01-api-basics\/00-Disposable.md#readme) |
+| [Next \(Disposable\)](..\/01-api-disposable\/00-Disposable.md#readme) |
 | --- |
 </div>
