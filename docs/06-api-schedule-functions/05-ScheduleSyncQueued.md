@@ -2,7 +2,7 @@
 
 # ScheduleSyncQueued
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>ScheduleSyncQueued</code>](#ScheduleSyncQueued)</details>
 

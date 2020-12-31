@@ -2,7 +2,7 @@
 
 # Event
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>Event</code>](#Event)
    1. [<code>EventType</code>](#EventType)</details>

@@ -399,7 +399,6 @@ function findRoughMatchRangesInText(
         let bestSubstrScore: number | undefined;
         let bestSubstr: string | undefined;
         let bestSubstrStartIndex: number | undefined;
-        // eslint-disable-next-line no-inner-declarations
         function onSubstr(substr: string, startIndex: number): boolean {
             for (let i = 0; i < queryTokens.length; i++) {
                 const queryToken = queryTokens[i];
@@ -1415,7 +1414,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                         <div class="cls-header__version">v0.0.1</div>
                         <div class="cls-header__nav cls-header__nav__list">
                             <label
-                                class="cls-header__nav__link"
+                                class="cls-header__nav__link cls-header__nav__link--theme-toggle"
                                 aria-label={themeSwitchLabel}
                                 title={themeSwitchLabel}
                             >
@@ -1425,9 +1424,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
                                     checked={theme === ThemeDark}
                                     onInput={onThemeSwitchButtonClick}
                                 />
-                                <span class="cls-header__theme-checkbox-input-label-text">
-                                    {theme === ThemeLight ? 'Light' : 'Dark'}
-                                </span>
+                                <div class="cls-header__theme-icon"></div>
                             </label>
                             <a
                                 class="cls-header__nav__link"

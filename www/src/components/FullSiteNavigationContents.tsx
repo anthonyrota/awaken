@@ -24,6 +24,7 @@ const githubUrl = getGithubUrl();
 const licenseLinkText = 'License';
 const githubLinkText = 'GitHub';
 
+// TODO: cleanup.
 export function FullSiteNavigationContents({
     bindKeys,
     isMovingFocusManuallyRef = useRef(false),
@@ -33,6 +34,9 @@ export function FullSiteNavigationContents({
     const linkTexts: string[] = [];
     pageGroups.forEach((pageGroup) => {
         pageGroup.pageIds.forEach((pageId) => {
+            if (pageId === null) {
+                return;
+            }
             linkTexts.push(pageIdToPageTitle[pageId]);
         });
     });
@@ -62,7 +66,7 @@ export function FullSiteNavigationContents({
         let i = 0;
         let sum = 0;
         for (; i < pageGroups.length; i++) {
-            sum += pageGroups[i].pageIds.length;
+            sum += pageGroups[i].pageIds.filter((v) => v !== null).length;
             if (sum > linkIndex) {
                 return i;
             }
@@ -84,7 +88,7 @@ export function FullSiteNavigationContents({
     ): number => {
         let sum = 0;
         for (let i = 0; i < pageGroups.length; i++) {
-            const { length } = pageGroups[i].pageIds;
+            const { length } = pageGroups[i].pageIds.filter((v) => v !== null);
             if (linkListIndex === i) {
                 return sum;
             }
@@ -151,7 +155,9 @@ export function FullSiteNavigationContents({
                             ) +
                                 (focusedLinkListIndex === pageGroups.length
                                     ? 2
-                                    : pageGroups[focusedLinkListIndex].pageIds
+                                    : pageGroups[
+                                          focusedLinkListIndex
+                                      ].pageIds.filter((v) => v !== null)
                                           .length) -
                                 1
                         ].current,
@@ -327,7 +333,10 @@ export function FullSiteNavigationContents({
         <ul>
             {pageGroups.map((pageGroup) => (
                 <FullSiteNavigationLinkList
-                    isActive={pageGroup.pageIds.some(isDocPageIdActivePath)}
+                    isActive={pageGroup.pageIds.some(
+                        (thing) =>
+                            thing !== null && isDocPageIdActivePath(thing),
+                    )}
                     headerText={pageGroup.title}
                     description={`${pageGroup.title} Navigation Links`}
                     onCheckboxClick={(() => {
@@ -347,6 +356,15 @@ export function FullSiteNavigationContents({
                     checkboxRef={(checkboxRefs[_checkboxRefIndex++] = useRef())}
                 >
                     {pageGroup.pageIds.map((pageId, index) => {
+                        if (pageId === null) {
+                            // Separator.
+                            return (
+                                <li
+                                    role="separator"
+                                    class="cls-full-site-nav__list-separator"
+                                ></li>
+                            );
+                        }
                         const isActive = isDocPageIdActivePath(pageId);
                         const menuLinkIndex = _checkboxRefIndex;
                         return (

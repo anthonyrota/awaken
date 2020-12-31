@@ -2,7 +2,7 @@
 
 # watchSourceEvents
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>watchSourceEvents</code>](#watchSourceEvents)</details>
 

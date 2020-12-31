@@ -2,7 +2,7 @@
 
 # Subject
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>Subject</code>](#Subject) - [<code>Function</code>](#Subject-Function), [<code>Interface</code>](#Subject-Interface)</details>
 
@@ -24,7 +24,7 @@
 
 <pre>interface Subject&lt;T&gt; extends <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;, <a href="../03-api-source/02-Sink.md#Sink-Interface">Sink</a>&lt;T&gt; {<br>    (eventOrSink: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt; | <a href="../03-api-source/02-Sink.md#Sink-Interface">Sink</a>&lt;T&gt;): void<br>}</pre><br>
 
-| [Previous \(zipWith\)](..\/04-api-operator\/108-zipWith.md#readme) |
+| [Previous \(zipWith\)](..\/04-api-operator\/109-zipWith.md#readme) |
 | --- |
 
 <div align="right">

@@ -2,12 +2,12 @@ import type { Theme } from '../../src/theme';
 import type { DeepCoreNode } from './core/nodes';
 import type { PageNode } from './core/nodes/Page';
 
-export type PageIds = /* PageId[] */ string[];
 export type Pages = PageNode<DeepCoreNode>[];
 
 export interface PageGroup {
     title: string;
-    pageIds: PageIds;
+    // HACK: null represents separator.
+    pageIds: (string | null)[];
 }
 
 export interface CodeBlockStyle {

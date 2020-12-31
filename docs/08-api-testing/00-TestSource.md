@@ -2,7 +2,7 @@
 
 # TestSource
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>TestSource</code>](#TestSource) - [<code>Function</code>](#TestSource-Function), [<code>Interface</code>](#TestSource-Interface)</details>
 

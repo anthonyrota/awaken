@@ -2,7 +2,7 @@
 
 # Source
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>Source</code>](#Source) - [<code>Function</code>](#Source-Function), [<code>Interface</code>](#Source-Interface)</details>
 

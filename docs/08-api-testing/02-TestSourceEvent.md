@@ -2,7 +2,7 @@
 
 # TestSourceEvent
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>TestSourceEvent</code>](#TestSourceEvent)</details>
 

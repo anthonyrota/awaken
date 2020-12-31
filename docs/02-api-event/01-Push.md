@@ -2,7 +2,7 @@
 
 # Push
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>Push</code>](#Push) - [<code>Function</code>](#Push-Function), [<code>Interface</code>](#Push-Interface)
    1. [<code>PushType</code>](#PushType) - [<code>Type</code>](#PushType-TypeAlias), [<code>Variable</code>](#PushType-Variable)</details>

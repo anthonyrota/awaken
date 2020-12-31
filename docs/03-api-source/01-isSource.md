@@ -2,7 +2,7 @@
 
 # isSource
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>isSource</code>](#isSource)</details>
 

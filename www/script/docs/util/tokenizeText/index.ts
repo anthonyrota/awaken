@@ -61,7 +61,7 @@ const registry = new vscodeTextmate.Registry({
 });
 
 const themePaths = {
-    [ThemeLight]: `${rootDir}/www/vendor/vsc-material-theme/Material-Theme-Lighter.json`,
+    [ThemeLight]: `${rootDir}/www/vendor/vsc-material-theme/Material-Theme-Palenight.json`,
     [ThemeDark]: `${rootDir}/www/vendor/vsc-material-theme/Material-Theme-Ocean.json`,
 };
 

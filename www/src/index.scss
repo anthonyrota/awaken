@@ -14,8 +14,10 @@ $hover-opacity: 0.7;
 $header-height: 56px;
 $header-border-height: 1px;
 $box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px;
+$focus-border-color: #74b0f4;
 
 $text-primary: 'text-primary';
+$text-secondary: 'text-secondary';
 $text-primary-accent: 'text-primary-accent';
 $accent: 'accent';
 $bg0: 'bg0';
@@ -30,8 +32,9 @@ $dark: 'dark';
 $themes: (
     $light: (
         $text-primary: #000,
-        $text-primary-accent: #6a737d,
-        $accent: #f36,
+        $text-secondary: #6a737d,
+        $text-primary-accent: #333,
+        $accent: #6b46c1,
         $bg0: #fff,
         $bg1: #f8f8f8,
         $bg2: #ddd,
@@ -40,13 +43,14 @@ $themes: (
     ),
     $dark: (
         $text-primary: #fff,
-        $text-primary-accent: #aaa,
-        $accent: #09f,
-        $bg0: #0a0a0a,
+        $text-secondary: #aaa,
+        $text-primary-accent: #ccc,
+        $accent: #9f7aea,
+        $bg0: #1a202c,
         $bg1: #11151c,
         $bg2: #212d40,
         $bg3: #364156,
-        $light-border: 1px solid #1b1b1b,
+        $light-border: 1px solid #2d3748,
     ),
 );
 
@@ -103,28 +107,6 @@ $theme-map: null;
 
 @function t($key) {
     @return map-get($theme-map, $key);
-}
-
-@mixin content-link {
-    text-decoration: none;
-    @include themed {
-        color: t($text-primary);
-    }
-
-    &:hover {
-        opacity: $hover-opacity;
-    }
-}
-
-@mixin navigation-link {
-    text-decoration: none;
-    @include themed {
-        color: t($text-primary);
-    }
-
-    &:hover {
-        opacity: $hover-opacity;
-    }
 }
 
 @mixin hidden {
@@ -301,10 +283,10 @@ blockquote,
 q {
     quotes: none;
 }
-blockquote:before,
-blockquote:after,
-q:before,
-q:after {
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
     content: '';
     content: none;
 }
@@ -319,10 +301,6 @@ html.cls-not-mobile-or-chromebook {
             width: 16px;
             height: 16px;
             padding: 2px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background-color: t($bg0);
         }
 
         ::-webkit-scrollbar-thumb {
@@ -490,8 +468,16 @@ button {
             margin: 0px $link-margin;
             padding: 0px $link-padding;
             height: $content-height;
+            text-decoration: none;
 
-            @include navigation-link;
+            &:not(&--theme-toggle) {
+                @include themed {
+                    color: t($text-primary);
+                }
+                &:hover {
+                    opacity: $hover-opacity;
+                }
+            }
         }
 
         &__icon {
@@ -567,7 +553,6 @@ button {
         $icon-size: $main-text-size;
         $icon-spacing-lg: $spacing;
         $icon-spacing-sm: $spacing/2;
-        $focus-border-color: #74b0f4;
 
         &__input {
             z-index: $z-index-search;
@@ -730,7 +715,7 @@ button {
                 &__content-snippet {
                     white-space: pre-wrap;
                     @include themed {
-                        color: t($text-primary-accent);
+                        color: t($text-secondary);
                     }
                 }
 
@@ -777,10 +762,99 @@ button {
 
     &__theme-checkbox-input {
         @include hidden;
-        &:focus + &-label-text {
-            outline-offset: $spacing/2;
-            outline: 2px solid -webkit-focus-ring-color !important;
-            opacity: $hover-opacity !important;
+    }
+
+    &__nav__link--theme-toggle:hover {
+        @include themed {
+            background-color: t($bg2);
+        }
+    }
+
+    &__theme-icon {
+        outline-offset: $spacing/3;
+        @include theme($dark) {
+            outline-offset: $spacing + $spacing/2;
+        }
+    }
+
+    &__theme-checkbox-input:focus + &__theme-icon {
+        outline: 2px solid -webkit-focus-ring-color !important;
+    }
+
+    &__nav__link--theme-toggle:hover &__theme-icon {
+        outline: none !important;
+    }
+
+    &__theme-icon {
+        // Taken from https://github.com/LekoArts/gatsby-themes/blob/67a05ac/themes/gatsby-theme-minimal-blog/src/components/colormode-toggle.tsx
+        // Which is adapted from https://codepen.io/aaroniker/pen/KGpXZo and https://github.com/narative/gatsby-theme-novela/blob/714b6209c5bd61b220370e8a7ad84c0b1407946a/%40narative/gatsby-theme-novela/src/components/Navigation/Navigation.Header.tsx
+
+        $color: #cbd5e0;
+        $scale: 0.8;
+
+        cursor: pointer;
+        box-sizing: inherit;
+        position: relative;
+        width: 24px * $scale;
+        height: 24px * $scale;
+        border-radius: 50%;
+        border: 4px * $scale solid $color;
+        background-color: $color;
+        transform: scale(0.55);
+        transition: border 0.45s ease 0s, transform 0.45s ease 0s,
+            background-color 0.45s ease 0s;
+        overflow: visible;
+        box-shadow: none;
+
+        &:before {
+            content: '';
+            position: absolute;
+            right: -9px * $scale;
+            top: -9px * $scale;
+            height: 24px * $scale;
+            width: 24px * $scale;
+            border: 2px * $scale solid $color;
+            border-radius: 50%;
+            transform: translate(14px * $scale, -14px * $scale);
+            opacity: 0;
+            transition: transform 0.45s ease 0s;
+        }
+
+        &:after {
+            content: '';
+            width: 8px * $scale;
+            height: 8px * $scale;
+            border-radius: 50%;
+            margin: -4px * $scale 0px * $scale 0px * $scale -4px * $scale;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            box-shadow: 0 -23px * $scale 0 $color, 0 23px * $scale 0 $color,
+                23px * $scale 0 0 $color, -23px * $scale 0 0 $color,
+                15px * $scale 15px * $scale 0 $color,
+                -15px * $scale 15px * $scale 0 $color,
+                15px * $scale -15px * $scale 0 $color,
+                -15px * $scale -15px * $scale 0 $color;
+            transform: scale(1);
+            transition: all 0.35s ease 0s;
+        }
+
+        @include theme($light) {
+            border: none;
+            background-color: transparent;
+            transform: scale(1);
+            overflow: hidden;
+            box-shadow: inset 8px * $scale -8px * $scale 0px 0px #2d3748;
+
+            &:before {
+                border: none;
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+
+            &:after {
+                transform: scale(0);
+            }
         }
     }
 
@@ -884,6 +958,16 @@ button {
         }
     }
 
+    &__list-separator {
+        margin-top: $spacing/2;
+        margin-bottom: $spacing/2 - 1px;
+        height: 1px;
+        width: 100%;
+        @include themed {
+            border-top: t($light-border);
+        }
+    }
+
     &__link-list-checkbox {
         position: absolute;
         top: 0;
@@ -965,7 +1049,14 @@ button {
         .cls-menu & {
             padding: $link-padding-menu;
         }
-        @include content-link;
+        text-decoration: none;
+        @include themed {
+            color: t($text-primary);
+        }
+        opacity: $hover-opacity;
+        &:hover {
+            opacity: 1;
+        }
         &:focus {
             html.cls-chromium & {
                 outline: 2px solid -webkit-focus-ring-color !important;
@@ -1018,6 +1109,9 @@ button {
         word-break: break-word;
         hyphens: auto;
         @include minimal-scrollbar;
+        @include themed {
+            border-right: t($light-border);
+        }
 
         &--js-sticky-active {
             @include sticky-sidebar--js-sticky-active;
@@ -1098,48 +1192,42 @@ button {
     }
 
     &__prev-next {
-        line-height: 1.4;
         display: flex;
-        padding-top: $spacing * 5;
+        line-height: 1.5rem;
+        margin-top: $spacing * 3.5;
+        @include themed {
+            border-top: t($light-border);
+        }
+        padding-top: $spacing * 1.5;
         padding-bottom: $spacing * 6;
-        padding-left: $spacing;
-        padding-right: $spacing;
+        margin-left: $spacing;
+        margin-right: $spacing;
 
-        &__icon {
-            height: 16px;
-            width: 16px;
-        }
-
-        &__prev,
-        &__next {
+        &__prev-link,
+        &__next-link {
+            @include themed {
+                color: t($text-primary);
+            }
             display: flex;
-            align-items: center;
             text-decoration: none;
-            color: inherit;
-            outline-offset: $spacing/2;
-            max-width: 40vw;
-
-            &-label {
-                text-transform: uppercase;
-                font-size: 15px;
-            }
-
-            &:hover,
-            &:focus {
-                opacity: $hover-opacity;
+            opacity: $hover-opacity;
+            &:hover {
+                opacity: 1;
             }
         }
 
-        &__prev-container {
-            margin-left: $spacing;
+        $arrow-spacing: $spacing * 2/3;
+
+        &__prev-link__arrow {
+            margin-right: $arrow-spacing;
         }
 
-        &__next {
+        &__next-link {
             margin-left: auto;
+            text-align: right;
 
-            &-container {
-                margin-right: $spacing;
-                text-align: right;
+            &__arrow {
+                margin-left: $arrow-spacing;
             }
         }
     }
@@ -1222,7 +1310,14 @@ button {
                     margin-left: -$indent;
                     text-indent: $indent;
                     outline-offset: $spacing / 3;
-                    @include content-link;
+                    text-decoration: none;
+                    @include themed {
+                        color: t($text-primary);
+                    }
+
+                    &:hover {
+                        opacity: $hover-opacity;
+                    }
 
                     &--active {
                         @include themed {
@@ -1334,11 +1429,11 @@ button {
     }
 
     &-code-span {
-        padding: 0.15em 0.3em;
+        padding: 0 0.2em;
         margin: 0;
         font-size: 85%;
         @include themed {
-            background-color: t($bg2);
+            color: t($accent);
         }
         white-space: pre-wrap;
         overflow-wrap: break-word;
@@ -1346,6 +1441,11 @@ button {
         word-break: break-all;
         word-break: break-word;
         hyphens: none;
+
+        &::before,
+        &::after {
+            content: '`';
+        }
     }
 
     &-code-block {
@@ -1353,25 +1453,97 @@ button {
         border-radius: 0.3em;
         line-height: 24px;
 
+        &__line-number,
+        &__copy-button {
+            display: none;
+        }
+
+        $line-number-width-offset: 4px;
+        $line-number-width: calc(3em - #{$line-number-width-offset});
+
+        .cls-doc-page__main > & &__line-number {
+            display: table-cell;
+            padding-right: $spacing;
+            color: var(--line-number-color);
+            border-right: 1px solid var(--line-number-color);
+            user-select: none;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .cls-doc-page__main > & &__line-code {
+            padding-left: $spacing;
+        }
+
+        .cls-doc-page__main > & &__copy-button {
+            display: inline-block;
+            user-select: none;
+            background: #000;
+            color: #fff;
+            &:hover {
+                @include themed {
+                    background-color: t($accent);
+                }
+            }
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+            right: 0;
+            border-top-right-radius: 10px;
+            border-bottom-left-radius: 8px;
+            $padding-top-bottom: $spacing * 0.6;
+            $padding-left-right: $spacing;
+            padding: $padding-top-bottom $padding-left-right;
+            outline: none;
+            &:focus {
+                $border-width: 2px;
+                border: $border-width solid $focus-border-color;
+                padding: $padding-top-bottom - $border-width $padding-left-right -
+                    $border-width;
+            }
+        }
+
         .cls-doc-page__main > & {
+            border-radius: 10px;
+            padding: $spacing * 1.2 $spacing * 1.5;
             white-space: pre-wrap;
             overflow-wrap: break-word;
             word-wrap: break-word;
             word-break: break-all;
             word-break: break-word;
             hyphens: none;
-        }
 
-        .cls-doc-page__main > & {
-            border-radius: 10px;
-            padding: $spacing * 1.2 $spacing * 1.5;
+            &[data-lang] {
+                position: relative;
+                padding-top: $spacing * 3;
+
+                &::before {
+                    content: attr(data-lang);
+                    position: absolute;
+                    top: 0;
+                    border-radius: 0 0 4px 4px;
+                    font-size: 12px;
+                    padding: 0 $spacing/2;
+                    padding-top: 0.15 * $spacing;
+                    left: $spacing * 1.2;
+                    text-transform: uppercase;
+                }
+            }
+
+            &[data-lang='ts']::before {
+                background: #3174c0;
+                color: #fff;
+            }
+
+            &[data-lang='bash']::before {
+                background: #f7f7f7;
+                color: #2a3337;
+            }
         }
 
         @media screen and (max-width: $size-small) {
             .cls-doc-page__main > & {
-                padding: $spacing;
-                overflow-x: auto;
-                overflow-y: hidden;
+                padding: 0;
                 max-width: 100vw;
                 max-width: calc(100vw - var(--scrollbar-width, 0px));
                 margin-left: 0;
@@ -1382,6 +1554,22 @@ button {
                 word-wrap: normal;
                 word-break: normal;
                 word-break: normal;
+            }
+
+            .cls-doc-page__main > & &__copy-button {
+                border-top-right-radius: 0;
+            }
+
+            .cls-doc-page__main > & &__code {
+                padding: $spacing;
+                padding-top: 0;
+                display: block;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+
+            .cls-doc-page__main > & &__line-code {
+                padding-right: $spacing;
             }
         }
 
@@ -1396,12 +1584,17 @@ button {
     }
 
     &-link {
+        text-decoration: underline;
+        outline-offset: $spacing / 4;
         @include themed {
             color: t($accent);
         }
-        text-decoration: none;
-        text-decoration: underline;
-        outline-offset: $spacing / 4;
+        &:focus,
+        &:hover {
+            @include themed {
+                color: rgba(t($accent), $hover-opacity);
+            }
+        }
     }
 
     &-heading__anchor {
@@ -1411,7 +1604,14 @@ button {
         padding-right: 4px;
         margin-left: -20px;
 
-        &:hover {
+        svg {
+            @include themed {
+                fill: t($text-primary);
+            }
+        }
+
+        &:hover,
+        &:focus {
             opacity: 1;
         }
     }
@@ -1456,8 +1656,12 @@ button {
             @include themed {
                 border-bottom: t($light-border);
             }
-            padding-top: 44px;
-            margin-bottom: 40px;
+            padding-top: $spacing * 5.6;
+            margin-bottom: $spacing * 4.6;
+        }
+
+        .cls-temp-focus-span:first-child + &::before {
+            content: none;
         }
     }
 
@@ -1474,6 +1678,25 @@ button {
         font-size: 16px;
     }
 
+    &-heading-4 + &-unordered-list,
+    &-heading-4 + &-blockquote,
+    &-heading-4 + &-collapsible-section,
+    &-heading-4 + &-ordered-list,
+    &-heading-4 + &-unordered-list,
+    &-heading-4 + &-paragraph,
+    &-heading-4 + &-code-block,
+    &-heading-4 + &-table,
+    &-collapsible-section__summary + &-unordered-list,
+    &-collapsible-section__summary + &-blockquote,
+    &-collapsible-section__summary + &-collapsible-section,
+    &-collapsible-section__summary + &-ordered-list,
+    &-collapsible-section__summary + &-unordered-list,
+    &-collapsible-section__summary + &-paragraph,
+    &-collapsible-section__summary + &-code-block,
+    &-collapsible-section__summary + &-table {
+        margin-top: $spacing;
+    }
+
     &-heading-5 {
         font-size: 14px;
     }
@@ -1487,11 +1710,20 @@ button {
         font-size: 12px;
     }
 
+    &-heading-3 {
+        margin-top: $spacing * 5;
+    }
+
+    &-heading-4,
+    &-heading-5,
+    &-heading-6 {
+        margin-top: $spacing * 3;
+    }
+
     &-heading-3,
     &-heading-4,
     &-heading-5,
     &-heading-6 {
-        margin-top: $spacing * 3.5;
         font-weight: 600;
         line-height: 1.25;
     }
@@ -1524,7 +1756,7 @@ button {
     &-table {
         display: table;
         width: calc(100% - #{$spacing * 2});
-        overflow: auto;
+        overflow-x: auto;
         overflow-wrap: normal;
         word-wrap: normal;
         word-break: normal;
@@ -1538,17 +1770,24 @@ button {
             );
         }
 
-        th {
+        &__th {
             font-weight: 600;
             text-align: left;
         }
 
-        td,
-        th {
+        &__td,
+        &__th {
             padding: 6px 13px;
         }
 
-        td {
+        &__th,
+        &__tr:not(:last-child) &__td {
+            @include themed {
+                border-bottom: t($light-border);
+            }
+        }
+
+        &__td {
             > :first-child {
                 &.cls-temp-focus-span + * {
                     margin-top: 0;
@@ -1562,16 +1801,26 @@ button {
         }
     }
 
+    &-unordered-list &-list__item {
+        position: relative;
+        padding-left: 1.5em;
+    }
+
+    &-unordered-list &-list__item::before {
+        content: '';
+        position: absolute;
+        @include themed {
+            background-color: t($bg3);
+        }
+        border-radius: 0;
+        width: 0.75em;
+        height: 0.125em;
+        top: 0.8125em;
+        left: 0;
+    }
+
     &-ordered-list {
         list-style-type: decimal;
-    }
-
-    &-unordered-list {
-        list-style-type: disc;
-    }
-
-    &-ordered-list,
-    &-unordered-list {
         padding-left: 2.5em;
     }
 
@@ -1617,10 +1866,10 @@ button {
 
     &-blockquote {
         @include themed {
-            background-color: t($bg1);
-            border-left: 9px solid t($bg2);
+            border-left: 6px solid t($accent);
         }
-        padding: $spacing;
+        padding: $spacing / 3 $spacing;
+        padding-left: $spacing * 1.5;
         margin-left: -30px;
         margin-right: -30px;
 

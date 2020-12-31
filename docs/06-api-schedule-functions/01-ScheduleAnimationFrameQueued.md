@@ -2,7 +2,7 @@
 
 # ScheduleAnimationFrameQueued
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>ScheduleAnimationFrameQueued</code>](#ScheduleAnimationFrameQueued)</details>
 

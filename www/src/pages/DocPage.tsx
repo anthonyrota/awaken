@@ -30,6 +30,9 @@ const {
 const pageOrder: string[] = [];
 pageGroups.forEach((group) => {
     group.pageIds.forEach((pageId) => {
+        if (pageId === null) {
+            return;
+        }
         pageOrder.push(pageId);
     });
 });
@@ -118,54 +121,29 @@ export function DocPageContent({
                             {previousPageId !== undefined && (
                                 <DocPageLink
                                     pageId={previousPageId}
-                                    class="cls-doc-page__prev-next__prev"
+                                    class="cls-doc-page__prev-next__prev-link"
                                 >
-                                    <svg
-                                        viewBox="0 0 14 24"
-                                        class="cls-doc-page__prev-next__icon"
+                                    <span
+                                        aria-hidden="true"
+                                        class="cls-doc-page__prev-next__prev-link__arrow"
                                     >
-                                        <path
-                                            fill="none"
-                                            fill-rule="evenodd"
-                                            stroke="currentColor"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12.5.75L1.78 11.47a.749.749 0 0 0-.001 1.059l.001.001L12.5 23.25"
-                                        ></path>
-                                    </svg>
-                                    <div class="cls-doc-page__prev-next__prev-container">
-                                        <div class="cls-doc-page__prev-next__prev-label">
-                                            Previous
-                                        </div>
-                                        {pageIdToPageTitle[previousPageId]}
-                                    </div>
+                                        ←
+                                    </span>
+                                    {pageIdToPageTitle[previousPageId]}
                                 </DocPageLink>
                             )}
                             {nextPageId !== undefined && (
                                 <DocPageLink
                                     pageId={nextPageId}
-                                    class="cls-doc-page__prev-next__next"
+                                    class="cls-doc-page__prev-next__next-link"
                                 >
-                                    <div class="cls-doc-page__prev-next__next-container">
-                                        <div class="cls-doc-page__prev-next__next-label">
-                                            Next
-                                        </div>
-                                        {pageIdToPageTitle[nextPageId]}
-                                    </div>
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        class="cls-doc-page__prev-next__icon"
+                                    {pageIdToPageTitle[nextPageId]}
+                                    <span
+                                        aria-hidden="true"
+                                        class="cls-doc-page__prev-next__next-link__arrow"
                                     >
-                                        <path
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M5.5.75l10.72 10.72a.749.749 0 0 1 .001 1.059l-.001.001L5.5 23.25"
-                                        ></path>
-                                    </svg>
+                                        →
+                                    </span>
                                 </DocPageLink>
                             )}
                         </nav>

@@ -2,7 +2,7 @@
 
 # Introduction
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>Motivation</code>](#motivation)
 2. [<code>Motivating Concepts</code>](#motivating-concepts)

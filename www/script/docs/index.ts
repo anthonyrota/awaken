@@ -13,7 +13,7 @@ import { ThemeDark, ThemeLight, Theme } from '../../src/theme';
 import { computeFileHash } from '../computeFileHash';
 import { exit } from '../exit';
 import { rootDir } from '../rootDir';
-import { buildApiPage, PageExports } from './analyze/build/buildApiPage';
+import { buildApiPage, PageExport } from './analyze/build/buildApiPage';
 import { AnalyzeContext } from './analyze/Context';
 import {
     ExportIdentifier,
@@ -123,10 +123,10 @@ async function main() {
         return pageId;
     }
 
-    interface Group {
+    type Group = {
         title: string;
-        exports: PageExports;
-    }
+        exports: (PageExport | 'separator')[];
+    };
 
     const apiPagesGroupOutlines: Group[] = [
         {
@@ -169,6 +169,7 @@ async function main() {
                 { main: coreIdentifier('Sink') },
                 { main: coreIdentifier('isSink') },
                 { main: coreIdentifier('subscribe') },
+                'separator',
                 { main: coreIdentifier('all') },
                 { main: coreIdentifier('animationFrames') },
                 { main: coreIdentifier('combineSources') },
@@ -210,6 +211,7 @@ async function main() {
                 { main: coreIdentifier('IdentityOperator') },
                 { main: coreIdentifier('pipe') },
                 { main: coreIdentifier('flow') },
+                'separator',
                 { main: coreIdentifier('at') },
                 { main: coreIdentifier('catchError') },
                 { main: coreIdentifier('collect') },
@@ -363,6 +365,7 @@ async function main() {
                     ),
                 },
                 { main: coreIdentifier('markAsSubject') },
+                'separator',
                 { main: coreIdentifier('CurrentValueSubject') },
                 { main: coreIdentifier('FinalValueSubject') },
                 {
@@ -414,19 +417,48 @@ async function main() {
         },
     ];
 
-    const apiPages = apiPagesGroupOutlines.map(
+    interface GroupItem {
+        title: string;
+        id: string;
+        exportGroup: PageExport;
+    }
+
+    const apiPagesWithSeparators = apiPagesGroupOutlines.map(
         ({ title, exports }) =>
             [
                 `API - ${title}`,
-                exports.map((export_) => ({
-                    title: export_.main.exportName,
-                    id: `api--${title.toLowerCase().split(/\W+/).join('-')}--${
-                        export_.main.exportName
-                    }`,
-                    exportGroup: export_,
-                })),
+                exports.map((export_) =>
+                    export_ === 'separator'
+                        ? export_
+                        : ({
+                              title: export_.main.exportName,
+                              id: `api--${title
+                                  .toLowerCase()
+                                  .split(/\W+/)
+                                  .join('-')}--${export_.main.exportName}`,
+                              exportGroup: export_,
+                          } as GroupItem),
+                ),
             ] as const,
     );
+
+    const apiPages = apiPagesWithSeparators.map(
+        ([title, group]) =>
+            [
+                title,
+                group.filter((v): v is GroupItem => v !== 'separator'),
+            ] as const,
+    );
+
+    const pageGroups: PageGroup[] = [
+        { title: 'Documentation', pageIds: ['core--introduction'] },
+        ...apiPagesWithSeparators.map(([title, group]) => ({
+            title,
+            pageIds: group.map((thing) =>
+                thing === 'separator' ? null : thing.id,
+            ),
+        })),
+    ];
 
     for (const [, group] of apiPages) {
         for (const { id, exportGroup } of group) {
@@ -555,16 +587,8 @@ async function main() {
     mergeExpectUnique(pageIdToPageTitle, docsSource.pageIdToPageTitle);
     mergeExpectUnique(pageIdToWebsitePath, docsSource.pageIdToWebsitePath);
 
-    const pageGroups: PageGroup[] = [
-        { title: 'Documentation', pageIds: ['core--introduction'] },
-        ...apiPages.map(([title, group]) => ({
-            title,
-            pageIds: group.map(({ id }) => id),
-        })),
-    ];
-
-    const allPageGroupIds = pageGroups.flatMap(
-        (pageGroup) => pageGroup.pageIds,
+    const allPageGroupIds = pageGroups.flatMap((pageGroup) =>
+        pageGroup.pageIds.filter((v): v is string => typeof v === 'string'),
     );
 
     const uniquePageIds = new Set();

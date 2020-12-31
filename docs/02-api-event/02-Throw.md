@@ -2,7 +2,7 @@
 
 # Throw
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>Throw</code>](#Throw) - [<code>Function</code>](#Throw-Function), [<code>Interface</code>](#Throw-Interface)
    1. [<code>ThrowType</code>](#ThrowType) - [<code>Type</code>](#ThrowType-TypeAlias), [<code>Variable</code>](#ThrowType-Variable)</details>

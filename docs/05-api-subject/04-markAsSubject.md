@@ -2,7 +2,7 @@
 
 # markAsSubject
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>markAsSubject</code>](#markAsSubject)</details>
 
@@ -19,6 +19,6 @@
 
 <div align="right">
 
-| [Next \(CurrentValueSubject\)](05-CurrentValueSubject.md#readme) |
+| [Next \(CurrentValueSubject\)](06-CurrentValueSubject.md#readme) |
 | --- |
 </div>

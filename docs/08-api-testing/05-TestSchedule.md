@@ -2,7 +2,7 @@
 
 # TestSchedule
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>TestSchedule</code>](#TestSchedule) - [<code>Function</code>](#TestSchedule-Function), [<code>Interface</code>](#TestSchedule-Interface)</details>
 

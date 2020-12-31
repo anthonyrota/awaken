@@ -2,7 +2,7 @@
 
 # TimeProvider
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>TimeProvider</code>](#TimeProvider)</details>
 

@@ -17,6 +17,7 @@
         "postinstall:flexsearch": "cpy .browserslistrc node_modules/flexsearch"
     },
     "dependencies": {
+        "copy-text-to-clipboard": "2.2.0",
         "fastest-levenshtein": "1.0.12",
         "firacode": "5.2.0",
         "flexsearch": "0.6.32",

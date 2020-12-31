@@ -2,7 +2,7 @@
 
 # SharedTestSource
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>SharedTestSource</code>](#SharedTestSource) - [<code>Function</code>](#SharedTestSource-Function), [<code>Interface</code>](#SharedTestSource-Interface)</details>
 

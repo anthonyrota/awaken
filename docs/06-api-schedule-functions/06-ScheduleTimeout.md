@@ -2,7 +2,7 @@
 
 # ScheduleTimeout
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>ScheduleTimeout</code>](#ScheduleTimeout)</details>
 

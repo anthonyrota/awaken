@@ -1,5 +1,6 @@
-import { Fragment, h, VNode } from 'preact';
-import { useRef, useState } from 'preact/hooks';
+import copy from 'copy-text-to-clipboard';
+import { ComponentChildren, Fragment, h, VNode } from 'preact';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { DeepCoreNode, CoreNodeType } from '../../script/docs/core/nodes';
 import { ListType } from '../../script/docs/core/nodes/List';
 import { unencodedTokenizedLines } from '../../script/docs/util/tokenizeText/util';
@@ -119,7 +120,7 @@ export function DeepCoreNodeComponent({
             const { foreground, background, colorMap } = codeBlockStyleMap[
                 theme
             ];
-            const { code, tokenizedLinesMap, codeLinks } = node;
+            const { code, tokenizedLinesMap, codeLinks, language } = node;
             const ChildNodeType$Text = 1;
             const ChildNodeType$Link = 0;
             interface ChildText {
@@ -264,38 +265,203 @@ export function DeepCoreNodeComponent({
                     });
                 });
             }
+            if (childNodes.length === 0) {
+                throw new Error();
+            }
+            const lines: ChildNode[][] = [[]];
+            childNodes.forEach((childNode) => {
+                const lastLine = lines[lines.length - 1];
+                if (childNode.type === ChildNodeType$Text) {
+                    if (childNode.text.indexOf('\n') === -1) {
+                        lastLine.push(childNode);
+                        return;
+                    }
+                    const split = childNode.text.split('\n');
+                    if (split[0]) {
+                        lastLine.push({
+                            type: ChildNodeType$Text,
+                            style: childNode.style,
+                            text: split[0],
+                        });
+                    }
+                    for (let i = 1; i < split.length; i++) {
+                        lines.push([
+                            {
+                                type: ChildNodeType$Text,
+                                style: childNode.style,
+                                text: split[i],
+                            },
+                        ]);
+                    }
+                    return;
+                }
+                const splitLink: ChildLink[] = [
+                    {
+                        type: ChildNodeType$Link,
+                        pageId: childNode.pageId,
+                        hash: childNode.hash,
+                        children: [],
+                    },
+                ];
+                childNode.children.forEach((textNode) => {
+                    const lastLink = splitLink[splitLink.length - 1];
+                    if (textNode.text.indexOf('\n') === -1) {
+                        lastLink.children.push(textNode);
+                        return;
+                    }
+                    const split = textNode.text.split('\n');
+                    if (split[0]) {
+                        lastLink.children.push({
+                            type: ChildNodeType$Text,
+                            style: textNode.style,
+                            text: split[0],
+                        });
+                    }
+                    for (let i = 1; i < split.length; i++) {
+                        splitLink.push({
+                            type: ChildNodeType$Link,
+                            pageId: childNode.pageId,
+                            hash: childNode.hash,
+                            children: [
+                                {
+                                    type: ChildNodeType$Text,
+                                    style: textNode.style,
+                                    text: split[i] || '\n',
+                                },
+                            ],
+                        });
+                    }
+                });
+                lastLine.push(splitLink[0]);
+                for (let i = 1; i < splitLink.length; i++) {
+                    lines.push([splitLink[i]]);
+                }
+                return;
+            });
+            function renderChildNodes(
+                childNodes: ChildNode[],
+            ): ComponentChildren {
+                return childNodes.map((childNode) => {
+                    if (childNode.type === ChildNodeType$Text) {
+                        return (
+                            <span style={childNode.style}>
+                                {childNode.text}
+                            </span>
+                        );
+                    }
+                    return (
+                        <DocPageLink
+                            class="cls-node-code-block__link"
+                            pageId={childNode.pageId}
+                            hash={childNode.hash}
+                        >
+                            {childNode.children.map((childText) => (
+                                <span
+                                    class="cls-node-code-block__link__text"
+                                    style={childText.style}
+                                >
+                                    {childText.text}
+                                </span>
+                            ))}
+                        </DocPageLink>
+                    );
+                });
+            }
+            interface RGB {
+                red: number;
+                green: number;
+                blue: number;
+            }
+            // eg. #00FF66.
+            function parseHex(hex: string): RGB {
+                return {
+                    red: parseInt(hex.slice(1, 3), 16),
+                    green: parseInt(hex.slice(3, 5), 16),
+                    blue: parseInt(hex.slice(5, 7), 16),
+                };
+            }
+            function stringifyRgb(rgb: RGB): string {
+                return `rgb(${rgb.red},${rgb.green},${rgb.blue})`;
+            }
+            const foregroundRgb = parseHex(colorMap[0]);
+            const backgroundRgb = parseHex(colorMap[1]);
+            function avgInt(x: number, y: number): number {
+                return (x + y) / 2;
+            }
+            const averagedForegroundBackground = stringifyRgb({
+                red: avgInt(foregroundRgb.red, backgroundRgb.red),
+                green: avgInt(foregroundRgb.green, backgroundRgb.green),
+                blue: avgInt(foregroundRgb.blue, backgroundRgb.blue),
+            });
+            const CopyState$AllowCopy = 0;
+            const CopyState$CopySuccess = 1;
+            const CopyState$CopyFail = 2;
+            const { 0: copyState, 1: setCopyState } = useState<
+                | typeof CopyState$AllowCopy
+                | typeof CopyState$CopySuccess
+                | typeof CopyState$CopyFail
+            >(CopyState$AllowCopy);
+            const onCopyButtonClick = () => {
+                const didCopy = copy(code);
+                setCopyState(
+                    didCopy ? CopyState$CopySuccess : CopyState$CopyFail,
+                );
+            };
+            useEffect(() => {
+                if (copyState === CopyState$AllowCopy) {
+                    return;
+                }
+                const timeoutHandle = setTimeout(() => {
+                    setCopyState(CopyState$AllowCopy);
+                }, 1000);
+                return () => {
+                    clearTimeout(timeoutHandle);
+                };
+            }, [copyState]);
             return (
                 <pre
                     class="cls-node-code-block"
+                    data-lang={language}
                     style={{
                         backgroundColor: background,
+                        '--line-number-color': averagedForegroundBackground,
                     }}
                 >
-                    {childNodes.map((childNode) => {
-                        if (childNode.type === ChildNodeType$Text) {
-                            return (
-                                <span style={childNode.style}>
-                                    {childNode.text}
-                                </span>
-                            );
-                        }
-                        return (
-                            <DocPageLink
-                                class="cls-node-code-block__link"
-                                pageId={childNode.pageId}
-                                hash={childNode.hash}
-                            >
-                                {childNode.children.map((childText) => (
-                                    <span
-                                        class="cls-node-code-block__link__text"
-                                        style={childText.style}
-                                    >
-                                        {childText.text}
-                                    </span>
+                    <button
+                        type="button"
+                        class="cls-node-code-block__copy-button"
+                        aria-label="Copy Code to Clipboard"
+                        title="Copy Code to Clipboard"
+                        aria-hidden="true"
+                        disabled={copyState !== CopyState$AllowCopy}
+                        tabIndex={-1}
+                        onClick={onCopyButtonClick}
+                    >
+                        {copyState === CopyState$AllowCopy
+                            ? 'Copy'
+                            : copyState === CopyState$CopySuccess
+                            ? 'Copied'
+                            : 'Copy Failed'}
+                    </button>
+                    <code class="cls-node-code-block__code">
+                        <table>
+                            <tbody>
+                                {lines.map((lineChildNodes, i) => (
+                                    <tr>
+                                        <td
+                                            class="cls-node-code-block__line-number"
+                                            aria-hidden="true"
+                                        >
+                                            {i + 1}
+                                        </td>
+                                        <td class="cls-node-code-block__line-code">
+                                            {renderChildNodes(lineChildNodes)}
+                                        </td>
+                                    </tr>
                                 ))}
-                            </DocPageLink>
-                        );
-                    })}
+                            </tbody>
+                        </table>
+                    </code>
                 </pre>
             );
         }
@@ -413,10 +579,10 @@ export function DeepCoreNodeComponent({
                                 tabIndex={-1}
                             >
                                 <svg
+                                    width="16"
                                     height="16"
                                     version="1.1"
                                     viewBox="0 0 16 16"
-                                    width="16"
                                 >
                                     <path
                                         fill-rule="evenodd"
@@ -494,9 +660,9 @@ export function DeepCoreNodeComponent({
             return (
                 <table class="cls-node-table">
                     <thead>
-                        <tr>
+                        <tr class="cls-node-table__tr">
                             {node.header.children.map((childNode) => (
-                                <th>
+                                <th class="cls-node-table__th">
                                     <DeepCoreNodeComponent
                                         node={childNode}
                                         pagePath={pagePath}
@@ -508,9 +674,9 @@ export function DeepCoreNodeComponent({
                     </thead>
                     <tbody>
                         {node.rows.map((row) => (
-                            <tr>
+                            <tr class="cls-node-table__tr">
                                 {row.children.map((childNode) => (
-                                    <td>
+                                    <td class="cls-node-table__td">
                                         <DeepCoreNodeComponent
                                             node={childNode}
                                             pagePath={pagePath}

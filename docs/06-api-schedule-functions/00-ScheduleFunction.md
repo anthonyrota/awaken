@@ -2,7 +2,7 @@
 
 # ScheduleFunction
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>ScheduleFunction</code>](#ScheduleFunction)</details>
 
@@ -14,7 +14,7 @@
 
 <pre>interface ScheduleFunction&lt;T extends any[] = []&gt; {<br>    (callback: (...args: T) =&gt; void, subscription?: <a href="../01-api-disposable/00-Disposable.md#Disposable-Interface">Disposable</a>): void<br>}</pre><br>
 
-| [Previous \(SubjectBase\)](..\/05-api-subject\/08-SubjectBase.md#readme) |
+| [Previous \(SubjectBase\)](..\/05-api-subject\/09-SubjectBase.md#readme) |
 | --- |
 
 <div align="right">

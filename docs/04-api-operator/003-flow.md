@@ -2,7 +2,7 @@
 
 # flow
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>flow</code>](#flow)</details>
 
@@ -132,6 +132,6 @@ function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T
 
 <div align="right">
 
-| [Next \(at\)](004-at.md#readme) |
+| [Next \(at\)](005-at.md#readme) |
 | --- |
 </div>

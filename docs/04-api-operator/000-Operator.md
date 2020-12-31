@@ -2,7 +2,7 @@
 
 # Operator
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>Operator</code>](#Operator)</details>
 
@@ -14,7 +14,7 @@
 
 <pre>interface Operator&lt;T, U&gt; {<br>    (source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;): <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;<br>}</pre><br>
 
-| [Previous \(zipSources\)](..\/03-api-source\/36-zipSources.md#readme) |
+| [Previous \(zipSources\)](..\/03-api-source\/37-zipSources.md#readme) |
 | --- |
 
 <div align="right">

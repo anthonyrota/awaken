@@ -2,7 +2,7 @@
 
 # End
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>End</code>](#End) - [<code>Interface</code>](#End-Interface), [<code>Variable</code>](#End-Variable)
    1. [<code>EndType</code>](#EndType) - [<code>Type</code>](#EndType-TypeAlias), [<code>Variable</code>](#EndType-Variable)</details>

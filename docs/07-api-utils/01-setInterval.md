@@ -2,7 +2,7 @@
 
 # setInterval
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>setInterval</code>](#setInterval)</details>
 

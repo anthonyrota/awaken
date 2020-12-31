@@ -2,7 +2,7 @@
 
 # subscribe
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>subscribe</code>](#subscribe)</details>
 
@@ -63,6 +63,6 @@ pipe(
 
 <div align="right">
 
-| [Next \(all\)](05-all.md#readme) |
+| [Next \(all\)](06-all.md#readme) |
 | --- |
 </div>

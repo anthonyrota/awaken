@@ -2,7 +2,7 @@
 
 # Sink
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>Sink</code>](#Sink) - [<code>Function</code>](#Sink-Function), [<code>Interface</code>](#Sink-Interface)</details>
 

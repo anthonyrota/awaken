@@ -2,7 +2,7 @@
 
 # SubjectDistributionSinkDisposalError
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>SubjectDistributionSinkDisposalError</code>](#SubjectDistributionSinkDisposalError) - [<code>Interface</code>](#SubjectDistributionSinkDisposalError-Interface), [<code>Variable</code>](#SubjectDistributionSinkDisposalError-Variable)</details>
 

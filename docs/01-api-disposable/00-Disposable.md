@@ -2,7 +2,7 @@
 
 # Disposable
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>Disposable</code>](#Disposable) - [<code>Function</code>](#Disposable-Function), [<code>Interface</code>](#Disposable-Interface)</details>
 

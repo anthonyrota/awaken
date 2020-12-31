@@ -232,7 +232,6 @@ export function parseMarkdownWithYamlFrontmatter(
                 htmlParser.write(node.value);
                 let _onCloseTag: ((tagName: string) => void) | undefined;
 
-                // eslint-disable-next-line no-inner-declarations
                 function onChunk(chunk: ParsedHtmlChunk): void {
                     switch (chunk.type) {
                         case 'opentag': {
@@ -265,7 +264,6 @@ export function parseMarkdownWithYamlFrontmatter(
                     }
                 }
 
-                // eslint-disable-next-line no-inner-declarations
                 function onOpenTag(
                     tagName: string,
                     attributes: Record<string, string>,

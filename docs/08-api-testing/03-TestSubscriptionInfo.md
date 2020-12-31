@@ -2,7 +2,7 @@
 
 # TestSubscriptionInfo
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>TestSubscriptionInfo</code>](#TestSubscriptionInfo) - [<code>Function</code>](#TestSubscriptionInfo-Function), [<code>Interface</code>](#TestSubscriptionInfo-Interface)</details>
 

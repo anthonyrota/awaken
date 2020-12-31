@@ -2,7 +2,7 @@
 
 # DisposalError
 
-<details><summary><b>Table of Contents</b></summary><br>
+<details><summary><b>Table of Contents</b></summary>
 
 1. [<code>DisposalError</code>](#DisposalError) - [<code>Interface</code>](#DisposalError-Interface), [<code>Variable</code>](#DisposalError-Variable)</details>
 
