@@ -8,13 +8,7 @@ import {
     ComponentChildren,
     ComponentChild,
 } from 'preact';
-import {
-    useState,
-    useRef,
-    useLayoutEffect,
-    useMemo,
-    useEffect,
-} from 'preact/hooks';
+import { useState, useRef, useLayoutEffect, useEffect } from 'preact/hooks';
 import { CoreNodeType, DeepCoreNode } from '../../script/docs/core/nodes';
 import { extractTextNodes } from '../../script/docs/core/nodes/util/extractTextNodes';
 import { isBlock } from '../../script/docs/core/nodes/util/isBlock';
@@ -230,8 +224,7 @@ function buildIndexableContent(pages: Pages): IndexablePageContent[] {
 }
 
 function buildIndex(indexableContent: IndexablePageContent[]) {
-    const flexSearch = FlexSearch.create<IndexablePageContent>({
-        async: false,
+    const index = FlexSearch.create<IndexablePageContent>({
         doc: {
             id: 'id',
             field: {
@@ -252,9 +245,9 @@ function buildIndex(indexableContent: IndexablePageContent[]) {
         },
     });
     indexableContent.forEach((item) => {
-        flexSearch.add(item);
+        index.add(item);
     });
-    return flexSearch;
+    return index;
 }
 
 const stopWords = [
@@ -761,16 +754,18 @@ function useSearch():
         return null;
     }
     const responseState = useDocPagesResponseState();
-    const index = useMemo(
-        () =>
-            responseState.type === ResponseDoneType
-                ? buildIndex(buildIndexableContent(responseState.pages))
-                : null,
-        [responseState.type],
-    );
-    if (index === null) {
+    const indexRef = useRef<ReturnType<typeof buildIndex> | undefined>();
+    if (responseState.type !== ResponseDoneType) {
         return null;
     }
+    const ensureIndex = (): ReturnType<typeof buildIndex> => {
+        if (!indexRef.current) {
+            indexRef.current = buildIndex(
+                buildIndexableContent(responseState.pages),
+            );
+        }
+        return indexRef.current;
+    };
     return (query: string, cancelToken, callback) => {
         function indexCallback(content: IndexablePageContent[]): void {
             if (content.length === 0) {
@@ -871,8 +866,7 @@ function useSearch():
                 callback(searchMatches);
             }
         }
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        index.search(
+        ensureIndex().search(
             query,
             {
                 limit: maxResults,
