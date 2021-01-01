@@ -45,7 +45,10 @@ function makeGrammar(rawGrammarText: string): vscodeTextmate.IRawGrammar {
 
 const grammars: Record<string, Promise<vscodeTextmate.IRawGrammar>> = {
     [TokenizeLanguage.TypeScript]: fs
-        .readFile(`${rootDir}/www/vendor/TypeScript.tmLanguage`, 'utf-8')
+        .readFile(
+            `${rootDir}/www/vendor/TypeScript-TmLanguage/TypeScript.tmLanguage`,
+            'utf-8',
+        )
         .then(makeGrammar),
 };
 
@@ -61,7 +64,7 @@ const registry = new vscodeTextmate.Registry({
 });
 
 const themePaths = {
-    [ThemeLight]: `${rootDir}/www/vendor/vsc-material-theme/Material-Theme-Palenight.json`,
+    [ThemeLight]: `${rootDir}/www/vendor/vscode-theme-github-light/Github-Light-Theme-Gray-color-theme.json`,
     [ThemeDark]: `${rootDir}/www/vendor/vsc-material-theme/Material-Theme-Ocean.json`,
 };
 

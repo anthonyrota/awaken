@@ -1,4 +1,5 @@
 import { isBrowser } from './env';
+import { globalThemeCallbackKey } from './globalKeys';
 
 export const ThemeLight = 'light';
 export const ThemeDark = 'dark';
@@ -17,24 +18,46 @@ function storeTheme(theme: Theme): void {
 
 const defaultTheme: Theme = ThemeDark;
 
+function isValidThemeValue(value: string | null): value is Theme {
+    return value === ThemeLight || value === ThemeDark;
+}
+
 export function setupTheme(): void {
     const theme = getStoredTheme();
     const newTheme =
-        theme === null || (theme !== ThemeLight && theme !== ThemeDark)
-            ? defaultTheme
-            : theme;
+        theme === null || !isValidThemeValue(theme) ? defaultTheme : theme;
     if (theme !== newTheme) {
         storeTheme(newTheme);
     }
     setThemeClass(newTheme);
+    window.addEventListener('storage', (e) => {
+        const { key, newValue } = e;
+        if (key === themeKey && isValidThemeValue(newValue)) {
+            setThemeClass(newValue);
+            propagateThemeChange(newValue);
+        }
+    });
 }
 
 export function getTheme(): Theme {
-    // Already initialized in template.html.
-    return isBrowser ? (getStoredTheme() as Theme) : ThemeDark;
+    if (!isBrowser) {
+        return defaultTheme;
+    }
+    const storedTheme = getStoredTheme();
+    if (!isValidThemeValue(storedTheme)) {
+        return defaultTheme;
+    }
+    return storedTheme;
 }
 
-const themeChangeListeners: (readonly [(theme: Theme) => void])[] = [];
+type ThemeChangeCallbackList = (readonly [(theme: Theme) => void])[];
+
+function getThemeChangeListeners(): ThemeChangeCallbackList {
+    if (!(globalThemeCallbackKey in window)) {
+        window[globalThemeCallbackKey] = [];
+    }
+    return window[globalThemeCallbackKey] as ThemeChangeCallbackList;
+}
 
 export function setTheme(theme: Theme): void {
     if (theme === getTheme()) {
@@ -42,14 +65,20 @@ export function setTheme(theme: Theme): void {
     }
     storeTheme(theme);
     setThemeClass(theme);
-    themeChangeListeners.forEach(([listener]) => {
-        listener(theme);
+    propagateThemeChange(theme);
+}
+
+function propagateThemeChange(newTheme: Theme): void {
+    getThemeChangeListeners().forEach((box) => {
+        const listener = box[0];
+        listener(newTheme);
     });
 }
 
 export function onThemeChange(
     themeChangeListener: (theme: Theme) => void,
 ): () => void {
+    const themeChangeListeners = getThemeChangeListeners();
     const box = [themeChangeListener] as const;
     themeChangeListeners.push(box);
     return () => {

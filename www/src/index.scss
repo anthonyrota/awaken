@@ -1757,6 +1757,7 @@ button {
         display: table;
         width: calc(100% - #{$spacing * 2});
         overflow-x: auto;
+        overflow-y: hidden;
         overflow-wrap: normal;
         word-wrap: normal;
         word-break: normal;

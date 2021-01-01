@@ -385,7 +385,7 @@ function addNode(docNode: tsdoc.DocNode, context: TSDocNodeWriteContext): void {
                 EmbeddedNode({
                     originalNode: CodeBlockNode({
                         language: docFencedCode.language,
-                        code: docFencedCode.code,
+                        code: docFencedCode.code.trimEnd(),
                     }),
                     context: context.embeddedNodeContext,
                 }),
