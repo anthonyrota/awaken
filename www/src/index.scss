@@ -1486,6 +1486,9 @@ button {
                 }
             }
             cursor: pointer;
+            &[disabled] {
+                cursor: not-allowed;
+            }
             position: absolute;
             top: 0;
             right: 0;
