@@ -208,12 +208,19 @@ function DocPageSidebar({ page, headingRefs }: DocPageSidebarProps): VNode {
             }
             setHighlightedHeadingId(previousHeadingId);
         };
-        listener();
-        document.addEventListener('scroll', listener);
-        window.addEventListener('resize', listener);
+        let rafHandle: number | undefined;
+        function listenerRaf(): void {
+            rafHandle = requestAnimationFrame(listener);
+        }
+        listenerRaf();
+        document.addEventListener('scroll', listenerRaf);
+        window.addEventListener('resize', listenerRaf);
         return () => {
-            document.removeEventListener('scroll', listener);
-            window.addEventListener('resize', listener);
+            if (rafHandle !== undefined) {
+                cancelAnimationFrame(rafHandle);
+            }
+            document.removeEventListener('scroll', listenerRaf);
+            window.removeEventListener('resize', listenerRaf);
         };
     }, []);
 

@@ -385,13 +385,10 @@ export function DeepCoreNodeComponent({
             }
             const foregroundRgb = parseHex(colorMap[0]);
             const backgroundRgb = parseHex(colorMap[1]);
-            function avgInt(x: number, y: number): number {
-                return (x + y) / 2;
-            }
             const averagedForegroundBackground = stringifyRgb({
-                red: avgInt(foregroundRgb.red, backgroundRgb.red),
-                green: avgInt(foregroundRgb.green, backgroundRgb.green),
-                blue: avgInt(foregroundRgb.blue, backgroundRgb.blue),
+                red: (foregroundRgb.red + backgroundRgb.red) / 2,
+                green: (foregroundRgb.green + backgroundRgb.green) / 2,
+                blue: (foregroundRgb.blue + backgroundRgb.blue) / 2,
             });
             const CopyState$AllowCopy = 0;
             const CopyState$CopySuccess = 1;
@@ -418,6 +415,10 @@ export function DeepCoreNodeComponent({
                     clearTimeout(timeoutHandle);
                 };
             }, [copyState]);
+            const lineNumberStyle: Record<string, string> = {
+                color: averagedForegroundBackground,
+                borderRight: `1px solid ${averagedForegroundBackground}`,
+            };
             return (
                 <pre
                     class="cls-node-code-block"
@@ -450,6 +451,7 @@ export function DeepCoreNodeComponent({
                                     <tr>
                                         <td
                                             class="cls-node-code-block__line-number"
+                                            style={lineNumberStyle}
                                             aria-hidden="true"
                                         >
                                             {i + 1}

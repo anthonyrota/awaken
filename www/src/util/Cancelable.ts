@@ -27,6 +27,8 @@ class __CancelToken implements CancelToken {
     public onCancel(cb: () => void) {
         if (this.__subscribers) {
             this.__subscribers.push(cb);
+        } else {
+            cb();
         }
     }
 }

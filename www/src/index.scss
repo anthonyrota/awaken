@@ -959,12 +959,18 @@ button {
     }
 
     &__list-separator {
-        margin-top: $spacing/2;
-        margin-bottom: $spacing/2 - 1px;
-        height: 1px;
+        position: relative;
+        height: $spacing;
         width: 100%;
-        @include themed {
-            border-top: t($light-border);
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            @include themed {
+                border-bottom: t($light-border);
+            }
         }
     }
 
@@ -1464,8 +1470,6 @@ button {
         .cls-doc-page__main > & &__line-number {
             display: table-cell;
             padding-right: $spacing;
-            color: var(--line-number-color);
-            border-right: 1px solid var(--line-number-color);
             user-select: none;
             text-align: right;
             white-space: nowrap;

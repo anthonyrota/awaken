@@ -54,13 +54,27 @@
             setupTheme();
         </script>
         <script>
-            requestAnimationFrame(function loop() {
+            function calculateScrollbarWidth() {
+                return (
+                    window.innerWidth -
+                    document.documentElement.clientWidth +
+                    'px'
+                );
+            }
+            function setScrollbarWidthStyle(value) {
                 document.documentElement.style.setProperty(
                     '--scrollbar-width',
-                    window.innerWidth -
-                        document.documentElement.clientWidth +
-                        'px',
+                    value,
                 );
+            }
+            let scrollbarWidth = calculateScrollbarWidth();
+            setScrollbarWidthStyle(scrollbarWidth);
+            requestAnimationFrame(function loop() {
+                const newScrollbarWidth = calculateScrollbarWidth();
+                if (scrollbarWidth !== newScrollbarWidth) {
+                    scrollbarWidth = newScrollbarWidth;
+                    setScrollbarWidthStyle(newScrollbarWidth);
+                }
                 requestAnimationFrame(loop);
             });
         </script>

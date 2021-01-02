@@ -1,6 +1,6 @@
 import { Action } from 'history';
 import { h, Fragment, VNode } from 'preact';
-import { useEffect, useRef } from 'preact/hooks';
+import { useLayoutEffect, useRef } from 'preact/hooks';
 import { FullSiteNavigationContents } from './components/FullSiteNavigationContents';
 import { Header } from './components/Header';
 import { memo } from './components/memo';
@@ -30,27 +30,37 @@ import { LicensePage } from './pages/LicensePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 function setFocusBefore(element?: ChildNode): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const parentEl = element ? element.parentElement! : document.body;
-    const tempSpan = document.createElement('span');
-    tempSpan.setAttribute('tabindex', '0');
-    parentEl.insertBefore(tempSpan, element || document.body.firstChild);
-    tempSpan.focus();
+    function scroll(): void {
+        if (element && element instanceof Element) {
+            element.scrollIntoView();
+        } else {
+            window.scrollTo(0, 0);
+        }
+    }
 
-    if (element) {
-        tempSpan.classList.add('cls-temp-focus-span');
-        tempSpan.addEventListener('focusout', () => {
+    scroll();
+
+    // Don't force reflow (tested in chrome and `focus` method was forcing
+    // reflow).
+    requestAnimationFrame(() => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const parentEl = element ? element.parentElement! : document.body;
+        const tempSpan = document.createElement('span');
+        tempSpan.setAttribute('tabindex', '0');
+        parentEl.insertBefore(tempSpan, element || document.body.firstChild);
+        tempSpan.focus();
+
+        if (element) {
+            tempSpan.classList.add('cls-temp-focus-span');
+            tempSpan.addEventListener('focusout', () => {
+                parentEl.removeChild(tempSpan);
+            });
+        } else {
             parentEl.removeChild(tempSpan);
-        });
-    } else {
-        parentEl.removeChild(tempSpan);
-    }
+        }
 
-    if (element && element instanceof Element) {
-        element.scrollIntoView();
-    } else {
-        window.scrollTo(0, 0);
-    }
+        scroll();
+    });
 }
 
 function getPageIdFromPathname(pathname: string): string | void {
@@ -175,7 +185,7 @@ function AppPath({
     const actionRef = useRef<Action | null>();
     actionRef.current = action;
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (
             isFirstRenderRef.current ||
             isDuplicateRender ||

@@ -10,6 +10,7 @@ import {
 } from 'preact';
 import { useState, useRef, useLayoutEffect, useEffect } from 'preact/hooks';
 import { CoreNodeType, DeepCoreNode } from '../../script/docs/core/nodes';
+import { PageNode } from '../../script/docs/core/nodes/Page';
 import { extractTextNodes } from '../../script/docs/core/nodes/util/extractTextNodes';
 import { isBlock } from '../../script/docs/core/nodes/util/isBlock';
 import { Pages } from '../../script/docs/types';
@@ -197,34 +198,8 @@ interface IndexablePageContent {
     textRegions: ExtractedTextRegion[];
 }
 
-function buildIndexableContent(pages: Pages): IndexablePageContent[] {
-    return pages.map((page) => {
-        const textRegions = extractTextRegions(
-            page,
-            [],
-            pageIdToPageTitle[page.pageId],
-        );
-        let content = '';
-        textRegions.forEach((textRegion) => {
-            if (textRegion.heading) {
-                content += textRegion.heading.text + '\n';
-            }
-            textRegion.contentText = textRegion.contentText
-                .trim()
-                .replace(/\n+/g, '\n');
-            content += textRegion.contentText;
-        });
-        return {
-            id: page.pageId,
-            title: pageIdToPageTitle[page.pageId],
-            content: content,
-            textRegions,
-        };
-    });
-}
-
-function buildIndex(indexableContent: IndexablePageContent[]) {
-    const index = FlexSearch.create<IndexablePageContent>({
+function indexFactory() {
+    return FlexSearch.create<IndexablePageContent>({
         doc: {
             id: 'id',
             field: {
@@ -244,10 +219,55 @@ function buildIndex(indexableContent: IndexablePageContent[]) {
             },
         },
     });
-    indexableContent.forEach((item) => {
-        index.add(item);
+}
+
+type Index = ReturnType<typeof indexFactory>;
+
+function makeIndexableContent(
+    page: PageNode<DeepCoreNode>,
+): IndexablePageContent {
+    const textRegions = extractTextRegions(
+        page,
+        [],
+        pageIdToPageTitle[page.pageId],
+    );
+    let content = '';
+    textRegions.forEach((textRegion) => {
+        if (textRegion.heading) {
+            content += textRegion.heading.text + '\n';
+        }
+        textRegion.contentText = textRegion.contentText
+            .trim()
+            .replace(/\n+/g, '\n');
+        content += textRegion.contentText;
     });
-    return index;
+    return {
+        id: page.pageId,
+        title: pageIdToPageTitle[page.pageId],
+        content,
+        textRegions,
+    };
+}
+
+function buildIndex(
+    cancelToken: CancelToken,
+    pages: Pages,
+    callback: (index: Index) => void,
+): void {
+    const index = indexFactory();
+    let i = 0;
+    const queue = new ScheduleQueue(cancelToken);
+    function indexNextPage(): void {
+        const page = pages[i++];
+        const indexableContent = makeIndexableContent(page);
+        index.add(indexableContent);
+        if (i === pages.length) {
+            callback(index);
+            return;
+        }
+        queue.queueTask(indexNextPage);
+    }
+    queue.queueTask(indexNextPage);
 }
 
 const stopWords = [
@@ -714,6 +734,7 @@ function getContentSnippet(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const endIndex = bestEndMatchRange!.endIndex;
     const lastNWordsRegexp = RegExp(`\\S+(?:\\s+\\S+){0,${padWords - 1}}\\s*$`);
+    // TODO.
     const firstNWordsRegexp = /^\s*(?:\S+\s+\n?){0,3}[^\s]*/;
     const padStartTextMatch = lastNWordsRegexp.exec(
         content.substring(startIndex - maxPadLength, startIndex),
@@ -743,29 +764,53 @@ function getContentSnippet(
     };
 }
 
-function useSearch():
-    | ((
-          query: string,
-          cancelToken: CancelToken,
-          callback: (matches: SearchMatch[]) => void,
-      ) => void)
-    | null {
+function useSearch(): (
+    query: string,
+    cancelToken: CancelToken,
+    callback: (matches: SearchMatch[]) => void,
+) => void {
     if (!isBrowser) {
-        return null;
+        return () => {};
     }
     const responseState = useDocPagesResponseState();
-    const indexRef = useRef<ReturnType<typeof buildIndex> | undefined>();
-    if (responseState.type !== ResponseDoneType) {
-        return null;
-    }
-    const ensureIndex = (): ReturnType<typeof buildIndex> => {
-        if (!indexRef.current) {
-            indexRef.current = buildIndex(
-                buildIndexableContent(responseState.pages),
-            );
+    const indexRef = useRef<Index | undefined>();
+    const cancelTokenRef = useRef(new Cancelable());
+    const onIndexCallbacks: ((index: Index) => void)[] = [];
+    function withIndex(
+        cancelToken: CancelToken,
+        callback: (index: Index) => void,
+    ): void {
+        if (cancelToken.canceled) {
+            return;
         }
-        return indexRef.current;
-    };
+        if (indexRef.current) {
+            callback(indexRef.current);
+            return;
+        }
+        onIndexCallbacks.push(callback);
+        cancelToken.onCancel(() => {
+            onIndexCallbacks.splice(onIndexCallbacks.indexOf(callback));
+        });
+    }
+    useEffect(() => {
+        if (responseState.type !== ResponseDoneType) {
+            return;
+        }
+        const { pages } = responseState;
+        buildIndex(cancelTokenRef.current.token, pages, (index) => {
+            indexRef.current = index;
+            onIndexCallbacks.forEach((callback) => {
+                callback(index);
+            });
+            onIndexCallbacks.length = 0;
+        });
+    }, [responseState]);
+    useEffect(() => {
+        return () => {
+            cancelTokenRef.current.cancel();
+            onIndexCallbacks.length = 0;
+        };
+    }, []);
     return (query: string, cancelToken, callback) => {
         function indexCallback(content: IndexablePageContent[]): void {
             if (content.length === 0) {
@@ -866,13 +911,15 @@ function useSearch():
                 callback(searchMatches);
             }
         }
-        ensureIndex().search(
-            query,
-            {
-                limit: maxResults,
-            },
-            indexCallback,
-        );
+        withIndex(cancelToken, (index) => {
+            index.search(
+                query,
+                {
+                    limit: maxResults,
+                },
+                indexCallback,
+            );
+        });
     };
 }
 
@@ -1078,14 +1125,7 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         }
     }, [isSearchFocused]);
 
-    function searchQuery(
-        search: (
-            query: string,
-            cancelToken: CancelToken,
-            callback: (matches: SearchMatch[]) => void,
-        ) => void,
-        query: string,
-    ): void {
+    function searchQuery(query: string): void {
         if (searchQueryCancelableRef.current) {
             searchQueryCancelableRef.current.cancel();
         }
@@ -1096,16 +1136,9 @@ export function Header({ enableMenu }: HeaderProps): VNode {
         });
     }
 
-    const previousSearch = usePrevious(search);
-    if (!previousSearch && search && isSearchFocused) {
-        searchQuery(search, searchValue);
-    }
-
     const onSearchInput: JSX.GenericEventHandler<HTMLInputElement> = (e) => {
         const { value } = e.currentTarget;
-        if (search) {
-            searchQuery(search, value);
-        }
+        searchQuery(value);
         setSearchValue(value);
     };
 
