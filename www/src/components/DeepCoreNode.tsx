@@ -425,7 +425,6 @@ export function DeepCoreNodeComponent({
                     data-lang={language}
                     style={{
                         backgroundColor: background,
-                        '--line-number-color': averagedForegroundBackground,
                     }}
                 >
                     <button
