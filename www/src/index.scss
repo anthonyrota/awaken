@@ -1217,6 +1217,8 @@ button {
             display: flex;
             text-decoration: none;
             opacity: $hover-opacity;
+            max-width: 45%;
+            hyphens: auto;
             &:hover {
                 opacity: 1;
             }
@@ -1347,6 +1349,7 @@ button {
         word-break: break-word;
         hyphens: auto;
         @media screen and (max-width: $size-show-menu) {
+            font-size: 50px;
             margin-left: 0;
             margin-right: 0;
             padding-left: $spacing;

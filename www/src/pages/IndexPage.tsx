@@ -11,7 +11,7 @@ export function IndexPage({ mainRef }: IndexPageProps): VNode {
                 title="A fast and extremely lightweight reactive programming library for TypeScript"
                 websiteNamePosition={WebsiteNamePositionStart}
             />
-            <main class="cls-page__content__container" ref={mainRef}>
+            <main id="main" class="cls-page__content__container" ref={mainRef}>
                 index
             </main>
         </Fragment>

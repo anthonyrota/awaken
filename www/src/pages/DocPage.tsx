@@ -103,7 +103,7 @@ export function DocPageContent({
                 {page.tableOfContents && (
                     <DocPageSidebar page={page} headingRefs={headingRefs} />
                 )}
-                <main class="cls-doc-page__main" ref={mainRef}>
+                <main id="main" class="cls-doc-page__main" ref={mainRef}>
                     {page.children.map((childNode) => (
                         <DeepCoreNodeComponent
                             node={childNode}
