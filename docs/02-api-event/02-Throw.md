@@ -17,9 +17,7 @@ A Throw event represents the &quot;throwing&quot; of an error, and has an <code>
 
 ### <a name="Throw-Function"></a><code>Throw - Function</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L177](..\/..\/packages\/core\/src\/source.ts#L177)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L177](..\/..\/packages\/core\/src\/source.ts#L177)</b>
 
 <pre>function Throw(error: unknown): <a href="#Throw-Interface">Throw</a></pre>
 
@@ -45,9 +43,7 @@ console.log(event.value); // Error(...).
 
 ### <a name="Throw-Interface"></a><code>Throw - Interface</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L61](..\/..\/packages\/core\/src\/source.ts#L61)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L61](..\/..\/packages\/core\/src\/source.ts#L61)</b>
 
 <pre>interface Throw {<br>    readonly error: unknown<br>    readonly type: <a href="#ThrowType-TypeAlias">ThrowType</a><br>}</pre>
 
@@ -55,9 +51,7 @@ console.log(event.value); // Error(...).
 
 ### <a name="ThrowType-TypeAlias"></a><code>ThrowType - Type</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L32](..\/..\/packages\/core\/src\/source.ts#L32)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L32](..\/..\/packages\/core\/src\/source.ts#L32)</b>
 
 ```ts
 type ThrowType = 1
@@ -65,9 +59,7 @@ type ThrowType = 1
 
 ### <a name="ThrowType-Variable"></a><code>ThrowType - Variable</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L36](..\/..\/packages\/core\/src\/source.ts#L36)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L36](..\/..\/packages\/core\/src\/source.ts#L36)</b>
 
 <pre>var ThrowType: <a href="#ThrowType-TypeAlias">ThrowType</a></pre><br>
 

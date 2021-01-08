@@ -8,9 +8,7 @@
 
 ## <a name="throttleMs"></a><code>throttleMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3667](..\/..\/packages\/core\/src\/source.ts#L3667)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3667](..\/..\/packages\/core\/src\/source.ts#L3667)</b>
 
 <pre>function throttleMs(<br>    durationMs: number,<br>    config?: <a href="092-throttle.md#ThrottleConfig">ThrottleConfig</a> | null,<br>): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

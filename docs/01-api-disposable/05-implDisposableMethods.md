@@ -8,9 +8,7 @@
 
 ## <a name="implDisposableMethods"></a><code>implDisposableMethods</code>
 
-> Source Location: [packages\/core\/src\/disposable.ts#L217](..\/..\/packages\/core\/src\/disposable.ts#L217)
-
-<b>Signature</b>
+<b>Signature - [disposable.ts#L217](..\/..\/packages\/core\/src\/disposable.ts#L217)</b>
 
 <pre>function implDisposableMethods&lt;T extends object&gt;(<br>    value: T,<br>    disposable: <a href="00-Disposable.md#Disposable-Interface">Disposable</a>,<br>): T & <a href="00-Disposable.md#Disposable-Interface">Disposable</a></pre>
 

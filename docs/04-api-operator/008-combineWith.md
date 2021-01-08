@@ -8,9 +8,7 @@
 
 ## <a name="combineWith"></a><code>combineWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1338](..\/..\/packages\/core\/src\/source.ts#L1338)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1338](..\/..\/packages\/core\/src\/source.ts#L1338)</b>
 
 <pre>function combineWith&lt;T extends unknown[]&gt;(<br>    sources: {<br>        [K in keyof T]: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T[K]&gt;<br>    },<br>): &lt;U&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;[U, ...T]&gt;</pre><br>
 

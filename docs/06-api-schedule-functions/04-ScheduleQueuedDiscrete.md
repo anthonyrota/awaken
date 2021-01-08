@@ -8,9 +8,7 @@
 
 ## <a name="ScheduleQueuedDiscrete"></a><code>ScheduleQueuedDiscrete</code>
 
-> Source Location: [packages\/core\/src\/schedule.ts#L176](..\/..\/packages\/core\/src\/schedule.ts#L176)
-
-<b>Signature</b>
+<b>Signature - [schedule.ts#L176](..\/..\/packages\/core\/src\/schedule.ts#L176)</b>
 
 <pre>function ScheduleQueuedDiscrete&lt;T extends any[] = []&gt;(<br>    schedule: (<br>        callback: (...args: T) =&gt; void,<br>        subscription: <a href="../01-api-disposable/00-Disposable.md#Disposable-Interface">Disposable</a>,<br>    ) =&gt; void,<br>): <a href="00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>&lt;T&gt;</pre><br>
 

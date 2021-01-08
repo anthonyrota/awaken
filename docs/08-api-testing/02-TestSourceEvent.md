@@ -8,9 +8,7 @@
 
 ## <a name="TestSourceEvent"></a><code>TestSourceEvent</code>
 
-> Source Location: [packages\/testing\/src\/index.ts#L179](..\/..\/packages\/testing\/src\/index.ts#L179)
-
-<b>Signature</b>
+<b>Signature - [index.ts#L179](..\/..\/packages\/testing\/src\/index.ts#L179)</b>
 
 <pre>type TestSourceEvent&lt;T&gt; = <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt; & {<br>    readonly frame: number<br>}</pre><br>
 

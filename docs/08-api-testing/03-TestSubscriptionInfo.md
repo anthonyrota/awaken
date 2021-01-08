@@ -10,17 +10,13 @@
 
 ### <a name="TestSubscriptionInfo-Function"></a><code>TestSubscriptionInfo - Function</code>
 
-> Source Location: [packages\/testing\/src\/index.ts#L142](..\/..\/packages\/testing\/src\/index.ts#L142)
-
-<b>Signature</b>
+<b>Signature - [index.ts#L142](..\/..\/packages\/testing\/src\/index.ts#L142)</b>
 
 <pre>function TestSubscriptionInfo(<br>    subscriptionStartFrame: number,<br>    subscriptionEndFrame: number,<br>): <a href="#TestSubscriptionInfo-Interface">TestSubscriptionInfo</a></pre>
 
 ### <a name="TestSubscriptionInfo-Interface"></a><code>TestSubscriptionInfo - Interface</code>
 
-> Source Location: [packages\/testing\/src\/index.ts#L134](..\/..\/packages\/testing\/src\/index.ts#L134)
-
-<b>Signature</b>
+<b>Signature - [index.ts#L134](..\/..\/packages\/testing\/src\/index.ts#L134)</b>
 
 ```ts
 interface TestSubscriptionInfo {

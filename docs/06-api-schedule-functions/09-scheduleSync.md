@@ -8,9 +8,7 @@
 
 ## <a name="scheduleSync"></a><code>scheduleSync</code>
 
-> Source Location: [packages\/core\/src\/schedule.ts#L202](..\/..\/packages\/core\/src\/schedule.ts#L202)
-
-<b>Signature</b>
+<b>Signature - [schedule.ts#L202](..\/..\/packages\/core\/src\/schedule.ts#L202)</b>
 
 <pre>var scheduleSync: <a href="00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a></pre><br>
 

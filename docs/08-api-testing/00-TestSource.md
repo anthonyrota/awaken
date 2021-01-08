@@ -10,17 +10,13 @@
 
 ### <a name="TestSource-Function"></a><code>TestSource - Function</code>
 
-> Source Location: [packages\/testing\/src\/index.ts#L232](..\/..\/packages\/testing\/src\/index.ts#L232)
-
-<b>Signature</b>
+<b>Signature - [index.ts#L232](..\/..\/packages\/testing\/src\/index.ts#L232)</b>
 
 <pre>function TestSource&lt;T&gt;(<br>    events: <a href="02-TestSourceEvent.md#TestSourceEvent">TestSourceEvent</a>&lt;T&gt;[],<br>    testSchedule: <a href="05-TestSchedule.md#TestSchedule-Interface">TestSchedule</a>,<br>): <a href="#TestSource-Interface">TestSource</a>&lt;T&gt;</pre>
 
 ### <a name="TestSource-Interface"></a><code>TestSource - Interface</code>
 
-> Source Location: [packages\/testing\/src\/index.ts#L225](..\/..\/packages\/testing\/src\/index.ts#L225)
-
-<b>Signature</b>
+<b>Signature - [index.ts#L225](..\/..\/packages\/testing\/src\/index.ts#L225)</b>
 
 <pre>interface TestSource&lt;T&gt; extends <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt; {<br>    readonly subscriptions: <a href="04-TestSourceSubscriptions.md#TestSourceSubscriptions">TestSourceSubscriptions</a><br>}</pre><br>
 

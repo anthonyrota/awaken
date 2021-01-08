@@ -8,9 +8,7 @@
 
 ## <a name="DISPOSED"></a><code>DISPOSED</code>
 
-> Source Location: [packages\/core\/src\/disposable.ts#L384](..\/..\/packages\/core\/src\/disposable.ts#L384)
-
-<b>Signature</b>
+<b>Signature - [disposable.ts#L384](..\/..\/packages\/core\/src\/disposable.ts#L384)</b>
 
 <pre>var DISPOSED: <a href="00-Disposable.md#Disposable-Interface">Disposable</a></pre><br>
 

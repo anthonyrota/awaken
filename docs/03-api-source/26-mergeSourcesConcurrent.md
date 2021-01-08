@@ -8,9 +8,7 @@
 
 ## <a name="mergeSourcesConcurrent"></a><code>mergeSourcesConcurrent</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1146](..\/..\/packages\/core\/src\/source.ts#L1146)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1146](..\/..\/packages\/core\/src\/source.ts#L1146)</b>
 
 <pre>function mergeSourcesConcurrent&lt;T&gt;(max: number, sources: <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;[]): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

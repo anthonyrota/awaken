@@ -1,3 +1,4 @@
+import * as path from 'path';
 import {
     ApiCallSignature,
     ApiConstructSignature,
@@ -11,6 +12,7 @@ import {
     ApiVariable,
     Excerpt,
 } from '@microsoft/api-extractor-model';
+import * as ts from 'typescript';
 import { DeepCoreNode } from '../../../core/nodes';
 import {
     CodeBlockNode,
@@ -18,16 +20,72 @@ import {
     CodeLinkType,
 } from '../../../core/nodes/CodeBlock';
 import { ContainerNode } from '../../../core/nodes/Container';
+import { GithubSourceLinkNode } from '../../../core/nodes/GithubSourceLink';
 import { PlainTextNode } from '../../../core/nodes/PlainText';
 import { TitleNode } from '../../../core/nodes/Title';
 import { format, formatWithCursor, Language } from '../../../util/prettier';
 import { AnalyzeContext } from '../../Context';
 import { getApiItemIdentifier } from '../../util/getApiItemIdentifier';
+import { getApiItemSourceGithubPathFromRoot } from '../../util/getApiItemSourceLocation';
 import { getExcerptTokenReference } from '../../util/getExcerptTokenReference';
 import { hideDocTag } from '../../util/tsdocUtil';
 import { UnsupportedApiItemError } from '../../util/UnsupportedApiItemError';
-
 import { getApiItemAnchorName } from './buildApiItemAnchor';
+
+export interface BuildApiItemSignatureParameters {
+    apiItem: ApiFunction | ApiInterface | ApiVariable | ApiTypeAlias;
+    context: AnalyzeContext;
+    syntaxKind: ts.SyntaxKind;
+}
+
+export function buildApiItemSignature(
+    parameters: BuildApiItemSignatureParameters,
+): DeepCoreNode {
+    const { apiItem, context, syntaxKind } = parameters;
+    return ContainerNode<DeepCoreNode>({
+        children: [
+            buildApiItemSignatureTitle({
+                apiItem,
+                context,
+                syntaxKind,
+            }),
+            buildApiItemSignatureExcerpt({
+                apiItem,
+                context,
+            }),
+        ],
+    });
+}
+
+export interface BuildApiItemSignatureTitleParameters {
+    apiItem: ApiFunction | ApiInterface | ApiVariable | ApiTypeAlias;
+    context: AnalyzeContext;
+    syntaxKind: ts.SyntaxKind;
+}
+
+export function buildApiItemSignatureTitle(
+    parameters: BuildApiItemSignatureTitleParameters,
+): DeepCoreNode {
+    const { apiItem, context, syntaxKind } = parameters;
+    const pathFromRoot = getApiItemSourceGithubPathFromRoot({
+        apiItem,
+        context,
+        syntaxKind,
+    });
+    return TitleNode({
+        children: [
+            PlainTextNode({ text: 'Signature - ' }),
+            GithubSourceLinkNode({
+                pathFromRoot,
+                children: [
+                    PlainTextNode({
+                        text: path.basename(pathFromRoot),
+                    }),
+                ],
+            }),
+        ],
+    });
+}
 
 export interface BuildApiItemSignatureExcerptParameters {
     apiItem: ApiFunction | ApiInterface | ApiVariable | ApiTypeAlias;
@@ -42,26 +100,6 @@ export function buildApiItemSignatureExcerpt(
         apiItem,
         excerpt: apiItem.excerpt,
         context,
-    });
-}
-
-export interface BuildApiItemSignatureParameters
-    extends BuildApiItemSignatureExcerptParameters {}
-
-export function buildApiItemSignature(
-    parameters: BuildApiItemSignatureParameters,
-): DeepCoreNode {
-    const { apiItem, context } = parameters;
-    return ContainerNode<DeepCoreNode>({
-        children: [
-            TitleNode({
-                children: [PlainTextNode({ text: 'Signature' })],
-            }),
-            buildApiItemSignatureExcerpt({
-                apiItem,
-                context,
-            }),
-        ],
     });
 }
 

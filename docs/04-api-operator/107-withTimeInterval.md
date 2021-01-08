@@ -9,17 +9,13 @@
 
 ## <a name="withTimeInterval"></a><code>withTimeInterval</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3820](..\/..\/packages\/core\/src\/source.ts#L3820)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3820](..\/..\/packages\/core\/src\/source.ts#L3820)</b>
 
 <pre>function withTimeInterval&lt;T&gt;(<br>    provideTime: <a href="../07-api-utils/04-TimeProvider.md#TimeProvider">TimeProvider</a>,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, <a href="#TimeInterval">TimeInterval</a>&lt;T&gt;&gt;</pre>
 
 ## <a name="TimeInterval"></a><code>TimeInterval</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3808](..\/..\/packages\/core\/src\/source.ts#L3808)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3808](..\/..\/packages\/core\/src\/source.ts#L3808)</b>
 
 ```ts
 interface TimeInterval<T> {

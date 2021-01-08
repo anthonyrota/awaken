@@ -8,9 +8,7 @@
 
 ## <a name="spyAfter"></a><code>spyAfter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2322](..\/..\/packages\/core\/src\/source.ts#L2322)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2322](..\/..\/packages\/core\/src\/source.ts#L2322)</b>
 
 <pre>var spyAfter: &lt;T&gt;(onEvent: (event: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;) =&gt; void) =&gt; <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre><br>
 

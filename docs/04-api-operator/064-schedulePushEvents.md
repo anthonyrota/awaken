@@ -8,9 +8,7 @@
 
 ## <a name="schedulePushEvents"></a><code>schedulePushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3854](..\/..\/packages\/core\/src\/source.ts#L3854)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3854](..\/..\/packages\/core\/src\/source.ts#L3854)</b>
 
 <pre>function schedulePushEvents(schedule: <a href="../06-api-schedule-functions/00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

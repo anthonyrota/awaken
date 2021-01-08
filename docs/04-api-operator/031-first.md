@@ -8,9 +8,7 @@
 
 ## <a name="first"></a><code>first</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2701](..\/..\/packages\/core\/src\/source.ts#L2701)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2701](..\/..\/packages\/core\/src\/source.ts#L2701)</b>
 
 <pre>var first: <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

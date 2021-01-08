@@ -10,17 +10,13 @@
 
 ### <a name="SubjectDistributionSinkDisposalError-Interface"></a><code>SubjectDistributionSinkDisposalError - Interface</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L292](..\/..\/packages\/core\/src\/subject.ts#L292)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L292](..\/..\/packages\/core\/src\/subject.ts#L292)</b>
 
 <pre>interface SubjectDistributionSinkDisposalError {<br>    readonly errors: <a href="../01-api-disposable/02-DisposalError.md#DisposalError-Interface">DisposalError</a>[]<br>}</pre>
 
 ### <a name="SubjectDistributionSinkDisposalError-Variable"></a><code>SubjectDistributionSinkDisposalError - Variable</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L314](..\/..\/packages\/core\/src\/subject.ts#L314)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L314](..\/..\/packages\/core\/src\/subject.ts#L314)</b>
 
 <pre>var SubjectDistributionSinkDisposalError: <a href="03-SubjectDistributionSinkDisposalErrorConstructor.md#SubjectDistributionSinkDisposalErrorConstructor">SubjectDistributionSinkDisposalErrorConstructor</a></pre>
 

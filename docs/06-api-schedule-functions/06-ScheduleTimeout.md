@@ -8,9 +8,7 @@
 
 ## <a name="ScheduleTimeout"></a><code>ScheduleTimeout</code>
 
-> Source Location: [packages\/core\/src\/schedule.ts#L244](..\/..\/packages\/core\/src\/schedule.ts#L244)
-
-<b>Signature</b>
+<b>Signature - [schedule.ts#L244](..\/..\/packages\/core\/src\/schedule.ts#L244)</b>
 
 <pre>function ScheduleTimeout(delayMs: number): <a href="00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a></pre><br>
 

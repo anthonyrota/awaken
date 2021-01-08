@@ -8,9 +8,7 @@
 
 ## <a name="delay"></a><code>delay</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3687](..\/..\/packages\/core\/src\/source.ts#L3687)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3687](..\/..\/packages\/core\/src\/source.ts#L3687)</b>
 
 <pre>function delay&lt;T&gt;(<br>    getDelaySource: (value: T, index: number) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre>
 

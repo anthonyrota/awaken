@@ -12,9 +12,7 @@
 
 ## <a name="debounce"></a><code>debounce</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3395](..\/..\/packages\/core\/src\/source.ts#L3395)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3395](..\/..\/packages\/core\/src\/source.ts#L3395)</b>
 
 <pre>function debounce&lt;T&gt;(<br>    getDurationSource: (value: T, index: number) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;,<br>    getInitialDurationRange?:<br>        | ((firstDebouncedValue: T, index: number) =&gt; <a href="#InitialDurationInfo">InitialDurationInfo</a>)<br>        | null,<br>    config?: <a href="#DebounceConfig">DebounceConfig</a> | null,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre>
 
@@ -22,25 +20,19 @@
 
 ## <a name="DebounceConfig"></a><code>DebounceConfig</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3346](..\/..\/packages\/core\/src\/source.ts#L3346)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3346](..\/..\/packages\/core\/src\/source.ts#L3346)</b>
 
 <pre>interface DebounceConfig {<br>    emitPendingOnEnd?: boolean | null<br>    leading?: boolean | null<br>    trailing?: boolean | <a href="#DebounceTrailingRestart-TypeAlias">DebounceTrailingRestart</a> | null<br>}</pre>
 
 ## <a name="defaultDebounceConfig"></a><code>defaultDebounceConfig</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3355](..\/..\/packages\/core\/src\/source.ts#L3355)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3355](..\/..\/packages\/core\/src\/source.ts#L3355)</b>
 
 <pre>var defaultDebounceConfig: <a href="#DebounceConfig">DebounceConfig</a></pre>
 
 ## <a name="InitialDurationInfo"></a><code>InitialDurationInfo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3364](..\/..\/packages\/core\/src\/source.ts#L3364)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3364](..\/..\/packages\/core\/src\/source.ts#L3364)</b>
 
 <pre>type InitialDurationInfo =<br>    | [<a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;, (<a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt; | undefined | null)?]<br>    | [undefined | null, <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;]</pre>
 
@@ -48,9 +40,7 @@
 
 ### <a name="DebounceTrailingRestart-TypeAlias"></a><code>DebounceTrailingRestart - Type</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3337](..\/..\/packages\/core\/src\/source.ts#L3337)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3337](..\/..\/packages\/core\/src\/source.ts#L3337)</b>
 
 ```ts
 type DebounceTrailingRestart = 'restart'
@@ -58,9 +48,7 @@ type DebounceTrailingRestart = 'restart'
 
 ### <a name="DebounceTrailingRestart-Variable"></a><code>DebounceTrailingRestart - Variable</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3341](..\/..\/packages\/core\/src\/source.ts#L3341)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3341](..\/..\/packages\/core\/src\/source.ts#L3341)</b>
 
 <pre>var DebounceTrailingRestart: <a href="#DebounceTrailingRestart-TypeAlias">DebounceTrailingRestart</a></pre><br>
 

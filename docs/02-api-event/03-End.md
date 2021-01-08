@@ -17,17 +17,13 @@ An End event represents the &quot;end&quot; of a <code>[Source](..\/03-api-sourc
 
 ### <a name="End-Interface"></a><code>End - Interface</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L69](..\/..\/packages\/core\/src\/source.ts#L69)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L69](..\/..\/packages\/core\/src\/source.ts#L69)</b>
 
 <pre>interface End {<br>    readonly type: <a href="#EndType-TypeAlias">EndType</a><br>}</pre>
 
 ### <a name="End-Variable"></a><code>End - Variable</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L205](..\/..\/packages\/core\/src\/source.ts#L205)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L205](..\/..\/packages\/core\/src\/source.ts#L205)</b>
 
 <pre>var End: <a href="#End-Interface">End</a></pre>
 
@@ -47,9 +43,7 @@ sink(End); // This disposes the sink, then calls `onEvent` above.
 
 ### <a name="EndType-TypeAlias"></a><code>EndType - Type</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L40](..\/..\/packages\/core\/src\/source.ts#L40)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L40](..\/..\/packages\/core\/src\/source.ts#L40)</b>
 
 ```ts
 type EndType = 2
@@ -57,9 +51,7 @@ type EndType = 2
 
 ### <a name="EndType-Variable"></a><code>EndType - Variable</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L44](..\/..\/packages\/core\/src\/source.ts#L44)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L44](..\/..\/packages\/core\/src\/source.ts#L44)</b>
 
 <pre>var EndType: <a href="#EndType-TypeAlias">EndType</a></pre><br>
 

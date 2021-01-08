@@ -8,9 +8,7 @@
 
 ## <a name="ScheduleSyncQueued"></a><code>ScheduleSyncQueued</code>
 
-> Source Location: [packages\/core\/src\/schedule.ts#L222](..\/..\/packages\/core\/src\/schedule.ts#L222)
-
-<b>Signature</b>
+<b>Signature - [schedule.ts#L222](..\/..\/packages\/core\/src\/schedule.ts#L222)</b>
 
 <pre>function ScheduleSyncQueued(): <a href="00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a></pre><br>
 

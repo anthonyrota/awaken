@@ -8,9 +8,7 @@
 
 ## <a name="isSink"></a><code>isSink</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L347](..\/..\/packages\/core\/src\/source.ts#L347)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L347](..\/..\/packages\/core\/src\/source.ts#L347)</b>
 
 <pre>function isSink(value: unknown): value is <a href="02-Sink.md#Sink-Interface">Sink</a>&lt;unknown&gt;</pre>
 

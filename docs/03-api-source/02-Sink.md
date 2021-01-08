@@ -23,9 +23,7 @@ The sink constructor takes an <code>onEvent</code> function, which is called eve
 
 ### <a name="Sink-Function"></a><code>Sink - Function</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L293](..\/..\/packages\/core\/src\/source.ts#L293)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L293](..\/..\/packages\/core\/src\/source.ts#L293)</b>
 
 <pre>function Sink&lt;T&gt;(onEvent: (event: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;) =&gt; void): <a href="#Sink-Interface">Sink</a>&lt;T&gt;</pre>
 
@@ -81,9 +79,7 @@ sink(Throw(...)); // Ignored.
 
 ### <a name="Sink-Interface"></a><code>Sink - Interface</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L243](..\/..\/packages\/core\/src\/source.ts#L243)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L243](..\/..\/packages\/core\/src\/source.ts#L243)</b>
 
 <pre>interface Sink&lt;T&gt; extends <a href="../01-api-disposable/00-Disposable.md#Disposable-Interface">Disposable</a> {<br>    (event: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;): void<br>}</pre><br>
 

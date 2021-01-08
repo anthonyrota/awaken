@@ -8,9 +8,7 @@
 
 ## <a name="subscribe"></a><code>subscribe</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L605](..\/..\/packages\/core\/src\/source.ts#L605)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L605](..\/..\/packages\/core\/src\/source.ts#L605)</b>
 
 <pre>function subscribe&lt;T&gt;(<br>    sink?: <a href="02-Sink.md#Sink-Interface">Sink</a>&lt;T&gt; | ((event: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;) =&gt; void),<br>): (source: <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="02-Sink.md#Sink-Interface">Sink</a>&lt;T&gt;</pre>
 

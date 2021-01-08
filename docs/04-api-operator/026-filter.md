@@ -8,9 +8,7 @@
 
 ## <a name="filter"></a><code>filter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1600](..\/..\/packages\/core\/src\/source.ts#L1600)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1600](..\/..\/packages\/core\/src\/source.ts#L1600)</b>
 
 <pre>function filter&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; false,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, never&gt;</pre>
 
@@ -21,8 +19,6 @@ Calls the predicate function for each Push event of the given source, only passi
 | Parameter | Type | Description |
 | --- | --- | --- |
 | predicate | <pre lang="ts">(value: T, index: number) =&gt; false</pre> | A function that accepts a value and an index. The filter method calls this function one time for each Push event of the given source. If and only if the function returns a truthy value, then the event will pass through. |
-
-<b>Signature</b>
 
 <pre>function filter&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, S&gt;</pre>
 

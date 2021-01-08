@@ -8,9 +8,7 @@
 
 ## <a name="FinalValueSubject"></a><code>FinalValueSubject</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L524](..\/..\/packages\/core\/src\/subject.ts#L524)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L524](..\/..\/packages\/core\/src\/subject.ts#L524)</b>
 
 <pre>function FinalValueSubject&lt;T&gt;(): <a href="00-Subject.md#Subject-Interface">Subject</a>&lt;T&gt;</pre><br>
 

@@ -8,9 +8,7 @@
 
 ## <a name="throwError"></a><code>throwError</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L778](..\/..\/packages\/core\/src\/source.ts#L778)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L778](..\/..\/packages\/core\/src\/source.ts#L778)</b>
 
 <pre>function throwError(getError: () =&gt; unknown): <a href="00-Source.md#Source-Interface">Source</a>&lt;never&gt;</pre><br>
 

@@ -8,9 +8,7 @@
 
 ## <a name="empty"></a><code>empty</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L795](..\/..\/packages\/core\/src\/source.ts#L795)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L795](..\/..\/packages\/core\/src\/source.ts#L795)</b>
 
 <pre>var empty: <a href="00-Source.md#Source-Interface">Source</a>&lt;never&gt;</pre><br>
 

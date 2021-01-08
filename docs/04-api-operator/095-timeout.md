@@ -8,9 +8,7 @@
 
 ## <a name="timeout"></a><code>timeout</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3061](..\/..\/packages\/core\/src\/source.ts#L3061)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3061](..\/..\/packages\/core\/src\/source.ts#L3061)</b>
 
 <pre>function timeout&lt;T&gt;(<br>    timeoutSource: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;,<br>    replacementSource: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;,<br>): &lt;U&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T | U&gt;</pre><br>
 

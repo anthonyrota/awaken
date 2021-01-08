@@ -8,15 +8,13 @@
 
 ## <a name="pipe"></a><code>pipe</code>
 
-> Source Location: [packages\/core\/src\/util.ts#L53](..\/..\/packages\/core\/src\/util.ts#L53)
-
 Calls the value accumulatively against all of the functions given left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, the given value will be returned.
 
 <b>Returns</b>
 
 The result of accumulatively calling the given value against all of the functions given left-to-right.
 
-<b>Signature</b>
+<b>Signature - [util.ts#L53](..\/..\/packages\/core\/src\/util.ts#L53)</b>
 
 ```ts
 function pipe<T>(x: T): T

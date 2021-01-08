@@ -8,9 +8,7 @@
 
 ## <a name="interval"></a><code>interval</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L980](..\/..\/packages\/core\/src\/source.ts#L980)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L980](..\/..\/packages\/core\/src\/source.ts#L980)</b>
 
 <pre>function interval(delayMs: number): <a href="00-Source.md#Source-Interface">Source</a>&lt;number&gt;</pre><br>
 

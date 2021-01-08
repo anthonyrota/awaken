@@ -8,9 +8,7 @@
 
 ## <a name="retryAlways"></a><code>retryAlways</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2991](..\/..\/packages\/core\/src\/source.ts#L2991)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2991](..\/..\/packages\/core\/src\/source.ts#L2991)</b>
 
 <pre>var retryAlways: <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

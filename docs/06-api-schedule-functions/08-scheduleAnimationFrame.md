@@ -8,9 +8,7 @@
 
 ## <a name="scheduleAnimationFrame"></a><code>scheduleAnimationFrame</code>
 
-> Source Location: [packages\/core\/src\/schedule.ts#L230](..\/..\/packages\/core\/src\/schedule.ts#L230)
-
-<b>Signature</b>
+<b>Signature - [schedule.ts#L230](..\/..\/packages\/core\/src\/schedule.ts#L230)</b>
 
 <pre>var scheduleAnimationFrame: <a href="00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>&lt;[number]&gt;</pre><br>
 

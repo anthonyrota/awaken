@@ -8,9 +8,7 @@
 
 ## <a name="ignorePushEvents"></a><code>ignorePushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1749](..\/..\/packages\/core\/src\/source.ts#L1749)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1749](..\/..\/packages\/core\/src\/source.ts#L1749)</b>
 
 <pre>var ignorePushEvents: &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;never&gt;</pre><br>
 

@@ -8,9 +8,7 @@
 
 ## <a name="scheduleSubscription"></a><code>scheduleSubscription</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3864](..\/..\/packages\/core\/src\/source.ts#L3864)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3864](..\/..\/packages\/core\/src\/source.ts#L3864)</b>
 
 <pre>function scheduleSubscription(schedule: <a href="../06-api-schedule-functions/00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

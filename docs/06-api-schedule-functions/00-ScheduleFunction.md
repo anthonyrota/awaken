@@ -8,9 +8,7 @@
 
 ## <a name="ScheduleFunction"></a><code>ScheduleFunction</code>
 
-> Source Location: [packages\/core\/src\/schedule.ts#L13](..\/..\/packages\/core\/src\/schedule.ts#L13)
-
-<b>Signature</b>
+<b>Signature - [schedule.ts#L13](..\/..\/packages\/core\/src\/schedule.ts#L13)</b>
 
 <pre>interface ScheduleFunction&lt;T extends any[] = []&gt; {<br>    (callback: (...args: T) =&gt; void, subscription?: <a href="../01-api-disposable/00-Disposable.md#Disposable-Interface">Disposable</a>): void<br>}</pre><br>
 

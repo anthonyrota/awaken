@@ -8,9 +8,7 @@
 
 ## <a name="takeWhile"></a><code>takeWhile</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2723](..\/..\/packages\/core\/src\/source.ts#L2723)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2723](..\/..\/packages\/core\/src\/source.ts#L2723)</b>
 
 <pre>function takeWhile&lt;T, S extends T&gt;(<br>    shouldContinue: (value: T, index: number) =&gt; value is S,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, S&gt;</pre>
 
@@ -21,8 +19,6 @@ Calls the shouldContinue function for each Push event of the given source. The r
 | Parameter | Type | Description |
 | --- | --- | --- |
 | shouldContinue | <pre lang="ts">(value: T, index: number) =&gt; value is S</pre> | A function that accepts a value and an index. The takeWhile method calls this function one time for each Push event of the given source. |
-
-<b>Signature</b>
 
 <pre>function takeWhile&lt;T&gt;(<br>    shouldContinue: (value: T, index: number) =&gt; unknown,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre><br>
 

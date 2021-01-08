@@ -8,9 +8,7 @@
 
 ## <a name="raceWith"></a><code>raceWith</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1348](..\/..\/packages\/core\/src\/source.ts#L1348)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1348](..\/..\/packages\/core\/src\/source.ts#L1348)</b>
 
 <pre>function raceWith&lt;T&gt;(<br>    sources: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;[],<br>): &lt;U&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T | U&gt;</pre><br>
 

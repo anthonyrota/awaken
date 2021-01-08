@@ -8,9 +8,7 @@
 
 ## <a name="skipWhile"></a><code>skipWhile</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2848](..\/..\/packages\/core\/src\/source.ts#L2848)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2848](..\/..\/packages\/core\/src\/source.ts#L2848)</b>
 
 <pre>function skipWhile&lt;T&gt;(<br>    shouldContinueSkipping: (value: T, index: number) =&gt; unknown,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre><br>
 

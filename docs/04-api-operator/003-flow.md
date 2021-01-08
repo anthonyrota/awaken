@@ -8,15 +8,13 @@
 
 ## <a name="flow"></a><code>flow</code>
 
-> Source Location: [packages\/core\/src\/util.ts#L105](..\/..\/packages\/core\/src\/util.ts#L105)
-
 Combines all of the functions given into a single function. This function takes a value and will accumulatively call it against all of the given functions left-to-right. The result of calling a function with the accumulated value will be given to the next function, and the result of the last function will be returned. If there are no functions given, then the combined function will return the value passed to it.
 
 <b>Returns</b>
 
 A function which takes a value and will return the result of accumulatively calling the value against all of the functions given left-to-right.
 
-<b>Signature</b>
+<b>Signature - [util.ts#L105](..\/..\/packages\/core\/src\/util.ts#L105)</b>
 
 ```ts
 function flow(): <T>(x: T) => T

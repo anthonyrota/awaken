@@ -41,7 +41,7 @@ Reactive programming with Microstream provides a few new primary data structures
 
 This allows us to transform collections of complicated asynchronous events as simply as we would filter the values in an array.
 
-> In this way <del>rxjs</del><a name="lodash-quote-footnote-link"></a><sup>[1](#lodash-quote-footnote)</sup> Microstream can essentially be thought of as Lodash for events.
+> In this way Microstream can essentially be thought of as Lodash for events.<a name="lodash-quote-footnote-link"></a><sup>[1](#lodash-quote-footnote)</sup>
 
 Built in to JavaScript there are a few fundamental representations of items and sequences of values:
 

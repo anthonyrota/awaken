@@ -8,9 +8,7 @@
 
 ## <a name="isEqualTo"></a><code>isEqualTo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1907](..\/..\/packages\/core\/src\/source.ts#L1907)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1907](..\/..\/packages\/core\/src\/source.ts#L1907)</b>
 
 <pre>function isEqualTo&lt;T, U&gt;(<br>    otherSource: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;,<br>    areValuesEqual: (a: T, b: U, index: number) =&gt; unknown,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, boolean&gt;</pre><br>
 

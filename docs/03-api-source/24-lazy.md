@@ -8,9 +8,7 @@
 
 ## <a name="lazy"></a><code>lazy</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L997](..\/..\/packages\/core\/src\/source.ts#L997)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L997](..\/..\/packages\/core\/src\/source.ts#L997)</b>
 
 <pre>function lazy&lt;T&gt;(createSource: () =&gt; <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

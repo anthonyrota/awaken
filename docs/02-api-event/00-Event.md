@@ -9,9 +9,7 @@
 
 ## <a name="Event"></a><code>Event</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L117](..\/..\/packages\/core\/src\/source.ts#L117)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L117](..\/..\/packages\/core\/src\/source.ts#L117)</b>
 
 <pre>type Event&lt;T&gt; = <a href="01-Push.md#Push-Interface">Push</a>&lt;T&gt; | <a href="02-Throw.md#Throw-Interface">Throw</a> | <a href="03-End.md#End-Interface">End</a></pre>
 
@@ -49,9 +47,7 @@ sink(Throw(new Error('...'))); // `${ThrowType}`, Error(...).
 
 ## <a name="EventType"></a><code>EventType</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L48](..\/..\/packages\/core\/src\/source.ts#L48)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L48](..\/..\/packages\/core\/src\/source.ts#L48)</b>
 
 <pre>type EventType = <a href="01-Push.md#PushType-TypeAlias">PushType</a> | <a href="02-Throw.md#ThrowType-TypeAlias">ThrowType</a> | <a href="03-End.md#EndType-TypeAlias">EndType</a></pre><br>
 

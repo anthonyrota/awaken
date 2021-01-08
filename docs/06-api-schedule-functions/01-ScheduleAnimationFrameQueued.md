@@ -8,9 +8,7 @@
 
 ## <a name="ScheduleAnimationFrameQueued"></a><code>ScheduleAnimationFrameQueued</code>
 
-> Source Location: [packages\/core\/src\/schedule.ts#L237](..\/..\/packages\/core\/src\/schedule.ts#L237)
-
-<b>Signature</b>
+<b>Signature - [schedule.ts#L237](..\/..\/packages\/core\/src\/schedule.ts#L237)</b>
 
 <pre>function ScheduleAnimationFrameQueued(): <a href="00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>&lt;[number]&gt;</pre><br>
 

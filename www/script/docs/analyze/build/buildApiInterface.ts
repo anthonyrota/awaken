@@ -8,7 +8,6 @@ import { buildApiItemAnchor } from './util/buildApiItemAnchor';
 import { buildApiItemExamples } from './util/buildApiItemExamples';
 import { buildApiItemSeeBlocks } from './util/buildApiItemSeeBlocks';
 import { buildApiItemSignature } from './util/buildApiItemSignature';
-import { buildApiItemSourceLocationLink } from './util/buildApiItemSourceLocationLink';
 import { buildApiItemSummary } from './util/buildApiItemSummary';
 
 export interface BuildApiInterfaceParameters {
@@ -25,19 +24,17 @@ export function buildApiInterface(
         context,
         textKind: getApiItemTextKind(interface_.kind),
     });
-    const sourceLocationLink = buildApiItemSourceLocationLink({
+    const signature = buildApiItemSignature({
         apiItem: interface_,
         context,
         syntaxKind: ts.SyntaxKind.InterfaceDeclaration,
     });
-    const signature = buildApiItemSignature({ apiItem: interface_, context });
     const summary = buildApiItemSummary({ apiItem: interface_, context });
     const examples = buildApiItemExamples({ apiItem: interface_, context });
     const seeBlocks = buildApiItemSeeBlocks({ apiItem: interface_, context });
 
     const container = ContainerNode<DeepCoreNode>({});
     if (anchor) container.children.push(anchor);
-    container.children.push(sourceLocationLink);
     container.children.push(signature);
     if (summary) container.children.push(summary);
 

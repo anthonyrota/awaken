@@ -8,9 +8,7 @@
 
 ## <a name="setTimeout"></a><code>setTimeout</code>
 
-> Source Location: [packages\/core\/src\/util.ts#L168](..\/..\/packages\/core\/src\/util.ts#L168)
-
-<b>Signature</b>
+<b>Signature - [util.ts#L168](..\/..\/packages\/core\/src\/util.ts#L168)</b>
 
 <pre>declare function setTimeoutImplementation&lt;T extends any[]&gt;(<br>    callback: (...args: T) =&gt; void,<br>    delayMs?: number,<br>    subscription?: <a href="../01-api-disposable/00-Disposable.md#Disposable-Interface">Disposable</a>,<br>    ...args: T<br>): void</pre>
 

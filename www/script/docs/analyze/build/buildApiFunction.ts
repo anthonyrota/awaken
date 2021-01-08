@@ -10,10 +10,9 @@ import { buildApiItemExamples } from './util/buildApiItemExamples';
 import { buildApiItemParameters } from './util/buildApiItemParameters';
 import { buildApiItemSeeBlocks } from './util/buildApiItemSeeBlocks';
 import {
-    buildApiItemSignature,
     buildApiItemSignatureExcerpt,
+    buildApiItemSignatureTitle,
 } from './util/buildApiItemSignature';
-import { buildApiItemSourceLocationLink } from './util/buildApiItemSourceLocationLink';
 import { buildApiItemSummary } from './util/buildApiItemSummary';
 
 export interface BuildApiFunctionParameters {
@@ -39,11 +38,6 @@ export function buildApiFunction(
         context,
         textKind: getApiItemTextKind(overloads[0].kind),
     });
-    const sourceLocationLink = buildApiItemSourceLocationLink({
-        apiItem: overloads[0],
-        context,
-        syntaxKind: ts.SyntaxKind.FunctionDeclaration,
-    });
     const baseDoc = buildApiItemBaseDoc({
         apiItem: overloads[0],
         context,
@@ -51,39 +45,31 @@ export function buildApiFunction(
     });
 
     if (anchor) container.children.push(anchor);
-    container.children.push(sourceLocationLink);
     if (baseDoc) container.children.push(baseDoc);
 
-    let didNotOnlyWriteSignature = true;
+    container.children.push(
+        buildApiItemSignatureTitle({
+            apiItem: overloads[0],
+            context,
+            syntaxKind: ts.SyntaxKind.FunctionDeclaration,
+        }),
+    );
 
     for (const fn of overloads) {
-        const _didNotOnlyWriteSignature = didNotOnlyWriteSignature;
+        const signatureExcerpt = buildApiItemSignatureExcerpt({
+            apiItem: fn,
+            context,
+        });
         const summary = buildApiItemSummary({ apiItem: fn, context });
         const parameters = buildApiItemParameters({ apiItem: fn, context });
         const examples = buildApiItemExamples({ apiItem: fn, context });
         const seeBlocks = buildApiItemSeeBlocks({ apiItem: fn, context });
 
-        didNotOnlyWriteSignature = !!(
-            summary ||
-            parameters ||
-            examples ||
-            seeBlocks
-        );
-
-        if (_didNotOnlyWriteSignature || didNotOnlyWriteSignature) {
-            const signature = buildApiItemSignature({ apiItem: fn, context });
-            container.children.push(signature);
-            if (summary) container.children.push(summary);
-            if (parameters) container.children.push(parameters);
-            if (examples) container.children.push(examples);
-            if (seeBlocks) container.children.push(seeBlocks);
-        } else {
-            const signatureExcerpt = buildApiItemSignatureExcerpt({
-                apiItem: fn,
-                context,
-            });
-            container.children.push(signatureExcerpt);
-        }
+        container.children.push(signatureExcerpt);
+        if (summary) container.children.push(summary);
+        if (parameters) container.children.push(parameters);
+        if (examples) container.children.push(examples);
+        if (seeBlocks) container.children.push(seeBlocks);
     }
 
     return container;

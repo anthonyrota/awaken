@@ -8,9 +8,7 @@
 
 ## <a name="SubjectDistributionSinkDisposalErrorConstructor"></a><code>SubjectDistributionSinkDisposalErrorConstructor</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L302](..\/..\/packages\/core\/src\/subject.ts#L302)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L302](..\/..\/packages\/core\/src\/subject.ts#L302)</b>
 
 <pre>interface SubjectDistributionSinkDisposalErrorConstructor {<br>    new (errors: <a href="../01-api-disposable/02-DisposalError.md#DisposalError-Interface">DisposalError</a>[]): <a href="02-SubjectDistributionSinkDisposalError.md#SubjectDistributionSinkDisposalError-Interface">SubjectDistributionSinkDisposalError</a><br>    prototype: <a href="02-SubjectDistributionSinkDisposalError.md#SubjectDistributionSinkDisposalError-Interface">SubjectDistributionSinkDisposalError</a><br>}</pre><br>
 

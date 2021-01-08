@@ -8,9 +8,7 @@
 
 ## <a name="takeUntil"></a><code>takeUntil</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2812](..\/..\/packages\/core\/src\/source.ts#L2812)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2812](..\/..\/packages\/core\/src\/source.ts#L2812)</b>
 
 <pre>function takeUntil(stopSource: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

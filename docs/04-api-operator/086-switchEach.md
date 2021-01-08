@@ -8,9 +8,7 @@
 
 ## <a name="switchEach"></a><code>switchEach</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2096](..\/..\/packages\/core\/src\/source.ts#L2096)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2096](..\/..\/packages\/core\/src\/source.ts#L2096)</b>
 
 <pre>var switchEach: &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

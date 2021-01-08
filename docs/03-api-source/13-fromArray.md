@@ -8,9 +8,7 @@
 
 ## <a name="fromArray"></a><code>fromArray</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L653](..\/..\/packages\/core\/src\/source.ts#L653)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L653](..\/..\/packages\/core\/src\/source.ts#L653)</b>
 
 <pre>function fromArray&lt;T&gt;(array: ArrayLike&lt;T&gt;): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre>
 

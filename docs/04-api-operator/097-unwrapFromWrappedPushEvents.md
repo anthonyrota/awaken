@@ -8,9 +8,7 @@
 
 ## <a name="unwrapFromWrappedPushEvents"></a><code>unwrapFromWrappedPushEvents</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1560](..\/..\/packages\/core\/src\/source.ts#L1560)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1560](..\/..\/packages\/core\/src\/source.ts#L1560)</b>
 
 <pre>var unwrapFromWrappedPushEvents: &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

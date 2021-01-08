@@ -8,7 +8,6 @@ import { buildApiItemAnchor } from './util/buildApiItemAnchor';
 import { buildApiItemExamples } from './util/buildApiItemExamples';
 import { buildApiItemSeeBlocks } from './util/buildApiItemSeeBlocks';
 import { buildApiItemSignature } from './util/buildApiItemSignature';
-import { buildApiItemSourceLocationLink } from './util/buildApiItemSourceLocationLink';
 import { buildApiItemSummary } from './util/buildApiItemSummary';
 
 export interface BuildApiTypeAliasParameters {
@@ -25,19 +24,17 @@ export function buildApiTypeAlias(
         context,
         textKind: getApiItemTextKind(typeAlias.kind),
     });
-    const sourceLocationLink = buildApiItemSourceLocationLink({
+    const signature = buildApiItemSignature({
         apiItem: typeAlias,
         context,
         syntaxKind: ts.SyntaxKind.TypeAliasDeclaration,
     });
-    const signature = buildApiItemSignature({ apiItem: typeAlias, context });
     const summary = buildApiItemSummary({ apiItem: typeAlias, context });
     const examples = buildApiItemExamples({ apiItem: typeAlias, context });
     const seeBlocks = buildApiItemSeeBlocks({ apiItem: typeAlias, context });
 
     const container = ContainerNode<DeepCoreNode>({});
     if (anchor) container.children.push(anchor);
-    container.children.push(sourceLocationLink);
     container.children.push(signature);
     if (summary) container.children.push(summary);
     if (examples) container.children.push(examples);

@@ -8,9 +8,7 @@
 
 ## <a name="TimeProvider"></a><code>TimeProvider</code>
 
-> Source Location: [packages\/core\/src\/util.ts#L305](..\/..\/packages\/core\/src\/util.ts#L305)
-
-<b>Signature</b>
+<b>Signature - [util.ts#L304](..\/..\/packages\/core\/src\/util.ts#L304)</b>
 
 ```ts
 interface TimeProvider {

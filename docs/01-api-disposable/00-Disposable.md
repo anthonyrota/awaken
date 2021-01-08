@@ -10,17 +10,13 @@
 
 ### <a name="Disposable-Function"></a><code>Disposable - Function</code>
 
-> Source Location: [packages\/core\/src\/disposable.ts#L336](..\/..\/packages\/core\/src\/disposable.ts#L336)
-
-<b>Signature</b>
+<b>Signature - [disposable.ts#L336](..\/..\/packages\/core\/src\/disposable.ts#L336)</b>
 
 <pre>function Disposable(onDispose?: () =&gt; void): <a href="#Disposable-Interface">Disposable</a></pre>
 
 ### <a name="Disposable-Interface"></a><code>Disposable - Interface</code>
 
-> Source Location: [packages\/core\/src\/disposable.ts#L13](..\/..\/packages\/core\/src\/disposable.ts#L13)
-
-<b>Signature</b>
+<b>Signature - [disposable.ts#L13](..\/..\/packages\/core\/src\/disposable.ts#L13)</b>
 
 <pre>interface Disposable {<br>    readonly active: boolean<br>    add(child: <a href="#Disposable-Interface">Disposable</a>): void<br>    dispose(): void<br>    remove(child: <a href="#Disposable-Interface">Disposable</a>): void<br>}</pre><br>
 

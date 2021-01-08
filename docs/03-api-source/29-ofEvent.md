@@ -8,9 +8,7 @@
 
 ## <a name="ofEvent"></a><code>ofEvent</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L742](..\/..\/packages\/core\/src\/source.ts#L742)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L742](..\/..\/packages\/core\/src\/source.ts#L742)</b>
 
 <pre>function ofEvent(event: <a href="../02-api-event/02-Throw.md#Throw-Interface">Throw</a> | <a href="../02-api-event/03-End.md#End-Interface">End</a>): <a href="00-Source.md#Source-Interface">Source</a>&lt;never&gt;</pre>
 

@@ -8,9 +8,7 @@
 
 ## <a name="reduce"></a><code>reduce</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1840](..\/..\/packages\/core\/src\/source.ts#L1840)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1840](..\/..\/packages\/core\/src\/source.ts#L1840)</b>
 
 <pre>function reduce&lt;T, R, I&gt;(<br>    transform: (<br>        previousAccumulatedResult: R | I,<br>        currentValue: T,<br>        currentIndex: number,<br>    ) =&gt; R,<br>    initialValue: I,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, R&gt;</pre>
 

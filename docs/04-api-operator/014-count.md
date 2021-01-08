@@ -8,9 +8,7 @@
 
 ## <a name="count"></a><code>count</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2804](..\/..\/packages\/core\/src\/source.ts#L2804)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2804](..\/..\/packages\/core\/src\/source.ts#L2804)</b>
 
 <pre>var count: &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;number&gt;</pre><br>
 

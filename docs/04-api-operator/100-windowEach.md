@@ -8,9 +8,7 @@
 
 ## <a name="windowEach"></a><code>windowEach</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3248](..\/..\/packages\/core\/src\/source.ts#L3248)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3248](..\/..\/packages\/core\/src\/source.ts#L3248)</b>
 
 <pre>function windowEach(<br>    getWindowClosingSource: &lt;T&gt;(currentWindow: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;&gt;</pre>
 

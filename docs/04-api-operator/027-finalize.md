@@ -8,9 +8,7 @@
 
 ## <a name="finalize"></a><code>finalize</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1737](..\/..\/packages\/core\/src\/source.ts#L1737)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1737](..\/..\/packages\/core\/src\/source.ts#L1737)</b>
 
 <pre>function finalize(callback: () =&gt; void): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

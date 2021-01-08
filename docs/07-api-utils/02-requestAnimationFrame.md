@@ -8,9 +8,7 @@
 
 ## <a name="requestAnimationFrame"></a><code>requestAnimationFrame</code>
 
-> Source Location: [packages\/core\/src\/util.ts#L136](..\/..\/packages\/core\/src\/util.ts#L136)
-
-<b>Signature</b>
+<b>Signature - [util.ts#L136](..\/..\/packages\/core\/src\/util.ts#L136)</b>
 
 <pre>declare function requestAnimationFrameImplementation(<br>    callback: (time: number) =&gt; void,<br>    subscription?: <a href="../01-api-disposable/00-Disposable.md#Disposable-Interface">Disposable</a>,<br>): void</pre>
 

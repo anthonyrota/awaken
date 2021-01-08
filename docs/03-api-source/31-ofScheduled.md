@@ -8,9 +8,7 @@
 
 ## <a name="ofScheduled"></a><code>ofScheduled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L727](..\/..\/packages\/core\/src\/source.ts#L727)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L727](..\/..\/packages\/core\/src\/source.ts#L727)</b>
 
 <pre>function ofScheduled&lt;T&gt;(schedule: <a href="../06-api-schedule-functions/00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>, ...items: T[]): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

@@ -8,9 +8,7 @@
 
 ## <a name="TestSourceSubscriptions"></a><code>TestSourceSubscriptions</code>
 
-> Source Location: [packages\/testing\/src\/index.ts#L172](..\/..\/packages\/testing\/src\/index.ts#L172)
-
-<b>Signature</b>
+<b>Signature - [index.ts#L172](..\/..\/packages\/testing\/src\/index.ts#L172)</b>
 
 <pre>type TestSourceSubscriptions = ReadonlyArray&lt;Readonly&lt;<a href="03-TestSubscriptionInfo.md#TestSubscriptionInfo-Interface">TestSubscriptionInfo</a>&gt;&gt;</pre><br>
 

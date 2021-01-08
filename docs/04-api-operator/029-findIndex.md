@@ -8,9 +8,7 @@
 
 ## <a name="findIndex"></a><code>findIndex</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1697](..\/..\/packages\/core\/src\/source.ts#L1697)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1697](..\/..\/packages\/core\/src\/source.ts#L1697)</b>
 
 <pre>function findIndex&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, number&gt;</pre><br>
 

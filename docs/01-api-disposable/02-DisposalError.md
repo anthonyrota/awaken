@@ -10,9 +10,7 @@
 
 ### <a name="DisposalError-Interface"></a><code>DisposalError - Interface</code>
 
-> Source Location: [packages\/core\/src\/disposable.ts#L282](..\/..\/packages\/core\/src\/disposable.ts#L282)
-
-<b>Signature</b>
+<b>Signature - [disposable.ts#L282](..\/..\/packages\/core\/src\/disposable.ts#L282)</b>
 
 ```ts
 interface DisposalError extends Error {
@@ -22,9 +20,7 @@ interface DisposalError extends Error {
 
 ### <a name="DisposalError-Variable"></a><code>DisposalError - Variable</code>
 
-> Source Location: [packages\/core\/src\/disposable.ts#L302](..\/..\/packages\/core\/src\/disposable.ts#L302)
-
-<b>Signature</b>
+<b>Signature - [disposable.ts#L302](..\/..\/packages\/core\/src\/disposable.ts#L302)</b>
 
 <pre>var DisposalError: <a href="03-DisposalErrorConstructor.md#DisposalErrorConstructor">DisposalErrorConstructor</a></pre>
 

@@ -8,9 +8,7 @@
 
 ## <a name="mergeSources"></a><code>mergeSources</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1156](..\/..\/packages\/core\/src\/source.ts#L1156)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1156](..\/..\/packages\/core\/src\/source.ts#L1156)</b>
 
 <pre>function mergeSources&lt;T&gt;(sources: <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;[]): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

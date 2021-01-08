@@ -8,9 +8,7 @@
 
 ## <a name="startWithSources"></a><code>startWithSources</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2135](..\/..\/packages\/core\/src\/source.ts#L2135)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2135](..\/..\/packages\/core\/src\/source.ts#L2135)</b>
 
 <pre>function startWithSources&lt;T&gt;(<br>    sources: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;[],<br>): &lt;U&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T | U&gt;</pre><br>
 

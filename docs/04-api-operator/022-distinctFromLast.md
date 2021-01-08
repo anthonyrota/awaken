@@ -8,9 +8,7 @@
 
 ## <a name="distinctFromLast"></a><code>distinctFromLast</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2490](..\/..\/packages\/core\/src\/source.ts#L2490)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2490](..\/..\/packages\/core\/src\/source.ts#L2490)</b>
 
 <pre>function distinctFromLast(): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre>
 

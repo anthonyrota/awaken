@@ -8,9 +8,7 @@
 
 ## <a name="isSource"></a><code>isSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L562](..\/..\/packages\/core\/src\/source.ts#L562)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L562](..\/..\/packages\/core\/src\/source.ts#L562)</b>
 
 <pre>function isSource(value: unknown): value is <a href="00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;</pre>
 

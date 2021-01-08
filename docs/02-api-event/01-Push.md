@@ -17,8 +17,6 @@ A Push event represents the &quot;pushing&quot; of a value to a <code>[Sink](..\
 
 ### <a name="Push-Function"></a><code>Push - Function</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L150](..\/..\/packages\/core\/src\/source.ts#L150)
-
 <b>Returns</b>
 
 The created Push event.
@@ -31,11 +29,9 @@ console.log(event.type); // `${PushType}`.
 console.log(event.value); // [1, 2, 3].
 ```
 
-<b>Signature</b>
+<b>Signature - [source.ts#L150](..\/..\/packages\/core\/src\/source.ts#L150)</b>
 
 <pre>function Push&lt;T&gt;(): <a href="#Push-Interface">Push</a>&lt;undefined&gt;</pre>
-
-<b>Signature</b>
 
 <pre>function Push&lt;T&gt;(value: T): <a href="#Push-Interface">Push</a>&lt;T&gt;</pre>
 
@@ -47,9 +43,7 @@ console.log(event.value); // [1, 2, 3].
 
 ### <a name="Push-Interface"></a><code>Push - Interface</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L53](..\/..\/packages\/core\/src\/source.ts#L53)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L53](..\/..\/packages\/core\/src\/source.ts#L53)</b>
 
 <pre>interface Push&lt;T&gt; {<br>    readonly type: <a href="#PushType-TypeAlias">PushType</a><br>    readonly value: T<br>}</pre>
 
@@ -57,9 +51,7 @@ console.log(event.value); // [1, 2, 3].
 
 ### <a name="PushType-TypeAlias"></a><code>PushType - Type</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L24](..\/..\/packages\/core\/src\/source.ts#L24)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L24](..\/..\/packages\/core\/src\/source.ts#L24)</b>
 
 ```ts
 type PushType = 0
@@ -67,9 +59,7 @@ type PushType = 0
 
 ### <a name="PushType-Variable"></a><code>PushType - Variable</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L28](..\/..\/packages\/core\/src\/source.ts#L28)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L28](..\/..\/packages\/core\/src\/source.ts#L28)</b>
 
 <pre>var PushType: <a href="#PushType-TypeAlias">PushType</a></pre><br>
 

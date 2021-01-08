@@ -10,17 +10,13 @@
 
 ### <a name="TestSchedule-Function"></a><code>TestSchedule - Function</code>
 
-> Source Location: [packages\/testing\/src\/index.ts#L54](..\/..\/packages\/testing\/src\/index.ts#L54)
-
-<b>Signature</b>
+<b>Signature - [index.ts#L54](..\/..\/packages\/testing\/src\/index.ts#L54)</b>
 
 <pre>function TestSchedule(): <a href="#TestSchedule-Interface">TestSchedule</a></pre>
 
 ### <a name="TestSchedule-Interface"></a><code>TestSchedule - Interface</code>
 
-> Source Location: [packages\/testing\/src\/index.ts#L30](..\/..\/packages\/testing\/src\/index.ts#L30)
-
-<b>Signature</b>
+<b>Signature - [index.ts#L30](..\/..\/packages\/testing\/src\/index.ts#L30)</b>
 
 <pre>interface TestSchedule {<br>    (callback: () =&gt; void, delayFrames: number, subscription?: <a href="../01-api-disposable/00-Disposable.md#Disposable-Interface">Disposable</a>): void<br>    readonly currentFrame: number<br>    readonly flush: () =&gt; void<br>    readonly reset: () =&gt; void<br>}</pre><br>
 

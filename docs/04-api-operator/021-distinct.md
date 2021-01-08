@@ -8,9 +8,7 @@
 
 ## <a name="distinct"></a><code>distinct</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2417](..\/..\/packages\/core\/src\/source.ts#L2417)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2417](..\/..\/packages\/core\/src\/source.ts#L2417)</b>
 
 <pre>function distinct(): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre>
 

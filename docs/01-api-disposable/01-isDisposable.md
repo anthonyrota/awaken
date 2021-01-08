@@ -8,9 +8,7 @@
 
 ## <a name="isDisposable"></a><code>isDisposable</code>
 
-> Source Location: [packages\/core\/src\/disposable.ts#L364](..\/..\/packages\/core\/src\/disposable.ts#L364)
-
-<b>Signature</b>
+<b>Signature - [disposable.ts#L364](..\/..\/packages\/core\/src\/disposable.ts#L364)</b>
 
 <pre>function isDisposable(value: unknown): value is <a href="00-Disposable.md#Disposable-Interface">Disposable</a></pre>
 

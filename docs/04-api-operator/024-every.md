@@ -8,9 +8,7 @@
 
 ## <a name="every"></a><code>every</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1716](..\/..\/packages\/core\/src\/source.ts#L1716)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1716](..\/..\/packages\/core\/src\/source.ts#L1716)</b>
 
 <pre>function every&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, boolean&gt;</pre><br>
 

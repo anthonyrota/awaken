@@ -9,9 +9,7 @@
 
 ## <a name="shareControlled"></a><code>shareControlled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3890](..\/..\/packages\/core\/src\/source.ts#L3890)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3890](..\/..\/packages\/core\/src\/source.ts#L3890)</b>
 
 <pre>function shareControlled&lt;T&gt;(<br>    Subject_: () =&gt; <a href="../05-api-subject/00-Subject.md#Subject-Interface">Subject</a>&lt;T&gt;,<br>): (source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="#ControllableSource">ControllableSource</a>&lt;T&gt;</pre>
 
@@ -19,9 +17,7 @@
 
 ## <a name="ControllableSource"></a><code>ControllableSource</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3874](..\/..\/packages\/core\/src\/source.ts#L3874)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3874](..\/..\/packages\/core\/src\/source.ts#L3874)</b>
 
 <pre>interface ControllableSource&lt;T&gt; extends <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt; {<br>    produce(): void<br>}</pre><br>
 

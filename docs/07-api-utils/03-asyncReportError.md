@@ -8,9 +8,7 @@
 
 ## <a name="asyncReportError"></a><code>asyncReportError</code>
 
-> Source Location: [packages\/core\/src\/util.ts#L244](..\/..\/packages\/core\/src\/util.ts#L244)
-
-<b>Signature</b>
+<b>Signature - [util.ts#L244](..\/..\/packages\/core\/src\/util.ts#L244)</b>
 
 ```ts
 function asyncReportError(error: unknown): void

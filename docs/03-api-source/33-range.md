@@ -8,9 +8,7 @@
 
 ## <a name="range"></a><code>range</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1026](..\/..\/packages\/core\/src\/source.ts#L1026)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1026](..\/..\/packages\/core\/src\/source.ts#L1026)</b>
 
 <pre>function range(count: number, start?: number): <a href="00-Source.md#Source-Interface">Source</a>&lt;number&gt;</pre><br>
 

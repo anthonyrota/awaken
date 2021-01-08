@@ -8,9 +8,7 @@
 
 ## <a name="ScheduleInterval"></a><code>ScheduleInterval</code>
 
-> Source Location: [packages\/core\/src\/schedule.ts#L260](..\/..\/packages\/core\/src\/schedule.ts#L260)
-
-<b>Signature</b>
+<b>Signature - [schedule.ts#L260](..\/..\/packages\/core\/src\/schedule.ts#L260)</b>
 
 <pre>function ScheduleInterval(delayMs: number): <a href="00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a></pre><br>
 

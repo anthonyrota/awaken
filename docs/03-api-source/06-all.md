@@ -8,9 +8,7 @@
 
 ## <a name="all"></a><code>all</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1207](..\/..\/packages\/core\/src\/source.ts#L1207)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1207](..\/..\/packages\/core\/src\/source.ts#L1207)</b>
 
 <pre>function all&lt;T extends unknown[]&gt;(<br>    sources: {<br>        [K in keyof T]: <a href="00-Source.md#Source-Interface">Source</a>&lt;T[K]&gt;<br>    },<br>): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

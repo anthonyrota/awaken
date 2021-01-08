@@ -8,9 +8,7 @@
 
 ## <a name="SubjectBase"></a><code>SubjectBase</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L85](..\/..\/packages\/core\/src\/subject.ts#L85)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L85](..\/..\/packages\/core\/src\/subject.ts#L85)</b>
 
 <pre>function SubjectBase&lt;T&gt;(): <a href="00-Subject.md#Subject-Interface">Subject</a>&lt;T&gt;</pre><br>
 

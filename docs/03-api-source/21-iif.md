@@ -8,9 +8,7 @@
 
 ## <a name="iif"></a><code>iif</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1013](..\/..\/packages\/core\/src\/source.ts#L1013)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1013](..\/..\/packages\/core\/src\/source.ts#L1013)</b>
 
 <pre>function iif&lt;T&gt;(<br>    condition: () =&gt; unknown,<br>    createSourceIfTrue: () =&gt; <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;,<br>    createSourceIfFalse: () =&gt; <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;,<br>): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

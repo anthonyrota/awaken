@@ -8,9 +8,7 @@
 
 ## <a name="maxCompare"></a><code>maxCompare</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1858](..\/..\/packages\/core\/src\/source.ts#L1858)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1858](..\/..\/packages\/core\/src\/source.ts#L1858)</b>
 
 <pre>function maxCompare&lt;T&gt;(<br>    compare: (<br>        currentValue: T,<br>        lastValue: T,<br>        currentValueIndex: number,<br>    ) =&gt; number,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre><br>
 

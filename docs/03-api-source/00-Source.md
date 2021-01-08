@@ -54,9 +54,7 @@ const Source = produce => sink => {
 
 ### <a name="Source-Function"></a><code>Source - Function</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L506](..\/..\/packages\/core\/src\/source.ts#L506)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L506](..\/..\/packages\/core\/src\/source.ts#L506)</b>
 
 <pre>function Source&lt;T&gt;(produce: (sink: <a href="02-Sink.md#Sink-Interface">Sink</a>&lt;T&gt;) =&gt; void): <a href="#Source-Interface">Source</a>&lt;T&gt;</pre>
 
@@ -140,9 +138,7 @@ const source = Source(sink => {
 
 ### <a name="Source-Interface"></a><code>Source - Interface</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L427](..\/..\/packages\/core\/src\/source.ts#L427)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L427](..\/..\/packages\/core\/src\/source.ts#L427)</b>
 
 <pre>interface Source&lt;T&gt; {<br>    (sink: <a href="02-Sink.md#Sink-Interface">Sink</a>&lt;T&gt;): void<br>}</pre><br>
 

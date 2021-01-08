@@ -8,9 +8,7 @@
 
 ## <a name="debounceMs"></a><code>debounceMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3579](..\/..\/packages\/core\/src\/source.ts#L3579)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3579](..\/..\/packages\/core\/src\/source.ts#L3579)</b>
 
 <pre>function debounceMs(<br>    durationMs: number,<br>    maxDurationMs?: number | null,<br>    config?: <a href="015-debounce.md#DebounceConfig">DebounceConfig</a> | null,<br>): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre>
 

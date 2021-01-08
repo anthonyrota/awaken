@@ -8,9 +8,7 @@
 
 ## <a name="find"></a><code>find</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1688](..\/..\/packages\/core\/src\/source.ts#L1688)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1688](..\/..\/packages\/core\/src\/source.ts#L1688)</b>
 
 <pre>function find&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, S&gt;</pre>
 

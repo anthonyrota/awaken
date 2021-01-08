@@ -8,9 +8,7 @@
 
 ## <a name="isSubject"></a><code>isSubject</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L66](..\/..\/packages\/core\/src\/subject.ts#L66)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L66](..\/..\/packages\/core\/src\/subject.ts#L66)</b>
 
 <pre>function isSubject(value: unknown): value is <a href="00-Subject.md#Subject-Interface">Subject</a>&lt;unknown&gt;</pre>
 

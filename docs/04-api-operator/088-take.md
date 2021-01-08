@@ -8,9 +8,7 @@
 
 ## <a name="take"></a><code>take</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2671](..\/..\/packages\/core\/src\/source.ts#L2671)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2671](..\/..\/packages\/core\/src\/source.ts#L2671)</b>
 
 <pre>function take(amount: number): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

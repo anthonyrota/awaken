@@ -8,9 +8,7 @@
 
 ## <a name="skip"></a><code>skip</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2828](..\/..\/packages\/core\/src\/source.ts#L2828)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2828](..\/..\/packages\/core\/src\/source.ts#L2828)</b>
 
 <pre>function skip(amount: number): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

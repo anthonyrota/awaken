@@ -8,9 +8,7 @@
 
 ## <a name="throwIfEmpty"></a><code>throwIfEmpty</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2401](..\/..\/packages\/core\/src\/source.ts#L2401)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2401](..\/..\/packages\/core\/src\/source.ts#L2401)</b>
 
 <pre>function throwIfEmpty(getError: () =&gt; unknown): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

@@ -8,9 +8,7 @@
 
 ## <a name="shareOnce"></a><code>shareOnce</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3963](..\/..\/packages\/core\/src\/source.ts#L3963)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3963](..\/..\/packages\/core\/src\/source.ts#L3963)</b>
 
 <pre>function shareOnce&lt;T&gt;(Subject_: () =&gt; <a href="../05-api-subject/00-Subject.md#Subject-Interface">Subject</a>&lt;T&gt;): <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre>
 

@@ -8,9 +8,7 @@
 
 ## <a name="last"></a><code>last</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2799](..\/..\/packages\/core\/src\/source.ts#L2799)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2799](..\/..\/packages\/core\/src\/source.ts#L2799)</b>
 
 <pre>var last: <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

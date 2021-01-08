@@ -70,8 +70,8 @@ Operator, allowing for the aggregation and transformation of sources.
 This allows us to transform collections of complicated asynchronous events as
 simply as we would filter the values in an array.
 
-> In this way ~~rxjs~~<sup name="lodash-quote-footnote-link">[1](#lodash-quote-footnote)</sup>
-> {{LibName}} can essentially be thought of as Lodash for events.
+> In this way {{LibName}} can essentially be thought of as Lodash for
+> events.<sup name="lodash-quote-footnote-link">[1](#lodash-quote-footnote)</sup>
 
 Built in to JavaScript there are a few fundamental representations of items and
 sequences of values:

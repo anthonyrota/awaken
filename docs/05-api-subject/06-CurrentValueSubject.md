@@ -10,17 +10,13 @@
 
 ### <a name="CurrentValueSubject-Function"></a><code>CurrentValueSubject - Function</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L370](..\/..\/packages\/core\/src\/subject.ts#L370)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L370](..\/..\/packages\/core\/src\/subject.ts#L370)</b>
 
 <pre>function CurrentValueSubject&lt;T&gt;(initialValue: T): <a href="00-Subject.md#Subject-Interface">Subject</a>&lt;T&gt;</pre>
 
 ### <a name="CurrentValueSubject-Interface"></a><code>CurrentValueSubject - Interface</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L363](..\/..\/packages\/core\/src\/subject.ts#L363)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L363](..\/..\/packages\/core\/src\/subject.ts#L363)</b>
 
 <pre>interface CurrentValueSubject&lt;T&gt; extends <a href="00-Subject.md#Subject-Interface">Subject</a>&lt;T&gt; {<br>    currentValue: T<br>}</pre><br>
 

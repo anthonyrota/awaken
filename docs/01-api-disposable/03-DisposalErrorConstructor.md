@@ -8,9 +8,7 @@
 
 ## <a name="DisposalErrorConstructor"></a><code>DisposalErrorConstructor</code>
 
-> Source Location: [packages\/core\/src\/disposable.ts#L292](..\/..\/packages\/core\/src\/disposable.ts#L292)
-
-<b>Signature</b>
+<b>Signature - [disposable.ts#L292](..\/..\/packages\/core\/src\/disposable.ts#L292)</b>
 
 <pre>interface DisposalErrorConstructor {<br>    new (errors: unknown[]): <a href="02-DisposalError.md#DisposalError-Interface">DisposalError</a><br>    prototype: <a href="02-DisposalError.md#DisposalError-Interface">DisposalError</a><br>}</pre><br>
 

@@ -8,9 +8,7 @@
 
 ## <a name="markAsSubject"></a><code>markAsSubject</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L36](..\/..\/packages\/core\/src\/subject.ts#L36)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L36](..\/..\/packages\/core\/src\/subject.ts#L36)</b>
 
 <pre>function markAsSubject&lt;T&gt;(<br>    subjectFunction: ((eventOrSink: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt; | <a href="../03-api-source/02-Sink.md#Sink-Interface">Sink</a>&lt;T&gt;) =&gt; void) & <a href="../01-api-disposable/00-Disposable.md#Disposable-Interface">Disposable</a>,<br>): <a href="00-Subject.md#Subject-Interface">Subject</a>&lt;T&gt;</pre><br>
 

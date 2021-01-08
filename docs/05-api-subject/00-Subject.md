@@ -10,17 +10,13 @@
 
 ### <a name="Subject-Function"></a><code>Subject - Function</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L333](..\/..\/packages\/core\/src\/subject.ts#L333)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L333](..\/..\/packages\/core\/src\/subject.ts#L333)</b>
 
 <pre>function Subject&lt;T&gt;(): <a href="#Subject-Interface">Subject</a>&lt;T&gt;</pre>
 
 ### <a name="Subject-Interface"></a><code>Subject - Interface</code>
 
-> Source Location: [packages\/core\/src\/subject.ts#L28](..\/..\/packages\/core\/src\/subject.ts#L28)
-
-<b>Signature</b>
+<b>Signature - [subject.ts#L28](..\/..\/packages\/core\/src\/subject.ts#L28)</b>
 
 <pre>interface Subject&lt;T&gt; extends <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;, <a href="../03-api-source/02-Sink.md#Sink-Interface">Sink</a>&lt;T&gt; {<br>    (eventOrSink: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt; | <a href="../03-api-source/02-Sink.md#Sink-Interface">Sink</a>&lt;T&gt;): void<br>}</pre><br>
 

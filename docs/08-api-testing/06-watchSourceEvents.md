@@ -8,9 +8,7 @@
 
 ## <a name="watchSourceEvents"></a><code>watchSourceEvents</code>
 
-> Source Location: [packages\/testing\/src\/index.ts#L295](..\/..\/packages\/testing\/src\/index.ts#L295)
-
-<b>Signature</b>
+<b>Signature - [index.ts#L295](..\/..\/packages\/testing\/src\/index.ts#L295)</b>
 
 <pre>function watchSourceEvents&lt;T&gt;(<br>    source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;,<br>    testSchedule: <a href="05-TestSchedule.md#TestSchedule-Interface">TestSchedule</a>,<br>    subscriptionInfo?: <a href="03-TestSubscriptionInfo.md#TestSubscriptionInfo-Interface">TestSubscriptionInfo</a>,<br>): <a href="02-TestSourceEvent.md#TestSourceEvent">TestSourceEvent</a>&lt;T&gt;[]</pre><br>
 

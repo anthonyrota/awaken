@@ -8,9 +8,7 @@
 
 ## <a name="spyPushAfter"></a><code>spyPushAfter</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L2327](..\/..\/packages\/core\/src\/source.ts#L2327)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L2327](..\/..\/packages\/core\/src\/source.ts#L2327)</b>
 
 <pre>var spyPushAfter: &lt;T&gt;(<br>    onPush: (value: T, index: number) =&gt; void,<br>) =&gt; <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre><br>
 

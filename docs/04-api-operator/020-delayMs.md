@@ -8,9 +8,7 @@
 
 ## <a name="delayMs"></a><code>delayMs</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L3743](..\/..\/packages\/core\/src\/source.ts#L3743)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L3743](..\/..\/packages\/core\/src\/source.ts#L3743)</b>
 
 <pre>function delayMs(ms: number): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

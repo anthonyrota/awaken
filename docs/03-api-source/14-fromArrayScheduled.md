@@ -8,9 +8,7 @@
 
 ## <a name="fromArrayScheduled"></a><code>fromArrayScheduled</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L663](..\/..\/packages\/core\/src\/source.ts#L663)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L663](..\/..\/packages\/core\/src\/source.ts#L663)</b>
 
 <pre>function fromArrayScheduled&lt;T&gt;(<br>    array: ArrayLike&lt;T&gt;,<br>    schedule: <a href="../06-api-schedule-functions/00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>,<br>): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

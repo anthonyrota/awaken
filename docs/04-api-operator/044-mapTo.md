@@ -8,9 +8,7 @@
 
 ## <a name="mapTo"></a><code>mapTo</code>
 
-> Source Location: [packages\/core\/src\/source.ts#L1489](..\/..\/packages\/core\/src\/source.ts#L1489)
-
-<b>Signature</b>
+<b>Signature - [source.ts#L1489](..\/..\/packages\/core\/src\/source.ts#L1489)</b>
 
 <pre>function mapTo&lt;U&gt;(value: U): &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;</pre>
 
