@@ -29,6 +29,7 @@ import { HtmlCommentNode } from '../../../core/render/markdown/nodes/HtmlComment
 import { Iter } from '../../../util/Iter';
 import { StringBuilder } from '../../../util/StringBuilder';
 import { AnalyzeContext } from '../../Context';
+import { addLibImportLinksToCodeBlocks } from '../../util/addLibImportLinksToCodeBlocks';
 
 interface TSDocNodeWriteContext {
     context: AnalyzeContext;
@@ -73,11 +74,12 @@ export function buildApiItemDocNode(
             DeepCoreNode
         >;
         simplifyDeepCoreNode(container);
+        replaceHtml(container);
         substituteDynamicTextValues(
             container,
             context.getDynamicTextVariableReplacement,
         );
-        replaceHtml(container);
+        addLibImportLinksToCodeBlocks(container, context);
         return container;
     }
     return;

@@ -20,6 +20,7 @@ import {
     getUniqueExportIdentifierKey,
 } from './analyze/Identifier';
 import { generateSourceMetadata } from './analyze/sourceMetadata';
+import { addLibImportLinksToCodeBlocks } from './analyze/util/addLibImportLinksToCodeBlocks';
 import { getApiItemIdentifier } from './analyze/util/getApiItemIdentifier';
 import { UnsupportedApiItemError } from './analyze/util/UnsupportedApiItemError';
 import { DeepCoreNode, CoreNodeType } from './core/nodes';
@@ -581,6 +582,10 @@ async function main() {
             a[key] = v;
         }
     }
+
+    docsSource.pages.forEach((page) => {
+        addLibImportLinksToCodeBlocks(page, analyzeContext);
+    });
 
     pages.push(...docsSource.pages);
     mergeExpectUnique(pageIdToMdPagePath, docsSource.pageIdToMdPagePath);

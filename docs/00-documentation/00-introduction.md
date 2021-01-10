@@ -155,15 +155,7 @@ All of the packages are [tree shakable](https:\/\/developer.mozilla.org\/en-US\/
 
 Because this library is tree shakable, all exports for each package are exported at the index location of that package. For example, to import some core variables, you would simply import them from <code>@microstream\/core</code>:
 
-```ts
-import { Source, Sink, subscribe, pipe, range, takeWhile } from '@microstream/core';
-
-pipe(
-    range(10),
-    takeWhile(n => n <= 5),
-    subscribe(event => console.log(event))
-);
-```
+<pre>import { <a href="../03-api-source/00-Source.md#Source">Source</a>, <a href="../03-api-source/02-Sink.md#Sink">Sink</a>, <a href="../03-api-source/04-subscribe.md#subscribe">subscribe</a>, <a href="../04-api-operator/002-pipe.md#pipe">pipe</a>, <a href="../03-api-source/33-range.md#range">range</a>, <a href="../04-api-operator/091-takeWhile.md#takeWhile">takeWhile</a> } from '@microstream/core';<br><br>pipe(<br>    range(10),<br>    takeWhile(n =&gt; n &lt;= 5),<br>    subscribe(event =&gt; console.log(event))<br>);</pre>
 
 ## <a name="using-the-library"></a>Using Microstream
 
@@ -171,65 +163,19 @@ Using Microstream is simple: just import the methods and variables you need to u
 
 Microstream exposes all of its methods and utilities, all of which are exported from the root of the package:
 
-```ts
-// TypeScript / ESModules.
-import { fromPromise } from '@microstream/core';
-// or CommonJS.
-const { fromPromise } = require('@microstream/core');
-```
+<pre>// TypeScript / ESModules.<br>import { <a href="../03-api-source/17-fromPromise.md#fromPromise">fromPromise</a> } from '@microstream/core';<br>// or CommonJS.<br>const { fromPromise } = require('@microstream/core');</pre>
 
 Until the [pipeline operator](https:\/\/developer.mozilla.org\/en-US\/docs\/Web\/JavaScript\/Reference\/Operators\/Pipeline\_operator) becomes standard, we expose a tiny <code>pipe</code> utility which simply calls the input value \(which is the first argument\) against the functions in the order in which they are given, and returns the output:
 
-```ts
-import { pipe, interval, map, take, subscribe } from '@microstream/core';
-
-pipe(
-  interval(1000), // Create an interval source: 0...1...2...etc.
-  map(x => x * 2), // Operate: times each push event by two: 0...2...4...etc.
-  take(3), // Only take three values: 0...2...(4|)
-  subscribe(event => { // Subscribe to the operated source.
-    console.log(event);
-    // Logs: Push(1) after 1s
-    // Logs: Push(2) after 2s
-    // Logs: Push(3) after 3s
-    // Logs: End
-  })
-);
-```
+<pre>import { <a href="../04-api-operator/002-pipe.md#pipe">pipe</a>, <a href="../03-api-source/22-interval.md#interval">interval</a>, <a href="../04-api-operator/041-map.md#map">map</a>, <a href="../04-api-operator/088-take.md#take">take</a>, <a href="../03-api-source/04-subscribe.md#subscribe">subscribe</a> } from '@microstream/core';<br><br>pipe(<br>  interval(1000), // Create an interval source: 0...1...2...etc.<br>  map(x =&gt; x * 2), // Operate: times each push event by two: 0...2...4...etc.<br>  take(3), // Only take three values: 0...2...(4|)<br>  subscribe(event =&gt; { // Subscribe to the operated source.<br>    console.log(event);<br>    // Logs: Push(1) after 1s<br>    // Logs: Push(2) after 2s<br>    // Logs: Push(3) after 3s<br>    // Logs: End<br>  })<br>);</pre>
 
 For reference, the above code is equivalent to the following without the <code>pipe</code> operator:
 
-```ts
-import { interval, map, take, subscribe } from '@microstream/core';
-
-const intervalSource = interval(1000);
-
-const mapOp = map(x => x * 2);
-const takeOp = take(3);
-
-const mappedSource = mapOp(intervalSource);
-const finalSource = takeOp(mappedSource)
-
-const consumer = subscribe(event => console.log(event))
-consumer(finalSource)
-
-// Logs: same as above
-```
+<pre>import { <a href="../03-api-source/22-interval.md#interval">interval</a>, <a href="../04-api-operator/041-map.md#map">map</a>, <a href="../04-api-operator/088-take.md#take">take</a>, <a href="../03-api-source/04-subscribe.md#subscribe">subscribe</a> } from '@microstream/core';<br><br>const intervalSource = interval(1000);<br><br>const mapOp = map(x =&gt; x * 2);<br>const takeOp = take(3);<br><br>const mappedSource = mapOp(intervalSource);<br>const finalSource = takeOp(mappedSource)<br><br>const consumer = subscribe(event =&gt; console.log(event))<br>consumer(finalSource)<br><br>// Logs: same as above</pre>
 
 Furthermore, <code>subscribe</code> is simply sugar used in the pipe function that takes a <code>Sink</code> and returns a function which will subscribe to a given source. For reference, you can also manually subscribe to sinks:
 
-```ts
-import { fromArray, Sink, subscribe } from '@microstream/core'
-
-pipe(fromArray(1, 2, 3), subscribe(event => console.log(event)))
-// Equivalent to...
-const source = fromArray(1, 2, 3)
-const sink = Sink(event => console.log(event))
-source(sink)
-// Or in a one-liner...
-fromArray(1, 2, 3)(Sink(event => console.log(event)))
-```
-<br>
+<pre>import { <a href="../03-api-source/13-fromArray.md#fromArray">fromArray</a>, <a href="../03-api-source/02-Sink.md#Sink">Sink</a>, <a href="../03-api-source/04-subscribe.md#subscribe">subscribe</a> } from '@microstream/core'<br><br>pipe(fromArray(1, 2, 3), subscribe(event =&gt; console.log(event)))<br>// Equivalent to...<br>const source = fromArray(1, 2, 3)<br>const sink = Sink(event =&gt; console.log(event))<br>source(sink)<br>// Or in a one-liner...<br>fromArray(1, 2, 3)(Sink(event =&gt; console.log(event)))</pre><br>
 
 <div align="right">
 

@@ -1,9 +1,8 @@
+import { DeepCoreNode, CoreNodeType } from '..';
 import {
     HtmlTagClassification,
     getHtmlTagClassification,
 } from '../HtmlElement';
-
-import { DeepCoreNode, CoreNodeType } from '../index';
 
 export function isBlock(node: DeepCoreNode): boolean {
     return (
