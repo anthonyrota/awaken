@@ -8,7 +8,7 @@
 
 ## <a name="expandMap"></a><code>expandMap</code>
 
-<b>Signature - [source.ts#L2031](..\/..\/packages\/core\/src\/source.ts#L2031)</b>
+<b>Signature - [source.ts#L2125](..\/..\/packages\/core\/src\/source.ts#L2125)</b>
 
 <pre>var expandMap: &lt;T&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;,<br>    maxConcurrent?: number | undefined,<br>) =&gt; <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre><br>
 

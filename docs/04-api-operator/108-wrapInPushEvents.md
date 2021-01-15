@@ -8,7 +8,7 @@
 
 ## <a name="wrapInPushEvents"></a><code>wrapInPushEvents</code>
 
-<b>Signature - [source.ts#L1553](..\/..\/packages\/core\/src\/source.ts#L1553)</b>
+<b>Signature - [source.ts#L1647](..\/..\/packages\/core\/src\/source.ts#L1647)</b>
 
 <pre>var wrapInPushEvents: &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;&gt;</pre><br>
 

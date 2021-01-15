@@ -8,7 +8,7 @@
 
 ## <a name="concatMap"></a><code>concatMap</code>
 
-<b>Signature - [source.ts#L2162](..\/..\/packages\/core\/src\/source.ts#L2162)</b>
+<b>Signature - [source.ts#L2256](..\/..\/packages\/core\/src\/source.ts#L2256)</b>
 
 <pre>function concatMap&lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, U&gt;</pre><br>
 

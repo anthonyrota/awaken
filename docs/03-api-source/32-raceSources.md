@@ -8,7 +8,7 @@
 
 ## <a name="raceSources"></a><code>raceSources</code>
 
-<b>Signature - [source.ts#L1220](..\/..\/packages\/core\/src\/source.ts#L1220)</b>
+<b>Signature - [source.ts#L1314](..\/..\/packages\/core\/src\/source.ts#L1314)</b>
 
 <pre>function raceSources&lt;T&gt;(sources: <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;[]): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

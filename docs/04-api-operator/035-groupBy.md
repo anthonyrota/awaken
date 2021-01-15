@@ -11,25 +11,25 @@
 
 ## <a name="groupBy"></a><code>groupBy</code>
 
-<b>Signature - [source.ts#L2527](..\/..\/packages\/core\/src\/source.ts#L2527)</b>
+<b>Signature - [source.ts#L2621](..\/..\/packages\/core\/src\/source.ts#L2621)</b>
 
 <pre>function groupBy&lt;T, K&gt;(<br>    getKey: (value: T, index: number) =&gt; K,<br>    Subject_?: typeof <a href="../05-api-subject/00-Subject.md#Subject-Function">Subject</a>,<br>    removeGroupWhenNoSubscribers?: boolean,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, <a href="#GroupSource">GroupSource</a>&lt;T, K&gt;&gt;</pre>
 
 ## <a name="GroupSource"></a><code>GroupSource</code>
 
-<b>Signature - [source.ts#L2614](..\/..\/packages\/core\/src\/source.ts#L2614)</b>
+<b>Signature - [source.ts#L2708](..\/..\/packages\/core\/src\/source.ts#L2708)</b>
 
 <pre>type GroupSource&lt;T, K&gt; = <a href="#ActiveGroupSource">ActiveGroupSource</a>&lt;T, K&gt; | <a href="#RemovedGroupSource">RemovedGroupSource</a>&lt;T&gt;</pre>
 
 ## <a name="ActiveGroupSource"></a><code>ActiveGroupSource</code>
 
-<b>Signature - [source.ts#L2596](..\/..\/packages\/core\/src\/source.ts#L2596)</b>
+<b>Signature - [source.ts#L2690](..\/..\/packages\/core\/src\/source.ts#L2690)</b>
 
 <pre>interface ActiveGroupSource&lt;T, K&gt; extends <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt; {<br>    key: K<br>    remove(): void<br>    removed: false<br>}</pre>
 
 ## <a name="RemovedGroupSource"></a><code>RemovedGroupSource</code>
 
-<b>Signature - [source.ts#L2605](..\/..\/packages\/core\/src\/source.ts#L2605)</b>
+<b>Signature - [source.ts#L2699](..\/..\/packages\/core\/src\/source.ts#L2699)</b>
 
 <pre>interface RemovedGroupSource&lt;T&gt; extends <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt; {<br>    key: null<br>    remove(): void<br>    removed: true<br>}</pre><br>
 

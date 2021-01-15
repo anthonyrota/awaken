@@ -8,7 +8,7 @@
 
 ## <a name="Operator"></a><code>Operator</code>
 
-<b>Signature - [source.ts#L1324](..\/..\/packages\/core\/src\/source.ts#L1324)</b>
+<b>Signature - [source.ts#L1418](..\/..\/packages\/core\/src\/source.ts#L1418)</b>
 
 <pre>interface Operator&lt;T, U&gt; {<br>    (source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;): <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;<br>}</pre><br>
 

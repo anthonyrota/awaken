@@ -8,7 +8,7 @@
 
 ## <a name="findWithIndex"></a><code>findWithIndex</code>
 
-<b>Signature - [source.ts#L1652](..\/..\/packages\/core\/src\/source.ts#L1652)</b>
+<b>Signature - [source.ts#L1746](..\/..\/packages\/core\/src\/source.ts#L1746)</b>
 
 <pre>function findWithIndex&lt;T, S extends T&gt;(<br>    predicate: (value: T, index: number) =&gt; value is S,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;<br>    T,<br>    {<br>        value: S<br>        index: number<br>    }<br>&gt;</pre>
 

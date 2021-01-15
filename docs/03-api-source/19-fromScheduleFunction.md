@@ -8,7 +8,7 @@
 
 ## <a name="fromScheduleFunction"></a><code>fromScheduleFunction</code>
 
-<b>Signature - [source.ts#L913](..\/..\/packages\/core\/src\/source.ts#L913)</b>
+<b>Signature - [source.ts#L1007](..\/..\/packages\/core\/src\/source.ts#L1007)</b>
 
 <pre>function fromScheduleFunction&lt;T extends unknown[]&gt;(<br>    schedule: <a href="../06-api-schedule-functions/00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>&lt;T&gt;,<br>): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

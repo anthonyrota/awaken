@@ -8,7 +8,7 @@
 
 ## <a name="merge"></a><code>merge</code>
 
-<b>Signature - [source.ts#L2045](..\/..\/packages\/core\/src\/source.ts#L2045)</b>
+<b>Signature - [source.ts#L2139](..\/..\/packages\/core\/src\/source.ts#L2139)</b>
 
 <pre>var merge: &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

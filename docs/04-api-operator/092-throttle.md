@@ -10,7 +10,7 @@
 
 ## <a name="throttle"></a><code>throttle</code>
 
-<b>Signature - [source.ts#L3634](..\/..\/packages\/core\/src\/source.ts#L3634)</b>
+<b>Signature - [source.ts#L3728](..\/..\/packages\/core\/src\/source.ts#L3728)</b>
 
 <pre>function throttle(<br>    getDurationSource: () =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;,<br>    config?: <a href="#ThrottleConfig">ThrottleConfig</a> | null,<br>): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre>
 
@@ -18,7 +18,7 @@
 
 ## <a name="ThrottleConfig"></a><code>ThrottleConfig</code>
 
-<b>Signature - [source.ts#L3605](..\/..\/packages\/core\/src\/source.ts#L3605)</b>
+<b>Signature - [source.ts#L3699](..\/..\/packages\/core\/src\/source.ts#L3699)</b>
 
 ```ts
 interface ThrottleConfig {
@@ -30,7 +30,7 @@ interface ThrottleConfig {
 
 ## <a name="defaultThrottleConfig"></a><code>defaultThrottleConfig</code>
 
-<b>Signature - [source.ts#L3614](..\/..\/packages\/core\/src\/source.ts#L3614)</b>
+<b>Signature - [source.ts#L3708](..\/..\/packages\/core\/src\/source.ts#L3708)</b>
 
 <pre>var defaultThrottleConfig: <a href="#ThrottleConfig">ThrottleConfig</a></pre><br>
 

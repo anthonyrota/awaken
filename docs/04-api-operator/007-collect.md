@@ -8,7 +8,7 @@
 
 ## <a name="collect"></a><code>collect</code>
 
-<b>Signature - [source.ts#L3314](..\/..\/packages\/core\/src\/source.ts#L3314)</b>
+<b>Signature - [source.ts#L3408](..\/..\/packages\/core\/src\/source.ts#L3408)</b>
 
 <pre>function collect&lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;): <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T[]&gt;</pre><br>
 

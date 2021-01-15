@@ -8,7 +8,7 @@
 
 ## <a name="repeat"></a><code>repeat</code>
 
-<b>Signature - [source.ts#L2976](..\/..\/packages\/core\/src\/source.ts#L2976)</b>
+<b>Signature - [source.ts#L3070](..\/..\/packages\/core\/src\/source.ts#L3070)</b>
 
 <pre>var repeat: (times: number) =&gt; <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

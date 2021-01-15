@@ -8,7 +8,7 @@
 
 ## <a name="fromSingularReactiveValue"></a><code>fromSingularReactiveValue</code>
 
-<b>Signature - [source.ts#L965](..\/..\/packages\/core\/src\/source.ts#L965)</b>
+<b>Signature - [source.ts#L1059](..\/..\/packages\/core\/src\/source.ts#L1059)</b>
 
 <pre>function fromSingularReactiveValue&lt;T, Signal&gt;(<br>    addCallback: (handler: (value: T) =&gt; void) =&gt; Signal,<br>    removeCallback: (<br>        handler: (value: T) =&gt; void,<br>        signal:<br>            | {<br>                  value: Signal<br>              }<br>            | undefined,<br>    ) =&gt; void,<br>): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

@@ -8,7 +8,7 @@
 
 ## <a name="takeLast"></a><code>takeLast</code>
 
-<b>Signature - [source.ts#L2760](..\/..\/packages\/core\/src\/source.ts#L2760)</b>
+<b>Signature - [source.ts#L2854](..\/..\/packages\/core\/src\/source.ts#L2854)</b>
 
 <pre>function takeLast(amount: number): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre>
 

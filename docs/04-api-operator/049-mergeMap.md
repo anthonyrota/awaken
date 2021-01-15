@@ -8,7 +8,7 @@
 
 ## <a name="mergeMap"></a><code>mergeMap</code>
 
-<b>Signature - [source.ts#L2026](..\/..\/packages\/core\/src\/source.ts#L2026)</b>
+<b>Signature - [source.ts#L2120](..\/..\/packages\/core\/src\/source.ts#L2120)</b>
 
 <pre>var mergeMap: &lt;T, U&gt;(<br>    transform: (value: T, index: number) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;,<br>    maxConcurrent?: number | undefined,<br>) =&gt; <a href="000-Operator.md#Operator">Operator</a>&lt;T, U&gt;</pre><br>
 

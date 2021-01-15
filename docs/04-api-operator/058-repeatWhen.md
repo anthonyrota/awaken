@@ -8,7 +8,7 @@
 
 ## <a name="repeatWhen"></a><code>repeatWhen</code>
 
-<b>Signature - [source.ts#L2996](..\/..\/packages\/core\/src\/source.ts#L2996)</b>
+<b>Signature - [source.ts#L3090](..\/..\/packages\/core\/src\/source.ts#L3090)</b>
 
 <pre>function repeatWhen&lt;T&gt;(<br>    getRepeatSource: (sourceEvents: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre><br>
 

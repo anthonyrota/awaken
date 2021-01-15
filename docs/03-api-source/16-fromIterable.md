@@ -8,7 +8,7 @@
 
 ## <a name="fromIterable"></a><code>fromIterable</code>
 
-<b>Signature - [source.ts#L819](..\/..\/packages\/core\/src\/source.ts#L819)</b>
+<b>Signature - [source.ts#L913](..\/..\/packages\/core\/src\/source.ts#L913)</b>
 
 <pre>function fromIterable&lt;T&gt;(iterable: Iterable&lt;T&gt;): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

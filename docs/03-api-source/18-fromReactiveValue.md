@@ -8,7 +8,7 @@
 
 ## <a name="fromReactiveValue"></a><code>fromReactiveValue</code>
 
-<b>Signature - [source.ts#L934](..\/..\/packages\/core\/src\/source.ts#L934)</b>
+<b>Signature - [source.ts#L1028](..\/..\/packages\/core\/src\/source.ts#L1028)</b>
 
 <pre>function fromReactiveValue&lt;T extends unknown[], Signal&gt;(<br>    addCallback: (handler: (...args: T) =&gt; void) =&gt; Signal,<br>    removeCallback: (<br>        handler: (...args: T) =&gt; void,<br>        signal:<br>            | {<br>                  value: Signal<br>              }<br>            | undefined,<br>    ) =&gt; void,<br>): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

@@ -8,7 +8,7 @@
 
 ## <a name="shareTransform"></a><code>shareTransform</code>
 
-<b>Signature - [source.ts#L4014](..\/..\/packages\/core\/src\/source.ts#L4014)</b>
+<b>Signature - [source.ts#L4108](..\/..\/packages\/core\/src\/source.ts#L4108)</b>
 
 <pre>function shareTransform&lt;T, U&gt;(<br>    Subject_: () =&gt; <a href="../05-api-subject/00-Subject.md#Subject-Interface">Subject</a>&lt;T&gt;,<br>    transform: (shared: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, U&gt;</pre>
 

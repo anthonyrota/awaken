@@ -8,7 +8,7 @@
 
 ## <a name="windowEvery"></a><code>windowEvery</code>
 
-<b>Signature - [source.ts#L3121](..\/..\/packages\/core\/src\/source.ts#L3121)</b>
+<b>Signature - [source.ts#L3215](..\/..\/packages\/core\/src\/source.ts#L3215)</b>
 
 <pre>function windowEvery(<br>    boundariesSource: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;&gt;</pre><br>
 

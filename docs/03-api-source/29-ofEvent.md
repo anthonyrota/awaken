@@ -8,11 +8,42 @@
 
 ## <a name="ofEvent"></a><code>ofEvent</code>
 
-<b>Signature - [source.ts#L742](..\/..\/packages\/core\/src\/source.ts#L742)</b>
+Creates a source which will emit only the given event. This means that if the given event is a <code>Push</code> event then the returned source will emit the value followed by an <code>End</code> event.
+
+<b>See Also</b>
+
+- <code>[ofEventScheduled](30-ofEventScheduled.md#ofEventScheduled)</code>
+
+<b>Signature - [source.ts#L836](..\/..\/packages\/core\/src\/source.ts#L836)</b>
 
 <pre>function ofEvent(event: <a href="../02-api-event/02-Throw.md#Throw-Interface">Throw</a> | <a href="../02-api-event/03-End.md#End-Interface">End</a>): <a href="00-Source.md#Source-Interface">Source</a>&lt;never&gt;</pre>
 
-<pre>function ofEvent&lt;T&gt;(event: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
+<b>Parameters</b>
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| event | <pre>[Throw](../02-api-event/02-Throw.md#Throw-Interface) &#124; [End](../02-api-event/03-End.md#End-Interface)</pre> | The <code>Throw</code> or <code>End</code> event to emit. |
+
+<b>Example Usage</b>
+
+<pre>import { <a href="#ofEvent">ofEvent</a>, <a href="../02-api-event/02-Throw.md#Throw">Throw</a>, <a href="../04-api-operator/002-pipe.md#pipe">pipe</a>, <a href="04-subscribe.md#subscribe">subscribe</a> } from '@microstream/core';<br><br>const source = ofEvent(Throw(new Error('ERROR!1!!1!')));<br>pipe(source, subscribe(console.log));<br>// End(Error(...))</pre>
+
+<b>See Also</b>
+
+- <code>[throwError](34-throwError.md#throwError)</code>
+- <code>[empty](10-empty.md#empty)</code>
+
+<pre>function ofEvent&lt;T&gt;(event: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre>
+
+<b>Parameters</b>
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| event | <pre>[Event](../02-api-event/00-Event.md#Event)&lt;T&gt;</pre> | The event to emit. |
+
+<b>Example Usage</b>
+
+<pre>import { <a href="#ofEvent">ofEvent</a>, <a href="../02-api-event/01-Push.md#Push">Push</a>, <a href="../04-api-operator/002-pipe.md#pipe">pipe</a>, <a href="04-subscribe.md#subscribe">subscribe</a> } from '@microstream/core';<br><br>const source = ofEvent(Push(123));<br>pipe(source, subscribe(console.log));<br>// Push(123)<br>// End</pre><br>
 
 | [Previous \(of\)](28-of.md#readme) |
 | --- |

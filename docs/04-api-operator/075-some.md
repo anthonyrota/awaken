@@ -8,7 +8,7 @@
 
 ## <a name="some"></a><code>some</code>
 
-<b>Signature - [source.ts#L1728](..\/..\/packages\/core\/src\/source.ts#L1728)</b>
+<b>Signature - [source.ts#L1822](..\/..\/packages\/core\/src\/source.ts#L1822)</b>
 
 <pre>function some&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; unknown,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, boolean&gt;</pre><br>
 

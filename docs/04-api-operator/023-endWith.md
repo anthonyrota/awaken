@@ -8,7 +8,7 @@
 
 ## <a name="endWith"></a><code>endWith</code>
 
-<b>Signature - [source.ts#L2207](..\/..\/packages\/core\/src\/source.ts#L2207)</b>
+<b>Signature - [source.ts#L2301](..\/..\/packages\/core\/src\/source.ts#L2301)</b>
 
 <pre>function endWith&lt;T&gt;(...values: T[]): &lt;U&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T | U&gt;</pre><br>
 

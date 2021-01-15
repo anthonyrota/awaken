@@ -8,7 +8,7 @@
 
 ## <a name="animationFrames"></a><code>animationFrames</code>
 
-<b>Signature - [source.ts#L989](..\/..\/packages\/core\/src\/source.ts#L989)</b>
+<b>Signature - [source.ts#L1083](..\/..\/packages\/core\/src\/source.ts#L1083)</b>
 
 <pre>var animationFrames: <a href="00-Source.md#Source-Interface">Source</a>&lt;number&gt;</pre><br>
 

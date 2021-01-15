@@ -8,7 +8,7 @@
 
 ## <a name="spyEndAfter"></a><code>spyEndAfter</code>
 
-<b>Signature - [source.ts#L2337](..\/..\/packages\/core\/src\/source.ts#L2337)</b>
+<b>Signature - [source.ts#L2431](..\/..\/packages\/core\/src\/source.ts#L2431)</b>
 
 <pre>var spyEndAfter: (onEnd: () =&gt; void) =&gt; <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

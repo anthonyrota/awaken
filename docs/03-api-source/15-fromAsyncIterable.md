@@ -8,7 +8,7 @@
 
 ## <a name="fromAsyncIterable"></a><code>fromAsyncIterable</code>
 
-<b>Signature - [source.ts#L885](..\/..\/packages\/core\/src\/source.ts#L885)</b>
+<b>Signature - [source.ts#L979](..\/..\/packages\/core\/src\/source.ts#L979)</b>
 
 <pre>function fromAsyncIterable&lt;T&gt;(iterable: AsyncIterable&lt;T&gt;): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

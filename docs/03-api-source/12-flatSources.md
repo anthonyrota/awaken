@@ -8,7 +8,7 @@
 
 ## <a name="flatSources"></a><code>flatSources</code>
 
-<b>Signature - [source.ts#L1139](..\/..\/packages\/core\/src\/source.ts#L1139)</b>
+<b>Signature - [source.ts#L1233](..\/..\/packages\/core\/src\/source.ts#L1233)</b>
 
 <pre>function flatSources&lt;T&gt;(sources: <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;[]): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

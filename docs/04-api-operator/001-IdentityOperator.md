@@ -8,7 +8,7 @@
 
 ## <a name="IdentityOperator"></a><code>IdentityOperator</code>
 
-<b>Signature - [source.ts#L1331](..\/..\/packages\/core\/src\/source.ts#L1331)</b>
+<b>Signature - [source.ts#L1425](..\/..\/packages\/core\/src\/source.ts#L1425)</b>
 
 <pre>interface IdentityOperator {<br>    &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;): <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;<br>}</pre><br>
 

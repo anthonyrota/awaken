@@ -8,7 +8,7 @@
 
 ## <a name="retry"></a><code>retry</code>
 
-<b>Signature - [source.ts#L2981](..\/..\/packages\/core\/src\/source.ts#L2981)</b>
+<b>Signature - [source.ts#L3075](..\/..\/packages\/core\/src\/source.ts#L3075)</b>
 
 <pre>var retry: (times: number) =&gt; <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

@@ -8,7 +8,7 @@
 
 ## <a name="withPrevious"></a><code>withPrevious</code>
 
-<b>Signature - [source.ts#L1754](..\/..\/packages\/core\/src\/source.ts#L1754)</b>
+<b>Signature - [source.ts#L1848](..\/..\/packages\/core\/src\/source.ts#L1848)</b>
 
 <pre>function withPrevious&lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;): <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;[T, T]&gt;</pre><br>
 

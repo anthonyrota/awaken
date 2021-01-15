@@ -8,7 +8,7 @@
 
 ## <a name="fromPromise"></a><code>fromPromise</code>
 
-<b>Signature - [source.ts#L894](..\/..\/packages\/core\/src\/source.ts#L894)</b>
+<b>Signature - [source.ts#L988](..\/..\/packages\/core\/src\/source.ts#L988)</b>
 
 <pre>function fromPromise&lt;T&gt;(promise: PromiseLike&lt;T&gt;): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

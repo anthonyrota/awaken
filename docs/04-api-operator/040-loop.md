@@ -8,7 +8,7 @@
 
 ## <a name="loop"></a><code>loop</code>
 
-<b>Signature - [source.ts#L2986](..\/..\/packages\/core\/src\/source.ts#L2986)</b>
+<b>Signature - [source.ts#L3080](..\/..\/packages\/core\/src\/source.ts#L3080)</b>
 
 <pre>var loop: <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

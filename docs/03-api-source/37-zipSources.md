@@ -8,7 +8,7 @@
 
 ## <a name="zipSources"></a><code>zipSources</code>
 
-<b>Signature - [source.ts#L1248](..\/..\/packages\/core\/src\/source.ts#L1248)</b>
+<b>Signature - [source.ts#L1342](..\/..\/packages\/core\/src\/source.ts#L1342)</b>
 
 <pre>function zipSources&lt;T extends unknown[]&gt;(<br>    sources: {<br>        [K in keyof T]: <a href="00-Source.md#Source-Interface">Source</a>&lt;T[K]&gt;<br>    },<br>): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

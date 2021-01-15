@@ -8,7 +8,7 @@
 
 ## <a name="minCompare"></a><code>minCompare</code>
 
-<b>Signature - [source.ts#L1887](..\/..\/packages\/core\/src\/source.ts#L1887)</b>
+<b>Signature - [source.ts#L1981](..\/..\/packages\/core\/src\/source.ts#L1981)</b>
 
 <pre>function minCompare&lt;T&gt;(<br>    compare: (<br>        currentValue: T,<br>        lastValue: T,<br>        currentValueIndex: number,<br>    ) =&gt; number,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre><br>
 

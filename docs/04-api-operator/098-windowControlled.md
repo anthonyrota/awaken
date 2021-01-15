@@ -8,7 +8,7 @@
 
 ## <a name="windowControlled"></a><code>windowControlled</code>
 
-<b>Signature - [source.ts#L3170](..\/..\/packages\/core\/src\/source.ts#L3170)</b>
+<b>Signature - [source.ts#L3264](..\/..\/packages\/core\/src\/source.ts#L3264)</b>
 
 <pre>function windowControlled(<br>    getWindowOpeningsSource: &lt;T&gt;(sharedSource: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;,<br>    getWindowClosingSource: &lt;T&gt;(currentWindow: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;,<br>): &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;&gt;</pre>
 

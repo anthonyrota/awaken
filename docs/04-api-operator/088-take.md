@@ -8,7 +8,7 @@
 
 ## <a name="take"></a><code>take</code>
 
-<b>Signature - [source.ts#L2671](..\/..\/packages\/core\/src\/source.ts#L2671)</b>
+<b>Signature - [source.ts#L2765](..\/..\/packages\/core\/src\/source.ts#L2765)</b>
 
 <pre>function take(amount: number): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

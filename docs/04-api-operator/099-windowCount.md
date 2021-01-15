@@ -8,7 +8,7 @@
 
 ## <a name="windowCount"></a><code>windowCount</code>
 
-<b>Signature - [source.ts#L3272](..\/..\/packages\/core\/src\/source.ts#L3272)</b>
+<b>Signature - [source.ts#L3366](..\/..\/packages\/core\/src\/source.ts#L3366)</b>
 
 <pre>function windowCount(<br>    maxWindowLength: number,<br>    createEvery?: number,<br>): &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;&gt;</pre><br>
 

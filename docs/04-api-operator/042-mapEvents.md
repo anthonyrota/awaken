@@ -8,7 +8,7 @@
 
 ## <a name="mapEvents"></a><code>mapEvents</code>
 
-<b>Signature - [source.ts#L1496](..\/..\/packages\/core\/src\/source.ts#L1496)</b>
+<b>Signature - [source.ts#L1590](..\/..\/packages\/core\/src\/source.ts#L1590)</b>
 
 <pre>function mapEvents&lt;T, U&gt;(<br>    transform: (event: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;, index: number) =&gt; <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;U&gt; | undefined | null,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, U&gt;</pre><br>
 

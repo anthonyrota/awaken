@@ -8,7 +8,7 @@
 
 ## <a name="windowTime"></a><code>windowTime</code>
 
-<b>Signature - [source.ts#L3292](..\/..\/packages\/core\/src\/source.ts#L3292)</b>
+<b>Signature - [source.ts#L3386](..\/..\/packages\/core\/src\/source.ts#L3386)</b>
 
 <pre>function windowTime(<br>    maxWindowDuration?: number | null,<br>    creationInterval?: number | null,<br>    maxWindowLength?: number,<br>): &lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;&gt;</pre><br>
 

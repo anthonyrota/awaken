@@ -8,7 +8,7 @@
 
 ## <a name="flat"></a><code>flat</code>
 
-<b>Signature - [source.ts#L1917](..\/..\/packages\/core\/src\/source.ts#L1917)</b>
+<b>Signature - [source.ts#L2011](..\/..\/packages\/core\/src\/source.ts#L2011)</b>
 
 <pre>function flat&lt;T&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;<a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;&gt;): <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
 

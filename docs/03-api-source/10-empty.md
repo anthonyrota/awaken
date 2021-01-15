@@ -8,7 +8,7 @@
 
 ## <a name="empty"></a><code>empty</code>
 
-<b>Signature - [source.ts#L795](..\/..\/packages\/core\/src\/source.ts#L795)</b>
+<b>Signature - [source.ts#L889](..\/..\/packages\/core\/src\/source.ts#L889)</b>
 
 <pre>var empty: <a href="00-Source.md#Source-Interface">Source</a>&lt;never&gt;</pre><br>
 

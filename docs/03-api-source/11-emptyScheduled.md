@@ -8,7 +8,7 @@
 
 ## <a name="emptyScheduled"></a><code>emptyScheduled</code>
 
-<b>Signature - [source.ts#L800](..\/..\/packages\/core\/src\/source.ts#L800)</b>
+<b>Signature - [source.ts#L894](..\/..\/packages\/core\/src\/source.ts#L894)</b>
 
 <pre>function emptyScheduled(schedule: <a href="../06-api-schedule-functions/00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>): <a href="00-Source.md#Source-Interface">Source</a>&lt;never&gt;</pre><br>
 

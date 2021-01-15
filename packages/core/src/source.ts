@@ -658,6 +658,36 @@ export function fromArray<T>(array: ArrayLike<T>): Source<T> {
 }
 
 /**
+ * Creates a source which will emit the items in the given array according to
+ * the given `schedule` function. For example, if the schedule function acts as
+ * a 1s interval then the items will be emitted on a 1s interval.
+ *
+ * @param array - The array of items to schedule.
+ * @param schedule - The schedule function.
+ * @returns The created source.
+ *
+ * @example
+ * ```ts
+ * import {
+ *     fromArrayScheduled,
+ *     ScheduleInterval,
+ *     pipe,
+ *     subscribe
+ * } from '{{LibCoreImportPath}}';
+ *
+ * const scheduleFunction = ScheduleInterval(1000);
+ * pipe(
+ *     fromArrayScheduled([2, 4, 6], scheduleFunction),
+ *     subscribe(console.log)
+ * )
+ * // 1s -> Push(2)
+ * // 2s -> Push(4)
+ * // 3s -> Push(6), End
+ * ```
+ *
+ * @see {@link core/fromArray#}
+ * @see {@link core/ofScheduled#}
+ *
  * @public
  */
 export function fromArrayScheduled<T>(
@@ -691,7 +721,7 @@ export function fromArrayScheduled<T>(
 }
 
 /**
- * Creates a Source from the given values.. The values will be synchronously
+ * Creates a Source from the given values. The values will be synchronously
  * emitted by the created source upon each subscription.
  *
  * @param values - The values to iterate over.
@@ -722,6 +752,36 @@ export function of<T>(...items: T[]): Source<T> {
 }
 
 /**
+ * Creates a source which will emit the given items according to the given
+ * `schedule` function. For example, if the schedule function acts as a
+ * 1s interval then the items will be emitted on a 1s interval.
+ *
+ * @param schedule - The schedule function.
+ * @param items - The items to schedule.
+ * @returns The created source.
+ *
+ * @example
+ * ```ts
+ * import {
+ *     ofScheduled,
+ *     ScheduleInterval,
+ *     pipe,
+ *     subscribe
+ * } from '{{LibCoreImportPath}}';
+ *
+ * const scheduleFunction = ScheduleInterval(1000);
+ * pipe(
+ *     ofScheduled(scheduleFunction, 2, 4, 6),
+ *     subscribe(console.log)
+ * )
+ * // 1s -> Push(2)
+ * // 2s -> Push(4)
+ * // 3s -> Push(6), End
+ * ```
+ *
+ * @see {@link core/of#}
+ * @see {@link core/fromArrayScheduled#}
+ *
  * @public
  */
 export function ofScheduled<T>(
@@ -732,10 +792,44 @@ export function ofScheduled<T>(
 }
 
 /**
+ * Creates a source which will emit only the given event. This means that if the
+ * given event is a `Push` event then the returned source will emit the
+ * value followed by an `End` event.
+ *
+ * @see {@link core/ofEventScheduled#}
+ */
+
+/**
+ * @param event - The `Throw` or `End` event to emit.
+ *
+ * @example
+ * ```ts
+ * import { ofEvent, Throw, pipe, subscribe } from '{{LibCoreImportPath}}';
+ *
+ * const source = ofEvent(Throw(new Error('ERROR!1!!1!')));
+ * pipe(source, subscribe(console.log));
+ * // End(Error(...))
+ * ```
+ *
+ * @see {@link core/throwError#}
+ * @see {@link core/empty#}
+ *
  * @public
  */
 export function ofEvent(event: Throw | End): Source<never>;
 /**
+ * @param event - The event to emit.
+ *
+ * @example
+ * ```ts
+ * import { ofEvent, Push, pipe, subscribe } from '{{LibCoreImportPath}}';
+ *
+ * const source = ofEvent(Push(123));
+ * pipe(source, subscribe(console.log));
+ * // Push(123)
+ * // End
+ * ```
+ *
  * @public
  */
 export function ofEvent<T>(event: Event<T>): Source<T>;

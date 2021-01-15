@@ -8,7 +8,7 @@
 
 ## <a name="never"></a><code>never</code>
 
-<b>Signature - [source.ts#L814](..\/..\/packages\/core\/src\/source.ts#L814)</b>
+<b>Signature - [source.ts#L908](..\/..\/packages\/core\/src\/source.ts#L908)</b>
 
 <pre>var never: <a href="00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;</pre><br>
 

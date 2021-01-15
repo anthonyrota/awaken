@@ -8,7 +8,7 @@
 
 ## <a name="sample"></a><code>sample</code>
 
-<b>Signature - [source.ts#L3751](..\/..\/packages\/core\/src\/source.ts#L3751)</b>
+<b>Signature - [source.ts#L3845](..\/..\/packages\/core\/src\/source.ts#L3845)</b>
 
 <pre>function sample(scheduleSource: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

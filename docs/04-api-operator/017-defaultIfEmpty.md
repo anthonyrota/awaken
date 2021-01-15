@@ -8,7 +8,7 @@
 
 ## <a name="defaultIfEmpty"></a><code>defaultIfEmpty</code>
 
-<b>Signature - [source.ts#L2361](..\/..\/packages\/core\/src\/source.ts#L2361)</b>
+<b>Signature - [source.ts#L2455](..\/..\/packages\/core\/src\/source.ts#L2455)</b>
 
 <pre>function defaultIfEmpty&lt;T&gt;(<br>    getDefaultValue: () =&gt; T,<br>): &lt;U&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T | U&gt;</pre><br>
 

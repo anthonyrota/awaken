@@ -309,7 +309,7 @@ export function flow<T>(...fns: Array<(x: T) => T>): (x: T) => T;
 // @public
 export function fromArray<T>(array: ArrayLike<T>): Source<T>;
 
-// @public (undocumented)
+// @public
 export function fromArrayScheduled<T>(array: ArrayLike<T>, schedule: ScheduleFunction): Source<T>;
 
 // @public (undocumented)
@@ -469,7 +469,7 @@ export function ofEventScheduled<T>(event: Throw | End, schedule: ScheduleFuncti
 // @public (undocumented)
 export function ofEventScheduled<T>(event: Event_2<T>, schedule: ScheduleFunction): Source<T>;
 
-// @public (undocumented)
+// @public
 export function ofScheduled<T>(schedule: ScheduleFunction, ...items: T[]): Source<T>;
 
 // @public (undocumented)

@@ -8,7 +8,7 @@
 
 ## <a name="timer"></a><code>timer</code>
 
-<b>Signature - [source.ts#L807](..\/..\/packages\/core\/src\/source.ts#L807)</b>
+<b>Signature - [source.ts#L901](..\/..\/packages\/core\/src\/source.ts#L901)</b>
 
 <pre>function timer(durationMs: number): <a href="00-Source.md#Source-Interface">Source</a>&lt;never&gt;</pre><br>
 

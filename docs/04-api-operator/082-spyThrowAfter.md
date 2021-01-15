@@ -8,7 +8,7 @@
 
 ## <a name="spyThrowAfter"></a><code>spyThrowAfter</code>
 
-<b>Signature - [source.ts#L2332](..\/..\/packages\/core\/src\/source.ts#L2332)</b>
+<b>Signature - [source.ts#L2426](..\/..\/packages\/core\/src\/source.ts#L2426)</b>
 
 <pre>var spyThrowAfter: (onThrow: (error: unknown) =&gt; void) =&gt; <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

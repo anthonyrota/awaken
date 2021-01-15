@@ -9,13 +9,13 @@
 
 ## <a name="withTime"></a><code>withTime</code>
 
-<b>Signature - [source.ts#L3799](..\/..\/packages\/core\/src\/source.ts#L3799)</b>
+<b>Signature - [source.ts#L3893](..\/..\/packages\/core\/src\/source.ts#L3893)</b>
 
 <pre>function withTime&lt;T&gt;(provideTime: <a href="../07-api-utils/04-TimeProvider.md#TimeProvider">TimeProvider</a>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, <a href="#WithTime">WithTime</a>&lt;T&gt;&gt;</pre>
 
 ## <a name="WithTime"></a><code>WithTime</code>
 
-<b>Signature - [source.ts#L3791](..\/..\/packages\/core\/src\/source.ts#L3791)</b>
+<b>Signature - [source.ts#L3885](..\/..\/packages\/core\/src\/source.ts#L3885)</b>
 
 ```ts
 interface WithTime<T> {

@@ -8,7 +8,7 @@
 
 ## <a name="catchError"></a><code>catchError</code>
 
-<b>Signature - [source.ts#L3090](..\/..\/packages\/core\/src\/source.ts#L3090)</b>
+<b>Signature - [source.ts#L3184](..\/..\/packages\/core\/src\/source.ts#L3184)</b>
 
 <pre>function catchError&lt;T&gt;(<br>    getNewSource: (error: unknown) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T&gt;,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre><br>
 

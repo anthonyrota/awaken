@@ -8,9 +8,33 @@
 
 ## <a name="fromArrayScheduled"></a><code>fromArrayScheduled</code>
 
-<b>Signature - [source.ts#L663](..\/..\/packages\/core\/src\/source.ts#L663)</b>
+<b>Signature - [source.ts#L693](..\/..\/packages\/core\/src\/source.ts#L693)</b>
 
-<pre>function fromArrayScheduled&lt;T&gt;(<br>    array: ArrayLike&lt;T&gt;,<br>    schedule: <a href="../06-api-schedule-functions/00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>,<br>): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre><br>
+<pre>function fromArrayScheduled&lt;T&gt;(<br>    array: ArrayLike&lt;T&gt;,<br>    schedule: <a href="../06-api-schedule-functions/00-ScheduleFunction.md#ScheduleFunction">ScheduleFunction</a>,<br>): <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;</pre>
+
+Creates a source which will emit the items in the given array according to the given <code>schedule</code> function. For example, if the schedule function acts as a 1s interval then the items will be emitted on a 1s interval.
+
+<b>Parameters</b>
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| array | <pre lang="ts">ArrayLike&lt;T&gt;</pre> | The array of items to schedule. |
+| schedule | <pre>[ScheduleFunction](../06-api-schedule-functions/00-ScheduleFunction.md#ScheduleFunction)</pre> | The schedule function. |
+
+<b>Returns</b>
+
+| Type | Description |
+| --- | --- |
+| <pre>[Source](00-Source.md#Source-Interface)&lt;T&gt;</pre> | The created source. |
+
+<b>Example Usage</b>
+
+<pre>import {<br>    <a href="#fromArrayScheduled">fromArrayScheduled</a>,<br>    <a href="../06-api-schedule-functions/02-ScheduleInterval.md#ScheduleInterval">ScheduleInterval</a>,<br>    <a href="../04-api-operator/002-pipe.md#pipe">pipe</a>,<br>    <a href="04-subscribe.md#subscribe">subscribe</a><br>} from '@microstream/core';<br><br>const scheduleFunction = ScheduleInterval(1000);<br>pipe(<br>    fromArrayScheduled([2, 4, 6], scheduleFunction),<br>    subscribe(console.log)<br>)<br>// 1s -&gt; Push(2)<br>// 2s -&gt; Push(4)<br>// 3s -&gt; Push(6), End</pre>
+
+<b>See Also</b>
+
+- <code>[fromArray](13-fromArray.md#fromArray)</code>
+- <code>[ofScheduled](31-ofScheduled.md#ofScheduled)</code><br>
 
 | [Previous \(fromArray\)](13-fromArray.md#readme) |
 | --- |

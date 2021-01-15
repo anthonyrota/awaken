@@ -8,7 +8,7 @@
 
 ## <a name="distinct"></a><code>distinct</code>
 
-<b>Signature - [source.ts#L2417](..\/..\/packages\/core\/src\/source.ts#L2417)</b>
+<b>Signature - [source.ts#L2511](..\/..\/packages\/core\/src\/source.ts#L2511)</b>
 
 <pre>function distinct(): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre>
 

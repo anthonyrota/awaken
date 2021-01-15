@@ -8,7 +8,7 @@
 
 ## <a name="isEqual"></a><code>isEqual</code>
 
-<b>Signature - [source.ts#L1038](..\/..\/packages\/core\/src\/source.ts#L1038)</b>
+<b>Signature - [source.ts#L1132](..\/..\/packages\/core\/src\/source.ts#L1132)</b>
 
 <pre>function isEqual&lt;T, U&gt;(<br>    sourceA: <a href="00-Source.md#Source-Interface">Source</a>&lt;T&gt;,<br>    sourceB: <a href="00-Source.md#Source-Interface">Source</a>&lt;U&gt;,<br>    areValuesEqual: (a: T, b: U, index: number) =&gt; unknown,<br>): <a href="00-Source.md#Source-Interface">Source</a>&lt;boolean&gt;</pre><br>
 

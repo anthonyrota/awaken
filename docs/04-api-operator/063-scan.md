@@ -8,7 +8,7 @@
 
 ## <a name="scan"></a><code>scan</code>
 
-<b>Signature - [source.ts#L1786](..\/..\/packages\/core\/src\/source.ts#L1786)</b>
+<b>Signature - [source.ts#L1880](..\/..\/packages\/core\/src\/source.ts#L1880)</b>
 
 <pre>function scan&lt;T, R, I&gt;(<br>    transform: (<br>        previousAccumulatedResult: R | I,<br>        currentValue: T,<br>        currentIndex: number,<br>    ) =&gt; R,<br>    initialValue: I,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, R&gt;</pre>
 

@@ -8,7 +8,7 @@
 
 ## <a name="delayMs"></a><code>delayMs</code>
 
-<b>Signature - [source.ts#L3743](..\/..\/packages\/core\/src\/source.ts#L3743)</b>
+<b>Signature - [source.ts#L3837](..\/..\/packages\/core\/src\/source.ts#L3837)</b>
 
 <pre>function delayMs(ms: number): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

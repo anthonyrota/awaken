@@ -8,7 +8,7 @@
 
 ## <a name="sampleMs"></a><code>sampleMs</code>
 
-<b>Signature - [source.ts#L3784](..\/..\/packages\/core\/src\/source.ts#L3784)</b>
+<b>Signature - [source.ts#L3878](..\/..\/packages\/core\/src\/source.ts#L3878)</b>
 
 <pre>function sampleMs(ms: number): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

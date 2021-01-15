@@ -8,7 +8,7 @@
 
 ## <a name="filter"></a><code>filter</code>
 
-<b>Signature - [source.ts#L1600](..\/..\/packages\/core\/src\/source.ts#L1600)</b>
+<b>Signature - [source.ts#L1694](..\/..\/packages\/core\/src\/source.ts#L1694)</b>
 
 <pre>function filter&lt;T&gt;(<br>    predicate: (value: T, index: number) =&gt; false,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, never&gt;</pre>
 

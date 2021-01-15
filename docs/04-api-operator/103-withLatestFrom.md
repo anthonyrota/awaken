@@ -8,7 +8,7 @@
 
 ## <a name="withLatestFrom"></a><code>withLatestFrom</code>
 
-<b>Signature - [source.ts#L1385](..\/..\/packages\/core\/src\/source.ts#L1385)</b>
+<b>Signature - [source.ts#L1479](..\/..\/packages\/core\/src\/source.ts#L1479)</b>
 
 <pre>function withLatestFrom&lt;T extends unknown[]&gt;(<br>    sources: {<br>        [K in keyof T]: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;T[K]&gt;<br>    },<br>): &lt;U&gt;(source: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;U&gt;) =&gt; <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;[U, ...T]&gt;</pre><br>
 

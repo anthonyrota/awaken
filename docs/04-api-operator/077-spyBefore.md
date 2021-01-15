@@ -8,7 +8,7 @@
 
 ## <a name="spyBefore"></a><code>spyBefore</code>
 
-<b>Signature - [source.ts#L2302](..\/..\/packages\/core\/src\/source.ts#L2302)</b>
+<b>Signature - [source.ts#L2396](..\/..\/packages\/core\/src\/source.ts#L2396)</b>
 
 <pre>var spyBefore: &lt;T&gt;(onEvent: (event: <a href="../02-api-event/00-Event.md#Event">Event</a>&lt;T&gt;) =&gt; void) =&gt; <a href="000-Operator.md#Operator">Operator</a>&lt;T, T&gt;</pre><br>
 

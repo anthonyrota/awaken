@@ -8,7 +8,7 @@
 
 ## <a name="takeWhile"></a><code>takeWhile</code>
 
-<b>Signature - [source.ts#L2723](..\/..\/packages\/core\/src\/source.ts#L2723)</b>
+<b>Signature - [source.ts#L2817](..\/..\/packages\/core\/src\/source.ts#L2817)</b>
 
 <pre>function takeWhile&lt;T, S extends T&gt;(<br>    shouldContinue: (value: T, index: number) =&gt; value is S,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, S&gt;</pre>
 

@@ -8,7 +8,7 @@
 
 ## <a name="mapPushEvents"></a><code>mapPushEvents</code>
 
-<b>Signature - [source.ts#L1539](..\/..\/packages\/core\/src\/source.ts#L1539)</b>
+<b>Signature - [source.ts#L1633](..\/..\/packages\/core\/src\/source.ts#L1633)</b>
 
 <pre>function mapPushEvents&lt;T&gt;(<br>    transform: (pushEvents: <a href="../02-api-event/01-Push.md#Push-Interface">Push</a>&lt;T&gt;, index: number) =&gt; <a href="../02-api-event/02-Throw.md#Throw-Interface">Throw</a> | <a href="../02-api-event/03-End.md#End-Interface">End</a>,<br>): <a href="000-Operator.md#Operator">Operator</a>&lt;T, never&gt;</pre>
 

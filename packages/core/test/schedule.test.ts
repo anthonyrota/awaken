@@ -64,7 +64,7 @@ describe('scheduleSync', () => {
     });
 
     it('should throw the error that a nested callback throws and allow scheduling of more functions after', () => {
-        return new Promise((done) => {
+        return new Promise<Error | void>((done) => {
             const throws = jest.fn(throw_('foo'));
             const throwsWrapped = jest.fn(() => {
                 scheduleSync(throws);

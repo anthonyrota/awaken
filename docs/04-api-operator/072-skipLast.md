@@ -8,7 +8,7 @@
 
 ## <a name="skipLast"></a><code>skipLast</code>
 
-<b>Signature - [source.ts#L2880](..\/..\/packages\/core\/src\/source.ts#L2880)</b>
+<b>Signature - [source.ts#L2974](..\/..\/packages\/core\/src\/source.ts#L2974)</b>
 
 <pre>function skipLast(amount: number): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

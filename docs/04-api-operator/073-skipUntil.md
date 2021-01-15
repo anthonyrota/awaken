@@ -8,7 +8,7 @@
 
 ## <a name="skipUntil"></a><code>skipUntil</code>
 
-<b>Signature - [source.ts#L2913](..\/..\/packages\/core\/src\/source.ts#L2913)</b>
+<b>Signature - [source.ts#L3007](..\/..\/packages\/core\/src\/source.ts#L3007)</b>
 
 <pre>function skipUntil(stopSource: <a href="../03-api-source/00-Source.md#Source-Interface">Source</a>&lt;unknown&gt;): <a href="001-IdentityOperator.md#IdentityOperator">IdentityOperator</a></pre><br>
 

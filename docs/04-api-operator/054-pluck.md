@@ -8,7 +8,7 @@
 
 ## <a name="pluck"></a><code>pluck</code>
 
-<b>Signature - [source.ts#L1569](..\/..\/packages\/core\/src\/source.ts#L1569)</b>
+<b>Signature - [source.ts#L1663](..\/..\/packages\/core\/src\/source.ts#L1663)</b>
 
 <pre>function pluck&lt;T, K extends keyof T&gt;(key: K): <a href="000-Operator.md#Operator">Operator</a>&lt;T, T[K]&gt;</pre><br>
 
