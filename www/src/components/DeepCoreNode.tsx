@@ -356,12 +356,21 @@ export function DeepCoreNodeComponent({
                 childNodes: ChildNode[],
             ): ComponentChildren {
                 return childNodes.map((childNode) => {
+                    // TODO: make so that empty text nodes don't appear here.
                     if (childNode.type === ChildNodeType$Text) {
+                        if (!childNode.text) {
+                            return null;
+                        }
                         return (
                             <span style={childNode.style}>
                                 {childNode.text}
                             </span>
                         );
+                    }
+                    if (
+                        childNode.children.every((childText) => !childText.text)
+                    ) {
+                        return null;
                     }
                     return (
                         <DocPageLink
@@ -459,14 +468,16 @@ export function DeepCoreNodeComponent({
                             : 'Copy Failed'}
                     </button>
                     <code class="cls-node-code-block__code">
-                        <table>
+                        <span class="cls-node-code-block__accessibility-hidden-text">
+                            {code}
+                        </span>
+                        <table aria-hidden="true">
                             <tbody>
                                 {lines.map((lineChildNodes, i) => (
                                     <tr>
                                         <td
                                             class="cls-node-code-block__line-number"
                                             style={lineNumberStyle}
-                                            aria-hidden="true"
                                         >
                                             {i + 1}
                                         </td>

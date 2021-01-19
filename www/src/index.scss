@@ -1483,6 +1483,10 @@ button {
             background-color: t($bg1) !important;
         }
 
+        &__accessibility-hidden-text {
+            @include hidden;
+        }
+
         &__line-number,
         &__copy-button {
             display: none;
