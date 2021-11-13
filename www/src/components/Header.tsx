@@ -122,7 +122,6 @@ function extractTextRegions(
                 const onlyChild = childNode.children[0];
                 if (onlyChild.type === CoreNodeType.PlainText) {
                     if (
-                        onlyChild.text === 'Signature' ||
                         onlyChild.text === 'Parameters' ||
                         onlyChild.text === 'Returns' ||
                         onlyChild.text === 'Example Usage'
@@ -133,6 +132,21 @@ function extractTextRegions(
                         i++;
                         continue;
                     }
+                }
+            }
+            // Signature title has more than one child
+            if (
+                childNode.type === CoreNodeType.Title &&
+                childNode.children.length === 2
+            ) {
+                const firstChild = childNode.children[0];
+                const secondChild = childNode.children[1];
+                if (
+                    firstChild.type === CoreNodeType.PlainText &&
+                    firstChild.text === 'Signature - ' &&
+                    secondChild.type === CoreNodeType.GithubSourceLink
+                ) {
+                    continue;
                 }
             }
             extractTextRegions(childNode, textRegions, documentTitle);
