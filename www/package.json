@@ -32,7 +32,7 @@
         "@microsoft/api-extractor": "7.9.11",
         "@microsoft/api-extractor-model": "7.8.19",
         "@microsoft/tsdoc": "0.12.19",
-        "@types/http-proxy": "1.17.4",
+        "@types/http-proxy": "1.17.14",
         "@types/mdast": "3.0.3",
         "@types/ncp": "2.0.4",
         "@types/service_worker_api": "0.0.9",
