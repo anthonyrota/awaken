@@ -57,7 +57,7 @@
         "postcss": "8.1.1",
         "postcss-selector-parser": "6.0.4",
         "posthtml": "0.13.4",
-        "preact": "10.4.8",
+        "preact": "10.19.6",
         "preact-render-to-string": "5.1.10",
         "prettier": "2.1.1",
         "remark-footnotes": "2.0.0",
